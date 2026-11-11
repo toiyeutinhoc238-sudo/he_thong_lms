@@ -196,3 +196,4 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
     </div>
   );
 };
+

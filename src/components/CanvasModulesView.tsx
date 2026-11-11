@@ -423,3 +423,4 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     </div>
   );
 };
+

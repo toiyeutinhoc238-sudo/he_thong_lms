@@ -57,3 +57,4 @@ export const CanvasCourseNav: React.FC<CanvasCourseNavProps> = ({
     </aside>
   );
 };
+

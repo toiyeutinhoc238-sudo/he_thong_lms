@@ -96,3 +96,4 @@ export const CanvasRightSidebar: React.FC<CanvasRightSidebarProps> = ({ onNaviga
     </aside>
   );
 };
+

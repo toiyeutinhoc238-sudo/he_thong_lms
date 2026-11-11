@@ -75,3 +75,4 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
     </header>
   );
 };
+
