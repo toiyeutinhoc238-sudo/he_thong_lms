@@ -40,6 +40,7 @@ interface AppContextType {
   deleteCourseActivity: (courseId: string, activityId: string) => void;
   updateCourse: (courseId: string, data: Partial<Course>) => Promise<void>;
   deleteCourse: (courseId: string) => void;
+  enrollCourse: (courseId: string) => Promise<boolean>;
   addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => void;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
@@ -397,37 +398,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addCourseActivity = (courseId: string, moduleId: string, newAct: Partial<Activity>) => {
+    const actId = newAct.id || `act-${Date.now()}`;
+    const completeAct: Activity = {
+      id: actId,
+      moduleId,
+      title: newAct.title || 'Hoạt động mới',
+      type: newAct.type || 'document',
+      durationMinutes: newAct.durationMinutes || 15,
+      isCompleted: false,
+      isRequired: newAct.isRequired !== undefined ? newAct.isRequired : true,
+      description: newAct.description || '',
+      videoUrl: newAct.videoUrl || '',
+      fileUrl: newAct.fileUrl || '',
+      dueDate: newAct.dueDate || '',
+      maxScore: newAct.maxScore || 10,
+      assignmentPrompt: newAct.assignmentPrompt || '',
+      quizQuestions: newAct.quizQuestions || [],
+      ...newAct
+    };
+
+    let updatedCourseModules: CourseModule[] = [];
+
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => {
         if (m.id !== moduleId) return m;
-        const completeAct: Activity = {
-          id: newAct.id || `act-${Date.now()}`,
-          moduleId,
-          title: newAct.title || 'Hoạt động mới',
-          type: newAct.type || 'document',
-          durationMinutes: newAct.durationMinutes || 15,
-          isCompleted: false,
-          isRequired: newAct.isRequired !== undefined ? newAct.isRequired : true,
-          description: newAct.description || '',
-          videoUrl: newAct.videoUrl || '',
-          fileUrl: newAct.fileUrl || '',
-          dueDate: newAct.dueDate || '',
-          maxScore: newAct.maxScore || 10,
-          assignmentPrompt: newAct.assignmentPrompt || '',
-          quizQuestions: newAct.quizQuestions || [],
-          ...newAct
-        };
         return {
           ...m,
           activities: [...(m.activities || []), completeAct]
         };
       });
+      updatedCourseModules = updatedModules;
       return calculateCourseProgress({ ...course, modules: updatedModules });
     }));
 
-    // Call API backend
-    api.activities.create(courseId, moduleId, newAct).catch(() => {});
+    // 1. Post to activity endpoint
+    api.activities.create(courseId, moduleId, completeAct).catch(() => {});
+    // 2. Also sync course modules for 100% database persistence
+    if (updatedCourseModules.length > 0) {
+      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    }
   };
 
   const addCourseModule = async (courseId: string, title: string, description?: string) => {
@@ -440,59 +450,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       activities: []
     };
 
+    let updatedCourseModules: CourseModule[] = [];
+
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
-      return { ...c, modules: [...(c.modules || []), newMod] };
+      const modules = [...(c.modules || []), newMod];
+      updatedCourseModules = modules;
+      return { ...c, modules };
     }));
 
-    api.modules.create(courseId, { title, description }).catch(() => {});
+    api.modules.create(courseId, newMod).catch(() => {});
+    if (updatedCourseModules.length > 0) {
+      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    }
     return newMod;
   };
 
   const updateCourseModule = async (courseId: string, moduleId: string, data: Partial<CourseModule>) => {
+    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
       const modules = (c.modules || []).map(m => m.id === moduleId ? { ...m, ...data } : m);
+      updatedCourseModules = modules;
       return { ...c, modules };
     }));
 
     api.modules.update(courseId, moduleId, data).catch(() => {});
+    if (updatedCourseModules.length > 0) {
+      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    }
   };
 
   const deleteCourseModule = async (courseId: string, moduleId: string) => {
+    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
       const modules = (c.modules || []).filter(m => m.id !== moduleId);
+      updatedCourseModules = modules;
       return calculateCourseProgress({ ...c, modules });
     }));
 
     api.modules.delete(courseId, moduleId).catch(() => {});
+    api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
   };
 
   const updateCourseActivity = (courseId: string, activityId: string, data: Partial<Activity>) => {
+    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => {
         const activities = (m.activities || []).map(a => a.id === activityId ? { ...a, ...data } : a);
         return { ...m, activities };
       });
+      updatedCourseModules = updatedModules;
       return { ...course, modules: updatedModules };
     }));
 
     api.activities.update(courseId, activityId, data).catch(() => {});
+    if (updatedCourseModules.length > 0) {
+      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    }
   };
 
   const deleteCourseActivity = (courseId: string, activityId: string) => {
+    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => ({
         ...m,
         activities: (m.activities || []).filter(a => a.id !== activityId)
       }));
+      updatedCourseModules = updatedModules;
       return calculateCourseProgress({ ...course, modules: updatedModules });
     }));
 
     api.activities.delete(courseId, activityId).catch(() => {});
+    api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
   };
 
   const updateCourse = async (courseId: string, data: Partial<Course>) => {
@@ -518,6 +551,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentView('dashboard');
     }
     api.courses.delete(courseId).catch(() => {});
+  };
+
+  const enrollCourse = async (courseId: string): Promise<boolean> => {
+    const studentInfo = {
+      id: currentUser.id || `user-${Date.now()}`,
+      name: currentUser.name || 'Học viên',
+      email: currentUser.email || 'hocvien@lms2.edu.vn',
+      className: currentUser.className || currentUser.classOrPosition || 'Lớp học',
+      school: currentUser.school || currentUser.department || 'LMS Nhóm 2',
+      avatar: currentUser.avatar || '',
+      enrolledAt: new Date().toLocaleDateString('vi-VN'),
+      status: 'Đang học'
+    };
+
+    // Update local state immediately
+    setCurrentUser(prev => ({
+      ...prev,
+      enrolledCourses: [...(prev.enrolledCourses || []).filter(cid => cid !== courseId), courseId]
+    }));
+
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      const enrolled = c.enrolledStudents || [];
+      const already = enrolled.some(s => s.id === studentInfo.id || (studentInfo.email && s.email === studentInfo.email));
+      if (already) return c;
+      const updatedList = [...enrolled, studentInfo];
+      return {
+        ...c,
+        enrolledStudents: updatedList,
+        enrolledStudentsCount: updatedList.length
+      };
+    }));
+
+    // Call API backend
+    try {
+      await api.courses.enroll(courseId, studentInfo);
+      return true;
+    } catch (err) {
+      console.warn('API enroll failed, saved in local state', err);
+      return true;
+    }
   };
 
   const addAnnouncement = (courseId: string, title: string, content: string, isImportant: boolean = false) => {
@@ -627,6 +701,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteCourseActivity,
         updateCourse,
         deleteCourse,
+        enrollCourse,
         addAnnouncement,
         isLoginModalOpen,
         setIsLoginModalOpen,

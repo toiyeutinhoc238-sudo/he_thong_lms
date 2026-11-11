@@ -12,13 +12,14 @@ import {
   GraduationCap,
   Sparkles,
   Edit3,
-  Trash2
+  Trash2,
+  UserCheck
 } from 'lucide-react';
 import api from '../services/api';
 import { EditCourseModal } from './EditCourseModal';
 
 export const CanvasDashboard: React.FC = () => {
-  const { courses, setCourses, navigateToCourse, activeRole, deleteCourse, updateCourse, currentUser } = useApp();
+  const { courses, setCourses, navigateToCourse, activeRole, deleteCourse, updateCourse, currentUser, enrollCourse } = useApp();
 
   const canManage = Boolean(
     currentUser?.role === 'admin' || 
@@ -153,6 +154,12 @@ export const CanvasDashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {courses.map((course, idx) => {
             const gradientColor = colors[idx % colors.length];
+            const isEnrolled = Boolean(
+              canManage ||
+              (currentUser?.enrolledCourses && currentUser.enrolledCourses.includes(course.id)) ||
+              (course.enrolledStudents && course.enrolledStudents.some((s: any) => s.id === currentUser?.id || (currentUser?.email && s.email === currentUser.email)))
+            );
+
             return (
               <div
                 key={course.id}
@@ -161,9 +168,16 @@ export const CanvasDashboard: React.FC = () => {
               >
                 {/* Canvas Colored Card Header Banner */}
                 <div className={`h-28 bg-gradient-to-r ${gradientColor} p-3 flex justify-between items-start relative`}>
-                  <span className="px-2 py-0.5 rounded bg-black/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-2xs">
-                    {course.code || 'LMS'}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded bg-black/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-2xs">
+                      {course.code || 'LMS'}
+                    </span>
+                    {isEnrolled && !canManage && (
+                      <span className="px-2 py-0.5 rounded bg-emerald-500 text-white text-[10px] font-black tracking-wider backdrop-blur-2xs shadow-2xs">
+                        ✓ Đã ghi danh
+                      </span>
+                    )}
+                  </div>
                   
                   {/* 3-dots Action Menu (Chỉ Giáo viên / Quản trị viên) */}
                   {canManage && (
@@ -229,27 +243,45 @@ export const CanvasDashboard: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Canvas Bottom Action Icons */}
-                  <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-slate-400">
-                    <div className="flex items-center gap-3">
-                      <span title="Thông báo" className="hover:text-slate-700">
-                        <Bell className="w-4 h-4" />
-                      </span>
-                      <span title="Thảo luận" className="hover:text-slate-700">
-                        <MessageSquare className="w-4 h-4" />
-                      </span>
-                      <span title="Bài tập" className="hover:text-slate-700">
-                        <FileCheck className="w-4 h-4" />
-                      </span>
-                      <span title="Tập tin" className="hover:text-slate-700">
-                        <Folder className="w-4 h-4" />
+                  {!isEnrolled && !canManage ? (
+                    <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 font-medium">Chưa ghi danh</span>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await enrollCourse(course.id);
+                          navigateToCourse(course.id);
+                        }}
+                        className="px-2.5 py-1 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1"
+                      >
+                        <UserCheck className="w-3 h-3" />
+                        <span>Đăng ký</span>
+                      </button>
+                    </div>
+                  ) : (
+                    /* Canvas Bottom Action Icons */
+                    <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-slate-400">
+                      <div className="flex items-center gap-3">
+                        <span title="Thông báo" className="hover:text-slate-700">
+                          <Bell className="w-4 h-4" />
+                        </span>
+                        <span title="Thảo luận" className="hover:text-slate-700">
+                          <MessageSquare className="w-4 h-4" />
+                        </span>
+                        <span title="Bài tập" className="hover:text-slate-700">
+                          <FileCheck className="w-4 h-4" />
+                        </span>
+                        <span title="Tập tin" className="hover:text-slate-700">
+                          <Folder className="w-4 h-4" />
+                        </span>
+                      </div>
+
+                      <span className="text-[11px] font-bold text-slate-500">
+                        {course.modules?.length || 0} bài
                       </span>
                     </div>
-
-                    <span className="text-[11px] font-bold text-slate-500">
-                      {course.modules?.length || 0} bài
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             );

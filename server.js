@@ -68,7 +68,8 @@ const userSchema = new mongoose.Schema({
   address: String,
   gender: String,
   avatar: String,
-  isProfileCompleted: { type: Boolean, default: false }
+  isProfileCompleted: { type: Boolean, default: false },
+  enrolledCourses: { type: [String], default: [] }
 }, { strict: false });
 
 const courseSchema = new mongoose.Schema({
@@ -76,10 +77,12 @@ const courseSchema = new mongoose.Schema({
   code: String,
   name: String,
   category: String,
+  gradeLevel: String,
   credits: Number,
   semester: String,
   academicYear: String,
   instructor: Object,
+  creator: Object,
   thumbnail: String,
   progress: Number,
   totalActivities: Number,
@@ -89,7 +92,8 @@ const courseSchema = new mongoose.Schema({
   syllabus: [String],
   modules: Array,
   announcements: Array,
-  enrolledStudentsCount: Number,
+  enrolledStudentsCount: { type: Number, default: 0 },
+  enrolledStudents: { type: Array, default: [] },
   certificateEligible: Boolean
 }, { strict: false });
 
@@ -136,6 +140,23 @@ const CourseModel = mongoose.model('Course', courseSchema);
 const NotifModel = mongoose.model('Notification', notifSchema);
 const CertModel = mongoose.model('Certificate', certSchema);
 const ForumModel = mongoose.model('ForumTopic', forumSchema);
+
+// Helper tìm document khóa học an toàn (hỗ trợ cả id string và MongoDB _id)
+async function getCourseDoc(id) {
+  if (!id) return null;
+  if (isMongoConnected) {
+    try {
+      let course = await CourseModel.findOne({ id });
+      if (!course && mongoose.isValidObjectId(id)) {
+        course = await CourseModel.findById(id);
+      }
+      return course;
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
 
 // Kết nối MongoDB Atlas (Không seed bất kỳ dữ liệu ảo nào)
 if (MONGODB_URI) {
@@ -532,15 +553,16 @@ app.get('/api/courses', async (req, res) => {
 
 // 4. Courses: Get By ID
 app.get('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id: req.params.id });
-      if (course) return res.json(course);
+      const course = await getCourseDoc(id);
+      if (course) return res.json(course.toObject ? course.toObject() : course);
     } catch (err) {}
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
   res.json(course);
 });
@@ -548,10 +570,11 @@ app.get('/api/courses/:id', async (req, res) => {
 // 5. Courses: Create new Course (Thêm khóa học thật từ API)
 app.post('/api/courses', async (req, res) => {
   const newCourseData = {
-    id: `course-${Date.now()}`,
+    id: req.body.id || `course-${Date.now()}`,
     code: req.body.code || 'HP-NEW',
     name: req.body.name || 'Học phần mới',
-    category: req.body.category || 'student_regular',
+    category: req.body.category || 'Chuyên đề AI',
+    gradeLevel: req.body.gradeLevel || 'Lớp 10',
     credits: req.body.credits || 3,
     semester: req.body.semester || 'Học kỳ 1',
     academicYear: '2026 - 2027',
@@ -559,18 +582,23 @@ app.post('/api/courses', async (req, res) => {
       name: 'Giáo viên',
       title: 'Giáo viên phụ trách',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      email: 'giangvien@lms2.edu.vn'
+      email: 'phanphiphu04@gmail.com'
+    },
+    creator: req.body.creator || req.body.instructor || {
+      name: 'Giáo viên',
+      email: 'phanphiphu04@gmail.com'
     },
     thumbnail: req.body.thumbnail || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
     progress: 0,
     totalActivities: 0,
     completedActivities: 0,
     description: req.body.description || '',
-    targetAudience: req.body.targetAudience || 'Học viên trực tuyến',
+    targetAudience: req.body.targetAudience || 'Học sinh',
     syllabus: req.body.syllabus || [],
     modules: req.body.modules || [],
     announcements: req.body.announcements || [],
     enrolledStudentsCount: 0,
+    enrolledStudents: [],
     certificateEligible: true,
     ...req.body
   };
@@ -579,7 +607,9 @@ app.post('/api/courses', async (req, res) => {
     try {
       const created = await CourseModel.create(newCourseData);
       return res.status(201).json(created);
-    } catch (err) {}
+    } catch (err) {
+      console.error('Lỗi tạo khóa học Mongo:', err);
+    }
   }
 
   const db = readDb();
@@ -596,13 +626,22 @@ app.put('/api/courses/:id', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const updated = await CourseModel.findOneAndUpdate({ id }, { $set: updateData }, { new: true });
-      if (updated) return res.json(updated);
-    } catch (err) {}
+      const course = await getCourseDoc(id);
+      if (course) {
+        Object.assign(course, updateData);
+        if (updateData.modules) course.markModified('modules');
+        if (updateData.enrolledStudents) course.markModified('enrolledStudents');
+        if (updateData.instructor) course.markModified('instructor');
+        await course.save();
+        return res.json(course.toObject ? course.toObject() : course);
+      }
+    } catch (err) {
+      console.error('Lỗi cập nhật khóa học Mongo:', err);
+    }
   }
 
   const db = readDb();
-  const idx = (db.courses || []).findIndex(c => c.id === id);
+  const idx = (db.courses || []).findIndex(c => c.id === id || c._id === id);
   if (idx !== -1) {
     db.courses[idx] = { ...db.courses[idx], ...updateData };
     writeDb(db);
@@ -617,13 +656,13 @@ app.delete('/api/courses/:id', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      await CourseModel.deleteOne({ id });
+      await CourseModel.deleteOne({ $or: [{ id }, ...(mongoose.isValidObjectId(id) ? [{ _id: id }] : [])] });
       return res.json({ success: true, message: 'Đã xóa khóa học thành công' });
     } catch (err) {}
   }
 
   const db = readDb();
-  db.courses = (db.courses || []).filter(c => c.id !== id);
+  db.courses = (db.courses || []).filter(c => c.id !== id && c._id !== id);
   writeDb(db);
   res.json({ success: true, message: 'Đã xóa khóa học thành công' });
 });
@@ -632,7 +671,7 @@ app.delete('/api/courses/:id', async (req, res) => {
 app.post('/api/courses/:id/modules', async (req, res) => {
   const { id } = req.params;
   const newModule = {
-    id: `mod-${Date.now()}`,
+    id: req.body.id || `mod-${Date.now()}`,
     courseId: id,
     title: req.body.title || 'Mô-đun mới',
     order: req.body.order || 1,
@@ -642,22 +681,34 @@ app.post('/api/courses/:id/modules', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course) {
         course.modules = course.modules || [];
-        course.modules.push(newModule);
+        const existingIdx = course.modules.findIndex(m => m.id === newModule.id);
+        if (existingIdx !== -1) {
+          course.modules[existingIdx] = { ...course.modules[existingIdx], ...newModule };
+        } else {
+          course.modules.push(newModule);
+        }
         course.markModified('modules');
         await course.save();
         return res.status(201).json(newModule);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('Lỗi thêm mô-đun Mongo:', err);
+    }
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (course) {
     course.modules = course.modules || [];
-    course.modules.push(newModule);
+    const existingIdx = course.modules.findIndex(m => m.id === newModule.id);
+    if (existingIdx !== -1) {
+      course.modules[existingIdx] = { ...course.modules[existingIdx], ...newModule };
+    } else {
+      course.modules.push(newModule);
+    }
     writeDb(db);
     return res.status(201).json(newModule);
   }
@@ -671,7 +722,7 @@ app.put('/api/courses/:id/modules/:modId', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course && course.modules) {
         const modIdx = course.modules.findIndex(m => m.id === modId);
         if (modIdx !== -1) {
@@ -685,7 +736,7 @@ app.put('/api/courses/:id/modules/:modId', async (req, res) => {
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (course && course.modules) {
     const modIdx = course.modules.findIndex(m => m.id === modId);
     if (modIdx !== -1) {
@@ -703,7 +754,7 @@ app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course && course.modules) {
         course.modules = course.modules.filter(m => m.id !== modId);
         course.markModified('modules');
@@ -714,7 +765,7 @@ app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (course && course.modules) {
     course.modules = course.modules.filter(m => m.id !== modId);
     writeDb(db);
@@ -727,7 +778,7 @@ app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
 app.post('/api/courses/:id/modules/:modId/activities', async (req, res) => {
   const { id, modId } = req.params;
   const newActivity = {
-    id: `act-${Date.now()}`,
+    id: req.body.id || `act-${Date.now()}`,
     moduleId: modId,
     title: req.body.title || 'Bài học mới',
     type: req.body.type || 'document',
@@ -746,28 +797,40 @@ app.post('/api/courses/:id/modules/:modId/activities', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course && course.modules) {
         const mod = course.modules.find(m => m.id === modId);
         if (mod) {
           mod.activities = mod.activities || [];
-          mod.activities.push(newActivity);
+          const existingActIdx = mod.activities.findIndex(a => a.id === newActivity.id);
+          if (existingActIdx !== -1) {
+            mod.activities[existingActIdx] = { ...mod.activities[existingActIdx], ...newActivity };
+          } else {
+            mod.activities.push(newActivity);
+          }
           course.totalActivities = (course.totalActivities || 0) + 1;
           course.markModified('modules');
           await course.save();
           return res.status(201).json(newActivity);
         }
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('Lỗi thêm bài học Mongo:', err);
+    }
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (course && course.modules) {
     const mod = course.modules.find(m => m.id === modId);
     if (mod) {
       mod.activities = mod.activities || [];
-      mod.activities.push(newActivity);
+      const existingActIdx = mod.activities.findIndex(a => a.id === newActivity.id);
+      if (existingActIdx !== -1) {
+        mod.activities[existingActIdx] = { ...mod.activities[existingActIdx], ...newActivity };
+      } else {
+        mod.activities.push(newActivity);
+      }
       course.totalActivities = (course.totalActivities || 0) + 1;
       writeDb(db);
       return res.status(201).json(newActivity);
@@ -783,7 +846,7 @@ app.put('/api/courses/:id/activities/:actId', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course && course.modules) {
         for (const mod of course.modules) {
           if (mod.activities) {
@@ -801,7 +864,7 @@ app.put('/api/courses/:id/activities/:actId', async (req, res) => {
   }
 
   const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (course && course.modules) {
     for (const mod of course.modules) {
       if (mod.activities) {
@@ -823,7 +886,7 @@ app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const course = await CourseModel.findOne({ id });
+      const course = await getCourseDoc(id);
       if (course && course.modules) {
         for (const mod of course.modules) {
           if (mod.activities) {
@@ -837,6 +900,136 @@ app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
             }
           }
         }
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
+  if (course && course.modules) {
+    for (const mod of course.modules) {
+      if (mod.activities) {
+        const beforeCount = mod.activities.length;
+        mod.activities = mod.activities.filter(a => a.id !== actId);
+        if (mod.activities.length !== beforeCount) {
+          course.totalActivities = Math.max(0, (course.totalActivities || 1) - 1);
+          writeDb(db);
+          return res.json({ success: true, message: 'Đã xóa bài học thành công' });
+        }
+      }
+    }
+  }
+  res.status(404).json({ message: 'Không tìm thấy bài học để xóa' });
+});
+
+// 5.9 Courses: Đăng ký khóa học cho học viên (Enrollment)
+app.post('/api/courses/:id/enroll', async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+  let userId = req.body.id || req.body.userId;
+  let userName = req.body.name;
+  let userEmail = req.body.email;
+  let userClass = req.body.className || req.body.classOrPosition;
+  let userSchool = req.body.school || req.body.department;
+  let userAvatar = req.body.avatar;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.replace('Bearer ', '').trim();
+    const match = token.match(/^jwt_token_(.+)_\d+$/);
+    if (match) {
+      userId = userId || match[1];
+    }
+  }
+
+  let dbUser = null;
+  if (isMongoConnected) {
+    try {
+      if (userId) dbUser = await UserModel.findOne({ id: userId });
+      if (!dbUser && userEmail) dbUser = await UserModel.findOne({ email: userEmail.toLowerCase().trim() });
+    } catch (e) {}
+  }
+  if (!dbUser) {
+    const db = readDb();
+    dbUser = (db.users || []).find(u => (userId && u.id === userId) || (userEmail && u.email === userEmail.toLowerCase().trim()));
+  }
+
+  if (dbUser) {
+    userId = dbUser.id || userId;
+    userName = dbUser.name || userName;
+    userEmail = dbUser.email || userEmail;
+    userClass = dbUser.className || dbUser.classOrPosition || userClass;
+    userSchool = dbUser.school || dbUser.department || userSchool;
+    userAvatar = dbUser.avatar || userAvatar;
+  }
+
+  const studentObj = {
+    id: userId || `user-${Date.now()}`,
+    name: userName || 'Học viên',
+    email: userEmail || 'hocvien@lms2.edu.vn',
+    className: userClass || 'Lớp học',
+    school: userSchool || 'LMS Nhóm 2',
+    avatar: userAvatar || '',
+    enrolledAt: new Date().toLocaleDateString('vi-VN'),
+    status: 'Đang học'
+  };
+
+  // Add course ID to user's enrolledCourses
+  if (isMongoConnected && dbUser) {
+    try {
+      dbUser.enrolledCourses = dbUser.enrolledCourses || [];
+      if (!dbUser.enrolledCourses.includes(id)) {
+        dbUser.enrolledCourses.push(id);
+        dbUser.markModified('enrolledCourses');
+        await dbUser.save();
+      }
+    } catch (e) {}
+  } else if (dbUser) {
+    const db = readDb();
+    const u = (db.users || []).find(x => x.id === dbUser.id);
+    if (u) {
+      u.enrolledCourses = u.enrolledCourses || [];
+      if (!u.enrolledCourses.includes(id)) {
+        u.enrolledCourses.push(id);
+        writeDb(db);
+      }
+    }
+  }
+
+  // Add student to course's enrolledStudents
+  if (isMongoConnected) {
+    try {
+      const course = await getCourseDoc(id);
+      if (course) {
+        course.enrolledStudents = course.enrolledStudents || [];
+        const isAlreadyEnrolled = course.enrolledStudents.some(s => s.id === studentObj.id || (studentObj.email && s.email === studentObj.email));
+        if (!isAlreadyEnrolled) {
+          course.enrolledStudents.push(studentObj);
+          course.enrolledStudentsCount = course.enrolledStudents.length;
+          course.markModified('enrolledStudents');
+          await course.save();
+        }
+        return res.json({ success: true, course: course.toObject ? course.toObject() : course, message: 'Đăng ký khóa học thành công' });
+      }
+    } catch (err) {
+      console.error('Lỗi đăng ký khóa học Mongo:', err);
+    }
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
+  if (course) {
+    course.enrolledStudents = course.enrolledStudents || [];
+    const isAlreadyEnrolled = course.enrolledStudents.some(s => s.id === studentObj.id || (studentObj.email && s.email === studentObj.email));
+    if (!isAlreadyEnrolled) {
+      course.enrolledStudents.push(studentObj);
+      course.enrolledStudentsCount = course.enrolledStudents.length;
+      writeDb(db);
+    }
+    return res.json({ success: true, course, message: 'Đăng ký khóa học thành công' });
+  }
+
+  res.status(404).json({ message: 'Không tìm thấy khóa học để đăng ký' });
+});
       }
     } catch (err) {}
   }
@@ -1127,34 +1320,23 @@ app.get('/api/users', async (req, res) => {
   res.json(safeUsers || []);
 });
 
-// 14. Students in Course
+// 14. Students in Course (Lấy danh sách học viên cùng lớp đã đăng ký khóa học này)
 app.get('/api/courses/:id/students', async (req, res) => {
+  const { id } = req.params;
   if (isMongoConnected) {
     try {
-      const users = await UserModel.find({ role: 'student' });
-      const students = users.map(s => ({
-        code: s.code,
-        name: s.name,
-        class: s.classOrPosition || 'Sư phạm K48',
-        progress: 0,
-        status: 'Đang học'
-      }));
-      return res.json(students || []);
-    } catch (err) {
-      return res.json([]);
-    }
+      const course = await getCourseDoc(id);
+      if (course && Array.isArray(course.enrolledStudents)) {
+        return res.json(course.enrolledStudents);
+      }
+    } catch (err) {}
   }
   const db = readDb();
-  const students = (db.users || [])
-    .filter(u => u.role === 'student')
-    .map(s => ({
-      code: s.code,
-      name: s.name,
-      class: s.classOrPosition || 'Sư phạm K48',
-      progress: 0,
-      status: 'Đang học'
-    }));
-  res.json(students || []);
+  const course = (db.courses || []).find(c => c.id === id || c._id === id);
+  if (course && Array.isArray(course.enrolledStudents)) {
+    return res.json(course.enrolledStudents);
+  }
+  return res.json([]);
 });
 
 // ====================== SERVE PRODUCTION FRONTEND ======================

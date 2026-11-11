@@ -13,12 +13,13 @@ import {
   ExternalLink, 
   GraduationCap,
   Sparkles,
-  X
+  X,
+  UserCheck
 } from 'lucide-react';
 import { EditCourseModal } from './EditCourseModal';
 
 export const CanvasCoursesList: React.FC = () => {
-  const { courses, setCourses, navigateToCourse, currentUser, activeRole, deleteCourse, updateCourse } = useApp();
+  const { courses, setCourses, navigateToCourse, currentUser, activeRole, deleteCourse, updateCourse, enrollCourse } = useApp();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -225,93 +226,121 @@ export const CanvasCoursesList: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map(course => (
-            <div
-              key={course.id}
-              className="bg-white rounded-3xl border border-slate-200/90 hover:border-[#0374b5] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
-              onClick={() => navigateToCourse(course.id)}
-            >
-              <div>
-                <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={course.thumbnail}
-                    alt={course.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[#0374b5] text-[10px] font-black uppercase tracking-wider shadow-xs">
-                      {course.code}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold shadow-xs">
-                      {course.gradeLevel || 'Lớp 1 - 12'}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-semibold">
-                      {course.category}
-                    </span>
+          {filteredCourses.map(course => {
+            const isEnrolled = Boolean(
+              canManage ||
+              (currentUser?.enrolledCourses && currentUser.enrolledCourses.includes(course.id)) ||
+              (course.enrolledStudents && course.enrolledStudents.some((s: any) => s.id === currentUser?.id || (currentUser?.email && s.email === currentUser.email)))
+            );
+
+            return (
+              <div
+                key={course.id}
+                className="bg-white rounded-3xl border border-slate-200/90 hover:border-[#0374b5] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
+                onClick={() => navigateToCourse(course.id)}
+              >
+                <div>
+                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={course.thumbnail}
+                      alt={course.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[#0374b5] text-[10px] font-black uppercase tracking-wider shadow-xs">
+                        {course.code}
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold shadow-xs">
+                        {course.gradeLevel || 'Lớp 1 - 12'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-semibold">
+                        {course.category}
+                      </span>
+                      {isEnrolled && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black shadow-xs">
+                          ✓ Đã ghi danh
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 text-white">
+                      <span className="text-[11px] font-semibold opacity-90 block">
+                        GV: {course.instructor?.name || 'Giáo viên phụ trách'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="absolute bottom-3 left-3 right-3 text-white">
-                    <span className="text-[11px] font-semibold opacity-90 block">
-                      GV: {course.instructor?.name || 'Giáo viên phụ trách'}
-                    </span>
+
+                  <div className="p-5 space-y-3">
+                    <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0374b5] transition-colors line-clamp-2">
+                      {course.name}
+                    </h3>
+
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      {course.description || 'Chương trình đào tạo chất lượng cao trên LMS Nhóm 2.'}
+                    </p>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                      <span className="flex items-center gap-1 font-medium">
+                        <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                        {(course.modules || []).length} Chương học
+                      </span>
+                      <span className="flex items-center gap-1 font-medium">
+                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                        {course.enrolledStudentsCount || course.enrolledStudents?.length || 0} Học viên
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-5 space-y-3">
-                  <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0374b5] transition-colors line-clamp-2">
-                    {course.name}
-                  </h3>
-
-                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                    {course.description || 'Chương trình đào tạo chất lượng cao trên LMS Nhóm 2.'}
-                  </p>
-
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-                    <span className="flex items-center gap-1 font-medium">
-                      <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-                      {(course.modules || []).length} Chương học
+                <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+                  {isEnrolled ? (
+                    <span className="text-xs font-bold text-[#0374b5] group-hover:underline flex items-center gap-1">
+                      Vào học ngay →
                     </span>
-                    <span className="flex items-center gap-1 font-medium">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
-                      {course.enrolledStudentsCount || 1} Học viên
-                    </span>
-                  </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await enrollCourse(course.id);
+                        navigateToCourse(course.id);
+                      }}
+                      className="px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-black shadow-xs transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>Đăng ký học ngay</span>
+                    </button>
+                  )}
+                  {canManage && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingCourse(course);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-[#0374b5] hover:bg-sky-50 transition-colors"
+                        title="Sửa thông tin khóa học"
+                      >
+                        <Edit3 className="w-4 h-4 text-[#0374b5]" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Bạn có chắc muốn xóa khóa học "${course.name}"?`)) {
+                            deleteCourse(course.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        title="Xóa khóa học"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0374b5] group-hover:underline flex items-center gap-1">
-                  Vào học ngay →
-                </span>
-                {canManage && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingCourse(course);
-                      }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-[#0374b5] hover:bg-sky-50 transition-colors"
-                      title="Sửa thông tin khóa học"
-                    >
-                      <Edit3 className="w-4 h-4 text-[#0374b5]" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Bạn có chắc muốn xóa khóa học "${course.name}"?`)) {
-                          deleteCourse(course.id);
-                        }
-                      }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Xóa khóa học"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

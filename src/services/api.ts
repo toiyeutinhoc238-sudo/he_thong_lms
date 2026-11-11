@@ -82,12 +82,17 @@ class ApiClient {
     }),
     delete: (id: string) => this.request<{ success: boolean }>(`/courses/${id}`, {
       method: 'DELETE'
-    })
+    }),
+    enroll: (id: string, studentData?: any) => this.request<{ success: boolean; course: Course; message?: string }>(`/courses/${id}/enroll`, {
+      method: 'POST',
+      body: JSON.stringify(studentData || {})
+    }),
+    getEnrolledStudents: (id: string) => this.request<any[]>(`/courses/${id}/students`)
   };
 
   // Modules
   modules = {
-    create: (courseId: string, data: { title: string; description?: string }) =>
+    create: (courseId: string, data: Partial<CourseModule>) =>
       this.request<CourseModule>(`/courses/${courseId}/modules`, {
         method: 'POST',
         body: JSON.stringify(data)

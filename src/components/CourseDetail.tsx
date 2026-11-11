@@ -11,10 +11,16 @@ import {
   Award, 
   Layers, 
   Plus, 
-  Send,
-  Folder,
-  Box,
-  CheckCircle2
+  Send, 
+  Folder, 
+  Box, 
+  CheckCircle2,
+  UserCheck,
+  Search,
+  School,
+  GraduationCap,
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 
 interface CourseDetailProps {
@@ -27,16 +33,19 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     setCurrentView, 
     navigateToActivity, 
     forumTopics, 
-    createForumTopic,
-    currentUser,
-    certificates,
-    activeRole
+    createForumTopic, 
+    currentUser, 
+    certificates, 
+    activeRole,
+    enrollCourse
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<CourseNavTab>('modules');
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newTopicContent, setNewTopicContent] = useState('');
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+  const [searchStudent, setSearchStudent] = useState('');
+  const [isEnrolling, setIsEnrolling] = useState(false);
 
   if (!activeCourse) {
     return (
@@ -52,7 +61,35 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     );
   }
 
+  const isEnrolled = Boolean(
+    currentUser?.role === 'admin' ||
+    currentUser?.role === 'lecturer' ||
+    activeRole === 'admin' ||
+    activeRole === 'lecturer' ||
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    (currentUser?.enrolledCourses && currentUser.enrolledCourses.includes(activeCourse.id)) ||
+    (activeCourse.enrolledStudents && activeCourse.enrolledStudents.some((s: any) => s.id === currentUser?.id || (currentUser?.email && s.email === currentUser.email)))
+  );
+
+  const handleEnroll = async () => {
+    setIsEnrolling(true);
+    try {
+      await enrollCourse(activeCourse.id);
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
   const courseTopics = forumTopics.filter(t => t.courseId === activeCourse.id);
+
+  const enrolledStudents = activeCourse.enrolledStudents || [];
+  const filteredEnrolledStudents = enrolledStudents.filter(st => {
+    const q = searchStudent.toLowerCase();
+    return (st.name || '').toLowerCase().includes(q) ||
+           (st.email || '').toLowerCase().includes(q) ||
+           (st.className || '').toLowerCase().includes(q) ||
+           (st.school || '').toLowerCase().includes(q);
+  });
 
   return (
     <div className="flex-1 flex min-w-0 bg-white">
@@ -65,6 +102,90 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
 
       {/* 2. Center Content Area */}
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
+        {/* Banner Đăng Ký Khóa Học (Dành riêng cho học viên chưa ghi danh) */}
+        {!isEnrolled && (
+          <div className="mx-4 sm:mx-8 mt-4 p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-indigo-500/10 border-2 border-[#0374b5]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-[#0374b5] text-white flex items-center justify-center shrink-0 shadow-md">
+                <UserCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                  Bạn chưa đăng ký tham gia khóa học này!
+                </h3>
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
+                  Bấm <strong>"Đăng Ký Khóa Học Ngay"</strong> để được ghi danh vào lớp, học tập cùng bạn bè và nộp bài tập cho giáo viên.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleEnroll}
+              disabled={isEnrolling}
+              className="px-5 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-95 shrink-0 flex items-center gap-2 disabled:opacity-50"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+              <span>{isEnrolling ? 'Đang ghi danh...' : 'Đăng Ký Khóa Học Ngay'}</span>
+            </button>
+          </div>
+        )}
+
+        {/* Thanh Thông Tin Người Tạo Khóa Học & Lớp Học */}
+        <div className="mx-4 sm:mx-8 mt-4 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0">
+              <img
+                src={activeCourse.instructor?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'}
+                alt={activeCourse.instructor?.name || 'Giáo viên'}
+                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-xs"
+              />
+              <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full shadow-2xs">
+                GV
+              </span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">
+                  {activeCourse.instructor?.name || 'Giáo viên phụ trách'}
+                </h4>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-[#0374b5] font-bold shrink-0">
+                  Người tạo khóa học
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold shrink-0">
+                  {activeCourse.gradeLevel || 'Lớp 1 - 12'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                Email: {activeCourse.instructor?.email || 'phanphiphu04@gmail.com'} • {activeCourse.category}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs shrink-0">
+            <button
+              onClick={() => setActiveTab('people')}
+              className="px-3 py-1 bg-white hover:bg-sky-50 border border-slate-200 hover:border-[#0374b5] rounded-xl font-bold text-slate-700 hover:text-[#0374b5] transition-colors flex items-center gap-1.5 shadow-2xs"
+              title="Xem danh sách các bạn cùng lớp khóa học này"
+            >
+              <Users className="w-3.5 h-3.5 text-[#0374b5]" />
+              <span>{activeCourse.enrolledStudentsCount || enrolledStudents.length} bạn cùng lớp</span>
+            </button>
+            {isEnrolled ? (
+              <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                Đã ghi danh
+              </span>
+            ) : (
+              <button
+                onClick={handleEnroll}
+                disabled={isEnrolling}
+                className="px-3.5 py-1 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl font-bold transition-all shadow-xs"
+              >
+                Đăng ký học +
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Tab 1: Nội dung học tập (Modules View - EXACTLY LIKE SCREENSHOT) */}
         {(activeTab === 'modules' || activeTab === 'home') && (
           <CanvasModulesView 
@@ -199,34 +320,167 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Tab 4: Thành viên (People) */}
+        {/* Tab 4: Thành viên (People - Giảng viên & Học viên cùng lớp) */}
         {activeTab === 'people' && (
-          <div className="p-6 max-w-4xl space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3">
-              Danh sách thành viên lớp học
-            </h2>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {currentUser.avatar ? (
-                  <img 
-                    src={currentUser.avatar} 
-                    alt={currentUser.name} 
-                    referrerPolicy="no-referrer"
-                    className="w-10 h-10 rounded-full object-cover border border-slate-200" 
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-[#0374b5] text-white font-bold flex items-center justify-center text-sm">
-                    {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+          <div className="p-6 max-w-5xl space-y-6">
+            <div className="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">
+                  Thành viên lớp học: {activeCourse.name}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Danh sách giáo viên phụ trách và các bạn học viên cùng lớp đã đăng ký khóa học này
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-[#0374b5]/10 text-[#0374b5] text-xs font-black rounded-full self-start sm:self-auto">
+                {(enrolledStudents.length) + 1} thành viên
+              </span>
+            </div>
+
+            {/* Section 1: Giáo viên phụ trách / Người tạo khóa học */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Giáo viên phụ trách & Người tạo khóa học
+              </h3>
+              <div className="p-4 bg-gradient-to-r from-sky-50 via-blue-50/50 to-indigo-50/50 rounded-2xl border border-sky-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-3.5">
+                  <div className="relative">
+                    <img 
+                      src={activeCourse.instructor?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'} 
+                      alt={activeCourse.instructor?.name || 'Giáo viên'} 
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs" 
+                    />
+                    <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full shadow-2xs">
+                      GV
+                    </span>
                   </div>
-                )}
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">{currentUser.name}</h4>
-                  <p className="text-xs text-slate-500">{currentUser.email} • {currentUser.code || currentUser.email?.split('@')[0]?.toUpperCase()}</p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-extrabold text-slate-900">
+                        {activeCourse.instructor?.name || 'Giáo viên phụ trách'}
+                      </h4>
+                      <span className="px-2 py-0.5 bg-[#0374b5] text-white text-[10px] font-black rounded-full">
+                        Giáo viên
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Email: <strong>{activeCourse.instructor?.email || 'phanphiphu04@gmail.com'}</strong> • Chức danh: {activeCourse.instructor?.title || 'Giáo viên Tin học'}
+                    </p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-white text-xs font-bold text-slate-700 border border-slate-200 shadow-2xs">
+                  Người tạo khóa học
+                </span>
+              </div>
+            </div>
+
+            {/* Section 2: Danh sách các học viên cùng lớp đã đăng ký */}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Danh sách học viên cùng lớp ({enrolledStudents.length} bạn đã đăng ký)
+                </h3>
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Tìm tên, lớp, trường..."
+                    value={searchStudent}
+                    onChange={(e) => setSearchStudent(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  />
                 </div>
               </div>
-              <span className="px-2.5 py-1 bg-[#0374b5]/10 text-[#0374b5] text-xs font-bold rounded-full capitalize">
-                {currentUser.role}
-              </span>
+
+              {enrolledStudents.length === 0 ? (
+                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-3">
+                  <div className="w-12 h-12 bg-sky-100 text-[#0374b5] rounded-2xl flex items-center justify-center mx-auto">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800">Chưa có học viên nào ghi danh</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                      Hiện tại lớp học này chưa có học viên nào đăng ký.
+                    </p>
+                  </div>
+                  {!isEnrolled && (
+                    <button
+                      onClick={handleEnroll}
+                      disabled={isEnrolling}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      <span>Đăng ký tham gia ngay</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs bg-white">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                        <tr>
+                          <th className="py-2.5 px-3.5 w-12 text-center">STT</th>
+                          <th className="py-2.5 px-4">Học viên</th>
+                          <th className="py-2.5 px-4">Lớp học</th>
+                          <th className="py-2.5 px-4">Trường học</th>
+                          <th className="py-2.5 px-4">Ngày đăng ký</th>
+                          <th className="py-2.5 px-4 text-center">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredEnrolledStudents.map((st, idx) => {
+                          const isMe = st.id === currentUser.id || (currentUser.email && st.email === currentUser.email);
+                          return (
+                            <tr key={st.id || idx} className={`hover:bg-slate-50/80 transition-colors ${isMe ? 'bg-sky-50/30' : ''}`}>
+                              <td className="py-2.5 px-3.5 text-center text-slate-400 font-semibold">{idx + 1}</td>
+                              <td className="py-2.5 px-4">
+                                <div className="flex items-center gap-2.5">
+                                  {st.avatar ? (
+                                    <img src={st.avatar} alt={st.name} className="w-8 h-8 rounded-full object-cover border border-slate-200" />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                                      {st.name?.charAt(0)?.toUpperCase() || 'H'}
+                                    </div>
+                                  )}
+                                  <div>
+                                    <p className="font-bold text-slate-900 flex items-center gap-1.5">
+                                      <span>{st.name}</span>
+                                      {isMe && (
+                                        <span className="px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full">
+                                          Bạn
+                                        </span>
+                                      )}
+                                    </p>
+                                    <p className="text-[11px] text-slate-400">{st.email}</p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-4 font-bold text-slate-800">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700">
+                                  {st.className || 'Chưa cập nhật'}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-4 text-slate-600 font-medium">
+                                {st.school || 'LMS Nhóm 2'}
+                              </td>
+                              <td className="py-2.5 px-4 text-slate-500 font-medium">
+                                {st.enrolledAt || 'Gần đây'}
+                              </td>
+                              <td className="py-2.5 px-4 text-center">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  {st.status || 'Đang học'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

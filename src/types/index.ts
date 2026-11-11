@@ -49,6 +49,18 @@ export interface User {
   dateOfBirth?: string;
   address?: string;
   isProfileCompleted?: boolean;
+  enrolledCourses?: string[];
+}
+
+export interface EnrolledStudent {
+  id: string;
+  name: string;
+  email: string;
+  className?: string;
+  school?: string;
+  avatar?: string;
+  enrolledAt: string;
+  status?: string;
 }
 
 export interface Activity {
@@ -146,6 +158,14 @@ export interface Course {
   modules: CourseModule[];
   announcements: CourseAnnouncement[];
   enrolledStudentsCount: number;
+  enrolledStudents?: EnrolledStudent[];
+  creator?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    role?: string;
+  };
   certificateEligible: boolean;
 }
 
