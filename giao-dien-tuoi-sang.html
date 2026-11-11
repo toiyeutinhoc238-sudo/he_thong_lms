@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS Nhóm 2 - Nền Tảng Học Tập & Phân Tích Realtime</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Quicksand"', '"Nunito"', 'sans-serif'],
+          },
+          colors: {
+            peach: {
+              50: '#fffbf7',
+              100: '#fff3ea',
+              200: '#ffe4d4',
+              300: '#ffd0b8',
+              400: '#ffaa8d',
+              500: '#ff846e',
+              600: '#f5634e',
+              700: '#d94432',
+              800: '#8e372b',
+              900: '#5c221a',
+            },
+            coral: {
+              accent: '#ff7769',
+              light: '#ffe9e3',
+              subtle: '#fff5f2'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #fdf7f2;
+      font-family: 'Quicksand', 'Nunito', sans-serif;
+      color: #63433a;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fbf0e8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #f1cfbe;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #e4b49e;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex text-[#624239] select-none antialiased">
+
+  <!-- ======================== 1. LEFT SIDEBAR ======================== -->
+  <aside class="w-64 shrink-0 bg-[#fffdfa] border-r border-[#fae4d7] flex flex-col justify-between py-6 px-4 z-20 shadow-xs">
+    <div class="space-y-6">
+      <!-- Brand Logo -->
+      <div class="flex items-center justify-center gap-2.5 pb-2 border-b border-[#fae4d7]/70">
+        <div class="w-9 h-9 rounded-2xl bg-[#ffece3] flex items-center justify-center text-xl shadow-xs">
+          🐾
+        </div>
+        <span class="font-extrabold text-lg tracking-wider text-[#d45d47] uppercase">
+          LMS Nhóm 2
+        </span>
+      </div>
+
+      <!-- User Profile Card -->
+      <div class="flex flex-col items-center text-center p-3.5 rounded-3xl bg-[#fff6f0] border border-[#fae3d5]">
+        <div class="relative mb-2">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#ff9b8e] to-[#ff7567] p-1 shadow-md shadow-[#ff7567]/20 flex items-center justify-center">
+            <div class="w-full h-full rounded-full bg-[#ffebe3] flex items-center justify-center text-2xl">
+              🐶
+            </div>
+          </div>
+          <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full"></span>
+        </div>
+        <h4 class="font-bold text-sm text-[#5d3b32]" id="profile-name">Quản trị viên</h4>
+        <span class="text-[11px] font-semibold text-[#a88278]" id="profile-role">System Admin</span>
+      </div>
+
+      <!-- Chức năng chính: Bài 1 đến Bài 8 -->
+      <div class="space-y-1.5">
+        <div class="text-[10px] font-extrabold tracking-wider uppercase text-[#b78c82] px-3 mb-1">
+          Chức năng chính
+        </div>
+
+        <nav class="space-y-1" id="nav-list">
+          <!-- Button Bài 1 -->
+          <button onclick="selectLesson(1)" id="btn-lesson-1" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">📖</span>
+            <span class="truncate">Bài 1</span>
+          </button>
+
+          <!-- Button Bài 2 -->
+          <button onclick="selectLesson(2)" id="btn-lesson-2" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">📄</span>
+            <span class="truncate">Bài 2</span>
+          </button>
+
+          <!-- Button Bài 3 -->
+          <button onclick="selectLesson(3)" id="btn-lesson-3" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">📡</span>
+            <span class="truncate">Bài 3</span>
+          </button>
+
+          <!-- Button Bài 4 -->
+          <button onclick="selectLesson(4)" id="btn-lesson-4" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">🤖</span>
+            <span class="truncate">Bài 4</span>
+          </button>
+
+          <!-- Button Bài 5 -->
+          <button onclick="selectLesson(5)" id="btn-lesson-5" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">🖼️</span>
+            <span class="truncate">Bài 5</span>
+          </button>
+
+          <!-- Button Bài 6 (Active Default như hình) -->
+          <button onclick="selectLesson(6)" id="btn-lesson-6" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all bg-gradient-to-r from-[#ff8776] to-[#ff675a] text-white shadow-md shadow-[#ff675a]/25">
+            <span class="text-base">⏱️</span>
+            <span class="truncate">Bài 6</span>
+          </button>
+
+          <!-- Button Bài 7 -->
+          <button onclick="selectLesson(7)" id="btn-lesson-7" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">🧠</span>
+            <span class="truncate">Bài 7</span>
+          </button>
+
+          <!-- Button Bài 8 -->
+          <button onclick="selectLesson(8)" id="btn-lesson-8" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]">
+            <span class="text-base">🚀</span>
+            <span class="truncate">Bài 8</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Hệ thống / Cài đặt dưới cùng -->
+    <div class="space-y-1.5 pt-4 border-t border-[#fae4d7]/70">
+      <div class="text-[10px] font-extrabold tracking-wider uppercase text-[#b78c82] px-3 mb-1">
+        Hệ thống
+      </div>
+      <button onclick="alert('Đang mở cài đặt hệ thống LMS Nhóm 2...')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold text-[#7b544b] hover:bg-[#fff2e9] transition-all">
+        <span class="text-base">⚙️</span>
+        <span>Cài đặt hệ thống</span>
+      </button>
+      <button onclick="window.location.href='/'" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-2xl text-xs font-bold text-[#d45d47] hover:bg-[#ffece7] transition-all">
+        <span class="text-base">🚪</span>
+        <span>Về trang LMS chính</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ======================== 2. MAIN CONTENT ======================== -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <!-- Top Status Bar -->
+    <header class="h-16 px-6 bg-[#fffdfa] border-b border-[#fae4d7] flex items-center justify-between shrink-0 shadow-2xs gap-4">
+      <!-- Left: Title & Status Badges -->
+      <div class="flex items-center flex-wrap gap-2.5">
+        <div class="flex items-center gap-1.5 font-extrabold text-sm sm:text-base text-[#d85c45]">
+          <span>🐾</span>
+          <span id="active-title">Bài 6: Phân Tích & Nhận Diện Realtime</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-xs">
+          <span class="px-2.5 py-1 rounded-full bg-[#fff4ec] border border-[#fae3d5] text-[#8e6054] font-semibold text-[11px] flex items-center gap-1">
+            <span>⏸️</span> Chờ kết nối
+          </span>
+          <span class="px-2.5 py-1 rounded-full bg-[#e3f9eb] border border-[#c3edd1] text-[#228e51] font-bold text-[11px] flex items-center gap-1">
+            <span>✨</span> Sẵn sàng rồi!!
+          </span>
+          <span class="px-2.5 py-1 rounded-full bg-[#e3f4ff] border border-[#c8e7fb] text-[#1b7db5] font-semibold text-[11px] hidden sm:flex items-center gap-1">
+            <span>👥</span> Phiên: client_lms2
+          </span>
+          <span class="px-2.5 py-1 rounded-full bg-[#fff8db] border border-[#f7e8a9] text-[#93711a] font-semibold text-[11px] hidden md:flex items-center gap-1">
+            <span>⏱️</span> Chu kỳ: 1s/frame
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Action Pills -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="toggleMirror()" class="px-3.5 py-1.5 rounded-full bg-white border border-[#fae3d5] hover:border-[#ff9b8e] text-xs font-bold text-[#7a5349] transition-all shadow-2xs flex items-center gap-1.5">
+          <span>🔄</span>
+          <span class="hidden sm:inline">Gương</span>
+        </button>
+
+        <button onclick="toggleCamera()" id="btn-cam" class="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#ff8776] to-[#ff6a5c] hover:brightness-105 text-xs font-extrabold text-white transition-all shadow-xs shadow-[#ff6a5c]/20 flex items-center gap-1.5">
+          <span>📹</span>
+          <span id="btn-cam-text">Bật Camera AI</span>
+        </button>
+
+        <button onclick="alert('Đang mở bảng cấu hình Quản trị viên')" class="px-3.5 py-1.5 rounded-full bg-[#ffece4] hover:bg-[#ffe1d5] text-[#d65741] text-xs font-bold transition-all border border-[#fcd5c5] flex items-center gap-1.5">
+          <span>⚙️</span>
+          <span class="hidden md:inline">Admin Cấu Hình</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace (Grid 2 Cột) -->
+    <div class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-12 gap-6 overflow-y-auto">
+      
+      <!-- Cột Trái (8 Cột): Khung Camera/Mô phỏng & Nhật ký -->
+      <div class="xl:col-span-8 flex flex-col space-y-6">
+        
+        <!-- Khu vực Camera / Trình chiếu bài học -->
+        <div class="bg-white rounded-3xl border border-[#fae3d5] p-5 shadow-xs flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-[#fae4d7]/60 mb-4">
+            <div class="flex items-center gap-2 text-xs font-bold text-[#624239]">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Webcam Của Bạn</span>
+            </div>
+            <span class="px-3 py-0.5 rounded-full bg-[#eef7ff] border border-[#cfe6fb] text-[#1c7db5] font-extrabold text-[11px]">
+              SẴN SÀNG
+            </span>
+          </div>
+
+          <!-- Màn hình trung tâm với Mascot siêu dễ thương -->
+          <div id="camera-screen" class="w-full aspect-video min-h-[320px] rounded-2xl bg-gradient-to-b from-[#fffaf6] to-[#fff3ea] border-2 border-dashed border-[#f6d7c5] flex flex-col items-center justify-center p-6 text-center transition-all relative overflow-hidden">
+            <video id="webcam-video" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl"></video>
+            
+            <div id="camera-placeholder" class="space-y-4 max-w-sm">
+              <div class="w-24 h-24 mx-auto rounded-3xl bg-[#ffe9de] flex items-center justify-center text-5xl shadow-inner">
+                🐶
+              </div>
+
+              <div class="space-y-1">
+                <h3 class="text-base sm:text-lg font-extrabold text-[#5c3a31]" id="placeholder-title">
+                  Đợi bạn bắt đầu học nè!
+                </h3>
+                <p class="text-xs text-[#a27e74] leading-relaxed" id="placeholder-desc">
+                  Nhấn nút bên dưới để bắt đầu bài học <strong class="text-[#d85c45]" id="active-lesson-name">Bài 6</strong> và mở camera thực hành nhé.
+                </p>
+              </div>
+
+              <button onclick="toggleCamera()" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#ff8776] to-[#ff675a] hover:scale-105 active:scale-95 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#ff675a]/30 transition-all inline-flex items-center gap-2">
+                <span>⭐</span>
+                <span>Kích Hoạt Ngay</span>
+              </button>
+            </div>
+
+            <!-- Overlay phân tích khi mở Camera -->
+            <div id="camera-overlay" class="hidden absolute top-4 left-4 bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-[#fae3d5] text-xs font-bold text-[#d85c45] shadow-xs">
+              🤖 AI Phân Tích: Sẵn sàng nhận diện biểu cảm
+            </div>
+          </div>
+
+          <!-- Thanh thông báo trạng thái dưới camera -->
+          <div class="mt-4 p-3 rounded-2xl bg-[#fff6ee] border border-[#fae3d5] flex items-center justify-between text-xs text-[#8e6054]">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-[#ffe6d8] text-[#c9533e] font-extrabold text-[10px]">CHỜ</span>
+              <span id="ai-status-text">Chưa có dữ liệu phân tích... Nhấn nút kích hoạt để bắt đầu!</span>
+            </div>
+            <button onclick="simulateAnalysis()" class="text-[11px] font-bold text-[#d85c45] hover:underline flex items-center gap-1">
+              <span>⚡</span> Thử mẫu phân tích
+            </button>
+          </div>
+        </div>
+
+        <!-- Bảng Nhật Ký Hoạt Động (Bottom Table) -->
+        <div class="bg-white rounded-3xl border border-[#fae3d5] p-5 shadow-xs flex-1 flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-[#fae4d7]/60 mb-3">
+            <div class="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-[#5c3a31]">
+              <span>🕒</span>
+              <span>Nhật Ký Hành Vi & Phân Bổ Bài Học</span>
+            </div>
+            <button onclick="clearLog()" class="px-3 py-1 rounded-full bg-[#fff2ea] hover:bg-[#ffe7da] text-[#c9533e] text-[11px] font-extrabold transition-colors border border-[#fbd0bd]">
+              Xóa hết
+            </button>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-[#fff3eb] text-[#8e5e52] font-extrabold border-b border-[#f9dfce]">
+                  <th class="py-2.5 px-4 rounded-l-xl">GIỜ</th>
+                  <th class="py-2.5 px-4">BÀI HỌC</th>
+                  <th class="py-2.5 px-4">HÀNH VI & MÔ TẢ CHI TIẾT</th>
+                  <th class="py-2.5 px-4">ĐIỂM / TÀI NGUYÊN</th>
+                  <th class="py-2.5 px-4 rounded-r-xl">TRẠNG THÁI</th>
+                </tr>
+              </thead>
+              <tbody id="log-table-body" class="divide-y divide-[#fae7db]/60 text-[#6d4940]">
+                <tr>
+                  <td colspan="5" class="py-8 text-center text-[#ab877d] italic text-xs">
+                    Chưa có hoạt động mới nào trong phiên học này~
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Cột Phải (4 Cột): 3 Widget Giám Sát Giống Mẫu -->
+      <div class="xl:col-span-4 flex flex-col space-y-5">
+        
+        <!-- Widget 1: Luồng xử lý & Hàng đợi -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="bg-white rounded-3xl p-4 border border-[#fae3d5] shadow-xs space-y-1">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-[#8f6256]">
+              <span>🌱</span>
+              <span class="text-[11px] uppercase tracking-wider">Tiến độ bài</span>
+            </div>
+            <div class="text-2xl font-black text-[#d65741]" id="metric-completed">6 / 8</div>
+            <div class="text-[10px] text-[#a47e74]">Đã hoàn thành 75%</div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-4 border border-[#fae3d5] shadow-xs space-y-1">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-[#8f6256]">
+              <span>📦</span>
+              <span class="text-[11px] uppercase tracking-wider">Điểm số</span>
+            </div>
+            <div class="text-2xl font-black text-[#228e51]">9.8 / 10</div>
+            <div class="text-[10px] text-[#a47e74]">Xếp loại: Xuất sắc</div>
+          </div>
+        </div>
+
+        <!-- Widget 2: Chìa Khóa API (Round-Robin) -->
+        <div class="bg-white rounded-3xl p-4 border border-[#fae3d5] shadow-xs flex items-center justify-between">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold text-[#7b5146]">
+              <span class="text-rose-400">💖</span>
+              <span class="text-[11px] uppercase tracking-wider">Chìa Khóa API (ROUND-ROBIN)</span>
+            </div>
+            <div class="text-xs font-bold text-[#5c3a31]">4 Keys Active</div>
+          </div>
+          <div class="w-9 h-9 rounded-2xl bg-[#fff5d9] text-amber-500 flex items-center justify-center text-lg shadow-2xs">
+            🔑
+          </div>
+        </div>
+
+        <!-- Widget 3: Tài Nguyên Pipeline (Danh Sách Tiến Trình Bài Học) -->
+        <div class="bg-white rounded-3xl p-5 border border-[#fae3d5] shadow-xs space-y-3.5 flex-1">
+          <div class="flex items-center justify-between pb-2.5 border-b border-[#fae4d7]/70">
+            <div class="flex items-center gap-1.5 text-xs font-extrabold text-[#5c3a31]">
+              <span>🥖</span>
+              <span>Tiến Trình Học Tập (Pipeline)</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#f6f6f6] border border-[#e2e2e2] text-slate-500 font-extrabold text-[10px]">
+              IDLE
+            </span>
+          </div>
+
+          <!-- Bảng các bài học Pipeline -->
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d85c45]">1. Bài 1: Tổng quan AI</div>
+                <div class="text-[10px] text-[#a27e74]">Lý thuyết & Setup môi trường</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#e3f9eb] text-[#228e51] font-bold text-[10px]">100% Hoàn thành</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d85c45]">2. Bài 2: Cấu trúc Dữ liệu</div>
+                <div class="text-[10px] text-[#a27e74]">Mảng & Giải thuật tối ưu</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#e3f9eb] text-[#228e51] font-bold text-[10px]">100% Hoàn thành</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d85c45]">3. Bài 3: Thị giác OpenCV</div>
+                <div class="text-[10px] text-[#a27e74]">Xử lý luồng hình ảnh camera</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#e3f9eb] text-[#228e51] font-bold text-[10px]">100% Hoàn thành</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d85c45]">4. Bài 4: Xử lý Ngôn ngữ NLP</div>
+                <div class="text-[10px] text-[#a27e74]">Tokenize & Transformer Chatbot</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#e3f9eb] text-[#228e51] font-bold text-[10px]">100% Hoàn thành</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d85c45]">5. Bài 5: Xử lý Ảnh Nâng Cao</div>
+                <div class="text-[10px] text-[#a27e74]">Phân đoạn ảnh & GANs</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#e3f9eb] text-[#228e51] font-bold text-[10px]">100% Hoàn thành</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#ffece4] border border-[#fcd3c1] flex items-center justify-between">
+              <div>
+                <div class="font-extrabold text-[#d64a32]">6. Bài 6: Phân Tích Realtime</div>
+                <div class="text-[10px] text-[#935c4e]">Đang thực hành trực tiếp</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#ff6b5d] text-white font-bold text-[10px] animate-pulse">Đang học</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between opacity-70">
+              <div>
+                <div class="font-extrabold text-[#7b544b]">7. Bài 7: Mạng Nơ-ron Sâu</div>
+                <div class="text-[10px] text-[#a27e74]">Huấn luyện PyTorch / TensorFlow</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#f0f0f0] text-slate-500 font-bold text-[10px]">Chưa mở</span>
+            </div>
+
+            <div class="p-2.5 rounded-2xl bg-[#fff9f4] border border-[#fae3d5] flex items-center justify-between opacity-70">
+              <div>
+                <div class="font-extrabold text-[#7b544b]">8. Bài 8: Triển khai Hệ thống</div>
+                <div class="text-[10px] text-[#a27e74]">Deploy Docker & Cloud Render</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-[#f0f0f0] text-slate-500 font-bold text-[10px]">Chưa mở</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ======================== 3. JAVASCRIPT XỬ LÝ TƯƠNG TÁC ======================== -->
+  <script>
+    const lessonsData = {
+      1: { title: "Bài 1: Tổng quan AI & Python", desc: "Giới thiệu tổng quan về Nền tảng AI, cài đặt môi trường và các thư viện cốt lõi.", icon: "📖" },
+      2: { title: "Bài 2: Cấu trúc Dữ liệu & Giải thuật", desc: "Phân tích cấu trúc mảng, danh sách liên kết và độ phức tạp tính toán.", icon: "📄" },
+      3: { title: "Bài 3: Thị giác Máy tính OpenCV", desc: "Xử lý luồng video đầu vào, lọc nhiễu khung hình và phát hiện chuyển động.", icon: "📡" },
+      4: { title: "Bài 4: Xử lý Ngôn ngữ Tự nhiên & Chatbot", desc: "Phát triển mô hình hội thoại AI thông minh hỗ trợ giải đáp học tập.", icon: "🤖" },
+      5: { title: "Bài 5: Xử lý Ảnh Nâng Cao & GANs", desc: "Phân đoạn đối tượng, tách biên cạnh và ứng dụng mạng đối nghịch tạo sinh.", icon: "🖼️" },
+      6: { title: "Bài 6: Phân Tích & Nhận Diện Realtime", desc: "Nhận diện khuôn mặt, biểu cảm học tập và độ tập trung theo thời gian thực.", icon: "⏱️" },
+      7: { title: "Bài 7: Huấn luyện Mạng Nơ-ron Sâu", desc: "Tối ưu hóa hàm mất mát, điều chỉnh siêu tham số và huấn luyện mô hình sâu.", icon: "🧠" },
+      8: { title: "Bài 8: Kiểm thử & Triển khai Hệ thống", desc: "Đóng gói ứng dụng, tối ưu hoá bộ nhớ và triển khai thực tế trên máy chủ.", icon: "🚀" }
+    };
+
+    let activeLesson = 6;
+    let isCameraOn = false;
+    let isMirrored = false;
+    let cameraStream = null;
+
+    // Chuyển bài học từ Bài 1 -> Bài 8
+    function selectLesson(lessonNum) {
+      activeLesson = lessonNum;
+      const lesson = lessonsData[lessonNum];
+
+      // Cập nhật giao diện menu
+      for (let i = 1; i <= 8; i++) {
+        const btn = document.getElementById(`btn-lesson-${i}`);
+        if (i === lessonNum) {
+          btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all bg-gradient-to-r from-[#ff8776] to-[#ff675a] text-white shadow-md shadow-[#ff675a]/25";
+        } else {
+          btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-[#7b544b] hover:bg-[#fff2e9]";
+        }
+      }
+
+      // Cập nhật tiêu đề & nội dung trung tâm
+      document.getElementById("active-title").innerText = `${lesson.title}`;
+      document.getElementById("placeholder-title").innerText = `Đang mở ${lesson.title}`;
+      document.getElementById("placeholder-desc").innerText = lesson.desc;
+      document.getElementById("active-lesson-name").innerText = `Bài ${lessonNum}`;
+      document.getElementById("ai-status-text").innerText = `Đã chuyển sang ${lesson.title}. Sẵn sàng ghi nhận bài tập.`;
+
+      // Thêm log hoạt động
+      addLogEntry(`Bài ${lessonNum}`, `Học viên bắt đầu tương tác với nội dung: ${lesson.title}`, "100%", "Đang học");
+    }
+
+    // Bật / Tắt Camera
+    async function toggleCamera() {
+      const video = document.getElementById("webcam-video");
+      const placeholder = document.getElementById("camera-placeholder");
+      const overlay = document.getElementById("camera-overlay");
+      const btnCamText = document.getElementById("btn-cam-text");
+
+      if (!isCameraOn) {
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          video.srcObject = cameraStream;
+          video.classList.remove("hidden");
+          placeholder.classList.add("hidden");
+          overlay.classList.remove("hidden");
+          btnCamText.innerText = "Tắt Camera AI";
+          isCameraOn = true;
+          document.getElementById("ai-status-text").innerText = "Camera đang hoạt động! AI đang phân tích luồng hình ảnh...";
+          addLogEntry(`Bài ${activeLesson}`, "Mở camera nhận diện trực tiếp thành công", "30 FPS", "Realtime OK");
+        } catch (err) {
+          alert("Không thể truy cập camera hoặc bạn chưa cấp quyền: " + err.message);
+        }
+      } else {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+        }
+        video.classList.add("hidden");
+        placeholder.classList.remove("hidden");
+        overlay.classList.add("hidden");
+        btnCamText.innerText = "Bật Camera AI";
+        isCameraOn = false;
+        document.getElementById("ai-status-text").innerText = "Đã dừng camera. Nhấn kích hoạt khi bạn sẵn sàng.";
+        addLogEntry(`Bài ${activeLesson}`, "Đã ngắt luồng camera học tập", "0 FPS", "Đã dừng");
+      }
+    }
+
+    // Lật camera
+    function toggleMirror() {
+      isMirrored = !isMirrored;
+      const video = document.getElementById("webcam-video");
+      if (isMirrored) {
+        video.style.transform = "scaleX(-1)";
+      } else {
+        video.style.transform = "scaleX(1)";
+      }
+    }
+
+    // Giả lập phân tích AI
+    function simulateAnalysis() {
+      const samples = [
+        "Học viên đang chăm chú theo dõi bài giảng (Tập trung: 98%)",
+        "Phát hiện cử chỉ giơ tay phát biểu ý kiến (Confidence: 94%)",
+        "Nhận diện đang ghi chú bài học (Tư thế chuẩn)",
+        "Đã hoàn thành câu hỏi tương tác trắc nghiệm số 1 (Đúng: 10/10)"
+      ];
+      const randomSample = samples[Math.floor(Math.random() * samples.length)];
+      document.getElementById("ai-status-text").innerText = "🤖 " + randomSample;
+      addLogEntry(`Bài ${activeLesson}`, randomSample, "+10 XP", "Tích cực");
+    }
+
+    // Thêm dòng log
+    function addLogEntry(lessonName, detail, resource, status) {
+      const tbody = document.getElementById("log-table-body");
+      // Xóa dòng placeholder nếu là log đầu
+      if (tbody.children.length === 1 && tbody.children[0].innerText.includes("Chưa có")) {
+        tbody.innerHTML = "";
+      }
+
+      const now = new Date();
+      const timeStr = now.toTimeString().split(" ")[0];
+
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-[#fff7f0] transition-colors";
+      tr.innerHTML = `
+        <td class="py-2.5 px-4 font-mono font-bold text-[#b55845]">${timeStr}</td>
+        <td class="py-2.5 px-4 font-bold text-[#d85c45]">${lessonName}</td>
+        <td class="py-2.5 px-4">${detail}</td>
+        <td class="py-2.5 px-4 font-semibold text-[#8b594d]">${resource}</td>
+        <td class="py-2.5 px-4">
+          <span class="px-2.5 py-0.5 rounded-full bg-[#e3f9eb] text-[#228e51] font-bold text-[11px]">${status}</span>
+        </td>
+      `;
+      tbody.prepend(tr);
+    }
+
+    // Xóa hết log
+    function clearLog() {
+      const tbody = document.getElementById("log-table-body");
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-8 text-center text-[#ab877d] italic text-xs">
+            Chưa có hoạt động mới nào trong phiên học này~
+          </td>
+        </tr>
+      `;
+    }
+
+    // Đồng bộ tên người dùng từ LocalStorage (nếu có từ phiên đăng nhập Google)
+    window.addEventListener("DOMContentLoaded", () => {
+      try {
+        const savedUser = localStorage.getItem("lms2_user");
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          if (user && user.name) {
+            document.getElementById("profile-name").innerText = user.name;
+            document.getElementById("profile-role").innerText = user.role === 'admin' ? 'Quản trị viên' : (user.className || 'Học viên');
+          }
+        }
+      } catch (e) {}
+
+      // Mặc định thêm log ban đầu
+      addLogEntry("Hệ thống", "Khởi tạo thành công không gian học tập tươi sáng LMS Nhóm 2", "Pipeline Ready", "Sẵn sàng");
+    });
+  </script>
+</body>
+</html>
