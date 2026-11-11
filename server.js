@@ -537,18 +537,65 @@ app.put('/api/auth/profile', async (req, res) => {
 });
 
 // 3. Courses: Get All (Không có dữ liệu ảo)
+// Helper: Lấy thông tin & Avatar thật từ tài khoản Google của giáo viên/người tạo
+async function resolveInstructorAvatar(course) {
+  if (!course) return course;
+  const courseObj = course.toObject ? course.toObject() : { ...course };
+  const targetEmail = (courseObj.instructor?.email || courseObj.creator?.email || 'phanphiphu04@gmail.com').toLowerCase().trim();
+
+  let user = null;
+  if (isMongoConnected) {
+    try {
+      user = await UserModel.findOne({ email: targetEmail });
+      if (!user && targetEmail !== 'phanphiphu04@gmail.com') {
+        user = await UserModel.findOne({ email: 'phanphiphu04@gmail.com' });
+      }
+    } catch (e) {}
+  } else {
+    const db = readDb();
+    user = (db.users || []).find(u => u.email?.toLowerCase().trim() === targetEmail);
+    if (!user && targetEmail !== 'phanphiphu04@gmail.com') {
+      user = (db.users || []).find(u => u.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com');
+    }
+  }
+
+  if (user) {
+    if (!courseObj.instructor) courseObj.instructor = {};
+    if (user.avatar) {
+      courseObj.instructor.avatar = user.avatar;
+    } else if (courseObj.instructor.avatar && courseObj.instructor.avatar.includes('unsplash.com')) {
+      courseObj.instructor.avatar = '';
+    }
+
+    if (user.name && (!courseObj.instructor.name || courseObj.instructor.name === 'Giáo viên' || courseObj.instructor.name === 'Giáo viên phụ trách')) {
+      courseObj.instructor.name = user.name;
+    }
+
+    if (courseObj.creator) {
+      if (user.avatar) courseObj.creator.avatar = user.avatar;
+      if (user.name) courseObj.creator.name = user.name;
+    }
+  } else if (courseObj.instructor?.avatar && courseObj.instructor.avatar.includes('unsplash.com')) {
+    courseObj.instructor.avatar = '';
+  }
+
+  return courseObj;
+}
+
 app.get('/api/courses', async (req, res) => {
   if (isMongoConnected) {
     try {
       const courses = await CourseModel.find();
-      return res.json(courses || []);
+      const enriched = await Promise.all((courses || []).map(resolveInstructorAvatar));
+      return res.json(enriched);
     } catch (err) {
       return res.json([]);
     }
   }
 
   const db = readDb();
-  res.json(db.courses || []);
+  const enriched = await Promise.all((db.courses || []).map(resolveInstructorAvatar));
+  res.json(enriched);
 });
 
 // 4. Courses: Get By ID
@@ -557,18 +604,40 @@ app.get('/api/courses/:id', async (req, res) => {
   if (isMongoConnected) {
     try {
       const course = await getCourseDoc(id);
-      if (course) return res.json(course.toObject ? course.toObject() : course);
+      if (course) {
+        const enriched = await resolveInstructorAvatar(course);
+        return res.json(enriched);
+      }
     } catch (err) {}
   }
 
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === id || c._id === id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
-  res.json(course);
+  const enriched = await resolveInstructorAvatar(course);
+  res.json(enriched);
 });
 
 // 5. Courses: Create new Course (Thêm khóa học thật từ API)
 app.post('/api/courses', async (req, res) => {
+  const creatorEmail = (req.body.instructor?.email || req.body.creator?.email || 'phanphiphu04@gmail.com').toLowerCase().trim();
+  let userCreator = null;
+  if (isMongoConnected) {
+    try {
+      userCreator = await UserModel.findOne({ email: creatorEmail });
+    } catch (e) {}
+  } else {
+    const db = readDb();
+    userCreator = (db.users || []).find(u => u.email?.toLowerCase().trim() === creatorEmail);
+  }
+
+  const realAvatar = (userCreator && userCreator.avatar) 
+    ? userCreator.avatar 
+    : (req.body.instructor?.avatar && !req.body.instructor.avatar.includes('unsplash.com') ? req.body.instructor.avatar : '');
+  const realName = (userCreator && userCreator.name) 
+    ? userCreator.name 
+    : (req.body.instructor?.name && req.body.instructor.name !== 'Giáo viên' && req.body.instructor.name !== 'Giáo viên phụ trách' ? req.body.instructor.name : 'Phú Phan');
+
   const newCourseData = {
     id: req.body.id || `course-${Date.now()}`,
     code: req.body.code || 'HP-NEW',
@@ -578,15 +647,16 @@ app.post('/api/courses', async (req, res) => {
     credits: req.body.credits || 3,
     semester: req.body.semester || 'Học kỳ 1',
     academicYear: '2026 - 2027',
-    instructor: req.body.instructor || {
-      name: 'Giáo viên',
-      title: 'Giáo viên phụ trách',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      email: 'phanphiphu04@gmail.com'
+    instructor: {
+      name: realName,
+      title: req.body.instructor?.title || 'Giáo viên phụ trách',
+      avatar: realAvatar,
+      email: creatorEmail
     },
-    creator: req.body.creator || req.body.instructor || {
-      name: 'Giáo viên',
-      email: 'phanphiphu04@gmail.com'
+    creator: {
+      name: realName,
+      email: creatorEmail,
+      avatar: realAvatar
     },
     thumbnail: req.body.thumbnail || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
     progress: 0,

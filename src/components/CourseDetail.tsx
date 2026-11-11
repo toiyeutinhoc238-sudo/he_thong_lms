@@ -91,6 +91,30 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
            (st.school || '').toLowerCase().includes(q);
   });
 
+  // Xác định thông tin Giáo viên phụ trách / Người tạo khóa học (ưu tiên Avatar & Tên tài khoản Google thật)
+  const isCreatorCurrent = Boolean(
+    currentUser?.email && (
+      (activeCourse.instructor?.email && activeCourse.instructor.email.toLowerCase().trim() === currentUser.email.toLowerCase().trim()) ||
+      (currentUser.email.toLowerCase().trim() === 'phanphiphu04@gmail.com')
+    )
+  );
+
+  const instructorAvatar = 
+    (currentUser?.avatar && isCreatorCurrent)
+      ? currentUser.avatar
+      : (activeCourse.instructor?.avatar && !activeCourse.instructor.avatar.includes('unsplash.com'))
+        ? activeCourse.instructor.avatar
+        : (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser?.avatar)
+          ? currentUser.avatar
+          : '';
+
+  const instructorName = 
+    (currentUser?.name && isCreatorCurrent && (!activeCourse.instructor?.name || activeCourse.instructor.name === 'Giáo viên' || activeCourse.instructor.name === 'Giáo viên phụ trách'))
+      ? currentUser.name
+      : (activeCourse.instructor?.name && activeCourse.instructor.name !== 'Giáo viên' && activeCourse.instructor.name !== 'Giáo viên phụ trách')
+        ? activeCourse.instructor.name
+        : (currentUser?.name || 'Phú Phan');
+
   return (
     <div className="flex-1 flex min-w-0 bg-white">
       {/* 1. Left Secondary Course Navigation (Trang chủ, Thảo luận, Số điểm,...) */}
@@ -133,11 +157,18 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         <div className="mx-4 sm:mx-8 mt-4 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative shrink-0">
-              <img
-                src={activeCourse.instructor?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'}
-                alt={activeCourse.instructor?.name || 'Giáo viên'}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-xs"
-              />
+              {instructorAvatar ? (
+                <img
+                  src={instructorAvatar}
+                  alt={instructorName}
+                  referrerPolicy="no-referrer"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-xs"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-sm border-2 border-white shadow-xs">
+                  {instructorName.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full shadow-2xs">
                 GV
               </span>
@@ -145,13 +176,13 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">
-                  {activeCourse.instructor?.name || 'Giáo viên phụ trách'}
+                  {instructorName}
                 </h4>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-[#0374b5] font-bold shrink-0">
                   Người tạo khóa học
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold shrink-0">
-                  {activeCourse.gradeLevel || 'Lớp 1 - 12'}
+                  {activeCourse.gradeLevel || 'Lớp 6'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5 truncate">
@@ -345,11 +376,18 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               <div className="p-4 bg-gradient-to-r from-sky-50 via-blue-50/50 to-indigo-50/50 rounded-2xl border border-sky-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-center gap-3.5">
                   <div className="relative">
-                    <img 
-                      src={activeCourse.instructor?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'} 
-                      alt={activeCourse.instructor?.name || 'Giáo viên'} 
-                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs" 
-                    />
+                    {instructorAvatar ? (
+                      <img 
+                        src={instructorAvatar} 
+                        alt={instructorName} 
+                        referrerPolicy="no-referrer"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-xs" 
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-base border-2 border-white shadow-xs">
+                        {instructorName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full shadow-2xs">
                       GV
                     </span>
@@ -357,7 +395,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-extrabold text-slate-900">
-                        {activeCourse.instructor?.name || 'Giáo viên phụ trách'}
+                        {instructorName}
                       </h4>
                       <span className="px-2 py-0.5 bg-[#0374b5] text-white text-[10px] font-black rounded-full">
                         Giáo viên
@@ -437,7 +475,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                               <td className="py-2.5 px-4">
                                 <div className="flex items-center gap-2.5">
                                   {st.avatar ? (
-                                    <img src={st.avatar} alt={st.name} className="w-8 h-8 rounded-full object-cover border border-slate-200" />
+                                    <img src={st.avatar} alt={st.name} referrerPolicy="no-referrer" className="w-8 h-8 rounded-full object-cover border border-slate-200" />
                                   ) : (
                                     <div className="w-8 h-8 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
                                       {st.name?.charAt(0)?.toUpperCase() || 'H'}
