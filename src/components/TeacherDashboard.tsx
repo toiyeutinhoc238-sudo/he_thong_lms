@@ -150,21 +150,21 @@ export const TeacherDashboard: React.FC = () => {
       {selectedCourse && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Sinh viên ghi danh</p>
+            <p className="text-xs font-medium text-slate-500">Học sinh ghi danh</p>
             <h3 className="text-2xl font-black text-slate-800 mt-1">{selectedCourse.enrolledStudentsCount || enrolledStudents.length || 0}</h3>
-            <span className="text-[11px] text-hcmue-700 font-medium">Lớp học phần</span>
+            <span className="text-[11px] text-hcmue-700 font-medium">Lớp học</span>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Số lượng chuyên đề</p>
+            <p className="text-xs font-medium text-slate-500">Số lượng chương học</p>
             <h3 className="text-2xl font-black text-amber-600 mt-1">{selectedCourse.modules?.length || 0}</h3>
-            <span className="text-[11px] text-slate-500 font-medium">{selectedCourse.totalActivities || 0} hoạt động</span>
+            <span className="text-[11px] text-slate-500 font-medium">{selectedCourse.totalActivities || 0} bài học</span>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Học phần</p>
-            <h3 className="text-2xl font-black text-purple-600 mt-1">{selectedCourse.code}</h3>
-            <span className="text-[11px] text-purple-700 font-medium">{selectedCourse.credits} tín chỉ</span>
+            <p className="text-xs font-medium text-slate-500">Khối lớp & Phân môn</p>
+            <h3 className="text-xl font-black text-purple-600 mt-1">{selectedCourse.gradeLevel || 'Lớp 1 - 12'}</h3>
+            <span className="text-[11px] text-purple-700 font-medium">{selectedCourse.category}</span>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -385,25 +385,25 @@ export const TeacherDashboard: React.FC = () => {
             <div className="pt-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-extrabold text-slate-800 text-base">
-                  Danh Sách Sinh Viên Ghi Danh
+                  Danh Sách Học Sinh Ghi Danh
                 </h3>
                 <span className="text-xs text-slate-500">
-                  {enrolledStudents.length} sinh viên
+                  {enrolledStudents.length} học sinh
                 </span>
               </div>
 
               {loadingStudents ? (
                 <div className="py-12 text-center text-xs text-slate-400">
-                  Đang tải danh sách sinh viên từ API...
+                  Đang tải danh sách học sinh từ API...
                 </div>
               ) : enrolledStudents.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
                       <tr>
-                        <th className="py-3 px-4">MSSV</th>
+                        <th className="py-3 px-4">Mã số</th>
                         <th className="py-3 px-4">Họ và Tên</th>
-                        <th className="py-3 px-4">Lớp sinh hoạt</th>
+                        <th className="py-3 px-4">Lớp học</th>
                         <th className="py-3 px-4 text-center">Tiến độ</th>
                         <th className="py-3 px-4 text-center">Trạng thái</th>
                       </tr>
@@ -429,7 +429,7 @@ export const TeacherDashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="py-12 text-center text-xs text-slate-400">
-                  Chưa có sinh viên nào trong danh sách. Dữ liệu sẽ hiển thị khi kết nối API endpoint <code>/courses/:id/students</code>.
+                  Chưa có học sinh nào trong danh sách. Dữ liệu sẽ hiển thị khi học sinh tham gia khóa học.
                 </div>
               )}
             </div>
@@ -439,13 +439,13 @@ export const TeacherDashboard: React.FC = () => {
           {selectedTab === 'announcements' && (
             <div className="pt-4 space-y-4 max-w-2xl">
               <h3 className="font-extrabold text-slate-800 text-base">
-                Gửi Thông báo Mới đến Toàn thể Sinh viên Lớp học phần
+                Gửi Thông báo Mới đến Toàn thể Học sinh Lớp học
               </h3>
 
               {isAncSuccess && (
                 <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Thông báo đã được gửi thành công đến bảng tin sinh viên!</span>
+                  <span>Thông báo đã được gửi thành công đến bảng tin học sinh!</span>
                 </div>
               )}
 

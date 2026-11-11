@@ -1,6 +1,19 @@
 export type Role = 'student' | 'lecturer' | 'admin';
 
-export type TrainingType = 'student_regular' | 'teacher_training' | 'internal' | 'community';
+export type CourseTrack = 'Chuyên đề AI' | 'Khoa học máy tính' | 'Tin học ứng dụng';
+
+export type TrainingType = 
+  | 'Chuyên đề AI' 
+  | 'Khoa học máy tính' 
+  | 'Tin học ứng dụng'
+  | 'ai_topics' 
+  | 'computer_science' 
+  | 'applied_informatics' 
+  | 'student_regular' 
+  | 'teacher_training' 
+  | 'internal' 
+  | 'community'
+  | string;
 
 export type AppView = 
   | 'dashboard' 
@@ -108,9 +121,10 @@ export interface Course {
   code: string;
   name: string;
   category: TrainingType;
-  credits: number;
-  semester: string;
-  academicYear: string;
+  gradeLevel: string; // Lớp 1 đến Lớp 12
+  credits?: number;
+  semester?: string;
+  academicYear?: string;
   instructor: {
     id: string;
     name: string;
@@ -123,7 +137,7 @@ export interface Course {
   totalActivities: number;
   completedActivities: number;
   description: string;
-  targetAudience: string;
+  targetAudience?: string;
   syllabus: string[];
   modules: CourseModule[];
   announcements: CourseAnnouncement[];

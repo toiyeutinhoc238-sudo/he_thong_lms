@@ -78,7 +78,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Diễn đàn thảo luận khóa học</h2>
-                <p className="text-xs text-slate-500">Trao đổi học thuật giữa sinh viên và giảng viên</p>
+                <p className="text-xs text-slate-500">Trao đổi học tập giữa học sinh và giáo viên</p>
               </div>
               <button
                 onClick={() => setIsCreatingTopic(!isCreatingTopic)}
@@ -252,7 +252,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             </h2>
             <div className="prose prose-sm max-w-none text-slate-700 space-y-3">
               <p><strong>Mục tiêu:</strong> {activeCourse.description || 'Cung cấp kiến thức toàn diện về môn học.'}</p>
-              <p><strong>Số tín chỉ:</strong> {activeCourse.credits || 3} tín chỉ</p>
+              <p><strong>Khối lớp:</strong> {activeCourse.gradeLevel || 'Lớp 1 - 12'}</p>
+              <p><strong>Chuyên đề Tin học:</strong> {activeCourse.category || 'Tin học'}</p>
               <p><strong>Học kỳ:</strong> {activeCourse.semester || 'Học kỳ 1'} ({activeCourse.academicYear || '2026-2027'})</p>
             </div>
           </div>

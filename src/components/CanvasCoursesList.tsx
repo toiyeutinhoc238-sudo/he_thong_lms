@@ -21,25 +21,26 @@ export const CanvasCoursesList: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Form tạo khóa học mới
+  // Form tạo khóa học mới chuẩn phổ thông Lớp 1 - 12
   const [formData, setFormData] = useState<{
     name: string;
     code: string;
-    category: TrainingType;
+    category: 'Chuyên đề AI' | 'Khoa học máy tính' | 'Tin học ứng dụng';
+    gradeLevel: string;
     instructorName: string;
-    credits: number;
     semester: string;
     description: string;
     thumbnail: string;
   }>({
     name: '',
     code: '',
-    category: 'student_regular',
-    instructorName: currentUser?.name || 'Giảng viên',
-    credits: 3,
-    semester: 'Học kỳ 1 - 2026',
+    category: 'Chuyên đề AI',
+    gradeLevel: 'Lớp 10',
+    instructorName: currentUser?.name || 'Giáo viên phụ trách',
+    semester: 'Học kỳ 1',
     description: '',
     thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'
   });
@@ -47,10 +48,18 @@ export const CanvasCoursesList: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredCourses = courses.filter(c => {
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || 
-                        c.code.toLowerCase().includes(search.toLowerCase());
-    const matchCat = selectedCategory === 'all' || c.category === selectedCategory;
-    return matchSearch && matchCat;
+    const matchSearch = (c.name || '').toLowerCase().includes(search.toLowerCase()) || 
+                        (c.code || '').toLowerCase().includes(search.toLowerCase());
+    
+    // Khớp chuyên đề (hỗ trợ cả slug cũ lẫn tên tiếng Việt mới)
+    const matchCat = selectedCategory === 'all' || 
+                     c.category === selectedCategory ||
+                     (selectedCategory === 'Chuyên đề AI' && (c.category === 'ai_topics' || c.category === 'AI')) ||
+                     (selectedCategory === 'Khoa học máy tính' && (c.category === 'computer_science' || c.category === 'CS')) ||
+                     (selectedCategory === 'Tin học ứng dụng' && (c.category === 'applied_informatics' || c.category === 'ICT'));
+    
+    const matchGrade = selectedGrade === 'all' || c.gradeLevel === selectedGrade;
+    return matchSearch && matchCat && matchGrade;
   });
 
   const handleCreateCourse = async (e: React.FormEvent) => {
@@ -60,29 +69,28 @@ export const CanvasCoursesList: React.FC = () => {
     setIsSubmitting(true);
     try {
       const courseId = `course-${Date.now()}`;
-      const mod1Id = `mod-1-${Date.now()}`;
 
       const newCourse: Course = {
         id: courseId,
         name: formData.name.trim(),
         code: formData.code.trim().toUpperCase(),
         category: formData.category,
-        credits: Number(formData.credits) || 3,
+        gradeLevel: formData.gradeLevel,
         semester: formData.semester,
         academicYear: '2026-2027',
         instructor: {
           id: currentUser?.id || 'admin',
-          name: formData.instructorName || currentUser?.name || 'Giảng viên',
+          name: formData.instructorName || currentUser?.name || 'Giáo viên phụ trách',
           email: currentUser?.email || 'admin@lms2.edu.vn',
           avatar: currentUser?.avatar || '',
-          title: 'Cán bộ Giảng viên'
+          title: 'Giáo viên Tin học'
         },
         thumbnail: formData.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
         progress: 0,
         totalActivities: 0,
         completedActivities: 0,
-        description: formData.description || 'Khóa học đào tạo trực tuyến trên hệ thống LMS Nhóm 2.',
-        targetAudience: 'Học viên',
+        description: formData.description || `Chương trình học tập môn ${formData.category} dành cho học sinh ${formData.gradeLevel}.`,
+        targetAudience: `Học sinh ${formData.gradeLevel}`,
         syllabus: [],
         modules: [],
         announcements: [],
@@ -95,10 +103,10 @@ export const CanvasCoursesList: React.FC = () => {
       setFormData({
         name: '',
         code: '',
-        category: 'student_regular',
-        instructorName: currentUser?.name || 'Giảng viên',
-        credits: 3,
-        semester: 'Học kỳ 1 - 2026',
+        category: 'Chuyên đề AI',
+        gradeLevel: 'Lớp 10',
+        instructorName: currentUser?.name || 'Giáo viên phụ trách',
+        semester: 'Học kỳ 1',
         description: '',
         thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'
       });
@@ -150,11 +158,10 @@ export const CanvasCoursesList: React.FC = () => {
 
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
           {[
-            { id: 'all', label: 'Tất cả' },
-            { id: 'student_regular', label: 'Chính quy' },
-            { id: 'teacher_training', label: 'Bồi dưỡng' },
-            { id: 'internal', label: 'Nội bộ' },
-            { id: 'community', label: 'Cộng đồng' }
+            { id: 'all', label: 'Tất cả chuyên đề' },
+            { id: 'Chuyên đề AI', label: '🤖 Chuyên đề AI' },
+            { id: 'Khoa học máy tính', label: '💻 Khoa học máy tính' },
+            { id: 'Tin học ứng dụng', label: '📱 Tin học ứng dụng' }
           ].map(cat => (
             <button
               key={cat.id}
@@ -168,6 +175,18 @@ export const CanvasCoursesList: React.FC = () => {
               {cat.label}
             </button>
           ))}
+
+          {/* Bộ lọc khối lớp Lớp 1 -> Lớp 12 */}
+          <select
+            value={selectedGrade}
+            onChange={(e) => setSelectedGrade(e.target.value)}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 focus:outline-none focus:border-[#0374b5] shrink-0 cursor-pointer"
+          >
+            <option value="all">Tất cả Khối lớp (1 - 12)</option>
+            {Array.from({ length: 12 }, (_, i) => `Lớp ${i + 1}`).map(g => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -180,8 +199,8 @@ export const CanvasCoursesList: React.FC = () => {
           <div className="space-y-1">
             <h3 className="text-base font-extrabold text-slate-800">Chưa có khóa học nào</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Hệ thống hiện tại chưa có khóa học trong danh mục này.
-              {activeRole === 'admin' ? ' Bấm nút bên dưới để tạo khóa học đầu tiên!' : ''}
+              Hệ thống hiện tại chưa có khóa học trong chuyên đề hoặc khối lớp này.
+              {activeRole === 'admin' ? ' Bấm nút bên dưới để tạo khóa học mới!' : ''}
             </p>
           </div>
           {activeRole === 'admin' && (
@@ -210,17 +229,20 @@ export const CanvasCoursesList: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-[#0374b5] text-[10px] font-black uppercase tracking-wider shadow-xs">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[#0374b5] text-[10px] font-black uppercase tracking-wider shadow-xs">
                       {course.code}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-[10px] font-semibold">
-                      {course.credits} tín chỉ
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold shadow-xs">
+                      {course.gradeLevel || 'Lớp 1 - 12'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-semibold">
+                      {course.category}
                     </span>
                   </div>
                   <div className="absolute bottom-3 left-3 right-3 text-white">
                     <span className="text-[11px] font-semibold opacity-90 block">
-                      {course.instructor?.name || 'Giảng viên'}
+                      GV: {course.instructor?.name || 'Giáo viên phụ trách'}
                     </span>
                   </div>
                 </div>
@@ -315,7 +337,7 @@ export const CanvasCoursesList: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: AI-2026"
+                    placeholder="Ví dụ: AI-10"
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white uppercase"
@@ -324,33 +346,48 @@ export const CanvasCoursesList: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Số tín chỉ
+                    Khối lớp học (Lớp 1 - 12) <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={formData.credits}
-                    onChange={(e) => setFormData({ ...formData, credits: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
-                  />
+                  <select
+                    value={formData.gradeLevel}
+                    onChange={(e) => setFormData({ ...formData, gradeLevel: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white font-bold"
+                  >
+                    <optgroup label="Khối Tiểu học">
+                      <option value="Lớp 1">Lớp 1</option>
+                      <option value="Lớp 2">Lớp 2</option>
+                      <option value="Lớp 3">Lớp 3</option>
+                      <option value="Lớp 4">Lớp 4</option>
+                      <option value="Lớp 5">Lớp 5</option>
+                    </optgroup>
+                    <optgroup label="Khối THCS">
+                      <option value="Lớp 6">Lớp 6</option>
+                      <option value="Lớp 7">Lớp 7</option>
+                      <option value="Lớp 8">Lớp 8</option>
+                      <option value="Lớp 9">Lớp 9</option>
+                    </optgroup>
+                    <optgroup label="Khối THPT">
+                      <option value="Lớp 10">Lớp 10</option>
+                      <option value="Lớp 11">Lớp 11</option>
+                      <option value="Lớp 12">Lớp 12</option>
+                    </optgroup>
+                  </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Chương trình đào tạo
+                    Chuyên đề Tin học <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as TrainingType })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-[#0374b5] focus:outline-none focus:border-[#0374b5] focus:bg-white"
                   >
-                    <option value="student_regular">Đào tạo Chính quy</option>
-                    <option value="teacher_training">Bồi dưỡng nghiệp vụ</option>
-                    <option value="internal">Nội bộ</option>
-                    <option value="community">Cộng đồng</option>
+                    <option value="Chuyên đề AI">🤖 Chuyên đề AI</option>
+                    <option value="Khoa học máy tính">💻 Khoa học máy tính</option>
+                    <option value="Tin học ứng dụng">📱 Tin học ứng dụng</option>
                   </select>
                 </div>
 
@@ -358,23 +395,25 @@ export const CanvasCoursesList: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Học kỳ
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Học kỳ 1 - 2026"
+                  <select
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
-                  />
+                  >
+                    <option value="Học kỳ 1">Học kỳ 1</option>
+                    <option value="Học kỳ 2">Học kỳ 2</option>
+                    <option value="Cả năm học">Cả năm học</option>
+                  </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Giảng viên phụ trách
+                  Giáo viên phụ trách
                 </label>
                 <input
                   type="text"
-                  placeholder="Họ và tên giảng viên"
+                  placeholder="Họ và tên giáo viên"
                   value={formData.instructorName}
                   onChange={(e) => setFormData({ ...formData, instructorName: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"

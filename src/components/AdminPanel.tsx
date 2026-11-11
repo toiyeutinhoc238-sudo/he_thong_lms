@@ -219,9 +219,17 @@ export const AdminPanel: React.FC = () => {
                   <div className="space-y-2">
                     <div className="h-36 rounded-2xl overflow-hidden bg-slate-100 relative">
                       <img src={course.thumbnail} alt={course.name} className="w-full h-full object-cover" />
-                      <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-white/95 text-[#0374b5] font-black text-[10px] uppercase shadow-xs">
-                        {course.code}
-                      </span>
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2.5 py-0.5 rounded-full bg-white/95 text-[#0374b5] font-black text-[10px] uppercase shadow-xs">
+                          {course.code}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 font-extrabold text-[10px] shadow-xs">
+                          {course.gradeLevel || 'Lớp 1 - 12'}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-slate-900/70 text-white font-semibold text-[10px] backdrop-blur-xs">
+                          {course.category}
+                        </span>
+                      </div>
                     </div>
 
                     <h3 className="font-extrabold text-slate-900 text-sm sm:text-base line-clamp-1">

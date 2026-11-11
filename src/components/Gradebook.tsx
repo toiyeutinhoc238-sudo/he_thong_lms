@@ -140,15 +140,15 @@ export const Gradebook: React.FC = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <p className="text-xs font-medium text-slate-400">Số lượng học phần</p>
+          <p className="text-xs font-medium text-slate-400">Số lượng khóa học</p>
           <h3 className="text-2xl sm:text-3xl font-black text-hcmue-800 mt-1">{courses.length}</h3>
-          <span className="text-[11px] text-slate-500 font-medium">Học phần đã đăng ký</span>
+          <span className="text-[11px] text-slate-500 font-medium">Môn học đã tham gia</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <p className="text-xs font-medium text-slate-400">Tổng tín chỉ</p>
-          <h3 className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{totalCredits}</h3>
-          <span className="text-[11px] text-slate-500 font-medium">Tín chỉ tích lũy</span>
+          <p className="text-xs font-medium text-slate-400">Cấp học</p>
+          <h3 className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">Lớp 1 - 12</h3>
+          <span className="text-[11px] text-slate-500 font-medium">Hệ Tin học Phổ thông</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -174,9 +174,9 @@ export const Gradebook: React.FC = () => {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-slate-600 uppercase tracking-wider font-bold border-b border-slate-200/80">
                 <tr>
-                  <th className="py-3.5 px-4">Mã HP</th>
-                  <th className="py-3.5 px-4">Tên học phần</th>
-                  <th className="py-3.5 px-3 text-center">Tín chỉ</th>
+                  <th className="py-3.5 px-4">Mã môn</th>
+                  <th className="py-3.5 px-4">Tên môn học</th>
+                  <th className="py-3.5 px-3 text-center">Khối lớp</th>
                   <th className="py-3.5 px-3 text-center">Chuyên cần</th>
                   <th className="py-3.5 px-3 text-center">Bài tập</th>
                   <th className="py-3.5 px-3 text-center">Trắc nghiệm</th>

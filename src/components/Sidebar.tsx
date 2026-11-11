@@ -33,11 +33,10 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
   };
 
   const programs: { id: TrainingType | 'all'; label: string; count?: string }[] = [
-    { id: 'all', label: 'Tất cả chương trình' },
-    { id: 'student_regular', label: 'Đại học & Sau đại học', count: 'Chính quy' },
-    { id: 'teacher_training', label: 'Bồi dưỡng Giáo viên', count: 'Mới' },
-    { id: 'community', label: 'Tuần SHCD & Kỹ năng' },
-    { id: 'internal', label: 'Bồi dưỡng Nội bộ' },
+    { id: 'all', label: 'Tất cả chuyên đề' },
+    { id: 'Chuyên đề AI', label: 'Chuyên đề AI', count: 'AI' },
+    { id: 'Khoa học máy tính', label: 'Khoa học máy tính', count: 'CS' },
+    { id: 'Tin học ứng dụng', label: 'Tin học ứng dụng', count: 'ICT' },
   ];
 
   return (
@@ -152,7 +151,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
           {/* Filter By Training Program */}
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2 flex items-center justify-between">
-              <span>Hệ đào tạo trực tuyến</span>
+              <span>Chuyên đề Tin học (Lớp 1 - 12)</span>
               <Layers className="w-3.5 h-3.5" />
             </div>
             <div className="space-y-1">

@@ -401,7 +401,7 @@ export const Dashboard: React.FC = () => {
             <ul className="text-[11px] text-slate-200 space-y-2 leading-relaxed">
               <li className="flex items-start gap-1.5">
                 <span className="text-amber-400 font-bold">•</span>
-                <span>Sinh viên hoàn thành các bài học và bài kiểm tra trên hệ thống theo đúng tiến độ đào tạo.</span>
+                <span>Học sinh hoàn thành các bài học và bài kiểm tra trên hệ thống theo đúng tiến độ đào tạo.</span>
               </li>
               <li className="flex items-start gap-1.5">
                 <span className="text-amber-400 font-bold">•</span>

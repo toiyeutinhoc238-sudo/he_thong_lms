@@ -508,7 +508,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       author: {
         name: currentUser.name,
         avatar: currentUser.avatar,
-        role: currentUser.role === 'lecturer' ? 'Giảng viên' : currentUser.role === 'admin' ? 'Quản trị viên' : 'Sinh viên'
+        role: currentUser.role === 'lecturer' ? 'Giáo viên' : currentUser.role === 'admin' ? 'Quản trị viên' : 'Học sinh'
       },
       content,
       createdAt: 'Vừa xong',
@@ -536,7 +536,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       author: {
         name: currentUser.name,
         avatar: currentUser.avatar,
-        role: currentUser.role === 'student' ? 'Sinh viên' : 'Giảng viên'
+        role: currentUser.role === 'student' ? 'Học sinh' : 'Giáo viên'
       },
       createdAt: 'Vừa xong',
       replies: [],

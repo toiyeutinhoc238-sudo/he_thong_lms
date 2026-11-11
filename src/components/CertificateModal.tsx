@@ -69,7 +69,7 @@ export const CertificateModal: React.FC = () => {
               BỘ GIÁO DỤC VÀ ĐÀO TẠO
             </h4>
             <h3 className="text-sm sm:text-base font-extrabold text-hcmue-900 uppercase tracking-wider">
-              TRƯỜNG ĐẠI HỌC SƯ PHẠM THÀNH PHỐ HỒ CHÍ MINH
+              HỆ THỐNG GIÁO DỤC TRỰC TUYẾN PHỔ THÔNG
             </h3>
             <div className="w-24 h-0.5 bg-amber-500 mx-auto mt-1" />
           </div>
@@ -92,7 +92,7 @@ export const CertificateModal: React.FC = () => {
           {/* Recipient */}
           <div className="space-y-2">
             <p className="text-xs sm:text-sm text-slate-600 font-serif">
-              Chứng nhận Học viên / Sinh viên:
+              Chứng nhận Học sinh:
             </p>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-hcmue-800 tracking-wider uppercase font-serif">
               {activeCertificate.studentName}

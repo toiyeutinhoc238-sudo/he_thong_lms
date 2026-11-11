@@ -47,7 +47,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
               <span>★</span> BỘ GIÁO DỤC VÀ ĐÀO TẠO
             </span>
             <span className="text-slate-300">|</span>
-            <span className="text-slate-200 hidden sm:inline">Trường Đại học Sư phạm TP. Hồ Chí Minh (HCMUE)</span>
+            <span className="text-slate-200 hidden sm:inline">Hệ thống LMS Nhóm 2 - Tin học Phổ thông (Lớp 1 - 12)</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -62,7 +62,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Sinh viên
+                Học sinh
               </button>
               <button
                 onClick={() => switchRole('lecturer')}
@@ -72,7 +72,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Giảng viên
+                Giáo viên
               </button>
               <button
                 onClick={() => switchRole('admin')}

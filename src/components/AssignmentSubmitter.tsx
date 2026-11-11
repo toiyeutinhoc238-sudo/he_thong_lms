@@ -297,7 +297,7 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
                 type="text"
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Nhập nhận xét chi tiết cho sinh viên..."
+                placeholder="Nhập nhận xét chi tiết cho học sinh..."
                 className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-hcmue-600"
                 required
               />
@@ -314,7 +314,7 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
               type="submit"
               className="ml-auto px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold text-xs rounded-xl shadow-sm transition-all"
             >
-              Lưu điểm & Công bố cho sinh viên
+              Lưu điểm & Công bố cho học sinh
             </button>
           </div>
         </form>

@@ -19,6 +19,8 @@ export const CanvasDashboard: React.FC = () => {
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
+  const [courseCategory, setCourseCategory] = useState<'Chuyên đề AI' | 'Khoa học máy tính' | 'Tin học ứng dụng'>('Chuyên đề AI');
+  const [courseGradeLevel, setCourseGradeLevel] = useState<string>('Lớp 10');
   const [courseDesc, setCourseDesc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,13 +39,13 @@ export const CanvasDashboard: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const code = courseCode.trim() || `LMS-${Date.now().toString().slice(-4)}`;
+      const code = courseCode.trim() || `TIN-${courseGradeLevel.replace('Lớp ', '')}-${Date.now().toString().slice(-3)}`;
       const newCourseData = {
         code,
         name: courseName.trim(),
-        description: courseDesc.trim() || 'Khóa học đào tạo trực tuyến trên hệ thống Canvas LMS',
-        credits: 3,
-        category: 'student_regular' as const,
+        description: courseDesc.trim() || `Khóa học môn ${courseCategory} dành cho ${courseGradeLevel}.`,
+        category: courseCategory,
+        gradeLevel: courseGradeLevel,
         semester: 'Học kỳ 1',
         academicYear: '2026 - 2027',
         modules: []
@@ -61,10 +63,13 @@ export const CanvasDashboard: React.FC = () => {
       // Fallback local
       const localCourse: any = {
         id: `course-${Date.now()}`,
-        code: courseCode.trim() || 'LMS 2',
+        code: courseCode.trim() || `TIN-${Date.now().toString().slice(-4)}`,
         name: courseName.trim(),
         description: courseDesc.trim(),
-        credits: 3,
+        category: courseCategory,
+        gradeLevel: courseGradeLevel,
+        semester: 'Học kỳ 1',
+        academicYear: '2026 - 2027',
         modules: []
       };
       setCourses(prev => [localCourse, ...prev]);
@@ -191,28 +196,75 @@ export const CanvasDashboard: React.FC = () => {
             </h3>
 
             <form onSubmit={handleCreateCourse} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mã khóa học (Course Code) *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: LMS 2 hoặc COMP101"
-                  value={courseCode}
-                  onChange={(e) => setCourseCode(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  autoFocus
-                  required
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Mã khóa học *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: AI-10"
+                    value={courseCode}
+                    onChange={(e) => setCourseCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] uppercase"
+                    autoFocus
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Khối lớp học *
+                  </label>
+                  <select
+                    value={courseGradeLevel}
+                    onChange={(e) => setCourseGradeLevel(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-bold focus:outline-none focus:border-[#0374b5]"
+                  >
+                    <optgroup label="Khối Tiểu học">
+                      <option value="Lớp 1">Lớp 1</option>
+                      <option value="Lớp 2">Lớp 2</option>
+                      <option value="Lớp 3">Lớp 3</option>
+                      <option value="Lớp 4">Lớp 4</option>
+                      <option value="Lớp 5">Lớp 5</option>
+                    </optgroup>
+                    <optgroup label="Khối THCS">
+                      <option value="Lớp 6">Lớp 6</option>
+                      <option value="Lớp 7">Lớp 7</option>
+                      <option value="Lớp 8">Lớp 8</option>
+                      <option value="Lớp 9">Lớp 9</option>
+                    </optgroup>
+                    <optgroup label="Khối THPT">
+                      <option value="Lớp 10">Lớp 10</option>
+                      <option value="Lớp 11">Lớp 11</option>
+                      <option value="Lớp 12">Lớp 12</option>
+                    </optgroup>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tên khóa học (Course Name) *
+                  Chuyên đề Tin học *
+                </label>
+                <select
+                  value={courseCategory}
+                  onChange={(e) => setCourseCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-bold text-[#0374b5] focus:outline-none focus:border-[#0374b5]"
+                >
+                  <option value="Chuyên đề AI">🤖 Chuyên đề AI</option>
+                  <option value="Khoa học máy tính">💻 Khoa học máy tính</option>
+                  <option value="Tin học ứng dụng">📱 Tin học ứng dụng</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tên khóa học *
                 </label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: Trí tuệ Nhân tạo và Ứng dụng"
+                  placeholder="Ví dụ: Lập trình Python cơ bản"
                   value={courseName}
                   onChange={(e) => setCourseName(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"

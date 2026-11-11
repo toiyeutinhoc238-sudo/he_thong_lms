@@ -273,7 +273,7 @@ export const ActivityViewer: React.FC = () => {
                   Bản xem trước tài liệu học tập
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Tài liệu giảng dạy chính thức của Trường Đại học Sư phạm TP.HCM. Bạn có thể xem trực tuyến hoặc tải bản PDF đầy đủ về thiết bị.
+                  Tài liệu học tập chính thức của Hệ thống LMS Nhóm 2. Bạn có thể xem trực tuyến hoặc tải bản PDF đầy đủ về thiết bị.
                 </p>
               </div>
               <button 

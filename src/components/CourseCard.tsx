@@ -12,16 +12,17 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
   const getCategoryBadge = (category: string) => {
     switch (category) {
-      case 'student_regular':
-        return { label: 'Chính quy', bg: 'bg-blue-100 text-blue-800 border-blue-200' };
-      case 'teacher_training':
-        return { label: 'Bồi dưỡng GV', bg: 'bg-amber-100 text-amber-800 border-amber-200' };
-      case 'community':
-        return { label: 'Cộng đồng / SHCD', bg: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
-      case 'internal':
-        return { label: 'Nội bộ', bg: 'bg-purple-100 text-purple-800 border-purple-200' };
+      case 'Chuyên đề AI':
+      case 'ai_topics':
+        return { label: '🤖 Chuyên đề AI', bg: 'bg-purple-100 text-purple-800 border-purple-200' };
+      case 'Khoa học máy tính':
+      case 'computer_science':
+        return { label: '💻 Khoa học máy tính', bg: 'bg-blue-100 text-blue-800 border-blue-200' };
+      case 'Tin học ứng dụng':
+      case 'applied_informatics':
+        return { label: '📱 Tin học ứng dụng', bg: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
       default:
-        return { label: 'Học phần', bg: 'bg-slate-100 text-slate-800 border-slate-200' };
+        return { label: category || 'Môn Tin học', bg: 'bg-sky-100 text-sky-800 border-sky-200' };
     }
   };
 
@@ -52,13 +53,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
             </span>
           </div>
 
-          {/* Credits / Semester pill */}
+          {/* Khối lớp & Học kỳ */}
           <div className="absolute bottom-3 left-3 text-white text-xs font-medium flex items-center gap-2">
-            <span className="bg-hcmue-900/80 backdrop-blur-xs px-2 py-0.5 rounded text-[11px]">
-              {course.credits > 0 ? `${course.credits} Tín chỉ` : 'Bắt buộc'}
+            <span className="bg-amber-400 text-slate-900 font-extrabold backdrop-blur-xs px-2 py-0.5 rounded text-[11px] shadow-xs">
+              {course.gradeLevel || 'Lớp 1 - 12'}
             </span>
             <span className="text-slate-200 text-[11px]">
-              {course.semester}
+              {course.semester || 'Học kỳ 1'}
             </span>
           </div>
         </div>

@@ -105,7 +105,7 @@ export const Footer: React.FC = () => {
             <span>•</span>
             <span className="hover:text-slate-400 cursor-pointer">Điều khoản sử dụng</span>
             <span>•</span>
-            <span className="hover:text-slate-400 cursor-pointer">Hướng dẫn sinh viên</span>
+            <span className="hover:text-slate-400 cursor-pointer">Hướng dẫn học sinh</span>
           </div>
         </div>
       </div>
