@@ -37,7 +37,7 @@ export const ActivityViewer: React.FC = () => {
         <p className="text-slate-600">Không tìm thấy hoạt động học tập.</p>
         <button 
           onClick={() => setCurrentView('course-detail')}
-          className="px-4 py-2 bg-hcmue-700 text-white rounded-xl text-xs font-bold"
+          className="px-4 py-2 bg-[#0374b5] text-white rounded-lg text-xs font-bold"
         >
           Quay lại khóa học
         </button>
@@ -49,7 +49,7 @@ export const ActivityViewer: React.FC = () => {
   let nextAct: { courseId: string; activityId: string; title: string } | null = null;
   let allActivities: any[] = [];
   activeCourse.modules.forEach(m => {
-    m.activities.forEach(a => {
+    (m.activities || []).forEach(a => {
       allActivities.push(a);
     });
   });
@@ -67,12 +67,12 @@ export const ActivityViewer: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Navigation Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
           onClick={() => setCurrentView('course-detail')}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-hcmue-700 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#0374b5] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Trở về: {activeCourse.name}</span>
@@ -87,7 +87,7 @@ export const ActivityViewer: React.FC = () => {
           ) : (
             <button
               onClick={handleMarkDone}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-hcmue-700 text-white text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold transition-all shadow-xs"
             >
               <Check className="w-4 h-4" />
               <span>Đánh dấu hoàn thành</span>
@@ -97,7 +97,7 @@ export const ActivityViewer: React.FC = () => {
           {nextAct && (
             <button
               onClick={() => navigateToActivity(nextAct!.courseId, nextAct!.activityId)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-hcmue-50 hover:bg-hcmue-100 text-hcmue-800 text-xs font-bold transition-all"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-xs font-bold transition-all"
             >
               <span>Bài kế tiếp</span>
               <ChevronRight className="w-4 h-4" />

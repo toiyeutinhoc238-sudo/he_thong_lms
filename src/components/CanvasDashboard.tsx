@@ -1,0 +1,258 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { 
+  BookOpen, 
+  Plus, 
+  MessageSquare, 
+  Bell, 
+  FileCheck, 
+  Folder, 
+  MoreVertical,
+  GraduationCap,
+  Sparkles
+} from 'lucide-react';
+import api from '../services/api';
+
+export const CanvasDashboard: React.FC = () => {
+  const { courses, setCourses, navigateToCourse, activeRole } = useApp();
+
+  const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [courseCode, setCourseCode] = useState('');
+  const [courseName, setCourseName] = useState('');
+  const [courseDesc, setCourseDesc] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const colors = [
+    'from-sky-600 to-blue-700',
+    'from-emerald-600 to-teal-700',
+    'from-indigo-600 to-purple-700',
+    'from-amber-500 to-orange-600',
+    'from-rose-600 to-pink-700',
+    'from-cyan-600 to-blue-600'
+  ];
+
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!courseName.trim()) return;
+    setIsSubmitting(true);
+
+    try {
+      const code = courseCode.trim() || `LMS-${Date.now().toString().slice(-4)}`;
+      const newCourseData = {
+        code,
+        name: courseName.trim(),
+        description: courseDesc.trim() || 'Khóa học đào tạo trực tuyến trên hệ thống Canvas LMS',
+        credits: 3,
+        category: 'student_regular' as const,
+        semester: 'Học kỳ 1',
+        academicYear: '2026 - 2027',
+        modules: []
+      };
+
+      const created = await api.courses.create(newCourseData);
+      setCourses(prev => [created, ...prev]);
+      setCourseCode('');
+      setCourseName('');
+      setCourseDesc('');
+      setIsCreateCourseOpen(false);
+      navigateToCourse(created.id);
+    } catch (err: any) {
+      console.error('Lỗi tạo khóa học:', err);
+      // Fallback local
+      const localCourse: any = {
+        id: `course-${Date.now()}`,
+        code: courseCode.trim() || 'LMS 2',
+        name: courseName.trim(),
+        description: courseDesc.trim(),
+        credits: 3,
+        modules: []
+      };
+      setCourses(prev => [localCourse, ...prev]);
+      setIsCreateCourseOpen(false);
+      navigateToCourse(localCourse.id);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="flex-1 py-6 px-4 sm:px-8 max-w-7xl mx-auto space-y-6">
+      {/* Dashboard Top Header */}
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            Bảng điều khiển
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Các khóa học của bạn trên hệ thống Canvas LMS
+          </p>
+        </div>
+
+        <button
+          onClick={() => setIsCreateCourseOpen(true)}
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-lg text-xs sm:text-sm font-bold transition-all shadow-xs"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tạo Khóa Học</span>
+        </button>
+      </div>
+
+      {/* Courses Cards Grid */}
+      {courses.length === 0 ? (
+        <div className="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center space-y-4 bg-white/70 shadow-2xs max-w-lg mx-auto my-12">
+          <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto shadow-inner">
+            <BookOpen className="w-8 h-8" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-900">Chưa có khóa học nào</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              Dữ liệu đang hoàn toàn trống. Bạn có thể bấm nút bên dưới để tạo khóa học thật đầu tiên hoặc nạp dữ liệu qua API.
+            </p>
+          </div>
+          <button
+            onClick={() => setIsCreateCourseOpen(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Tạo Khóa Học Mới Ngay</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {courses.map((course, idx) => {
+            const gradientColor = colors[idx % colors.length];
+            return (
+              <div
+                key={course.id}
+                onClick={() => navigateToCourse(course.id)}
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col"
+              >
+                {/* Canvas Colored Card Header Banner */}
+                <div className={`h-28 bg-gradient-to-r ${gradientColor} p-3 flex justify-between items-start relative`}>
+                  <span className="px-2 py-0.5 rounded bg-black/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-2xs">
+                    {course.code || 'LMS'}
+                  </span>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="p-1 rounded-full text-white/80 hover:text-white hover:bg-black/20 transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#0374b5] group-hover:underline line-clamp-2 leading-snug">
+                      {course.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-1">
+                      {course.description || course.code}
+                    </p>
+                  </div>
+
+                  {/* Canvas Bottom Action Icons */}
+                  <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-slate-400">
+                    <div className="flex items-center gap-3">
+                      <span title="Thông báo" className="hover:text-slate-700">
+                        <Bell className="w-4 h-4" />
+                      </span>
+                      <span title="Thảo luận" className="hover:text-slate-700">
+                        <MessageSquare className="w-4 h-4" />
+                      </span>
+                      <span title="Bài tập" className="hover:text-slate-700">
+                        <FileCheck className="w-4 h-4" />
+                      </span>
+                      <span title="Tập tin" className="hover:text-slate-700">
+                        <Folder className="w-4 h-4" />
+                      </span>
+                    </div>
+
+                    <span className="text-[11px] font-bold text-slate-500">
+                      {course.modules?.length || 0} bài
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create Course Modal */}
+      {isCreateCourseOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+            <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#0374b5]" />
+              <span>Tạo Khóa Học Mới (Canvas LMS)</span>
+            </h3>
+
+            <form onSubmit={handleCreateCourse} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Mã khóa học (Course Code) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: LMS 2 hoặc COMP101"
+                  value={courseCode}
+                  onChange={(e) => setCourseCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tên khóa học (Course Name) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: Trí tuệ Nhân tạo và Ứng dụng"
+                  value={courseName}
+                  onChange={(e) => setCourseName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Mô tả khóa học
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Mô tả nội dung, mục tiêu của khóa học..."
+                  value={courseDesc}
+                  onChange={(e) => setCourseDesc(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateCourseOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Đang tạo...' : 'Tạo Khóa Học'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

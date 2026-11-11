@@ -21,7 +21,7 @@
       "name": "1. Authentication",
       "item": [
         {
-          "name": "Login",
+          "name": "Login with Credentials",
           "request": {
             "method": "POST",
             "header": [
@@ -29,12 +29,30 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"48.01.104.055\",\n  \"password\": \"password123\",\n  \"program\": \"student_regular\"\n}"
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\",\n  \"program\": \"student_regular\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login with Google OAuth",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"GOOGLE_ID_TOKEN_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google"]
             }
           }
         },
