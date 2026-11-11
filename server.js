@@ -7,6 +7,28 @@ import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Tự động nạp cấu hình từ .env nếu có (không cần cài thêm thư viện phụ thuộc)
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const envLines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+    for (const line of envLines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx !== -1) {
+          const k = trimmed.slice(0, eqIdx).trim();
+          const v = trimmed.slice(eqIdx + 1).trim();
+          if (!process.env[k]) {
+            process.env[k] = v;
+          }
+        }
+      }
+    }
+  } catch (e) {}
+}
+
 const PORT = process.env.PORT || 5000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
@@ -28,7 +50,7 @@ app.get('/api/health', (req, res) => res.json({
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 let isMongoConnected = false;
 
-// Mongoose Schemas
+// Mongoose Schemas (Tuyệt đối không gán dữ liệu ảo)
 const userSchema = new mongoose.Schema({
   id: String,
   name: String,
@@ -109,14 +131,13 @@ const NotifModel = mongoose.model('Notification', notifSchema);
 const CertModel = mongoose.model('Certificate', certSchema);
 const ForumModel = mongoose.model('ForumTopic', forumSchema);
 
-// Kết nối MongoDB Atlas
+// Kết nối MongoDB Atlas (Không seed bất kỳ dữ liệu ảo nào)
 if (MONGODB_URI) {
   console.log('🔄 Đang kết nối tới MongoDB Atlas...');
   mongoose.connect(MONGODB_URI, { dbName: 'vle_hcmue' })
-    .then(async () => {
+    .then(() => {
       isMongoConnected = true;
       console.log('✅ Đã kết nối thành công tới MongoDB Atlas (Database: vle_hcmue)!');
-      await seedMongoIfEmpty();
     })
     .catch(err => {
       console.warn('⚠️ Kết nối MongoDB Atlas thất bại, tự động chuyển về Local JSON DB:', err.message);
@@ -125,202 +146,17 @@ if (MONGODB_URI) {
   console.log('ℹ️ Chưa có MONGODB_URI, sử dụng Local JSON Database (db.json)');
 }
 
-async function seedMongoIfEmpty() {
-  try {
-    const userCount = await UserModel.countDocuments();
-    if (userCount === 0) {
-      console.log('🌱 Đang tạo dữ liệu mẫu khởi tạo trên MongoDB Atlas...');
-      const localData = readDb();
-      if (localData.users?.length) await UserModel.insertMany(localData.users);
-      if (localData.courses?.length) await CourseModel.insertMany(localData.courses);
-      if (localData.notifications?.length) await NotifModel.insertMany(localData.notifications);
-      console.log('✅ Đã tạo dữ liệu mẫu thành công trên MongoDB Atlas!');
-    }
-  } catch (e) {
-    console.error('Lỗi khi seed MongoDB:', e.message);
-  }
-}
-
-// ====================== LOCAL JSON FALLBACK ======================
+// ====================== LOCAL JSON FALLBACK (DỮ LIỆU RỖNG 100%) ======================
 function initDb() {
   if (!fs.existsSync(DB_FILE)) {
-    const defaultData = {
-      users: [
-        {
-          id: 'user-sv-01',
-          name: 'Nguyễn Văn An',
-          username: '48.01.104.055',
-          password: 'password123',
-          email: '4801104055@student.hcmue.edu.vn',
-          role: 'student',
-          code: '48.01.104.055',
-          department: 'Khoa Công nghệ Thông tin',
-          classOrPosition: 'Lớp Sư phạm Tin học K48',
-          phone: '0903 123 456',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-        },
-        {
-          id: 'user-gv-01',
-          name: 'TS. Trần Minh Khoa',
-          username: 'khoatm@hcmue.edu.vn',
-          password: 'password123',
-          email: 'khoatm@hcmue.edu.vn',
-          role: 'lecturer',
-          code: 'CB-HCMUE-2015',
-          department: 'Khoa Tâm lý - Giáo dục',
-          classOrPosition: 'Giảng viên chính / Trưởng bộ môn',
-          phone: '0912 345 678',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
-        },
-        {
-          id: 'user-adm-01',
-          name: 'ThS. Lê Hoàng Long',
-          username: 'admin',
-          password: 'password123',
-          email: 'hotrovle@hcmue.edu.vn',
-          role: 'admin',
-          code: 'ADMIN-001',
-          department: 'Trung tâm CNTT & Đào tạo Trực tuyến',
-          classOrPosition: 'Quản trị viên Hệ thống Cổng Đào tạo VLE',
-          phone: '028 3835 2020',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80'
-        }
-      ],
-      courses: [
-        {
-          id: 'course-tlh102',
-          code: 'TLH102',
-          name: 'Tâm lý học Sư phạm và Giáo dục học',
-          category: 'student_regular',
-          credits: 3,
-          semester: 'Học kỳ 1',
-          academicYear: '2026 - 2027',
-          instructor: {
-            id: 'user-gv-01',
-            name: 'TS. Trần Minh Khoa',
-            title: 'Giảng viên chính - Khoa Tâm lý GD',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-            email: 'khoatm@hcmue.edu.vn'
-          },
-          thumbnail: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
-          progress: 50,
-          totalActivities: 4,
-          completedActivities: 2,
-          description: 'Học phần trang bị cho sinh viên ngành Sư phạm các quy luật tâm lý của hoạt động dạy và học, bản chất của quá trình hình thành nhân cách học sinh.',
-          targetAudience: 'Sinh viên năm 2 các ngành Sư phạm trực thuộc ĐH Sư phạm TP.HCM.',
-          syllabus: [
-            'Chương 1: Những vấn đề chung của Tâm lý học Sư phạm',
-            'Chương 2: Kỹ năng giao tiếp và ứng xử sư phạm'
-          ],
-          announcements: [
-            {
-              id: 'anc-1',
-              title: 'Lịch kiểm tra trực tuyến Chuyên đề 1',
-              content: 'Chào các bạn sinh viên, bài trắc nghiệm Chuyên đề 1 sẽ mở vào thứ 6 tuần này.',
-              author: 'TS. Trần Minh Khoa',
-              authorRole: 'Giảng viên phụ trách',
-              createdAt: '11/11/2026 09:00',
-              isImportant: true
-            }
-          ],
-          enrolledStudentsCount: 120,
-          certificateEligible: true,
-          modules: [
-            {
-              id: 'mod-1',
-              courseId: 'course-tlh102',
-              title: 'Chuyên đề 1: Tổng quan Tâm lý học Sư phạm',
-              order: 1,
-              description: 'Nghiên cứu các đặc điểm tâm sinh lý học sinh THPT',
-              activities: [
-                {
-                  id: 'act-1',
-                  moduleId: 'mod-1',
-                  title: 'Video bài giảng: Đặc điểm tâm sinh lý tuổi dậy thì',
-                  type: 'video',
-                  durationMinutes: 20,
-                  isCompleted: true,
-                  isRequired: true,
-                  videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-                },
-                {
-                  id: 'act-2',
-                  moduleId: 'mod-1',
-                  title: 'Tài liệu: Giáo trình Tâm lý học Sư phạm chương 1',
-                  type: 'document',
-                  durationMinutes: 25,
-                  isCompleted: true,
-                  isRequired: true,
-                  fileSize: '3.8 MB',
-                  totalPages: 32
-                },
-                {
-                  id: 'act-3',
-                  moduleId: 'mod-1',
-                  title: 'Bài tập: Xây dựng giải pháp xử lý xung đột lớp học',
-                  type: 'assignment',
-                  durationMinutes: 45,
-                  isCompleted: false,
-                  isRequired: true,
-                  dueDate: '20/11/2026 - 23:59',
-                  assignmentPrompt: 'Trình bày kế hoạch 4 bước giải quyết xung đột giữa 2 học sinh THPT trong giờ học.'
-                },
-                {
-                  id: 'act-4',
-                  moduleId: 'mod-1',
-                  title: 'Kiểm tra trắc nghiệm Chuyên đề 1 (15 phút)',
-                  type: 'quiz',
-                  durationMinutes: 15,
-                  isCompleted: false,
-                  isRequired: true,
-                  timeLimitMinutes: 15,
-                  passScore: 5.0,
-                  quizQuestions: [
-                    {
-                      id: 'q1',
-                      question: 'Động lực học tập của học sinh trung học phổ thông chủ yếu xuất phát từ yếu tố nào?',
-                      options: [
-                        'Sự áp đặt nghiêm khắc từ cha mẹ',
-                        'Ý thức nghề nghiệp tương lai và nhu cầu khẳng định bản thân',
-                        'Chỉ nhằm đối phó với thi cử',
-                        'Phần thưởng vật chất ngắn hạn'
-                      ],
-                      correctAnswer: 1,
-                      explanation: 'Ở lứa tuổi thanh niên học sinh, định hướng nghề nghiệp và tự ý thức là động lực nội tại chủ đạo.'
-                    },
-                    {
-                      id: 'q2',
-                      question: 'Theo thuyết Vùng phát triển gần nhất (ZPD) của Vygotsky, vai trò của người dạy là gì?',
-                      options: [
-                        'Yêu cầu học sinh chép lại bài làm mẫu',
-                        'Để học sinh tự làm hoàn toàn không can thiệp',
-                        'Cung cấp giàn giáo (scaffolding) hỗ trợ học sinh vươn tới mức phát triển tiềm năng',
-                        'Chỉ chấm điểm bài thi cuối kỳ'
-                      ],
-                      correctAnswer: 2,
-                      explanation: 'Vygotsky chỉ ra vai trò nâng đỡ (scaffolding) của người thầy giúp học sinh đạt đến mức tiềm năng.'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      notifications: [
-        {
-          id: 'notif-1',
-          title: 'Chào mừng bạn đến với VLE HCMUE',
-          message: 'Hệ thống Đào tạo Trực tuyến Trường Đại học Sư phạm TP.HCM đã sẵn sàng phục vụ học tập.',
-          type: 'system',
-          createdAt: 'Vừa xong',
-          read: false
-        }
-      ],
+    const emptyDb = {
+      users: [],
+      courses: [],
+      notifications: [],
       certificates: [],
       forumTopics: []
     };
-    fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
+    fs.writeFileSync(DB_FILE, JSON.stringify(emptyDb, null, 2), 'utf-8');
   }
 }
 
@@ -357,7 +193,7 @@ app.post('/api/auth/login', async (req, res) => {
         return res.json({ token, user: userObj });
       }
 
-      // Dynamic account creation
+      // Tạo tài khoản mới trực tiếp từ dữ liệu người dùng nhập
       const role = username?.toLowerCase().includes('admin') ? 'admin' 
                  : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
                  : 'student';
@@ -389,9 +225,8 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Local JSON DB Fallback
   const db = readDb();
-  const user = db.users.find(u => 
-    (u.username === username || u.code === username || u.email === username) &&
-    (!password || u.password === password || password === '123456' || password === 'password123')
+  let user = db.users.find(u => 
+    (u.username === username || u.code === username || u.email === username)
   );
 
   if (user) {
@@ -427,29 +262,46 @@ app.post('/api/auth/login', async (req, res) => {
 
 // 2. Auth: Get current user profile
 app.get('/api/auth/me', async (req, res) => {
+  const authHeader = req.headers.authorization;
   if (isMongoConnected) {
     try {
+      if (authHeader && authHeader.includes('jwt_token_')) {
+        const parts = authHeader.split('_');
+        const userId = parts[2];
+        const user = await UserModel.findOne({ id: userId });
+        if (user) {
+          const u = user.toObject();
+          delete u.password;
+          return res.json(u);
+        }
+      }
       const user = await UserModel.findOne();
       if (user) {
         const u = user.toObject();
         delete u.password;
         return res.json(u);
       }
+      return res.status(401).json({ message: 'Chưa đăng nhập' });
     } catch (err) {}
   }
 
   const db = readDb();
-  const { password, ...defaultUser } = db.users[0] || {};
-  res.json(defaultUser);
+  if (db.users && db.users.length > 0) {
+    const { password, ...defaultUser } = db.users[0];
+    return res.json(defaultUser);
+  }
+  return res.status(401).json({ message: 'Chưa đăng nhập' });
 });
 
-// 3. Courses: Get All
+// 3. Courses: Get All (Không có dữ liệu ảo)
 app.get('/api/courses', async (req, res) => {
   if (isMongoConnected) {
     try {
       const courses = await CourseModel.find();
-      return res.json(courses);
-    } catch (err) {}
+      return res.json(courses || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
 
   const db = readDb();
@@ -471,11 +323,11 @@ app.get('/api/courses/:id', async (req, res) => {
   res.json(course);
 });
 
-// 5. Courses: Create new Course (Lecturer / Admin)
+// 5. Courses: Create new Course (Thêm khóa học thật từ API)
 app.post('/api/courses', async (req, res) => {
   const newCourseData = {
     id: `course-${Date.now()}`,
-    code: req.body.code || 'HP-MOI',
+    code: req.body.code || 'HP-NEW',
     name: req.body.name || 'Học phần mới',
     category: req.body.category || 'student_regular',
     credits: req.body.credits || 3,
@@ -493,10 +345,10 @@ app.post('/api/courses', async (req, res) => {
     completedActivities: 0,
     description: req.body.description || '',
     targetAudience: req.body.targetAudience || 'Sinh viên Sư phạm',
-    syllabus: req.body.syllabus || ['Chuyên đề 1', 'Chuyên đề 2'],
-    modules: [],
-    announcements: [],
-    enrolledStudentsCount: 1,
+    syllabus: req.body.syllabus || [],
+    modules: req.body.modules || [],
+    announcements: req.body.announcements || [],
+    enrolledStudentsCount: 0,
     certificateEligible: true,
     ...req.body
   };
@@ -509,6 +361,7 @@ app.post('/api/courses', async (req, res) => {
   }
 
   const db = readDb();
+  db.courses = db.courses || [];
   db.courses.push(newCourseData);
   writeDb(db);
   res.status(201).json(newCourseData);
@@ -608,7 +461,7 @@ app.post('/api/courses/:id/activities/:actId/submit', async (req, res) => {
   res.json({ success: true, submission: subData });
 });
 
-// 8. Activities: Grade Assignment (Lecturer)
+// 8. Activities: Grade Assignment
 app.post('/api/courses/:id/activities/:actId/grade', async (req, res) => {
   const { grade, feedback } = req.body;
 
@@ -714,8 +567,10 @@ app.get('/api/certificates', async (req, res) => {
   if (isMongoConnected) {
     try {
       const certs = await CertModel.find();
-      return res.json(certs);
-    } catch (err) {}
+      return res.json(certs || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
   const db = readDb();
   res.json(db.certificates || []);
@@ -726,8 +581,10 @@ app.get('/api/notifications', async (req, res) => {
   if (isMongoConnected) {
     try {
       const notifs = await NotifModel.find();
-      return res.json(notifs);
-    } catch (err) {}
+      return res.json(notifs || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
   const db = readDb();
   res.json(db.notifications || []);
@@ -753,12 +610,14 @@ app.get('/api/courses/:id/forum', async (req, res) => {
   if (isMongoConnected) {
     try {
       const topics = await ForumModel.find({ courseId: req.params.id });
-      return res.json(topics);
-    } catch (err) {}
+      return res.json(topics || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
   const db = readDb();
   const topics = (db.forumTopics || []).filter(t => t.courseId === req.params.id);
-  res.json(topics);
+  res.json(topics || []);
 });
 
 // 13. Users (Admin)
@@ -766,12 +625,14 @@ app.get('/api/users', async (req, res) => {
   if (isMongoConnected) {
     try {
       const users = await UserModel.find({}, { password: 0 });
-      return res.json(users);
-    } catch (err) {}
+      return res.json(users || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
   const db = readDb();
   const safeUsers = (db.users || []).map(({ password, ...u }) => u);
-  res.json(safeUsers);
+  res.json(safeUsers || []);
 });
 
 // 14. Students in Course
@@ -783,11 +644,13 @@ app.get('/api/courses/:id/students', async (req, res) => {
         code: s.code,
         name: s.name,
         class: s.classOrPosition || 'Sư phạm K48',
-        progress: 50,
+        progress: 0,
         status: 'Đang học'
       }));
-      return res.json(students);
-    } catch (err) {}
+      return res.json(students || []);
+    } catch (err) {
+      return res.json([]);
+    }
   }
   const db = readDb();
   const students = (db.users || [])
@@ -796,10 +659,10 @@ app.get('/api/courses/:id/students', async (req, res) => {
       code: s.code,
       name: s.name,
       class: s.classOrPosition || 'Sư phạm K48',
-      progress: 50,
+      progress: 0,
       status: 'Đang học'
     }));
-  res.json(students);
+  res.json(students || []);
 });
 
 // ====================== SERVE PRODUCTION FRONTEND ======================
@@ -826,5 +689,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`👉 http://localhost:${PORT}`);
   console.log(`API Base URL: http://localhost:${PORT}/api`);
   console.log(`Database Mode: ${isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB'}`);
+  console.log(`Dữ liệu: HOÀN TOÀN TRỐNG (Không có dữ liệu ảo)`);
   console.log(`======================================================\n`);
 });
