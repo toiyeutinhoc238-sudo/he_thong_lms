@@ -38,6 +38,7 @@ interface AppContextType {
   addCourseActivity: (courseId: string, moduleId: string, newAct: Partial<Activity>) => void;
   updateCourseActivity: (courseId: string, activityId: string, data: Partial<Activity>) => void;
   deleteCourseActivity: (courseId: string, activityId: string) => void;
+  updateCourse: (courseId: string, data: Partial<Course>) => Promise<void>;
   deleteCourse: (courseId: string) => void;
   addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => void;
   isLoginModalOpen: boolean;
@@ -192,7 +193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return {
         ...prev,
         role,
-        classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên'
+        classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giáo viên' : 'Học viên'
       };
     });
 
@@ -473,6 +474,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.activities.delete(courseId, activityId).catch(() => {});
   };
 
+  const updateCourse = async (courseId: string, data: Partial<Course>) => {
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      return {
+        ...c,
+        ...data,
+        instructor: data.instructor ? { ...c.instructor, ...data.instructor } : c.instructor
+      };
+    }));
+    try {
+      await api.courses.update(courseId, data);
+    } catch (err) {
+      console.warn('API updateCourse failed or offline, updated in local cache', err);
+    }
+  };
+
   const deleteCourse = (courseId: string) => {
     setCourses(prev => prev.filter(c => c.id !== courseId));
     if (activeCourseId === courseId) {
@@ -488,7 +505,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title,
       content,
       author: currentUser.name,
-      authorRole: currentUser.role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
+      authorRole: currentUser.role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
       createdAt: new Date().toLocaleString('vi-VN'),
       isImportant
     };
@@ -587,6 +604,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCourseActivity,
         updateCourseActivity,
         deleteCourseActivity,
+        updateCourse,
         deleteCourse,
         addAnnouncement,
         isLoginModalOpen,

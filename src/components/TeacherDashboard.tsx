@@ -114,13 +114,13 @@ export const TeacherDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
-              Studio Giảng Viên • LMS Nhóm 2
+              Không gian Giáo Viên • LMS Nhóm 2
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold">
               Không Gian Quản Lý & Điều Phối Học Phần
             </h1>
             <p className="text-amber-100 text-xs sm:text-sm">
-              Giảng viên: <strong>{currentUser.name}</strong> • {currentUser.department}
+              Giáo viên: <strong>{currentUser.name}</strong> • {currentUser.department}
             </p>
           </div>
 

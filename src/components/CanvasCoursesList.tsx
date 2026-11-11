@@ -15,14 +15,18 @@ import {
   Sparkles,
   X
 } from 'lucide-react';
+import { EditCourseModal } from './EditCourseModal';
 
 export const CanvasCoursesList: React.FC = () => {
-  const { courses, setCourses, navigateToCourse, currentUser, activeRole, deleteCourse } = useApp();
+  const { courses, setCourses, navigateToCourse, currentUser, activeRole, deleteCourse, updateCourse } = useApp();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+
+  const canManage = activeRole === 'admin' || currentUser?.role === 'admin' || currentUser?.email === 'phanphiphu04@gmail.com';
 
   // Form tạo khóa học mới chuẩn phổ thông Lớp 1 - 12
   const [formData, setFormData] = useState<{
@@ -273,19 +277,31 @@ export const CanvasCoursesList: React.FC = () => {
                 <span className="text-xs font-bold text-[#0374b5] group-hover:underline flex items-center gap-1">
                   Vào học ngay →
                 </span>
-                {activeRole === 'admin' && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`Bạn có chắc muốn xóa khóa học "${course.name}"?`)) {
-                        deleteCourse(course.id);
-                      }
-                    }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                    title="Xóa khóa học"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                {canManage && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingCourse(course);
+                      }}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-[#0374b5] hover:bg-sky-50 transition-colors"
+                      title="Sửa thông tin khóa học"
+                    >
+                      <Edit3 className="w-4 h-4 text-[#0374b5]" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Bạn có chắc muốn xóa khóa học "${course.name}"?`)) {
+                          deleteCourse(course.id);
+                        }
+                      }}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      title="Xóa khóa học"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -466,6 +482,15 @@ export const CanvasCoursesList: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Modal Chỉnh Sửa Khóa Học */}
+      <EditCourseModal
+        isOpen={!!editingCourse}
+        course={editingCourse}
+        onClose={() => setEditingCourse(null)}
+        onSave={async (courseId, data) => {
+          await updateCourse(courseId, data);
+        }}
+      />
     </div>
   );
 };

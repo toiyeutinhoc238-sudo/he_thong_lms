@@ -220,7 +220,7 @@ app.post('/api/auth/login', async (req, res) => {
         role,
         code: username,
         department: 'LMS Nhóm 2',
-        classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
+        classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
       });
 
@@ -261,7 +261,7 @@ app.post('/api/auth/login', async (req, res) => {
     role,
     code: username,
     department: 'LMS Nhóm 2',
-    classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
+    classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
   };
 
@@ -537,8 +537,8 @@ app.post('/api/courses', async (req, res) => {
     semester: req.body.semester || 'Học kỳ 1',
     academicYear: '2026 - 2027',
     instructor: req.body.instructor || {
-      name: 'Giảng viên',
-      title: 'Giảng viên phụ trách',
+      name: 'Giáo viên',
+      title: 'Giáo viên phụ trách',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
       email: 'giangvien@lms2.edu.vn'
     },

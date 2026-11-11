@@ -74,12 +74,16 @@ export interface Activity {
   // Assignment specific
   dueDate?: string;
   assignmentPrompt?: string;
+  starterCode?: string;
+  programmingLanguage?: string;
+  submissionType?: 'file' | 'online_text' | 'code' | 'any';
   submission?: {
     fileUrl?: string;
     fileName?: string;
     fileSize?: string;
     submittedAt?: string;
     textSubmission?: string;
+    codeSubmission?: string;
     grade?: number;
     feedback?: string;
     status: 'not_submitted' | 'submitted' | 'graded';

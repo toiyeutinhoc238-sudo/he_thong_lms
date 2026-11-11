@@ -11,6 +11,7 @@ import {
   BookOpen, 
   Plus, 
   Trash2, 
+  Edit3,
   Search, 
   ExternalLink,
   Sparkles,
@@ -18,11 +19,13 @@ import {
   GraduationCap
 } from 'lucide-react';
 import api from '../services/api';
+import { EditCourseModal } from './EditCourseModal';
 
 export const AdminPanel: React.FC = () => {
-  const { currentUser, courses, setCourses, navigateToCourse, setCurrentView, deleteCourse } = useApp();
+  const { currentUser, courses, setCourses, navigateToCourse, setCurrentView, deleteCourse, updateCourse } = useApp();
 
   const [activeTab, setActiveTab] = useState<'courses' | 'users' | 'settings'>('courses');
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [searchUser, setSearchUser] = useState('');
@@ -247,17 +250,26 @@ export const AdminPanel: React.FC = () => {
                     >
                       <span>Vào quản lý nội dung →</span>
                     </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`Xác nhận xóa khóa học "${course.name}"?`)) {
-                          deleteCourse(course.id);
-                        }
-                      }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                      title="Xóa khóa học"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingCourse(course)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-[#0374b5] hover:bg-sky-50"
+                        title="Chỉnh sửa khóa học"
+                      >
+                        <Edit3 className="w-4 h-4 text-[#0374b5]" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(`Xác nhận xóa khóa học "${course.name}"?`)) {
+                            deleteCourse(course.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                        title="Xóa khóa học"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -381,6 +393,15 @@ export const AdminPanel: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Modal Chỉnh Sửa Khóa Học */}
+      <EditCourseModal
+        isOpen={!!editingCourse}
+        course={editingCourse}
+        onClose={() => setEditingCourse(null)}
+        onSave={async (courseId, data) => {
+          await updateCourse(courseId, data);
+        }}
+      />
     </div>
   );
 };

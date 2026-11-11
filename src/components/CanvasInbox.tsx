@@ -65,7 +65,7 @@ export const CanvasInbox: React.FC = () => {
 
   // New message form
   const [composeData, setComposeData] = useState({
-    recipient: 'Giảng viên phụ trách',
+    recipient: 'Giáo viên phụ trách',
     subject: '',
     content: ''
   });
@@ -143,7 +143,7 @@ export const CanvasInbox: React.FC = () => {
     try { localStorage.setItem('lms2_inbox_threads', JSON.stringify(updated)); } catch {}
 
     setComposeData({
-      recipient: 'Giảng viên phụ trách',
+      recipient: 'Giáo viên phụ trách',
       subject: '',
       content: ''
     });
@@ -163,7 +163,7 @@ export const CanvasInbox: React.FC = () => {
               Hộp Thư LMS Nhóm 2
             </h1>
             <p className="text-xs text-slate-500">
-              Trao đổi học tập với Giảng viên & Ban Quản trị
+              Trao đổi học tập với Giáo viên & Ban Quản trị
             </p>
           </div>
         </div>
@@ -377,7 +377,7 @@ export const CanvasInbox: React.FC = () => {
                   onChange={(e) => setComposeData({ ...composeData, recipient: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0374b5] focus:bg-white"
                 >
-                  <option value="Giảng viên phụ trách">Giảng viên phụ trách môn học</option>
+                  <option value="Giáo viên phụ trách">Giáo viên phụ trách môn học</option>
                   <option value="Ban Quản trị LMS Nhóm 2">Ban Quản trị LMS Nhóm 2</option>
                   <option value="Cố vấn học tập">Cố vấn học tập & Giáo vụ</option>
                 </select>

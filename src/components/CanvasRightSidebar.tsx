@@ -91,7 +91,7 @@ export const CanvasRightSidebar: React.FC<CanvasRightSidebarProps> = ({ onNaviga
       {/* Section: Phản hồi gần đây (Recent feedback) */}
       <div className="space-y-2 pt-2 border-t border-slate-200">
         <h3 className="text-sm font-bold text-slate-900">Phản hồi gần đây</h3>
-        <p className="text-xs text-slate-500 italic">Chưa có phản hồi mới từ giảng viên</p>
+        <p className="text-xs text-slate-500 italic">Chưa có phản hồi mới từ giáo viên</p>
       </div>
     </aside>
   );

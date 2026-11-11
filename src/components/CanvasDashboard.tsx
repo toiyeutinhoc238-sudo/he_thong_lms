@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { Course } from '../types';
 import { 
   BookOpen, 
   Plus, 
@@ -9,20 +10,32 @@ import {
   Folder, 
   MoreVertical,
   GraduationCap,
-  Sparkles
+  Sparkles,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import api from '../services/api';
+import { EditCourseModal } from './EditCourseModal';
 
 export const CanvasDashboard: React.FC = () => {
-  const { courses, setCourses, navigateToCourse, activeRole } = useApp();
+  const { courses, setCourses, navigateToCourse, activeRole, deleteCourse, updateCourse } = useApp();
 
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [dropdownCourseId, setDropdownCourseId] = useState<string | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+
   const [courseCode, setCourseCode] = useState('');
   const [courseName, setCourseName] = useState('');
   const [courseCategory, setCourseCategory] = useState<'Chuyên đề AI' | 'Khoa học máy tính' | 'Tin học ứng dụng'>('Chuyên đề AI');
   const [courseGradeLevel, setCourseGradeLevel] = useState<string>('Lớp 10');
   const [courseDesc, setCourseDesc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const handleGlobalClick = () => setDropdownCourseId(null);
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   const colors = [
     'from-sky-600 to-blue-700',
@@ -137,14 +150,56 @@ export const CanvasDashboard: React.FC = () => {
                   <span className="px-2 py-0.5 rounded bg-black/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-2xs">
                     {course.code || 'LMS'}
                   </span>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="p-1 rounded-full text-white/80 hover:text-white hover:bg-black/20 transition-colors"
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                  
+                  {/* 3-dots Action Menu */}
+                  <div className="relative">
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDropdownCourseId(prev => prev === course.id ? null : course.id);
+                      }}
+                      className="p-1 rounded-full text-white/80 hover:text-white hover:bg-black/20 transition-colors"
+                      title="Tùy chọn khóa học"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+
+                    {dropdownCourseId === course.id && (
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute right-0 top-7 z-30 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 text-xs text-slate-700 animate-in fade-in zoom-in-95"
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingCourse(course);
+                            setDropdownCourseId(null);
+                          }}
+                          className="w-full px-3.5 py-2 text-left hover:bg-sky-50 hover:text-[#0374b5] flex items-center gap-2 font-bold transition-colors"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-[#0374b5]" />
+                          <span>Chỉnh sửa khóa học</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDropdownCourseId(null);
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa khóa học "${course.name}" (${course.code}) cùng toàn bộ bài học bên trong?`)) {
+                              deleteCourse(course.id);
+                            }
+                          }}
+                          className="w-full px-3.5 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 font-bold transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Xóa khóa học</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Card Body */}
@@ -305,6 +360,15 @@ export const CanvasDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Edit Course Modal */}
+      <EditCourseModal
+        isOpen={!!editingCourse}
+        course={editingCourse}
+        onClose={() => setEditingCourse(null)}
+        onSave={async (courseId, data) => {
+          await updateCourse(courseId, data);
+        }}
+      />
     </div>
   );
 };

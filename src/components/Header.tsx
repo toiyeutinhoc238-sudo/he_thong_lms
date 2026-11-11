@@ -138,7 +138,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input 
               type="text" 
-              placeholder="Tìm kiếm môn học, bài giảng, giảng viên..."
+              placeholder="Tìm kiếm môn học, bài giảng, giáo viên..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-hcmue-500 focus:ring-2 focus:ring-hcmue-100 transition-all text-slate-700 placeholder:text-slate-400"
@@ -260,7 +260,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                   <p className="text-xs text-slate-500 font-medium">Đang đăng nhập với vai trò</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-hcmue-100 text-hcmue-800">
-                      {activeRole === 'student' ? 'Học viên chính quy' : activeRole === 'lecturer' ? 'Giảng viên' : 'Quản trị viên'}
+                      {activeRole === 'student' ? 'Học viên' : activeRole === 'lecturer' ? 'Giáo viên' : 'Quản trị viên'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 mt-1 truncate">{currentUser.department}</p>

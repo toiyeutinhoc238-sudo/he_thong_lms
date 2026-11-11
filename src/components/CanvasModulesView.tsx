@@ -20,7 +20,8 @@ import {
   Video,
   Clock,
   Sparkles,
-  Award
+  Award,
+  Code2
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion } from '../types';
 
@@ -63,11 +64,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   const [actDueDate, setActDueDate] = useState('');
   const [actMaxScore, setActMaxScore] = useState(10);
   const [actPrompt, setActPrompt] = useState('');
+  const [actStarterCode, setActStarterCode] = useState('');
+  const [actProgLang, setActProgLang] = useState('Python');
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([
     {
       id: 'q1',
-      question: 'Câu hỏi kiểm tra nhận thức 1?',
-      options: ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+      question: 'Trí tuệ nhân tạo (AI) học hỏi từ yếu tố nào để đưa ra dự đoán?',
+      options: ['Dữ liệu huấn luyện', 'Bộ nhớ USB', 'Màn hình máy tính', 'Bàn phím'],
       correctAnswer: 0
     }
   ]);
@@ -147,12 +150,19 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     const newActivityData: Partial<Activity> = {
       title: actTitle.trim(),
       type: actType,
-      description: actDesc.trim() || (actType === 'video' ? 'Video bài giảng' : actType === 'document' ? 'Xem trang' : actType === 'assignment' ? 'Nộp bài tập' : 'Kiểm tra trắc nghiệm'),
+      description: actDesc.trim() || (
+        actType === 'video' ? 'Video bài giảng' : 
+        actType === 'document' ? 'Xem trang' : 
+        actType === 'assignment' ? (actProgLang ? `Bài tập lập trình ${actProgLang}` : 'Bài tập thực hành') : 
+        'Kiểm tra trắc nghiệm'
+      ),
       videoUrl: actVideoUrl.trim(),
       fileUrl: actFileUrl.trim(),
       dueDate: actDueDate.trim(),
       maxScore: Number(actMaxScore) || 10,
       assignmentPrompt: actPrompt.trim(),
+      starterCode: actStarterCode.trim() || undefined,
+      programmingLanguage: actType === 'assignment' ? actProgLang : undefined,
       quizQuestions: actType === 'quiz' ? quizQuestions : undefined,
       isRequired: true,
       durationMinutes: 15
@@ -167,6 +177,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     setActFileUrl('');
     setActDueDate('');
     setActPrompt('');
+    setActStarterCode('');
     setIsAddActivityOpen(false);
   };
 
@@ -182,7 +193,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
       fileUrl: editingActivity.fileUrl,
       dueDate: editingActivity.dueDate,
       maxScore: editingActivity.maxScore,
-      assignmentPrompt: editingActivity.assignmentPrompt
+      assignmentPrompt: editingActivity.assignmentPrompt,
+      starterCode: editingActivity.starterCode,
+      programmingLanguage: editingActivity.programmingLanguage,
+      quizQuestions: editingActivity.quizQuestions
     });
 
     setEditingActivity(null);
@@ -706,31 +720,24 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
               {/* Trường riêng cho BÀI TẬP */}
               {actType === 'assignment' && (
                 <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-200/60 space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Yêu cầu / Đề bài bài tập
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Hướng dẫn học viên thực hiện và nộp bài..."
-                      value={actPrompt}
-                      onChange={(e) => setActPrompt(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                    />
-                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-purple-900 mb-1">
-                        Hạn nộp (Deadline)
+                        Dạng bài / Ngôn ngữ
                       </label>
-                      <input
-                        type="text"
-                        placeholder="Ví dụ: 31/12 lúc 23:59"
-                        value={actDueDate}
-                        onChange={(e) => setActDueDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
+                      <select
+                        value={actProgLang}
+                        onChange={(e) => setActProgLang(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                      >
+                        <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
+                        <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
+                        <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
+                        <option value="C++">⚡ Lập trình C++ / Pascal</option>
+                        <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án (.pdf, .docx, .zip)</option>
+                      </select>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-purple-900 mb-1">
                         Thang điểm
@@ -743,35 +750,146 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-purple-900 mb-1">
+                      Yêu cầu / Đề bài bài tập *
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Nhập đề bài, các yêu cầu cần học sinh hoàn thành và nộp..."
+                      value={actPrompt}
+                      onChange={(e) => setActPrompt(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-purple-900 mb-1">
+                      Khung mã nguồn mẫu / Starter Code (Tùy chọn)
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="# Gõ khung code mẫu hoặc gợi ý khởi tạo cho học sinh..."
+                      value={actStarterCode}
+                      onChange={(e) => setActStarterCode(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-purple-900 mb-1">
+                      Hạn nộp (Deadline)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: 30/11 lúc 23:59"
+                      value={actDueDate}
+                      onChange={(e) => setActDueDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
                 </div>
               )}
 
               {/* Trường riêng cho TRẮC NGHIỆM */}
               {actType === 'quiz' && (
-                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-2.5">
-                  <div className="flex items-center justify-between">
+                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3 max-h-96 overflow-y-auto">
+                  <div className="flex items-center justify-between sticky top-0 bg-amber-50/90 py-1 backdrop-blur-xs z-10">
                     <span className="text-xs font-bold text-amber-900">
-                      Câu hỏi trắc nghiệm ({quizQuestions.length} câu)
+                      Soạn câu hỏi trắc nghiệm ({quizQuestions.length} câu)
                     </span>
                     <button
                       type="button"
                       onClick={() => setQuizQuestions(prev => [
                         ...prev, 
                         {
-                          id: `q${prev.length + 1}`,
+                          id: `q${Date.now()}`,
                           question: `Câu hỏi ${prev.length + 1}?`,
                           options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
                           correctAnswer: 0
                         }
                       ])}
-                      className="px-2 py-0.5 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded text-[11px] font-bold"
+                      className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
                     >
                       + Thêm câu hỏi
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Bộ làm bài trắc nghiệm tự động chấm điểm cho học viên theo chuẩn Canvas.
-                  </p>
+
+                  {quizQuestions.map((q, qIdx) => (
+                    <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-xs text-amber-950">
+                          Câu {qIdx + 1}
+                        </span>
+                        {quizQuestions.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => setQuizQuestions(prev => prev.filter((_, idx) => idx !== qIdx))}
+                            className="text-rose-500 hover:text-rose-700 p-1"
+                            title="Xóa câu hỏi này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="Nội dung câu hỏi..."
+                        value={q.question}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, question: val } : item));
+                        }}
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                        required
+                      />
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
+                          4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
+                        </label>
+                        {q.options.map((opt, oIdx) => (
+                          <div key={oIdx} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name={`correct_add_${q.id || qIdx}`}
+                              checked={q.correctAnswer === oIdx}
+                              onChange={() => {
+                                setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, correctAnswer: oIdx } : item));
+                              }}
+                              className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
+                              title="Đánh dấu đáp án ĐÚNG"
+                            />
+                            <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
+                              {['A', 'B', 'C', 'D'][oIdx]}
+                            </span>
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setQuizQuestions(prev => prev.map((item, idx) => {
+                                  if (idx !== qIdx) return item;
+                                  const newOpts = [...item.options];
+                                  newOpts[oIdx] = val;
+                                  return { ...item, options: newOpts };
+                                }));
+                              }}
+                              className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
+                                q.correctAnswer === oIdx 
+                                  ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
+                                  : 'border-slate-300 bg-white text-slate-700'
+                              }`}
+                              placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -861,9 +979,40 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </div>
               )}
 
-              {/* Sửa Hạn nộp & Đề bài */}
+              {/* Sửa Hạn nộp & Đề bài BÀI TẬP */}
               {editingActivity.type === 'assignment' && (
-                <div className="space-y-3">
+                <div className="space-y-3 p-3 bg-purple-50/50 rounded-xl border border-purple-200">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-purple-900 mb-1">
+                        Dạng bài / Ngôn ngữ
+                      </label>
+                      <select
+                        value={editingActivity.programmingLanguage || 'Python'}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, programmingLanguage: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                      >
+                        <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
+                        <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
+                        <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
+                        <option value="C++">⚡ Lập trình C++ / Pascal</option>
+                        <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-purple-900 mb-1">
+                        Thang điểm
+                      </label>
+                      <input
+                        type="number"
+                        value={editingActivity.maxScore || 10}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, maxScore: Number(e.target.value) })}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-bold text-purple-900 mb-1">
                       Yêu cầu / Đề bài
@@ -872,9 +1021,22 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                       rows={3}
                       value={editingActivity.assignmentPrompt || ''}
                       onChange={(e) => setEditingActivity({ ...editingActivity, assignmentPrompt: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-purple-900 mb-1">
+                      Khung mã nguồn gợi ý / Starter Code (Tùy chọn)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={editingActivity.starterCode || ''}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, starterCode: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-xs font-bold text-purple-900 mb-1">
                       Hạn nộp
@@ -883,9 +1045,125 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                       type="text"
                       value={editingActivity.dueDate || ''}
                       onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Sửa TRẮC NGHIỆM */}
+              {editingActivity.type === 'quiz' && (
+                <div className="space-y-3 p-3 bg-amber-50/50 rounded-xl border border-amber-200 max-h-96 overflow-y-auto">
+                  <div className="flex items-center justify-between sticky top-0 bg-amber-50/95 py-1 z-10">
+                    <span className="text-xs font-bold text-amber-900">
+                      Soạn câu hỏi trắc nghiệm ({(editingActivity.quizQuestions || []).length} câu)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = editingActivity.quizQuestions || [];
+                        setEditingActivity({
+                          ...editingActivity,
+                          quizQuestions: [
+                            ...current,
+                            {
+                              id: `q${Date.now()}`,
+                              question: `Câu hỏi ${current.length + 1}?`,
+                              options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+                              correctAnswer: 0
+                            }
+                          ]
+                        });
+                      }}
+                      className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
+                    >
+                      + Thêm câu hỏi
+                    </button>
+                  </div>
+
+                  {(editingActivity.quizQuestions || []).map((q, qIdx) => (
+                    <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-xs text-amber-950">
+                          Câu {qIdx + 1}
+                        </span>
+                        {(editingActivity.quizQuestions || []).length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (editingActivity.quizQuestions || []).filter((_, idx) => idx !== qIdx);
+                              setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                            }}
+                            className="text-rose-500 hover:text-rose-700 p-1"
+                            title="Xóa câu hỏi này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="Nội dung câu hỏi..."
+                        value={q.question}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
+                            idx === qIdx ? { ...item, question: val } : item
+                          );
+                          setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                        }}
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                        required
+                      />
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
+                          4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
+                        </label>
+                        {q.options.map((opt, oIdx) => (
+                          <div key={oIdx} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name={`correct_edit_${q.id || qIdx}`}
+                              checked={q.correctAnswer === oIdx}
+                              onChange={() => {
+                                const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
+                                  idx === qIdx ? { ...item, correctAnswer: oIdx } : item
+                                );
+                                setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                              }}
+                              className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
+                              title="Đánh dấu đáp án ĐÚNG"
+                            />
+                            <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
+                              {['A', 'B', 'C', 'D'][oIdx]}
+                            </span>
+                            <input
+                              type="text"
+                              value={opt}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const updated = (editingActivity.quizQuestions || []).map((item, idx) => {
+                                  if (idx !== qIdx) return item;
+                                  const newOpts = [...item.options];
+                                  newOpts[oIdx] = val;
+                                  return { ...item, options: newOpts };
+                                });
+                                setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                              }}
+                              className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
+                                q.correctAnswer === oIdx 
+                                  ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
+                                  : 'border-slate-300 bg-white text-slate-700'
+                              }`}
+                              placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
