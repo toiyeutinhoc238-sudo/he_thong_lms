@@ -1,14 +1,5 @@
-/**
- * Reference REST API Server for VLE HCMUE
- * Chạy bằng Node.js thuần (Zero dependencies - không cần cài thêm npm package nào).
- * 
- * Lệnh chạy:
- *   node server.js
- * 
- * Server sẽ lắng nghe tại: http://localhost:5000/api
- */
-
-import http from 'http';
+import express from 'express';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,39 +9,190 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 5000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
-// Khởi tạo database mẫu nếu chưa tồn tại
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Khởi tạo Database mẫu đầy đủ nếu chưa có
 function initDb() {
   if (!fs.existsSync(DB_FILE)) {
-    const initialData = {
+    const defaultData = {
       users: [
         {
-          id: 'user-1',
+          id: 'user-sv-01',
           name: 'Nguyễn Văn An',
           username: '48.01.104.055',
+          password: 'password123',
           email: '4801104055@student.hcmue.edu.vn',
           role: 'student',
           code: '48.01.104.055',
           department: 'Khoa Công nghệ Thông tin',
-          classOrPosition: 'K48 Sư phạm Tin học',
+          classOrPosition: 'Lớp Sư phạm Tin học K48',
+          phone: '0903 123 456',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
         },
         {
-          id: 'user-2',
+          id: 'user-gv-01',
           name: 'TS. Trần Minh Khoa',
           username: 'khoatm@hcmue.edu.vn',
+          password: 'password123',
           email: 'khoatm@hcmue.edu.vn',
           role: 'lecturer',
           code: 'CB-HCMUE-2015',
           department: 'Khoa Tâm lý - Giáo dục',
-          classOrPosition: 'Giảng viên chính',
+          classOrPosition: 'Giảng viên chính / Trưởng bộ môn',
+          phone: '0912 345 678',
           avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
+        },
+        {
+          id: 'user-adm-01',
+          name: 'ThS. Lê Hoàng Long',
+          username: 'admin',
+          password: 'password123',
+          email: 'hotrovle@hcmue.edu.vn',
+          role: 'admin',
+          code: 'ADMIN-001',
+          department: 'Trung tâm CNTT & Đào tạo Trực tuyến',
+          classOrPosition: 'Quản trị viên Hệ thống Cổng Đào tạo VLE',
+          phone: '028 3835 2020',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80'
         }
       ],
-      courses: [],
-      notifications: [],
-      certificates: []
+      courses: [
+        {
+          id: 'course-tlh102',
+          code: 'TLH102',
+          name: 'Tâm lý học Sư phạm và Giáo dục học',
+          category: 'student_regular',
+          credits: 3,
+          semester: 'Học kỳ 1',
+          academicYear: '2026 - 2027',
+          instructor: {
+            id: 'user-gv-01',
+            name: 'TS. Trần Minh Khoa',
+            title: 'Giảng viên chính - Khoa Tâm lý GD',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+            email: 'khoatm@hcmue.edu.vn'
+          },
+          thumbnail: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+          progress: 50,
+          totalActivities: 4,
+          completedActivities: 2,
+          description: 'Học phần trang bị cho sinh viên ngành Sư phạm các quy luật tâm lý của hoạt động dạy và học, bản chất của quá trình hình thành nhân cách học sinh.',
+          targetAudience: 'Sinh viên năm 2 các ngành Sư phạm trực thuộc ĐH Sư phạm TP.HCM.',
+          syllabus: [
+            'Chương 1: Những vấn đề chung của Tâm lý học Sư phạm',
+            'Chương 2: Kỹ năng giao tiếp và ứng xử sư phạm'
+          ],
+          announcements: [
+            {
+              id: 'anc-1',
+              title: 'Lịch kiểm tra trực tuyến Chuyên đề 1',
+              content: 'Chào các bạn sinh viên, bài trắc nghiệm Chuyên đề 1 sẽ mở vào thứ 6 tuần này.',
+              author: 'TS. Trần Minh Khoa',
+              authorRole: 'Giảng viên phụ trách',
+              createdAt: '11/11/2026 09:00',
+              isImportant: true
+            }
+          ],
+          enrolledStudentsCount: 120,
+          certificateEligible: true,
+          modules: [
+            {
+              id: 'mod-1',
+              courseId: 'course-tlh102',
+              title: 'Chuyên đề 1: Tổng quan Tâm lý học Sư phạm',
+              order: 1,
+              description: 'Nghiên cứu các đặc điểm tâm sinh lý học sinh THPT',
+              activities: [
+                {
+                  id: 'act-1',
+                  moduleId: 'mod-1',
+                  title: 'Video bài giảng: Đặc điểm tâm sinh lý tuổi dậy thì',
+                  type: 'video',
+                  durationMinutes: 20,
+                  isCompleted: true,
+                  isRequired: true,
+                  videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+                },
+                {
+                  id: 'act-2',
+                  moduleId: 'mod-1',
+                  title: 'Tài liệu: Giáo trình Tâm lý học Sư phạm chương 1',
+                  type: 'document',
+                  durationMinutes: 25,
+                  isCompleted: true,
+                  isRequired: true,
+                  fileSize: '3.8 MB',
+                  totalPages: 32
+                },
+                {
+                  id: 'act-3',
+                  moduleId: 'mod-1',
+                  title: 'Bài tập: Xây dựng giải pháp xử lý xung đột lớp học',
+                  type: 'assignment',
+                  durationMinutes: 45,
+                  isCompleted: false,
+                  isRequired: true,
+                  dueDate: '20/11/2026 - 23:59',
+                  assignmentPrompt: 'Trình bày kế hoạch 4 bước giải quyết xung đột giữa 2 học sinh THPT trong giờ học.'
+                },
+                {
+                  id: 'act-4',
+                  moduleId: 'mod-1',
+                  title: 'Kiểm tra trắc nghiệm Chuyên đề 1 (15 phút)',
+                  type: 'quiz',
+                  durationMinutes: 15,
+                  isCompleted: false,
+                  isRequired: true,
+                  timeLimitMinutes: 15,
+                  passScore: 5.0,
+                  quizQuestions: [
+                    {
+                      id: 'q1',
+                      question: 'Động lực học tập của học sinh trung học phổ thông chủ yếu xuất phát từ yếu tố nào?',
+                      options: [
+                        'Sự áp đặt nghiêm khắc từ cha mẹ',
+                        'Ý thức nghề nghiệp tương lai và nhu cầu khẳng định bản thân',
+                        'Chỉ nhằm đối phó với thi cử',
+                        'Phần thưởng vật chất ngắn hạn'
+                      ],
+                      correctAnswer: 1,
+                      explanation: 'Ở lứa tuổi thanh niên học sinh, định hướng nghề nghiệp và tự ý thức là động lực nội tại chủ đạo.'
+                    },
+                    {
+                      id: 'q2',
+                      question: 'Theo thuyết Vùng phát triển gần nhất (ZPD) của Vygotsky, vai trò của người dạy là gì?',
+                      options: [
+                        'Yêu cầu học sinh chép lại bài làm mẫu',
+                        'Để học sinh tự làm hoàn toàn không can thiệp',
+                        'Cung cấp giàn giáo (scaffolding) hỗ trợ học sinh vươn tới mức phát triển tiềm năng',
+                        'Chỉ chấm điểm bài thi cuối kỳ'
+                      ],
+                      correctAnswer: 2,
+                      explanation: 'Vygotsky chỉ ra vai trò nâng đỡ (scaffolding) của người thầy giúp học sinh đạt đến mức tiềm năng.'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      notifications: [
+        {
+          id: 'notif-1',
+          title: 'Chào mừng bạn đến với VLE HCMUE',
+          message: 'Hệ thống Đào tạo Trực tuyến Trường Đại học Sư phạm TP.HCM đã sẵn sàng phục vụ học tập.',
+          type: 'system',
+          createdAt: 'Vừa xong',
+          read: false
+        }
+      ],
+      certificates: [],
+      forumTopics: []
     };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
+    fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
   }
 }
 
@@ -60,7 +202,7 @@ function readDb() {
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
   } catch {
-    return { users: [], courses: [], notifications: [], certificates: [] };
+    return { users: [], courses: [], notifications: [], certificates: [], forumTopics: [] };
   }
 }
 
@@ -68,155 +210,341 @@ function writeDb(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-function sendJson(res, statusCode, data) {
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-  });
-  res.end(JSON.stringify(data));
-}
+// ====================== API ROUTES ======================
 
-function parseBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => {
-      try {
-        resolve(body ? JSON.parse(body) : {});
-      } catch (e) {
-        resolve({});
-      }
-    });
-    req.on('error', reject);
-  });
-}
+// 1. Auth: Đăng nhập
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  const db = readDb();
 
-const server = http.createServer(async (req, res) => {
-  // CORS Preflight
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
-    return res.end();
+  // Tìm theo username hoặc MSSV hoặc email
+  const user = db.users.find(u => 
+    (u.username === username || u.code === username || u.email === username) &&
+    (!password || u.password === password || password === '123456' || password === 'password123')
+  );
+
+  if (user) {
+    const token = `jwt_token_${user.id}_${Date.now()}`;
+    const { password, ...safeUser } = user;
+    return res.json({ token, user: safeUser });
   }
 
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = url.pathname;
-  const method = req.method;
+  // Nếu người dùng gõ tên mới, tự tạo tài khoản dynamic
+  const role = username?.toLowerCase().includes('admin') ? 'admin' 
+             : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
+             : 'student';
 
-  console.log(`[API ${method}] ${pathname}`);
+  const newUser = {
+    id: `user-${Date.now()}`,
+    name: username,
+    username,
+    email: `${username}@hcmue.edu.vn`,
+    role,
+    code: username,
+    department: 'Trường ĐH Sư phạm TP.HCM',
+    classOrPosition: role === 'student' ? 'Sinh viên chính quy' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+  };
 
-  try {
-    // 1. Auth: Login
-    if (pathname === '/api/auth/login' && method === 'POST') {
-      const body = await parseBody(req);
-      const db = readDb();
-      const user = db.users.find(u => u.username === body.username) || {
-        id: `user-${Date.now()}`,
-        name: body.username || 'Người dùng VLE',
-        username: body.username,
-        email: `${body.username}@hcmue.edu.vn`,
-        role: body.username?.includes('gv') ? 'lecturer' : body.username?.includes('admin') ? 'admin' : 'student',
-        code: body.username,
-        department: 'Trường ĐH Sư phạm TP.HCM',
-        classOrPosition: 'Học viên trực tuyến',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-      };
+  db.users.push(newUser);
+  writeDb(db);
 
-      return sendJson(res, 200, {
-        token: `vle_token_${Date.now()}_${Buffer.from(user.username || 'user').toString('base64')}`,
-        user
-      });
-    }
-
-    // 2. Auth: Get Current Profile
-    if (pathname === '/api/auth/me' && method === 'GET') {
-      const db = readDb();
-      return sendJson(res, 200, db.users[0] || {});
-    }
-
-    // 3. Courses: Get All
-    if (pathname === '/api/courses' && method === 'GET') {
-      const db = readDb();
-      return sendJson(res, 200, db.courses);
-    }
-
-    // 4. Courses: Create New Course
-    if (pathname === '/api/courses' && method === 'POST') {
-      const body = await parseBody(req);
-      const db = readDb();
-      const newCourse = {
-        id: `course-${Date.now()}`,
-        code: body.code || 'HP-NEW',
-        name: body.name || 'Học phần mới',
-        category: body.category || 'student_regular',
-        credits: body.credits || 3,
-        semester: body.semester || 'Học kỳ 1',
-        academicYear: '2026 - 2027',
-        instructor: body.instructor || {
-          name: 'Giảng viên HCMUE',
-          title: 'Khoa Sư phạm',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
-        },
-        thumbnail: body.thumbnail || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
-        progress: 0,
-        totalActivities: 0,
-        completedActivities: 0,
-        description: body.description || '',
-        modules: [],
-        announcements: [],
-        ...body
-      };
-
-      db.courses.push(newCourse);
-      writeDb(db);
-      return sendJson(res, 201, newCourse);
-    }
-
-    // 5. Courses: Get By ID
-    const courseMatch = pathname.match(/^\/api\/courses\/([^\/]+)$/);
-    if (courseMatch && method === 'GET') {
-      const courseId = courseMatch[1];
-      const db = readDb();
-      const course = db.courses.find(c => c.id === courseId);
-      if (!course) return sendJson(res, 404, { message: 'Không tìm thấy khóa học' });
-      return sendJson(res, 200, course);
-    }
-
-    // 6. Notifications: Get All
-    if (pathname === '/api/notifications' && method === 'GET') {
-      const db = readDb();
-      return sendJson(res, 200, db.notifications);
-    }
-
-    // 7. Certificates: Get My Certificates
-    if (pathname === '/api/certificates' && method === 'GET') {
-      const db = readDb();
-      return sendJson(res, 200, db.certificates);
-    }
-
-    // 8. Users: Get All
-    if (pathname === '/api/users' && method === 'GET') {
-      const db = readDb();
-      return sendJson(res, 200, db.users);
-    }
-
-    // Fallback 404
-    return sendJson(res, 404, { message: `Endpoint ${method} ${pathname} chưa được hỗ trợ.` });
-  } catch (error) {
-    console.error('API Server Error:', error);
-    return sendJson(res, 500, { message: 'Lỗi máy chủ nội bộ', error: error.message });
-  }
+  return res.json({
+    token: `jwt_token_${newUser.id}_${Date.now()}`,
+    user: newUser
+  });
 });
 
-server.listen(PORT, () => {
+// 2. Auth: Get current user profile
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const db = readDb();
+  if (authHeader && authHeader.startsWith('Bearer jwt_token_user-')) {
+    const userId = authHeader.split('_')[2];
+    const user = db.users.find(u => u.id === userId);
+    if (user) {
+      const { password, ...safeUser } = user;
+      return res.json(safeUser);
+    }
+  }
+  // Default to student
+  const { password, ...defaultUser } = db.users[0] || {};
+  res.json(defaultUser);
+});
+
+// 3. Courses: Get All
+app.get('/api/courses', (req, res) => {
+  const db = readDb();
+  res.json(db.courses || []);
+});
+
+// 4. Courses: Get By ID
+app.get('/api/courses/:id', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+  res.json(course);
+});
+
+// 5. Courses: Create new Course (Lecturer / Admin)
+app.post('/api/courses', (req, res) => {
+  const db = readDb();
+  const newCourse = {
+    id: `course-${Date.now()}`,
+    code: req.body.code || 'HP-MOI',
+    name: req.body.name || 'Học phần mới',
+    category: req.body.category || 'student_regular',
+    credits: req.body.credits || 3,
+    semester: req.body.semester || 'Học kỳ 1',
+    academicYear: '2026 - 2027',
+    instructor: req.body.instructor || {
+      name: 'Giảng viên HCMUE',
+      title: 'Khoa Sư phạm',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      email: 'gv@hcmue.edu.vn'
+    },
+    thumbnail: req.body.thumbnail || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+    progress: 0,
+    totalActivities: 0,
+    completedActivities: 0,
+    description: req.body.description || '',
+    targetAudience: req.body.targetAudience || 'Sinh viên Sư phạm',
+    syllabus: req.body.syllabus || ['Chuyên đề 1', 'Chuyên đề 2'],
+    modules: [],
+    announcements: [],
+    enrolledStudentsCount: 1,
+    certificateEligible: true,
+    ...req.body
+  };
+
+  db.courses.push(newCourse);
+  writeDb(db);
+  res.status(201).json(newCourse);
+});
+
+// 6. Activities: Mark Completed
+app.post('/api/courses/:id/activities/:actId/complete', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+
+  let found = false;
+  let total = 0;
+  let completed = 0;
+
+  (course.modules || []).forEach(m => {
+    (m.activities || []).forEach(a => {
+      total++;
+      if (a.id === req.params.actId) {
+        a.isCompleted = true;
+        found = true;
+      }
+      if (a.isCompleted) completed++;
+    });
+  });
+
+  course.completedActivities = completed;
+  course.totalActivities = total;
+  course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  writeDb(db);
+  res.json({ success: true, progress: course.progress });
+});
+
+// 7. Activities: Submit Assignment
+app.post('/api/courses/:id/activities/:actId/submit', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+
+  const { fileName, textSubmission } = req.body;
+  let updatedSub = null;
+
+  (course.modules || []).forEach(m => {
+    (m.activities || []).forEach(a => {
+      if (a.id === req.params.actId) {
+        a.isCompleted = true;
+        a.submission = {
+          status: 'submitted',
+          fileName: fileName || 'BaiTap_Nop.pdf',
+          fileSize: '2.1 MB',
+          submittedAt: new Date().toLocaleString('vi-VN'),
+          textSubmission
+        };
+        updatedSub = a.submission;
+      }
+    });
+  });
+
+  writeDb(db);
+  res.json({ success: true, submission: updatedSub });
+});
+
+// 8. Activities: Grade Assignment (Lecturer)
+app.post('/api/courses/:id/activities/:actId/grade', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+
+  const { grade, feedback } = req.body;
+  (course.modules || []).forEach(m => {
+    (m.activities || []).forEach(a => {
+      if (a.id === req.params.actId && a.submission) {
+        a.score = Number(grade);
+        a.submission.status = 'graded';
+        a.submission.grade = Number(grade);
+        a.submission.feedback = feedback;
+      }
+    });
+  });
+
+  writeDb(db);
+  res.json({ success: true });
+});
+
+// 9. Activities: Submit Quiz
+app.post('/api/courses/:id/activities/:actId/quiz-submit', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+
+  const { answers, score, maxScore } = req.body;
+  const passed = score >= (maxScore * 0.5);
+
+  (course.modules || []).forEach(m => {
+    (m.activities || []).forEach(a => {
+      if (a.id === req.params.actId) {
+        a.isCompleted = passed;
+        a.score = score;
+        a.maxScore = maxScore;
+        a.quizResult = {
+          score,
+          maxScore,
+          passed,
+          submittedAt: new Date().toLocaleString('vi-VN'),
+          answers
+        };
+      }
+    });
+  });
+
+  writeDb(db);
+  res.json({ success: true, passed, score });
+});
+
+// 10. Activities: Add Activity (Lecturer)
+app.post('/api/courses/:id/modules/:modId/activities', (req, res) => {
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+
+  const module = (course.modules || []).find(m => m.id === req.params.modId);
+  if (!module) return res.status(404).json({ message: 'Không tìm thấy chuyên đề' });
+
+  const newActivity = {
+    id: `act-${Date.now()}`,
+    moduleId: req.params.modId,
+    title: req.body.title || 'Hoạt động mới',
+    type: req.body.type || 'video',
+    durationMinutes: Number(req.body.durationMinutes) || 20,
+    isCompleted: false,
+    isRequired: true,
+    description: req.body.description || '',
+    ...req.body
+  };
+
+  module.activities.push(newActivity);
+  course.totalActivities = (course.totalActivities || 0) + 1;
+  writeDb(db);
+
+  res.status(201).json(newActivity);
+});
+
+// 11. Grades
+app.get('/api/grades', (req, res) => {
+  const db = readDb();
+  res.json([]);
+});
+
+// 12. Certificates
+app.get('/api/certificates', (req, res) => {
+  const db = readDb();
+  res.json(db.certificates || []);
+});
+
+// 13. Notifications
+app.get('/api/notifications', (req, res) => {
+  const db = readDb();
+  res.json(db.notifications || []);
+});
+
+// 14. Forum
+app.get('/api/courses/:id/forum', (req, res) => {
+  const db = readDb();
+  const topics = (db.forumTopics || []).filter(t => t.courseId === req.params.id);
+  res.json(topics);
+});
+
+app.post('/api/courses/:id/forum', (req, res) => {
+  const db = readDb();
+  const newTopic = {
+    id: `topic-${Date.now()}`,
+    courseId: req.params.id,
+    title: req.body.title,
+    content: req.body.content,
+    author: {
+      name: 'Người dùng VLE',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      role: 'Sinh viên'
+    },
+    createdAt: 'Vừa xong',
+    replies: [],
+    views: 1,
+    likes: 0
+  };
+  db.forumTopics = db.forumTopics || [];
+  db.forumTopics.push(newTopic);
+  writeDb(db);
+  res.status(201).json(newTopic);
+});
+
+// 15. Users (Admin)
+app.get('/api/users', (req, res) => {
+  const db = readDb();
+  const safeUsers = (db.users || []).map(({ password, ...u }) => u);
+  res.json(safeUsers);
+});
+
+// 16. Students in Course
+app.get('/api/courses/:id/students', (req, res) => {
+  const db = readDb();
+  const students = (db.users || [])
+    .filter(u => u.role === 'student')
+    .map(s => ({
+      code: s.code,
+      name: s.name,
+      class: s.classOrPosition || 'Sư phạm K48',
+      progress: 50,
+      status: 'Đang học'
+    }));
+  res.json(students);
+});
+
+// ====================== SERVE PRODUCTION FRONTEND ======================
+const distPath = path.join(__dirname, 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// Start Server on all interfaces (0.0.0.0) for Render compatibility
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 VLE HCMUE Backend API Server is running!`);
-  console.log(`👉 http://localhost:${PORT}/api`);
+  console.log(`🚀 HCMUE VLE LMS Full-Stack Server is running!`);
+  console.log(`👉 http://localhost:${PORT}`);
+  console.log(`API Base URL: http://localhost:${PORT}/api`);
   console.log(`Database storage: ${DB_FILE}`);
   console.log(`======================================================\n`);
 });

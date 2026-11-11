@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+  backend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: node server.js
+    ports:
+      - "5000:5000"
+    restart: always
