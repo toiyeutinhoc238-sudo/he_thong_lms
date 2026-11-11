@@ -27,7 +27,7 @@ export const AdminPanel: React.FC = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [searchUser, setSearchUser] = useState('');
 
-  // Fetch users from API
+  // Fetch users from API (Chỉ lấy tài khoản thật từ hệ thống)
   useEffect(() => {
     setLoadingUsers(true);
     api.users.getAll()
@@ -35,132 +35,16 @@ export const AdminPanel: React.FC = () => {
         if (Array.isArray(res)) setUsersList(res);
       })
       .catch(() => {
-        setUsersList([
-          {
-            id: currentUser.id || 'admin',
-            code: currentUser.code || 'PHANPHIPHU04',
-            name: currentUser.name || 'Phú Phan',
-            email: currentUser.email || 'phanphiphu04@gmail.com',
-            department: currentUser.school || 'LMS Nhóm 2',
-            classOrPosition: 'Quản trị viên',
-            role: 'admin'
-          }
-        ]);
+        if (currentUser?.id && currentUser?.email) {
+          setUsersList([currentUser]);
+        } else {
+          setUsersList([]);
+        }
       })
       .finally(() => {
         setLoadingUsers(false);
       });
   }, [currentUser]);
-
-  // Tạo khóa học mẫu chuẩn với 1 click
-  const handleSeedSampleCourse = () => {
-    const courseId = `course-sample-${Date.now()}`;
-    const mod1Id = `mod-1-${Date.now()}`;
-    const mod2Id = `mod-2-${Date.now()}`;
-
-    const sampleCourse: Course = {
-      id: courseId,
-      name: 'Nhập Môn Trí Tuệ Nhân Tạo & Học Máy',
-      code: 'AI-101',
-      category: 'student_regular',
-      credits: 3,
-      semester: 'Học kỳ 1 - 2026',
-      academicYear: '2026-2027',
-      instructor: {
-        id: currentUser.id || 'admin',
-        name: currentUser.name || 'Quản trị viên',
-        email: currentUser.email || 'admin@lms2.edu.vn',
-        avatar: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        title: 'Giảng viên phụ trách'
-      },
-      thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-      progress: 0,
-      totalActivities: 5,
-      completedActivities: 0,
-      description: 'Chương trình đào tạo toàn diện về Trí tuệ Nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên và thực hành ứng dụng thực tế.',
-      targetAudience: 'Học viên',
-      syllabus: ['Tổng quan AI', 'Xử lý hình ảnh', 'Mô hình học máy', 'Đồ án cuối kỳ'],
-      modules: [
-        {
-          id: mod1Id,
-          courseId: courseId,
-          title: 'Bài 1: Nguồn gốc của AI và Quyền quyết định',
-          description: 'Tìm hiểu lịch sử và các khái niệm cốt lõi của Trí tuệ Nhân tạo',
-          order: 1,
-          activities: [
-            {
-              id: `act-1-${Date.now()}`,
-              moduleId: mod1Id,
-              title: 'Khảo sát nhận thức ban đầu: Trí tuệ nhân tạo (AI)',
-              type: 'document',
-              durationMinutes: 15,
-              isCompleted: false,
-              isRequired: true,
-              description: 'Tài liệu đọc hiểu và định hướng môn học'
-            },
-            {
-              id: `act-2-${Date.now()}`,
-              moduleId: mod1Id,
-              title: 'Video tương tác: Bản chất của AI & Ứng dụng thực tế',
-              type: 'video',
-              videoUrl: 'https://www.youtube.com/watch?v=2ePf9rue1Ao',
-              durationMinutes: 20,
-              isCompleted: false,
-              isRequired: true,
-              description: 'Bài giảng video tương tác trực quan'
-            },
-            {
-              id: `act-3-${Date.now()}`,
-              moduleId: mod1Id,
-              title: 'Bài tập 1: Phân tích các trường hợp ứng dụng AI quanh ta',
-              type: 'assignment',
-              durationMinutes: 45,
-              isCompleted: false,
-              isRequired: true,
-              maxScore: 10,
-              description: 'Nộp bài thu hoạch dạng văn bản hoặc tập tin'
-            }
-          ]
-        },
-        {
-          id: mod2Id,
-          courseId: courseId,
-          title: 'Bài 2: Lợi ích và Cách sử dụng công cụ AI phù hợp',
-          description: 'Kỹ năng khai thác Prompt Engineering và các mô hình ngôn ngữ lớn',
-          order: 2,
-          activities: [
-            {
-              id: `act-4-${Date.now()}`,
-              moduleId: mod2Id,
-              title: 'Tài liệu hướng dẫn: Nguyên tắc đạo đức khi ứng dụng AI',
-              type: 'document',
-              durationMinutes: 25,
-              isCompleted: false,
-              isRequired: true,
-              description: 'Quy tắc liêm chính học thuật và bảo vệ dữ liệu'
-            },
-            {
-              id: `act-5-${Date.now()}`,
-              moduleId: mod2Id,
-              title: 'Bài kiểm tra trắc nghiệm số 1: Kiến thức nền tảng AI',
-              type: 'quiz',
-              durationMinutes: 15,
-              isCompleted: false,
-              isRequired: true,
-              maxScore: 10,
-              description: 'Trắc nghiệm tự động chấm điểm'
-            }
-          ]
-        }
-      ],
-      announcements: [],
-      enrolledStudentsCount: 1,
-      certificateEligible: true
-    };
-
-    setCourses(prev => [sampleCourse, ...prev]);
-    alert('Đã khởi tạo thành công khóa học mẫu chuẩn "Nhập Môn Trí Tuệ Nhân Tạo & Học Máy" với đầy đủ 2 chương và 5 hoạt động bài tập, video, trắc nghiệm!');
-  };
 
   const filteredUsers = usersList.filter(u => {
     const q = searchUser.toLowerCase();
@@ -194,18 +78,10 @@ export const AdminPanel: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             onClick={() => setCurrentView('courses-list')}
-            className="px-4 py-2.5 rounded-2xl bg-white hover:bg-sky-50 text-[#0374b5] font-extrabold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+            className="px-5 py-2.5 rounded-2xl bg-white hover:bg-sky-50 text-[#0374b5] font-extrabold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Tạo Khóa Học</span>
-          </button>
-
-          <button
-            onClick={handleSeedSampleCourse}
-            className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5"
-          >
-            <Sparkles className="w-4 h-4 text-slate-900" />
-            <span>+ Khóa Học Mẫu</span>
+            <span>Tạo Khóa Học Mới</span>
           </button>
         </div>
       </div>
@@ -314,27 +190,22 @@ export const AdminPanel: React.FC = () => {
 
           {courses.length === 0 ? (
             <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-8 text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto text-2xl">
+              <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto text-2xl">
                 🎓
               </div>
               <div className="space-y-1">
                 <h3 className="font-extrabold text-slate-800">Chưa có khóa học nào trên hệ thống</h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Bạn có thể bấm nút tạo khóa học tùy chỉnh hoặc bấm nút bên dưới để tự động tạo một khóa học mẫu chuẩn Trí tuệ Nhân tạo với đầy đủ bài tập và video.
+                  Hiện chưa có khóa học nào. Quản trị viên có thể bấm nút bên dưới để tạo khóa học và xây dựng các bài học, bài tập.
                 </p>
               </div>
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={handleSeedSampleCourse}
-                  className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-extrabold shadow-sm transition-all"
-                >
-                  ⚡ Khởi tạo Khóa học mẫu ngay
-                </button>
+              <div className="flex items-center justify-center">
                 <button
                   onClick={() => setCurrentView('courses-list')}
-                  className="px-5 py-2.5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-extrabold shadow-sm transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-extrabold shadow-sm transition-all flex items-center gap-2"
                 >
-                  + Tự tạo Khóa học mới
+                  <Plus className="w-4 h-4" />
+                  <span>+ Tạo Khóa Học Mới</span>
                 </button>
               </div>
             </div>

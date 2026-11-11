@@ -458,7 +458,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH"
+                  placeholder="Ví dụ: BÀI 1: TỔNG QUAN HỌC PHẦN"
                   value={moduleTitle}
                   onChange={(e) => setModuleTitle(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"

@@ -74,39 +74,19 @@ export const CanvasCoursesList: React.FC = () => {
           id: currentUser?.id || 'admin',
           name: formData.instructorName || currentUser?.name || 'Giảng viên',
           email: currentUser?.email || 'admin@lms2.edu.vn',
-          avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          avatar: currentUser?.avatar || '',
           title: 'Cán bộ Giảng viên'
         },
         thumbnail: formData.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
         progress: 0,
-        totalActivities: 1,
+        totalActivities: 0,
         completedActivities: 0,
         description: formData.description || 'Khóa học đào tạo trực tuyến trên hệ thống LMS Nhóm 2.',
         targetAudience: 'Học viên',
-        syllabus: ['Tổng quan môn học', 'Lý thuyết cơ bản', 'Thực hành nâng cao', 'Kiểm tra & Đánh giá'],
-        modules: [
-          {
-            id: mod1Id,
-            courseId: courseId,
-            title: 'Chương 1: Giới thiệu & Định hướng học tập',
-            description: 'Làm quen với lộ trình học tập và cài đặt môi trường',
-            order: 1,
-            activities: [
-              {
-                id: `act-1-${Date.now()}`,
-                moduleId: mod1Id,
-                title: 'Khảo sát nhận thức ban đầu & Hướng dẫn môn học',
-                type: 'document',
-                durationMinutes: 15,
-                isCompleted: false,
-                isRequired: true,
-                description: 'Tài liệu hướng dẫn bắt đầu khóa học'
-              }
-            ]
-          }
-        ],
+        syllabus: [],
+        modules: [],
         announcements: [],
-        enrolledStudentsCount: 1,
+        enrolledStudentsCount: 0,
         certificateEligible: true
       };
 

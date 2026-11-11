@@ -71,8 +71,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [courses, setCourses] = useState<Course[]>(() => {
-    const saved = localStorage.getItem('lms2_courses');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('lms2_courses');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((c: any) => !c.id?.includes('sample') && c.code !== 'AI-101');
+        }
+      }
+    } catch {}
+    return [];
   });
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);

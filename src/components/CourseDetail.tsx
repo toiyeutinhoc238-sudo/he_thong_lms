@@ -207,14 +207,21 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             </h2>
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img 
-                  src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'} 
-                  alt="" 
-                  className="w-10 h-10 rounded-full object-cover" 
-                />
+                {currentUser.avatar ? (
+                  <img 
+                    src={currentUser.avatar} 
+                    alt={currentUser.name} 
+                    referrerPolicy="no-referrer"
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#0374b5] text-white font-bold flex items-center justify-center text-sm">
+                    {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">{currentUser.name}</h4>
-                  <p className="text-xs text-slate-500">{currentUser.email} • {currentUser.code}</p>
+                  <p className="text-xs text-slate-500">{currentUser.email} • {currentUser.code || currentUser.email?.split('@')[0]?.toUpperCase()}</p>
                 </div>
               </div>
               <span className="px-2.5 py-1 bg-[#0374b5]/10 text-[#0374b5] text-xs font-bold rounded-full capitalize">

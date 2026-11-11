@@ -316,7 +316,7 @@ export const ProfileModal: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Nguyễn Văn An"
+                  placeholder="Nhập họ và tên"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
@@ -331,7 +331,7 @@ export const ProfileModal: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: 12A1"
+                    placeholder="Nhập tên lớp học"
                     value={formData.className}
                     onChange={(e) => setFormData({ ...formData, className: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
@@ -345,7 +345,7 @@ export const ProfileModal: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: THPT Lê Quý Đôn"
+                    placeholder="Nhập tên trường học"
                     value={formData.school}
                     onChange={(e) => setFormData({ ...formData, school: e.target.value })}
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"

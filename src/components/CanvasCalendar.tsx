@@ -23,42 +23,47 @@ interface CalendarEvent {
 }
 
 export const CanvasCalendar: React.FC = () => {
-  const { courses, activeRole } = useApp();
+  const { courses } = useApp();
 
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 10, 11)); // Tháng 11 / 2026
-  const [selectedDate, setSelectedDate] = useState<string>('2026-11-15');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
 
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    {
-      id: 'evt-1',
-      title: 'Hạn nộp Bài tập 1: Khảo sát AI',
-      date: '2026-11-15',
-      time: '23:59',
-      courseName: 'Trí tuệ Nhân tạo',
-      type: 'assignment'
-    },
-    {
-      id: 'evt-2',
-      title: 'Buổi học Trực tuyến: Thực hành OpenCV',
-      date: '2026-11-18',
-      time: '08:00 - 10:30',
-      courseName: 'Thị giác máy tính',
-      type: 'lecture'
-    },
-    {
-      id: 'evt-3',
-      title: 'Bài kiểm tra giữa kỳ trắc nghiệm',
-      date: '2026-11-25',
-      time: '14:00 - 15:00',
-      courseName: 'Cơ sở dữ liệu',
-      type: 'quiz'
+  // Lưu và nạp sự kiện người dùng tạo từ localStorage (Tuyệt đối không dùng dữ liệu ảo)
+  const [customEvents, setCustomEvents] = useState<CalendarEvent[]>(() => {
+    try {
+      const saved = localStorage.getItem('lms2_calendar_events');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
-  ]);
+  });
+
+  // Tự động đồng bộ các hạn bài tập thật từ các khóa học hiện có
+  const courseEvents: CalendarEvent[] = [];
+  courses.forEach(c => {
+    (c.modules || []).forEach(m => {
+      (m.activities || []).forEach(a => {
+        if (a.dueDate) {
+          courseEvents.push({
+            id: `act-${a.id}`,
+            title: a.title,
+            date: a.dueDate.includes('T') ? a.dueDate.split('T')[0] : a.dueDate,
+            time: '23:59',
+            courseName: c.name,
+            type: a.type === 'assignment' ? 'assignment' : a.type === 'quiz' ? 'quiz' : 'general'
+          });
+        }
+      });
+    });
+  });
+
+  const events = [...courseEvents, ...customEvents];
 
   const [newEvent, setNewEvent] = useState({
     title: '',
-    date: '2026-11-15',
+    date: todayStr,
     time: '23:59',
     courseName: courses[0]?.name || 'Hệ thống LMS Nhóm 2',
     type: 'assignment' as const
@@ -96,11 +101,16 @@ export const CanvasCalendar: React.FC = () => {
       type: newEvent.type
     };
 
-    setEvents(prev => [...prev, item]);
+    const updated = [...customEvents, item];
+    setCustomEvents(updated);
+    try {
+      localStorage.setItem('lms2_calendar_events', JSON.stringify(updated));
+    } catch {}
+
     setIsAddEventOpen(false);
     setNewEvent({
       title: '',
-      date: '2026-11-15',
+      date: todayStr,
       time: '23:59',
       courseName: courses[0]?.name || 'Hệ thống LMS Nhóm 2',
       type: 'assignment'
@@ -433,3 +443,4 @@ export const CanvasCalendar: React.FC = () => {
     </div>
   );
 };
+

@@ -101,7 +101,7 @@ export const OnboardingModal: React.FC = () => {
             <input
               type="text"
               required
-              placeholder="Ví dụ: Nguyễn Văn An"
+              placeholder="Nhập đầy đủ họ và tên của bạn"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#0374b5] focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all"
@@ -118,7 +118,7 @@ export const OnboardingModal: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder="Ví dụ: 12A1 hoặc K48 Tin"
+                placeholder="Nhập tên lớp học"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#0374b5] focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all"
@@ -134,7 +134,7 @@ export const OnboardingModal: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder="Ví dụ: THPT Lê Quý Đôn"
+                placeholder="Nhập tên trường học"
                 value={school}
                 onChange={(e) => setSchool(e.target.value)}
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#0374b5] focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all"

@@ -39,41 +39,25 @@ interface MessageThread {
 export const CanvasInbox: React.FC = () => {
   const { currentUser } = useApp();
 
-  const [threads, setThreads] = useState<MessageThread[]>([
-    {
-      id: 'thread-1',
-      sender: {
-        name: 'TS. Nguyễn Văn Hùng',
-        email: 'gv.hung@lms2.edu.vn',
-        role: 'Giảng viên',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-      },
-      subject: 'Nhắc nhở: Hạn chót nộp bài tập khảo sát tuần 1',
-      snippet: 'Chào các bạn, thầy nhắc nhở các bạn nhớ hoàn thiện bài tập trắc nghiệm...',
-      content: 'Chào các bạn học viên,\n\nThầy nhắc nhở các bạn nhớ hoàn thiện bài tập khảo sát tuần 1 trước 23:59 Chủ Nhật tuần này để hệ thống kịp thời tổng hợp điểm chuyên cần.\n\nNếu gặp bất kỳ khó khăn kỹ thuật nào, các bạn có thể phản hồi trực tiếp qua hộp thư này.\n\nThân mến,\nThầy Hùng.',
-      time: '10:30 Hôm nay',
-      isRead: false,
-      courseTag: 'Trí tuệ Nhân tạo',
-      replies: []
-    },
-    {
-      id: 'thread-2',
-      sender: {
-        name: 'Ban Quản trị LMS Nhóm 2',
-        email: 'admin@lms2.edu.vn',
-        role: 'Quản trị viên'
-      },
-      subject: 'Chào mừng bạn tham gia hệ thống LMS Nhóm 2!',
-      snippet: 'Tài khoản của bạn đã được xác thực an toàn qua Google OAuth 2.0...',
-      content: 'Chào bạn,\n\nChúc mừng bạn đã kết nối thành công tài khoản Google với hệ thống Quản lý Học tập LMS Nhóm 2. Toàn bộ tiến trình bài học, kết quả bài thi và chứng chỉ sẽ được đồng bộ và lưu trữ an toàn trong suốt khóa đào tạo.\n\nChúc bạn có những trải nghiệm học tập hiệu quả!',
-      time: '08:15 Hôm qua',
-      isRead: true,
-      courseTag: 'Hệ thống',
-      replies: []
+  const [threads, setThreads] = useState<MessageThread[]>(() => {
+    try {
+      const saved = localStorage.getItem('lms2_inbox_threads');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
-  ]);
+  });
 
-  const [activeThreadId, setActiveThreadId] = useState<string>('thread-1');
+  const [activeThreadId, setActiveThreadId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('lms2_inbox_threads');
+      const list = saved ? JSON.parse(saved) : [];
+      return list[0]?.id || '';
+    } catch {
+      return '';
+    }
+  });
+
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [search, setSearch] = useState('');
   const [replyText, setReplyText] = useState('');
@@ -86,7 +70,7 @@ export const CanvasInbox: React.FC = () => {
     content: ''
   });
 
-  const activeThread = threads.find(t => t.id === activeThreadId) || threads[0];
+  const activeThread = threads.find(t => t.id === activeThreadId) || (threads.length > 0 ? threads[0] : null);
 
   const filteredThreads = threads.filter(t => {
     const matchFilter = filter === 'all' || (filter === 'unread' && !t.isRead);
@@ -97,7 +81,11 @@ export const CanvasInbox: React.FC = () => {
 
   const handleSelectThread = (id: string) => {
     setActiveThreadId(id);
-    setThreads(prev => prev.map(t => t.id === id ? { ...t, isRead: true } : t));
+    setThreads(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, isRead: true } : t);
+      try { localStorage.setItem('lms2_inbox_threads', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
   };
 
   const handleSendReply = (e: React.FormEvent) => {
@@ -111,15 +99,19 @@ export const CanvasInbox: React.FC = () => {
       isMe: true
     };
 
-    setThreads(prev => prev.map(t => {
-      if (t.id === activeThread.id) {
-        return {
-          ...t,
-          replies: [...(t.replies || []), newReply]
-        };
-      }
-      return t;
-    }));
+    setThreads(prev => {
+      const updated = prev.map(t => {
+        if (t.id === activeThread.id) {
+          return {
+            ...t,
+            replies: [...(t.replies || []), newReply]
+          };
+        }
+        return t;
+      });
+      try { localStorage.setItem('lms2_inbox_threads', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
 
     setReplyText('');
   };
@@ -145,10 +137,17 @@ export const CanvasInbox: React.FC = () => {
       replies: []
     };
 
-    setThreads(prev => [newThread, ...prev]);
+    const updated = [newThread, ...threads];
+    setThreads(updated);
     setActiveThreadId(newThread.id);
+    try { localStorage.setItem('lms2_inbox_threads', JSON.stringify(updated)); } catch {}
+
+    setComposeData({
+      recipient: 'Giảng viên phụ trách',
+      subject: '',
+      content: ''
+    });
     setIsComposeOpen(false);
-    setComposeData({ recipient: 'Giảng viên phụ trách', subject: '', content: '' });
   };
 
   return (
@@ -435,3 +434,4 @@ export const CanvasInbox: React.FC = () => {
     </div>
   );
 };
+
