@@ -112,10 +112,10 @@ const ForumModel = mongoose.model('ForumTopic', forumSchema);
 // Kết nối MongoDB Atlas
 if (MONGODB_URI) {
   console.log('🔄 Đang kết nối tới MongoDB Atlas...');
-  mongoose.connect(MONGODB_URI)
+  mongoose.connect(MONGODB_URI, { dbName: 'vle_hcmue' })
     .then(async () => {
       isMongoConnected = true;
-      console.log('✅ Đã kết nối thành công tới MongoDB Atlas!');
+      console.log('✅ Đã kết nối thành công tới MongoDB Atlas (Database: vle_hcmue)!');
       await seedMongoIfEmpty();
     })
     .catch(err => {
