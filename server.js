@@ -806,11 +806,16 @@ app.get('/api/courses/:id/students', async (req, res) => {
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ message: `API route ${req.path} không tồn tại.` });
+  
+  // SPA Fallback cho Express 5 (không dùng app.get('*') để tránh lỗi PathError trong Express 5)
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+      return res.sendFile(path.join(distPath, 'index.html'));
     }
-    res.sendFile(path.join(distPath, 'index.html'));
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ message: `API route ${req.method} ${req.path} không tồn tại.` });
+    }
+    next();
   });
 }
 
