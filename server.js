@@ -260,6 +260,81 @@ app.post('/api/auth/login', async (req, res) => {
   });
 });
 
+// 1.1 Auth: Đăng nhập bằng Google OAuth (Google Identity Services)
+app.post('/api/auth/google', async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) {
+    return res.status(400).json({ message: 'Thiếu credential xác thực từ Google' });
+  }
+
+  try {
+    // Gọi Google Token Info endpoint để kiểm tra chữ ký số mật mã và lấy thông tin người dùng
+    const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!googleRes.ok) {
+      return res.status(401).json({ message: 'Google Token không hợp lệ hoặc đã hết hạn' });
+    }
+
+    const payload = await googleRes.json();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Phân quyền tự động dựa vào email trường HCMUE
+    let role = 'student';
+    if (email && email.toLowerCase().endsWith('@hcmue.edu.vn') && !email.toLowerCase().includes('student')) {
+      role = 'lecturer';
+    }
+    if (email && (email.toLowerCase().includes('admin') || email === 'phanphiphu04@gmail.com')) {
+      role = 'admin';
+    }
+
+    let user;
+    if (isMongoConnected) {
+      user = await UserModel.findOne({ email });
+      if (!user) {
+        user = new UserModel({
+          id: `user-google-${googleId ? googleId.slice(-6) : Date.now().toString().slice(-6)}`,
+          name: name || email.split('@')[0],
+          username: email.split('@')[0],
+          email,
+          role,
+          code: email.split('@')[0].toUpperCase(),
+          department: role === 'student' ? 'Khoa Sư phạm / CNTT' : 'Trường Đại học Sư phạm TP.HCM',
+          classOrPosition: role === 'student' ? 'Sinh viên' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+          avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+        });
+        await user.save();
+      }
+    } else {
+      const db = readDb();
+      db.users = db.users || [];
+      user = db.users.find(u => u.email === email);
+      if (!user) {
+        user = {
+          id: `user-google-${googleId ? googleId.slice(-6) : Date.now().toString().slice(-6)}`,
+          name: name || email.split('@')[0],
+          username: email.split('@')[0],
+          email,
+          role,
+          code: email.split('@')[0].toUpperCase(),
+          department: role === 'student' ? 'Khoa Sư phạm / CNTT' : 'Trường Đại học Sư phạm TP.HCM',
+          classOrPosition: role === 'student' ? 'Sinh viên' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+          avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+        };
+        db.users.push(user);
+        writeDb(db);
+      }
+    }
+
+    const token = `jwt_token_${user.id}_${Date.now()}`;
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+
+    return res.json({ token, user: userObj });
+  } catch (err) {
+    console.error('Lỗi xác thực Google:', err);
+    return res.status(500).json({ message: 'Lỗi xác thực Google OAuth: ' + err.message });
+  }
+});
+
 // 2. Auth: Get current user profile
 app.get('/api/auth/me', async (req, res) => {
   const authHeader = req.headers.authorization;

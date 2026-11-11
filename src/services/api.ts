@@ -47,6 +47,11 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(credentials)
       }),
+    googleLogin: (credential: string) =>
+      this.request<{ token: string; user: User }>('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ credential })
+      }),
     getMe: () => this.request<User>('/auth/me'),
     logout: () => {
       localStorage.removeItem('hcmue_vle_token');
