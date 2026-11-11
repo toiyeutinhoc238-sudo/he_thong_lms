@@ -10,6 +10,9 @@
     "start": "node server.js",
     "server": "node server.js"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "cors": "^2.8.6",

@@ -13,6 +13,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check endpoint for Render & monitoring
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
+app.get('/api/health', (req, res) => res.json({ 
+  status: 'ok', 
+  service: 'HCMUE VLE LMS API', 
+  uptime: process.uptime(), 
+  timestamp: new Date().toISOString() 
+}));
+
 // Khởi tạo Database mẫu đầy đủ nếu chưa có
 function initDb() {
   if (!fs.existsSync(DB_FILE)) {
