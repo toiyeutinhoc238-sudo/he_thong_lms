@@ -251,13 +251,13 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Tab 7: Kho học liệu 3D Noraclass */}
+        {/* Tab 7: Kho học liệu số & Mô phỏng 3D */}
         {activeTab === 'resources3d' && (
           <div className="p-6 max-w-4xl space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
               <Box className="w-5 h-5 text-indigo-600" />
               <h2 className="text-lg font-bold text-slate-900">
-                Kho học liệu 3D & Mô phỏng tương tác Noraclass
+                Kho học liệu số & Mô phỏng tương tác 3D
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

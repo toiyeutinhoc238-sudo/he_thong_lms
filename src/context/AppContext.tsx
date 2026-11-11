@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Course, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType } from '../types';
+import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType } from '../types';
 import { initialUser } from '../data/mockData';
 import api from '../services/api';
 
@@ -32,7 +32,13 @@ interface AppContextType {
   submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, grade: number, feedback: string) => void;
   submitQuiz: (courseId: string, activityId: string, score: number, maxScore: number, answers: Record<string, number | number[]>) => void;
+  addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
+  updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
+  deleteCourseModule: (courseId: string, moduleId: string) => Promise<void>;
   addCourseActivity: (courseId: string, moduleId: string, newAct: Partial<Activity>) => void;
+  updateCourseActivity: (courseId: string, activityId: string, data: Partial<Activity>) => void;
+  deleteCourseActivity: (courseId: string, activityId: string) => void;
+  deleteCourse: (courseId: string) => void;
   addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => void;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
@@ -45,12 +51,12 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeRole, setActiveRole] = useState<Role>('student');
   const [currentUser, setCurrentUser] = useState<User>(() => {
-    const saved = localStorage.getItem('hcmue_vle_user');
-    return saved ? JSON.parse(saved) : { ...initialUser, name: 'Sinh viên HCMUE', code: 'Chưa đăng nhập' };
+    const saved = localStorage.getItem('lms2_user') || localStorage.getItem('hcmue_vle_user');
+    return saved ? JSON.parse(saved) : { ...initialUser, name: 'Học viên LMS Nhóm 2', code: 'Chưa đăng nhập' };
   });
 
   const [courses, setCourses] = useState<Course[]>(() => {
-    const saved = localStorage.getItem('hcmue_vle_courses');
+    const saved = localStorage.getItem('lms2_courses') || localStorage.getItem('hcmue_vle_courses');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -61,12 +67,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem('hcmue_vle_notifs');
+    const saved = localStorage.getItem('lms2_notifs') || localStorage.getItem('hcmue_vle_notifs');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [certificates, setCertificates] = useState<Certificate[]>(() => {
-    const saved = localStorage.getItem('hcmue_vle_certs');
+    const saved = localStorage.getItem('lms2_certs') || localStorage.getItem('hcmue_vle_certs');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -77,19 +83,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync state to local storage cache
   useEffect(() => {
-    localStorage.setItem('hcmue_vle_courses', JSON.stringify(courses));
+    localStorage.setItem('lms2_courses', JSON.stringify(courses));
   }, [courses]);
 
   useEffect(() => {
-    localStorage.setItem('hcmue_vle_certs', JSON.stringify(certificates));
+    localStorage.setItem('lms2_certs', JSON.stringify(certificates));
   }, [certificates]);
 
   useEffect(() => {
-    localStorage.setItem('hcmue_vle_notifs', JSON.stringify(notifications));
+    localStorage.setItem('lms2_notifs', JSON.stringify(notifications));
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem('hcmue_vle_user', JSON.stringify(currentUser));
+    localStorage.setItem('lms2_user', JSON.stringify(currentUser));
   }, [currentUser]);
 
   // Fetch initial data from Backend API
@@ -136,9 +142,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(prev => ({
       ...prev,
       role,
-      name: role === 'student' ? 'Sinh viên HCMUE' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên VLE',
-      code: role === 'student' ? 'SV-2026' : role === 'lecturer' ? 'GV-2026' : 'ADMIN-001',
-      department: role === 'student' ? 'Khoa Sư phạm' : role === 'lecturer' ? 'Bộ môn Sư phạm' : 'Trung tâm CNTT'
+      name: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
+      code: role === 'student' ? 'HV-2026' : role === 'lecturer' ? 'GV-2026' : 'ADMIN-001',
+      department: 'Hệ thống Đào tạo LMS Nhóm 2'
     }));
 
     if (role === 'lecturer') {
@@ -325,7 +331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const updatedModules = (course.modules || []).map(m => {
         if (m.id !== moduleId) return m;
         const completeAct: Activity = {
-          id: `act-${Date.now()}`,
+          id: newAct.id || `act-${Date.now()}`,
           moduleId,
           title: newAct.title || 'Hoạt động mới',
           type: newAct.type || 'document',
@@ -333,6 +339,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           isCompleted: false,
           isRequired: newAct.isRequired !== undefined ? newAct.isRequired : true,
           description: newAct.description || '',
+          videoUrl: newAct.videoUrl || '',
+          fileUrl: newAct.fileUrl || '',
+          dueDate: newAct.dueDate || '',
+          maxScore: newAct.maxScore || 10,
+          assignmentPrompt: newAct.assignmentPrompt || '',
+          quizQuestions: newAct.quizQuestions || [],
           ...newAct
         };
         return {
@@ -344,7 +356,81 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     // Call API backend
-    api.activities.addActivity(courseId, moduleId, newAct).catch(() => {});
+    api.activities.create(courseId, moduleId, newAct).catch(() => {});
+  };
+
+  const addCourseModule = async (courseId: string, title: string, description?: string) => {
+    const newMod: CourseModule = {
+      id: `mod-${Date.now()}`,
+      courseId,
+      title,
+      order: 1,
+      description: description || '',
+      activities: []
+    };
+
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      return { ...c, modules: [...(c.modules || []), newMod] };
+    }));
+
+    api.modules.create(courseId, { title, description }).catch(() => {});
+    return newMod;
+  };
+
+  const updateCourseModule = async (courseId: string, moduleId: string, data: Partial<CourseModule>) => {
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      const modules = (c.modules || []).map(m => m.id === moduleId ? { ...m, ...data } : m);
+      return { ...c, modules };
+    }));
+
+    api.modules.update(courseId, moduleId, data).catch(() => {});
+  };
+
+  const deleteCourseModule = async (courseId: string, moduleId: string) => {
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      const modules = (c.modules || []).filter(m => m.id !== moduleId);
+      return calculateCourseProgress({ ...c, modules });
+    }));
+
+    api.modules.delete(courseId, moduleId).catch(() => {});
+  };
+
+  const updateCourseActivity = (courseId: string, activityId: string, data: Partial<Activity>) => {
+    setCourses(prev => prev.map(course => {
+      if (course.id !== courseId) return course;
+      const updatedModules = (course.modules || []).map(m => {
+        const activities = (m.activities || []).map(a => a.id === activityId ? { ...a, ...data } : a);
+        return { ...m, activities };
+      });
+      return { ...course, modules: updatedModules };
+    }));
+
+    api.activities.update(courseId, activityId, data).catch(() => {});
+  };
+
+  const deleteCourseActivity = (courseId: string, activityId: string) => {
+    setCourses(prev => prev.map(course => {
+      if (course.id !== courseId) return course;
+      const updatedModules = (course.modules || []).map(m => ({
+        ...m,
+        activities: (m.activities || []).filter(a => a.id !== activityId)
+      }));
+      return calculateCourseProgress({ ...course, modules: updatedModules });
+    }));
+
+    api.activities.delete(courseId, activityId).catch(() => {});
+  };
+
+  const deleteCourse = (courseId: string) => {
+    setCourses(prev => prev.filter(c => c.id !== courseId));
+    if (activeCourseId === courseId) {
+      setActiveCourseId(null);
+      setCurrentView('dashboard');
+    }
+    api.courses.delete(courseId).catch(() => {});
   };
 
   const addAnnouncement = (courseId: string, title: string, content: string, isImportant: boolean = false) => {
@@ -446,7 +532,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitAssignment,
         gradeAssignment,
         submitQuiz,
+        addCourseModule,
+        updateCourseModule,
+        deleteCourseModule,
         addCourseActivity,
+        updateCourseActivity,
+        deleteCourseActivity,
+        deleteCourse,
         addAnnouncement,
         isLoginModalOpen,
         setIsLoginModalOpen,

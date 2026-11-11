@@ -135,15 +135,15 @@ export const LoginModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-hcmue-800 text-white flex items-center justify-center shadow-md shadow-hcmue-900/20">
+            <div className="w-12 h-12 rounded-2xl bg-[#0374b5] text-white flex items-center justify-center shadow-md shadow-sky-900/20">
               <GraduationCap className="w-7 h-7 text-amber-300" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-hcmue-900">
-                Đăng nhập VLE HCMUE
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">
+                Đăng nhập LMS Nhóm 2
               </h2>
               <p className="text-xs text-slate-500">
-                Hệ thống Quản lý Đào tạo Trực tuyến
+                Hệ thống Quản lý Học tập Trực tuyến
               </p>
             </div>
           </div>
@@ -231,7 +231,7 @@ export const LoginModal: React.FC = () => {
             </button>
           </div>
           <p className="text-[11px] text-slate-400 text-center">
-            Hỗ trợ email sinh viên (@student.hcmue.edu.vn) & giảng viên (@hcmue.edu.vn)
+            Hỗ trợ đăng nhập nhanh bằng tài khoản Google cá nhân & tổ chức
           </p>
         </div>
 
@@ -242,26 +242,26 @@ export const LoginModal: React.FC = () => {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-white px-3 text-slate-400 font-semibold tracking-wider text-[11px]">
-              Hoặc đăng nhập bằng tài khoản HCMUE
+              Hoặc đăng nhập bằng tài khoản LMS Nhóm 2
             </span>
           </div>
         </div>
 
-        {/* Official VLE Form */}
+        {/* Form Đăng nhập */}
         <form onSubmit={handleFormLogin} className="space-y-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Hệ đào tạo (Training Program)
+              Chương trình đào tạo
             </label>
             <select
               value={selectedProgram}
               onChange={(e) => setSelectedProgram(e.target.value as any)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-hcmue-600 focus:bg-white"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
             >
-              <option value="student_regular">Student Training (Đại học & Sau đại học)</option>
-              <option value="teacher_training">Teacher Training (Bồi dưỡng Giáo viên)</option>
-              <option value="community">Community / Sinh hoạt Công dân</option>
-              <option value="internal">Internal Training (Bồi dưỡng nội bộ)</option>
+              <option value="student_regular">Đào tạo Chính quy</option>
+              <option value="teacher_training">Bồi dưỡng Chuyên môn</option>
+              <option value="community">Sinh hoạt Tập thể & Kỹ năng</option>
+              <option value="internal">Đào tạo Nội bộ</option>
             </select>
           </div>
 
@@ -273,10 +273,10 @@ export const LoginModal: React.FC = () => {
               <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Nhập MSSV hoặc tên đăng nhập"
+                placeholder="Nhập tên đăng nhập hoặc email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-hcmue-600 focus:bg-white"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] focus:bg-white"
                 required
               />
             </div>
@@ -287,7 +287,7 @@ export const LoginModal: React.FC = () => {
               <label className="text-xs font-bold text-slate-700">
                 Mật khẩu (Password)
               </label>
-              <a href="#" className="text-[11px] text-hcmue-700 hover:underline">
+              <a href="#" className="text-[11px] text-[#0374b5] hover:underline">
                 Quên mật khẩu?
               </a>
             </div>
@@ -298,7 +298,7 @@ export const LoginModal: React.FC = () => {
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-hcmue-600 focus:bg-white"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] focus:bg-white"
                 required
               />
             </div>
@@ -310,7 +310,7 @@ export const LoginModal: React.FC = () => {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="rounded text-hcmue-700"
+                className="rounded text-[#0374b5]"
               />
               <span>Ghi nhớ phiên đăng nhập</span>
             </label>
@@ -321,7 +321,7 @@ export const LoginModal: React.FC = () => {
           <button
             type="submit"
             disabled={isLoggingIn}
-            className="w-full py-3 bg-hcmue-800 hover:bg-hcmue-900 disabled:opacity-50 text-white font-extrabold text-sm rounded-xl transition-all shadow-md shadow-hcmue-950/20 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#0374b5] hover:bg-[#025a8c] disabled:opacity-50 text-white font-extrabold text-sm rounded-xl transition-all shadow-md shadow-sky-950/20 flex items-center justify-center gap-2"
           >
             <span>{isLoggingIn ? 'Đang xác thực tài khoản...' : 'Đăng nhập hệ thống'}</span>
             <ArrowRight className="w-4 h-4" />
@@ -333,8 +333,8 @@ export const LoginModal: React.FC = () => {
           <p>
             Cần cấp lại mật khẩu hoặc hỗ trợ tài khoản?
           </p>
-          <a href="mailto:hotrovle@hcmue.edu.vn" className="text-hcmue-700 font-bold hover:underline">
-            Email: hotrovle@hcmue.edu.vn | Hotline: (028) 3835 2020
+          <a href="mailto:support@lms2.edu.vn" className="text-[#0374b5] font-bold hover:underline">
+            Email: support@lms2.edu.vn | LMS Nhóm 2
           </a>
         </div>
       </div>

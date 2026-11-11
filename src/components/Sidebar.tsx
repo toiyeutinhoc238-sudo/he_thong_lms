@@ -186,20 +186,20 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
         <div className="p-4 border-t border-slate-100">
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-2xl p-3.5 border border-blue-100/80">
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-7 h-7 rounded-lg bg-hcmue-600 text-white flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#0374b5] text-white flex items-center justify-center">
                 <HelpCircle className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-800">Trợ giúp VLE HCMUE</span>
+              <span className="text-xs font-bold text-slate-800">Trợ giúp LMS Nhóm 2</span>
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed mb-2.5">
               Cần hỗ trợ về tài khoản đăng nhập hoặc học phần trực tuyến?
             </p>
             <div className="space-y-1 text-[11px]">
               <a 
-                href="mailto:hotrovle@hcmue.edu.vn" 
-                className="text-hcmue-700 font-medium hover:underline block truncate"
+                href="mailto:support@lms2.edu.vn" 
+                className="text-[#0374b5] font-medium hover:underline block truncate"
               >
-                ✉ hotrovle@hcmue.edu.vn
+                ✉ support@lms2.edu.vn
               </a>
               <div className="text-slate-600 flex items-center gap-1 font-mono">
                 <PhoneCall className="w-3 h-3 text-slate-400" /> (028) 3835 2020

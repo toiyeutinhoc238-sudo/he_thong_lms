@@ -29,7 +29,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'ai',
-      text: `Xin chào ${currentUser.name}! Tôi là Trợ lý AI của Canvas LMS. Tôi có thể giúp bạn tóm tắt bài học, giải thích các khái niệm trong khóa học "${activeCourse?.name || 'Khóa học'}", hoặc hướng dẫn bạn làm bài tập. Bạn cần hỗ trợ gì?`,
+      text: `Xin chào ${currentUser.name}! Tôi là Trợ lý AI của LMS Nhóm 2. Tôi có thể giúp bạn tóm tắt bài học, giải thích các khái niệm trong khóa học "${activeCourse?.name || 'Khóa học'}", hoặc hướng dẫn bạn làm bài tập. Bạn cần hỗ trợ gì?`,
       time: 'Vừa xong'
     }
   ]);
@@ -101,7 +101,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                 </span>
               </h3>
               <p className="text-[11px] text-slate-500">
-                Canvas LMS AI Assistant
+                LMS Nhóm 2 AI Assistant
               </p>
             </div>
           </div>

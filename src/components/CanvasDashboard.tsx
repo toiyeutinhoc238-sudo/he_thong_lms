@@ -84,7 +84,7 @@ export const CanvasDashboard: React.FC = () => {
             Bảng điều khiển
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Các khóa học của bạn trên hệ thống Canvas LMS
+            Các khóa học của bạn trên hệ thống LMS Nhóm 2
           </p>
         </div>
 
@@ -187,7 +187,7 @@ export const CanvasDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
             <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-[#0374b5]" />
-              <span>Tạo Khóa Học Mới (Canvas LMS)</span>
+              <span>Tạo Khóa Học Mới (LMS Nhóm 2)</span>
             </h3>
 
             <form onSubmit={handleCreateCourse} className="space-y-3.5">

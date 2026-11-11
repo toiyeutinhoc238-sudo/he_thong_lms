@@ -1,15 +1,14 @@
 /**
- * API Service Client for VLE HCMUE
- * Sẵn sàng để tích hợp với backend API thật (Node.js, Express, Spring Boot, Laravel, Django, ASP.NET,...)
+ * API Service Client for LMS Nhóm 2
  */
 
-import { Course, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem } from '../types';
+import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 class ApiClient {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('hcmue_vle_token');
+    const token = localStorage.getItem('lms2_token') || localStorage.getItem('hcmue_vle_token');
     return {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -34,8 +33,7 @@ class ApiClient {
 
       return await response.json();
     } catch (error: any) {
-      // In ra console để dev dễ debug khi gọi API backend
-      console.warn(`[API Client] Yêu cầu tới ${endpoint} thất bại hoặc chưa có backend:`, error.message);
+      console.warn(`[API Client] Yêu cầu tới ${endpoint} thất bại:`, error.message);
       throw error;
     }
   }
@@ -54,6 +52,7 @@ class ApiClient {
       }),
     getMe: () => this.request<User>('/auth/me'),
     logout: () => {
+      localStorage.removeItem('lms2_token');
       localStorage.removeItem('hcmue_vle_token');
       return Promise.resolve();
     }
@@ -79,8 +78,40 @@ class ApiClient {
     })
   };
 
-  // Activities & Modules
+  // Modules
+  modules = {
+    create: (courseId: string, data: { title: string; description?: string }) =>
+      this.request<CourseModule>(`/courses/${courseId}/modules`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    update: (courseId: string, modId: string, data: Partial<CourseModule>) =>
+      this.request<CourseModule>(`/courses/${courseId}/modules/${modId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    delete: (courseId: string, modId: string) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/modules/${modId}`, {
+        method: 'DELETE'
+      })
+  };
+
+  // Activities & Kho học liệu
   activities = {
+    create: (courseId: string, modId: string, data: Partial<Activity>) =>
+      this.request<Activity>(`/courses/${courseId}/modules/${modId}/activities`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    update: (courseId: string, actId: string, data: Partial<Activity>) =>
+      this.request<Activity>(`/courses/${courseId}/activities/${actId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    delete: (courseId: string, actId: string) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/activities/${actId}`, {
+        method: 'DELETE'
+      }),
     markCompleted: (courseId: string, activityId: string) => 
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'

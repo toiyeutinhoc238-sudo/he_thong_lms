@@ -15,7 +15,7 @@ export const CertificatesView: React.FC = () => {
             <span>Chứng chỉ & Văn bằng Điện tử Xác thực</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-800">
-            Chứng Chỉ Hoàn Thành Khóa Học (HCMUE VLE)
+            Chứng Chỉ Hoàn Thành Khóa Học (LMS Nhóm 2)
           </h1>
           <p className="text-xs text-slate-500">
             Chứng chỉ được cấp tự động khi học viên đạt 100% tiến độ học tập và vượt qua các bài kiểm tra đánh giá theo quy chuẩn của Trường ĐH Sư phạm TP.HCM.
@@ -70,7 +70,7 @@ export const CertificatesView: React.FC = () => {
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Xác thực bởi HCMUE</span>
+                  <span>Xác thực bởi LMS Nhóm 2</span>
                 </div>
 
                 <button

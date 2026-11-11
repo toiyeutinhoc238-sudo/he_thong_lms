@@ -49,7 +49,7 @@ export const AdminPanel: React.FC = () => {
               Bảng Điều Phối Kỹ Thuật & Người Dùng
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm">
-              Trường Đại học Sư phạm Thành phố Hồ Chí Minh • Máy chủ chính: <strong>vle.hcmue.edu.vn</strong>
+              Hệ thống Quản trị Đào tạo Trực tuyến • LMS Nhóm 2
             </p>
           </div>
 

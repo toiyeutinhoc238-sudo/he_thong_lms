@@ -119,7 +119,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <span className="text-[17px] font-extrabold text-hcmue-900 tracking-tight leading-none group-hover:text-hcmue-700 transition-colors">
-                  VLE HCMUE
+                  LMS Nhóm 2
                 </span>
                 <span className="px-1.5 py-0.5 bg-blue-100 text-hcmue-800 text-[10px] font-bold rounded uppercase tracking-wider">
                   Loop LMS 2.0

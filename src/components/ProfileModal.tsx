@@ -75,7 +75,7 @@ export const ProfileModal: React.FC = () => {
           <div className="space-y-3">
             <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200/60 flex items-center justify-between">
               <div className="text-xs">
-                <div className="font-bold text-slate-800">Microsoft Office 365 HCMUE</div>
+                <div className="font-bold text-slate-800">Tài khoản học tập LMS Nhóm 2</div>
                 <div className="text-slate-500 font-mono text-[11px]">{currentUser.email}</div>
               </div>
               <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">

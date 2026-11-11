@@ -31,7 +31,7 @@ export const CanvasCourseNav: React.FC<CanvasCourseNavProps> = ({
     { id: 'files', label: 'Các tập tin' },
     { id: 'syllabus', label: 'Lịch trình khóa học' },
     { id: 'modules', label: 'Nội dung học tập' },
-    { id: 'resources3d', label: 'Kho học liệu 3D Noraclass' },
+    { id: 'resources3d', label: 'Kho học liệu số & Mô phỏng 3D' },
   ];
 
   return (

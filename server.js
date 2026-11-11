@@ -40,7 +40,7 @@ app.use(express.json());
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({ 
   status: 'ok', 
-  service: 'HCMUE VLE LMS API', 
+  service: 'LMS Nhóm 2 API', 
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   uptime: process.uptime(), 
   timestamp: new Date().toISOString() 
@@ -202,11 +202,11 @@ app.post('/api/auth/login', async (req, res) => {
         id: `user-${Date.now()}`,
         name: username,
         username,
-        email: `${username}@hcmue.edu.vn`,
+        email: `${username}@lms2.edu.vn`,
         role,
         code: username,
-        department: 'Trường ĐH Sư phạm TP.HCM',
-        classOrPosition: role === 'student' ? 'Sinh viên chính quy' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+        department: 'LMS Nhóm 2',
+        classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
       });
 
@@ -243,11 +243,11 @@ app.post('/api/auth/login', async (req, res) => {
     id: `user-${Date.now()}`,
     name: username,
     username,
-    email: `${username}@hcmue.edu.vn`,
+    email: `${username}@lms2.edu.vn`,
     role,
     code: username,
-    department: 'Trường ĐH Sư phạm TP.HCM',
-    classOrPosition: role === 'student' ? 'Sinh viên chính quy' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+    department: 'LMS Nhóm 2',
+    classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
   };
 
@@ -277,9 +277,9 @@ app.post('/api/auth/google', async (req, res) => {
     const payload = await googleRes.json();
     const { sub: googleId, email, name, picture } = payload;
 
-    // Phân quyền tự động dựa vào email trường HCMUE
+    // Phân quyền tự động dựa vào email
     let role = 'student';
-    if (email && email.toLowerCase().endsWith('@hcmue.edu.vn') && !email.toLowerCase().includes('student')) {
+    if (email && email.toLowerCase().includes('teacher')) {
       role = 'lecturer';
     }
     if (email && (email.toLowerCase().includes('admin') || email === 'phanphiphu04@gmail.com')) {
@@ -297,8 +297,8 @@ app.post('/api/auth/google', async (req, res) => {
           email,
           role,
           code: email.split('@')[0].toUpperCase(),
-          department: role === 'student' ? 'Khoa Sư phạm / CNTT' : 'Trường Đại học Sư phạm TP.HCM',
-          classOrPosition: role === 'student' ? 'Sinh viên' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+          department: 'LMS Nhóm 2',
+          classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
           avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
         });
         await user.save();
@@ -315,8 +315,8 @@ app.post('/api/auth/google', async (req, res) => {
           email,
           role,
           code: email.split('@')[0].toUpperCase(),
-          department: role === 'student' ? 'Khoa Sư phạm / CNTT' : 'Trường Đại học Sư phạm TP.HCM',
-          classOrPosition: role === 'student' ? 'Sinh viên' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+          department: 'LMS Nhóm 2',
+          classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
           avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
         };
         db.users.push(user);
@@ -409,17 +409,17 @@ app.post('/api/courses', async (req, res) => {
     semester: req.body.semester || 'Học kỳ 1',
     academicYear: '2026 - 2027',
     instructor: req.body.instructor || {
-      name: 'Giảng viên HCMUE',
-      title: 'Khoa Sư phạm',
+      name: 'Giảng viên',
+      title: 'Giảng viên phụ trách',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      email: 'gv@hcmue.edu.vn'
+      email: 'giangvien@lms2.edu.vn'
     },
     thumbnail: req.body.thumbnail || 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
     progress: 0,
     totalActivities: 0,
     completedActivities: 0,
     description: req.body.description || '',
-    targetAudience: req.body.targetAudience || 'Sinh viên Sư phạm',
+    targetAudience: req.body.targetAudience || 'Học viên trực tuyến',
     syllabus: req.body.syllabus || [],
     modules: req.body.modules || [],
     announcements: req.body.announcements || [],
@@ -440,6 +440,276 @@ app.post('/api/courses', async (req, res) => {
   db.courses.push(newCourseData);
   writeDb(db);
   res.status(201).json(newCourseData);
+});
+
+// 5.1 Courses: Update Course
+app.put('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  if (isMongoConnected) {
+    try {
+      const updated = await CourseModel.findOneAndUpdate({ id }, { $set: updateData }, { new: true });
+      if (updated) return res.json(updated);
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const idx = (db.courses || []).findIndex(c => c.id === id);
+  if (idx !== -1) {
+    db.courses[idx] = { ...db.courses[idx], ...updateData };
+    writeDb(db);
+    return res.json(db.courses[idx]);
+  }
+  res.status(404).json({ message: 'Không tìm thấy khóa học để cập nhật' });
+});
+
+// 5.2 Courses: Delete Course
+app.delete('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (isMongoConnected) {
+    try {
+      await CourseModel.deleteOne({ id });
+      return res.json({ success: true, message: 'Đã xóa khóa học thành công' });
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  db.courses = (db.courses || []).filter(c => c.id !== id);
+  writeDb(db);
+  res.json({ success: true, message: 'Đã xóa khóa học thành công' });
+});
+
+// 5.3 Modules: Add Module to Course
+app.post('/api/courses/:id/modules', async (req, res) => {
+  const { id } = req.params;
+  const newModule = {
+    id: `mod-${Date.now()}`,
+    courseId: id,
+    title: req.body.title || 'Mô-đun mới',
+    order: req.body.order || 1,
+    description: req.body.description || '',
+    activities: req.body.activities || []
+  };
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course) {
+        course.modules = course.modules || [];
+        course.modules.push(newModule);
+        course.markModified('modules');
+        await course.save();
+        return res.status(201).json(newModule);
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course) {
+    course.modules = course.modules || [];
+    course.modules.push(newModule);
+    writeDb(db);
+    return res.status(201).json(newModule);
+  }
+  res.status(404).json({ message: 'Không tìm thấy khóa học để thêm mô-đun' });
+});
+
+// 5.4 Modules: Update Module
+app.put('/api/courses/:id/modules/:modId', async (req, res) => {
+  const { id, modId } = req.params;
+  const updateData = req.body;
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course && course.modules) {
+        const modIdx = course.modules.findIndex(m => m.id === modId);
+        if (modIdx !== -1) {
+          course.modules[modIdx] = { ...course.modules[modIdx], ...updateData };
+          course.markModified('modules');
+          await course.save();
+          return res.json(course.modules[modIdx]);
+        }
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course && course.modules) {
+    const modIdx = course.modules.findIndex(m => m.id === modId);
+    if (modIdx !== -1) {
+      course.modules[modIdx] = { ...course.modules[modIdx], ...updateData };
+      writeDb(db);
+      return res.json(course.modules[modIdx]);
+    }
+  }
+  res.status(404).json({ message: 'Không tìm thấy mô-đun để cập nhật' });
+});
+
+// 5.5 Modules: Delete Module
+app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
+  const { id, modId } = req.params;
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course && course.modules) {
+        course.modules = course.modules.filter(m => m.id !== modId);
+        course.markModified('modules');
+        await course.save();
+        return res.json({ success: true, message: 'Đã xóa mô-đun thành công' });
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course && course.modules) {
+    course.modules = course.modules.filter(m => m.id !== modId);
+    writeDb(db);
+    return res.json({ success: true, message: 'Đã xóa mô-đun thành công' });
+  }
+  res.status(404).json({ message: 'Không tìm thấy mô-đun để xóa' });
+});
+
+// 5.6 Activities: Add Activity / Learning Resource (Video, Link, Assignment, Quiz,...)
+app.post('/api/courses/:id/modules/:modId/activities', async (req, res) => {
+  const { id, modId } = req.params;
+  const newActivity = {
+    id: `act-${Date.now()}`,
+    moduleId: modId,
+    title: req.body.title || 'Bài học mới',
+    type: req.body.type || 'document',
+    durationMinutes: req.body.durationMinutes || 15,
+    isCompleted: false,
+    isRequired: req.body.isRequired ?? true,
+    description: req.body.description || 'Xem trang',
+    videoUrl: req.body.videoUrl || '',
+    fileUrl: req.body.fileUrl || '',
+    dueDate: req.body.dueDate || '',
+    maxScore: req.body.maxScore || 10,
+    assignmentPrompt: req.body.assignmentPrompt || '',
+    quizQuestions: req.body.quizQuestions || [],
+    ...req.body
+  };
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course && course.modules) {
+        const mod = course.modules.find(m => m.id === modId);
+        if (mod) {
+          mod.activities = mod.activities || [];
+          mod.activities.push(newActivity);
+          course.totalActivities = (course.totalActivities || 0) + 1;
+          course.markModified('modules');
+          await course.save();
+          return res.status(201).json(newActivity);
+        }
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course && course.modules) {
+    const mod = course.modules.find(m => m.id === modId);
+    if (mod) {
+      mod.activities = mod.activities || [];
+      mod.activities.push(newActivity);
+      course.totalActivities = (course.totalActivities || 0) + 1;
+      writeDb(db);
+      return res.status(201).json(newActivity);
+    }
+  }
+  res.status(404).json({ message: 'Không tìm thấy mô-đun để thêm hoạt động' });
+});
+
+// 5.7 Activities: Update Activity
+app.put('/api/courses/:id/activities/:actId', async (req, res) => {
+  const { id, actId } = req.params;
+  const updateData = req.body;
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course && course.modules) {
+        for (const mod of course.modules) {
+          if (mod.activities) {
+            const actIdx = mod.activities.findIndex(a => a.id === actId);
+            if (actIdx !== -1) {
+              mod.activities[actIdx] = { ...mod.activities[actIdx], ...updateData };
+              course.markModified('modules');
+              await course.save();
+              return res.json(mod.activities[actIdx]);
+            }
+          }
+        }
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course && course.modules) {
+    for (const mod of course.modules) {
+      if (mod.activities) {
+        const actIdx = mod.activities.findIndex(a => a.id === actId);
+        if (actIdx !== -1) {
+          mod.activities[actIdx] = { ...mod.activities[actIdx], ...updateData };
+          writeDb(db);
+          return res.json(mod.activities[actIdx]);
+        }
+      }
+    }
+  }
+  res.status(404).json({ message: 'Không tìm thấy bài học để cập nhật' });
+});
+
+// 5.8 Activities: Delete Activity
+app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
+  const { id, actId } = req.params;
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id });
+      if (course && course.modules) {
+        for (const mod of course.modules) {
+          if (mod.activities) {
+            const beforeCount = mod.activities.length;
+            mod.activities = mod.activities.filter(a => a.id !== actId);
+            if (mod.activities.length !== beforeCount) {
+              course.totalActivities = Math.max(0, (course.totalActivities || 1) - 1);
+              course.markModified('modules');
+              await course.save();
+              return res.json({ success: true, message: 'Đã xóa bài học thành công' });
+            }
+          }
+        }
+      }
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  const course = (db.courses || []).find(c => c.id === id);
+  if (course && course.modules) {
+    for (const mod of course.modules) {
+      if (mod.activities) {
+        const beforeCount = mod.activities.length;
+        mod.activities = mod.activities.filter(a => a.id !== actId);
+        if (mod.activities.length !== beforeCount) {
+          course.totalActivities = Math.max(0, (course.totalActivities || 1) - 1);
+          writeDb(db);
+          return res.json({ success: true, message: 'Đã xóa bài học thành công' });
+        }
+      }
+    }
+  }
+  res.status(404).json({ message: 'Không tìm thấy bài học để xóa' });
 });
 
 // 6. Activities: Mark Completed
@@ -760,7 +1030,7 @@ if (fs.existsSync(distPath)) {
 // Start Server on all interfaces (0.0.0.0) for Render compatibility
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 HCMUE VLE LMS Full-Stack Server is running!`);
+  console.log(`🚀 LMS Nhóm 2 Full-Stack Server is running!`);
   console.log(`👉 http://localhost:${PORT}`);
   console.log(`API Base URL: http://localhost:${PORT}/api`);
   console.log(`Database Mode: ${isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB'}`);

@@ -66,6 +66,20 @@ export const ActivityViewer: React.FC = () => {
     markActivityCompleted(activeCourse.id, activeActivity.id);
   };
 
+  const getYouTubeEmbedUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.includes('embed/')) return url;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    if (match && match[1]) {
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=0&enablejsapi=1`;
+    }
+    return url;
+  };
+
+  const isYouTube = (url?: string) => {
+    return url && (url.includes('youtube.com') || url.includes('youtu.be'));
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Navigation Top Bar */}
@@ -127,16 +141,29 @@ export const ActivityViewer: React.FC = () => {
       {/* 3. VIDEO TYPE */}
       {activeActivity.type === 'video' && (
         <div className="space-y-6">
-          <div className="bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+          <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800">
             {/* Video Player Box */}
             <div className="relative aspect-video w-full bg-slate-900 flex items-center justify-center">
-              <iframe 
-                className="w-full h-full"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&enablejsapi=1" 
-                title={activeActivity.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              />
+              {activeActivity.videoUrl && isYouTube(activeActivity.videoUrl) ? (
+                <iframe 
+                  className="w-full h-full"
+                  src={getYouTubeEmbedUrl(activeActivity.videoUrl)} 
+                  title={activeActivity.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                />
+              ) : activeActivity.videoUrl ? (
+                <video 
+                  controls 
+                  src={activeActivity.videoUrl} 
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="text-center p-8 text-slate-400 space-y-2">
+                  <Play className="w-12 h-12 mx-auto text-slate-600" />
+                  <p className="text-sm">Chưa có đường dẫn video. Bạn có thể bấm Sửa ở ngoài để chèn link YouTube hoặc MP4.</p>
+                </div>
+              )}
             </div>
 
             {/* Video Action Toolbar */}
@@ -144,7 +171,7 @@ export const ActivityViewer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                 <span className="text-xs text-slate-300">
-                  Hệ thống đang tự động theo dõi thời lượng xem bài giảng
+                  Hệ thống LMS Nhóm 2 ghi nhận tiến độ học tập
                 </span>
               </div>
 
@@ -158,7 +185,7 @@ export const ActivityViewer: React.FC = () => {
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{activeActivity.isCompleted ? 'Đã ghi nhận hoàn thành' : 'Xác nhận hoàn thành bài xem'}</span>
+                  <span>{activeActivity.isCompleted ? 'Đã hoàn thành' : 'Đánh dấu đã xem xong'}</span>
                 </button>
               </div>
             </div>
@@ -170,19 +197,22 @@ export const ActivityViewer: React.FC = () => {
               {activeActivity.title}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {activeActivity.description || 'Bài giảng trực tuyến cung cấp các kiến thức trọng tâm của chuyên đề, đi kèm các ví dụ thực tiễn trong giảng dạy.'}
+              {activeActivity.description || 'Bài giảng video trực tuyến cung cấp kiến thức trọng tâm của bài học.'}
             </p>
 
-            <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/60 text-xs text-hcmue-900 space-y-1">
-              <div className="font-bold flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-hcmue-700" />
-                <span>Ghi chú học tập cho sinh viên:</span>
+            {activeActivity.videoUrl && (
+              <div className="text-xs text-slate-500 flex items-center gap-2">
+                <span>Nguồn video:</span>
+                <a 
+                  href={activeActivity.videoUrl} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-[#0374b5] hover:underline font-mono truncate max-w-md"
+                >
+                  {activeActivity.videoUrl}
+                </a>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-slate-600">
-                <li>Xem kỹ phần phân tích tình huống thực tế ở nửa sau video.</li>
-                <li>Ghi chép lại 3 từ khóa chính để chuẩn bị cho bài kiểm tra trắc nghiệm tiếp theo.</li>
-              </ul>
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -212,22 +242,24 @@ export const ActivityViewer: React.FC = () => {
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeActivity.isCompleted
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-hcmue-700 text-white hover:bg-hcmue-800'
+                      : 'bg-[#0374b5] text-white hover:bg-[#025a8c]'
                   }`}
                 >
                   <Check className="w-4 h-4" />
                   <span>{activeActivity.isCompleted ? 'Đã hoàn thành đọc' : 'Đánh dấu đã đọc tài liệu'}</span>
                 </button>
 
-                <a
-                  href={activeActivity.fileUrl || '#'}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Tải tệp PDF</span>
-                </a>
+                {activeActivity.fileUrl && (
+                  <a
+                    href={activeActivity.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Mở Liên Kết / Trang Gốc</span>
+                  </a>
+                )}
               </div>
             </div>
 
@@ -266,7 +298,7 @@ export const ActivityViewer: React.FC = () => {
           </p>
           <button 
             onClick={handleMarkDone}
-            className="px-4 py-2 bg-hcmue-700 text-white rounded-xl text-xs font-bold"
+            className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-lg text-xs font-bold"
           >
             Đánh dấu hoàn thành diễn đàn
           </button>

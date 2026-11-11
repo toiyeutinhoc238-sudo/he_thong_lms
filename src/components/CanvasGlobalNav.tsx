@@ -36,12 +36,12 @@ export const CanvasGlobalNav: React.FC = () => {
       <div 
         onClick={() => setCurrentView('dashboard')}
         className="w-12 h-12 flex flex-col items-center justify-center cursor-pointer mb-2 group transition-transform active:scale-95"
-        title="Trang chủ LMS"
+        title="LMS Nhóm 2 - Bảng điều khiển"
       >
         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
           <GraduationCap className="w-6 h-6 text-white" />
         </div>
-        <span className="text-[10px] font-black tracking-wider uppercase opacity-90 mt-0.5">LMS</span>
+        <span className="text-[10px] font-black tracking-wider uppercase opacity-90 mt-0.5">Nhóm 2</span>
       </div>
 
       {/* Nav Items List */}
@@ -164,7 +164,7 @@ export const CanvasGlobalNav: React.FC = () => {
       {/* 7. Help / Trợ giúp Bottom */}
       <div className="w-full flex flex-col items-center pt-2 border-t border-white/10">
         <button
-          onClick={() => alert('Trung tâm trợ giúp LMS Canvas:\n- Hỗ trợ tài khoản: hotrovle@hcmue.edu.vn\n- Hotline: (028) 3835 2020')}
+          onClick={() => alert('Trung tâm hỗ trợ LMS Nhóm 2:\n- Hệ thống Quản lý Học tập LMS Nhóm 2\n- Chức năng: Thêm, xóa, sửa khóa học, mô-đun, bài tập, video, tài liệu\n- Hỗ trợ kỹ thuật: support@lms2.edu.vn')}
           className="w-[72px] py-2 flex flex-col items-center justify-center rounded-lg text-white/90 hover:bg-[#02629b] hover:text-white transition-all text-center"
           title="Trợ giúp & Hướng dẫn"
         >

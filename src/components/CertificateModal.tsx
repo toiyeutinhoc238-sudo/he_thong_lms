@@ -30,7 +30,7 @@ export const CertificateModal: React.FC = () => {
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-amber-500" />
             <h3 className="font-extrabold text-slate-800 text-sm sm:text-base">
-              Chứng chỉ Điện tử Xác thực • HCMUE VLE
+              Chứng chỉ Điện tử Xác thực • LMS Nhóm 2
             </h3>
           </div>
 
@@ -145,7 +145,7 @@ export const CertificateModal: React.FC = () => {
               {/* Red Stamp Emblem */}
               <div className="py-2 relative flex items-center justify-center">
                 <div className="w-20 h-20 rounded-full border-2 border-red-600 border-dashed flex flex-col items-center justify-center text-red-600 font-bold text-[9px] uppercase leading-tight rotate-[-12deg] bg-red-50/50 shadow-xs">
-                  <span>★ HCMUE ★</span>
+                  <span>★ LMS Nhóm 2 ★</span>
                   <span className="font-extrabold text-[10px]">ĐÃ KÝ SỐ</span>
                   <span>XÁC THỰC</span>
                 </div>

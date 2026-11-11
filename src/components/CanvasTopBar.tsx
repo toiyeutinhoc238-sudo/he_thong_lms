@@ -28,13 +28,21 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
         </button>
 
         <nav className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+          <button 
+            onClick={() => setCurrentView('dashboard')}
+            className="text-slate-900 font-extrabold hover:text-[#0374b5] transition-colors"
+          >
+            LMS Nhóm 2
+          </button>
+          <span className="text-slate-400 font-normal">›</span>
+
           {currentView === 'dashboard' ? (
-            <span className="text-slate-900 font-bold">Bảng điều khiển</span>
+            <span className="text-slate-600 font-medium">Bảng điều khiển</span>
           ) : (
             <>
               <button 
                 onClick={() => setCurrentView('course-detail')}
-                className="text-[#0374b5] hover:underline font-bold truncate max-w-[200px] sm:max-w-[320px]"
+                className="text-[#0374b5] hover:underline font-bold truncate max-w-[160px] sm:max-w-[280px]"
               >
                 {activeCourse ? (activeCourse.code || activeCourse.name) : 'Khóa học'}
               </button>
