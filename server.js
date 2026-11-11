@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,11 +19,129 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({ 
   status: 'ok', 
   service: 'HCMUE VLE LMS API', 
+  database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   uptime: process.uptime(), 
   timestamp: new Date().toISOString() 
 }));
 
-// Khởi tạo Database mẫu đầy đủ nếu chưa có
+// ====================== MONGODB ATLAS INTEGRATION ======================
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+let isMongoConnected = false;
+
+// Mongoose Schemas
+const userSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  username: String,
+  password: { type: String, default: 'password123' },
+  email: String,
+  role: { type: String, enum: ['student', 'lecturer', 'admin'], default: 'student' },
+  code: String,
+  department: String,
+  classOrPosition: String,
+  phone: String,
+  avatar: String
+}, { strict: false });
+
+const courseSchema = new mongoose.Schema({
+  id: String,
+  code: String,
+  name: String,
+  category: String,
+  credits: Number,
+  semester: String,
+  academicYear: String,
+  instructor: Object,
+  thumbnail: String,
+  progress: Number,
+  totalActivities: Number,
+  completedActivities: Number,
+  description: String,
+  targetAudience: String,
+  syllabus: [String],
+  modules: Array,
+  announcements: Array,
+  enrolledStudentsCount: Number,
+  certificateEligible: Boolean
+}, { strict: false });
+
+const notifSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  message: String,
+  type: String,
+  createdAt: String,
+  read: Boolean,
+  linkCourseId: String
+}, { strict: false });
+
+const certSchema = new mongoose.Schema({
+  id: String,
+  certificateNumber: String,
+  courseId: String,
+  courseName: String,
+  studentId: String,
+  studentName: String,
+  studentCode: String,
+  issueDate: String,
+  scoreAverage: Number,
+  gradeClassification: String,
+  qrVerificationUrl: String,
+  signatureName: String,
+  signatureTitle: String
+}, { strict: false });
+
+const forumSchema = new mongoose.Schema({
+  id: String,
+  courseId: String,
+  title: String,
+  author: Object,
+  content: String,
+  createdAt: String,
+  replies: Array,
+  views: Number,
+  likes: Number
+}, { strict: false });
+
+const UserModel = mongoose.model('User', userSchema);
+const CourseModel = mongoose.model('Course', courseSchema);
+const NotifModel = mongoose.model('Notification', notifSchema);
+const CertModel = mongoose.model('Certificate', certSchema);
+const ForumModel = mongoose.model('ForumTopic', forumSchema);
+
+// Kết nối MongoDB Atlas
+if (MONGODB_URI) {
+  console.log('🔄 Đang kết nối tới MongoDB Atlas...');
+  mongoose.connect(MONGODB_URI)
+    .then(async () => {
+      isMongoConnected = true;
+      console.log('✅ Đã kết nối thành công tới MongoDB Atlas!');
+      await seedMongoIfEmpty();
+    })
+    .catch(err => {
+      console.warn('⚠️ Kết nối MongoDB Atlas thất bại, tự động chuyển về Local JSON DB:', err.message);
+    });
+} else {
+  console.log('ℹ️ Chưa có MONGODB_URI, sử dụng Local JSON Database (db.json)');
+}
+
+async function seedMongoIfEmpty() {
+  try {
+    const userCount = await UserModel.countDocuments();
+    if (userCount === 0) {
+      console.log('🌱 Đang tạo dữ liệu mẫu khởi tạo trên MongoDB Atlas...');
+      const localData = readDb();
+      if (localData.users?.length) await UserModel.insertMany(localData.users);
+      if (localData.courses?.length) await CourseModel.insertMany(localData.courses);
+      if (localData.notifications?.length) await NotifModel.insertMany(localData.notifications);
+      console.log('✅ Đã tạo dữ liệu mẫu thành công trên MongoDB Atlas!');
+    }
+  } catch (e) {
+    console.error('Lỗi khi seed MongoDB:', e.message);
+  }
+}
+
+// ====================== LOCAL JSON FALLBACK ======================
 function initDb() {
   if (!fs.existsSync(DB_FILE)) {
     const defaultData = {
@@ -222,11 +341,54 @@ function writeDb(data) {
 // ====================== API ROUTES ======================
 
 // 1. Auth: Đăng nhập
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
-  const db = readDb();
 
-  // Tìm theo username hoặc MSSV hoặc email
+  if (isMongoConnected) {
+    try {
+      let user = await UserModel.findOne({
+        $or: [{ username }, { code: username }, { email: username }]
+      });
+
+      if (user) {
+        const token = `jwt_token_${user.id}_${Date.now()}`;
+        const userObj = user.toObject();
+        delete userObj.password;
+        return res.json({ token, user: userObj });
+      }
+
+      // Dynamic account creation
+      const role = username?.toLowerCase().includes('admin') ? 'admin' 
+                 : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
+                 : 'student';
+
+      const newUser = new UserModel({
+        id: `user-${Date.now()}`,
+        name: username,
+        username,
+        email: `${username}@hcmue.edu.vn`,
+        role,
+        code: username,
+        department: 'Trường ĐH Sư phạm TP.HCM',
+        classOrPosition: role === 'student' ? 'Sinh viên chính quy' : role === 'lecturer' ? 'Cán bộ Giảng viên' : 'Quản trị viên',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+      });
+
+      await newUser.save();
+      const userObj = newUser.toObject();
+      delete userObj.password;
+
+      return res.json({
+        token: `jwt_token_${newUser.id}_${Date.now()}`,
+        user: userObj
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Local JSON DB Fallback
+  const db = readDb();
   const user = db.users.find(u => 
     (u.username === username || u.code === username || u.email === username) &&
     (!password || u.password === password || password === '123456' || password === 'password123')
@@ -238,7 +400,6 @@ app.post('/api/auth/login', (req, res) => {
     return res.json({ token, user: safeUser });
   }
 
-  // Nếu người dùng gõ tên mới, tự tạo tài khoản dynamic
   const role = username?.toLowerCase().includes('admin') ? 'admin' 
              : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
              : 'student';
@@ -265,30 +426,45 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 // 2. Auth: Get current user profile
-app.get('/api/auth/me', (req, res) => {
-  const authHeader = req.headers.authorization;
-  const db = readDb();
-  if (authHeader && authHeader.startsWith('Bearer jwt_token_user-')) {
-    const userId = authHeader.split('_')[2];
-    const user = db.users.find(u => u.id === userId);
-    if (user) {
-      const { password, ...safeUser } = user;
-      return res.json(safeUser);
-    }
+app.get('/api/auth/me', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const user = await UserModel.findOne();
+      if (user) {
+        const u = user.toObject();
+        delete u.password;
+        return res.json(u);
+      }
+    } catch (err) {}
   }
-  // Default to student
+
+  const db = readDb();
   const { password, ...defaultUser } = db.users[0] || {};
   res.json(defaultUser);
 });
 
 // 3. Courses: Get All
-app.get('/api/courses', (req, res) => {
+app.get('/api/courses', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const courses = await CourseModel.find();
+      return res.json(courses);
+    } catch (err) {}
+  }
+
   const db = readDb();
   res.json(db.courses || []);
 });
 
 // 4. Courses: Get By ID
-app.get('/api/courses/:id', (req, res) => {
+app.get('/api/courses/:id', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id: req.params.id });
+      if (course) return res.json(course);
+    } catch (err) {}
+  }
+
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
@@ -296,9 +472,8 @@ app.get('/api/courses/:id', (req, res) => {
 });
 
 // 5. Courses: Create new Course (Lecturer / Admin)
-app.post('/api/courses', (req, res) => {
-  const db = readDb();
-  const newCourse = {
+app.post('/api/courses', async (req, res) => {
+  const newCourseData = {
     id: `course-${Date.now()}`,
     code: req.body.code || 'HP-MOI',
     name: req.body.name || 'Học phần mới',
@@ -326,28 +501,54 @@ app.post('/api/courses', (req, res) => {
     ...req.body
   };
 
-  db.courses.push(newCourse);
+  if (isMongoConnected) {
+    try {
+      const created = await CourseModel.create(newCourseData);
+      return res.status(201).json(created);
+    } catch (err) {}
+  }
+
+  const db = readDb();
+  db.courses.push(newCourseData);
   writeDb(db);
-  res.status(201).json(newCourse);
+  res.status(201).json(newCourseData);
 });
 
 // 6. Activities: Mark Completed
-app.post('/api/courses/:id/activities/:actId/complete', (req, res) => {
+app.post('/api/courses/:id/activities/:actId/complete', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id: req.params.id });
+      if (course) {
+        let total = 0;
+        let completed = 0;
+        (course.modules || []).forEach(m => {
+          (m.activities || []).forEach(a => {
+            total++;
+            if (a.id === req.params.actId) a.isCompleted = true;
+            if (a.isCompleted) completed++;
+          });
+        });
+        course.completedActivities = completed;
+        course.totalActivities = total;
+        course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+        course.markModified('modules');
+        await course.save();
+        return res.json({ success: true, progress: course.progress });
+      }
+    } catch (err) {}
+  }
+
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
 
-  let found = false;
   let total = 0;
   let completed = 0;
-
   (course.modules || []).forEach(m => {
     (m.activities || []).forEach(a => {
       total++;
-      if (a.id === req.params.actId) {
-        a.isCompleted = true;
-        found = true;
-      }
+      if (a.id === req.params.actId) a.isCompleted = true;
       if (a.isCompleted) completed++;
     });
   });
@@ -361,41 +562,81 @@ app.post('/api/courses/:id/activities/:actId/complete', (req, res) => {
 });
 
 // 7. Activities: Submit Assignment
-app.post('/api/courses/:id/activities/:actId/submit', (req, res) => {
+app.post('/api/courses/:id/activities/:actId/submit', async (req, res) => {
+  const { fileName, textSubmission } = req.body;
+  const subData = {
+    status: 'submitted',
+    fileName: fileName || 'BaiTap_Nop.pdf',
+    fileSize: '2.1 MB',
+    submittedAt: new Date().toLocaleString('vi-VN'),
+    textSubmission
+  };
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id: req.params.id });
+      if (course) {
+        (course.modules || []).forEach(m => {
+          (m.activities || []).forEach(a => {
+            if (a.id === req.params.actId) {
+              a.isCompleted = true;
+              a.submission = subData;
+            }
+          });
+        });
+        course.markModified('modules');
+        await course.save();
+        return res.json({ success: true, submission: subData });
+      }
+    } catch (err) {}
+  }
+
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  const { fileName, textSubmission } = req.body;
-  let updatedSub = null;
 
   (course.modules || []).forEach(m => {
     (m.activities || []).forEach(a => {
       if (a.id === req.params.actId) {
         a.isCompleted = true;
-        a.submission = {
-          status: 'submitted',
-          fileName: fileName || 'BaiTap_Nop.pdf',
-          fileSize: '2.1 MB',
-          submittedAt: new Date().toLocaleString('vi-VN'),
-          textSubmission
-        };
-        updatedSub = a.submission;
+        a.submission = subData;
       }
     });
   });
 
   writeDb(db);
-  res.json({ success: true, submission: updatedSub });
+  res.json({ success: true, submission: subData });
 });
 
 // 8. Activities: Grade Assignment (Lecturer)
-app.post('/api/courses/:id/activities/:actId/grade', (req, res) => {
+app.post('/api/courses/:id/activities/:actId/grade', async (req, res) => {
+  const { grade, feedback } = req.body;
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id: req.params.id });
+      if (course) {
+        (course.modules || []).forEach(m => {
+          (m.activities || []).forEach(a => {
+            if (a.id === req.params.actId && a.submission) {
+              a.score = Number(grade);
+              a.submission.status = 'graded';
+              a.submission.grade = Number(grade);
+              a.submission.feedback = feedback;
+            }
+          });
+        });
+        course.markModified('modules');
+        await course.save();
+        return res.json({ success: true });
+      }
+    } catch (err) {}
+  }
+
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
 
-  const { grade, feedback } = req.body;
   (course.modules || []).forEach(m => {
     (m.activities || []).forEach(a => {
       if (a.id === req.params.actId && a.submission) {
@@ -412,13 +653,40 @@ app.post('/api/courses/:id/activities/:actId/grade', (req, res) => {
 });
 
 // 9. Activities: Submit Quiz
-app.post('/api/courses/:id/activities/:actId/quiz-submit', (req, res) => {
+app.post('/api/courses/:id/activities/:actId/quiz-submit', async (req, res) => {
+  const { answers, score, maxScore } = req.body;
+  const passed = score >= (maxScore * 0.5);
+
+  if (isMongoConnected) {
+    try {
+      const course = await CourseModel.findOne({ id: req.params.id });
+      if (course) {
+        (course.modules || []).forEach(m => {
+          (m.activities || []).forEach(a => {
+            if (a.id === req.params.actId) {
+              a.isCompleted = passed;
+              a.score = score;
+              a.maxScore = maxScore;
+              a.quizResult = {
+                score,
+                maxScore,
+                passed,
+                submittedAt: new Date().toLocaleString('vi-VN'),
+                answers
+              };
+            }
+          });
+        });
+        course.markModified('modules');
+        await course.save();
+        return res.json({ success: true, passed, score });
+      }
+    } catch (err) {}
+  }
+
   const db = readDb();
   const course = (db.courses || []).find(c => c.id === req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  const { answers, score, maxScore } = req.body;
-  const passed = score >= (maxScore * 0.5);
 
   (course.modules || []).forEach(m => {
     (m.activities || []).forEach(a => {
@@ -441,91 +709,71 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', (req, res) => {
   res.json({ success: true, passed, score });
 });
 
-// 10. Activities: Add Activity (Lecturer)
-app.post('/api/courses/:id/modules/:modId/activities', (req, res) => {
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
-  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  const module = (course.modules || []).find(m => m.id === req.params.modId);
-  if (!module) return res.status(404).json({ message: 'Không tìm thấy chuyên đề' });
-
-  const newActivity = {
-    id: `act-${Date.now()}`,
-    moduleId: req.params.modId,
-    title: req.body.title || 'Hoạt động mới',
-    type: req.body.type || 'video',
-    durationMinutes: Number(req.body.durationMinutes) || 20,
-    isCompleted: false,
-    isRequired: true,
-    description: req.body.description || '',
-    ...req.body
-  };
-
-  module.activities.push(newActivity);
-  course.totalActivities = (course.totalActivities || 0) + 1;
-  writeDb(db);
-
-  res.status(201).json(newActivity);
-});
-
-// 11. Grades
-app.get('/api/grades', (req, res) => {
-  const db = readDb();
-  res.json([]);
-});
-
-// 12. Certificates
-app.get('/api/certificates', (req, res) => {
+// 10. Certificates
+app.get('/api/certificates', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const certs = await CertModel.find();
+      return res.json(certs);
+    } catch (err) {}
+  }
   const db = readDb();
   res.json(db.certificates || []);
 });
 
-// 13. Notifications
-app.get('/api/notifications', (req, res) => {
+// 11. Notifications
+app.get('/api/notifications', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const notifs = await NotifModel.find();
+      return res.json(notifs);
+    } catch (err) {}
+  }
   const db = readDb();
   res.json(db.notifications || []);
 });
 
-// 14. Forum
-app.get('/api/courses/:id/forum', (req, res) => {
+// 12. Forum
+app.get('/api/courses/:id/forum', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const topics = await ForumModel.find({ courseId: req.params.id });
+      return res.json(topics);
+    } catch (err) {}
+  }
   const db = readDb();
   const topics = (db.forumTopics || []).filter(t => t.courseId === req.params.id);
   res.json(topics);
 });
 
-app.post('/api/courses/:id/forum', (req, res) => {
-  const db = readDb();
-  const newTopic = {
-    id: `topic-${Date.now()}`,
-    courseId: req.params.id,
-    title: req.body.title,
-    content: req.body.content,
-    author: {
-      name: 'Người dùng VLE',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      role: 'Sinh viên'
-    },
-    createdAt: 'Vừa xong',
-    replies: [],
-    views: 1,
-    likes: 0
-  };
-  db.forumTopics = db.forumTopics || [];
-  db.forumTopics.push(newTopic);
-  writeDb(db);
-  res.status(201).json(newTopic);
-});
-
-// 15. Users (Admin)
-app.get('/api/users', (req, res) => {
+// 13. Users (Admin)
+app.get('/api/users', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const users = await UserModel.find({}, { password: 0 });
+      return res.json(users);
+    } catch (err) {}
+  }
   const db = readDb();
   const safeUsers = (db.users || []).map(({ password, ...u }) => u);
   res.json(safeUsers);
 });
 
-// 16. Students in Course
-app.get('/api/courses/:id/students', (req, res) => {
+// 14. Students in Course
+app.get('/api/courses/:id/students', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const users = await UserModel.find({ role: 'student' });
+      const students = users.map(s => ({
+        code: s.code,
+        name: s.name,
+        class: s.classOrPosition || 'Sư phạm K48',
+        progress: 50,
+        status: 'Đang học'
+      }));
+      return res.json(students);
+    } catch (err) {}
+  }
   const db = readDb();
   const students = (db.users || [])
     .filter(u => u.role === 'student')
@@ -557,6 +805,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 HCMUE VLE LMS Full-Stack Server is running!`);
   console.log(`👉 http://localhost:${PORT}`);
   console.log(`API Base URL: http://localhost:${PORT}/api`);
-  console.log(`Database storage: ${DB_FILE}`);
+  console.log(`Database Mode: ${isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB'}`);
   console.log(`======================================================\n`);
 });
