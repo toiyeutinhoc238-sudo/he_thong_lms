@@ -48,13 +48,7 @@ export const CanvasGlobalNav: React.FC = () => {
       <nav className="w-full flex-1 flex flex-col items-center space-y-1">
         {/* 1. Account / Tài khoản */}
         <button
-          onClick={() => {
-            if (!currentUser.id || currentUser.code === 'Chưa đăng nhập') {
-              setIsLoginModalOpen(true);
-            } else {
-              setCurrentView('profile');
-            }
-          }}
+          onClick={() => setCurrentView('profile')}
           className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
             isNavActive('account')
               ? 'bg-white text-[#0374b5] shadow-xs'
@@ -67,14 +61,15 @@ export const CanvasGlobalNav: React.FC = () => {
               <img 
                 src={currentUser.avatar} 
                 alt={currentUser.name} 
+                referrerPolicy="no-referrer"
                 className="w-7 h-7 rounded-full object-cover border border-white/60 shadow-xs" 
               />
             ) : (
               <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-xs font-bold">{currentUser.name ? currentUser.name.charAt(0) : 'U'}</span>
+                <span className="text-xs font-bold">{currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}</span>
               </div>
             )}
-            {(!currentUser.id || currentUser.code === 'Chưa đăng nhập') && (
+            {(!currentUser.id || !currentUser.email) && (
               <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-[#0374b5]" />
             )}
           </div>

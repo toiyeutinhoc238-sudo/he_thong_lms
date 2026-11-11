@@ -134,10 +134,24 @@ const ForumModel = mongoose.model('ForumTopic', forumSchema);
 // Kết nối MongoDB Atlas (Không seed bất kỳ dữ liệu ảo nào)
 if (MONGODB_URI) {
   console.log('🔄 Đang kết nối tới MongoDB Atlas...');
-  mongoose.connect(MONGODB_URI, { dbName: 'vle_hcmue' })
-    .then(() => {
+  mongoose.connect(MONGODB_URI, { dbName: 'lms_nhom2' })
+    .then(async () => {
       isMongoConnected = true;
-      console.log('✅ Đã kết nối thành công tới MongoDB Atlas (Database: vle_hcmue)!');
+      console.log('✅ Đã kết nối thành công tới MongoDB Atlas (Database: lms_nhom2)!');
+      
+      // Tự động dọn dẹp các tài khoản ảo hoặc mẫu thử nghiệm cũ nếu có
+      try {
+        await UserModel.deleteMany({
+          $or: [
+            { email: { $regex: /hcmue/i } },
+            { name: { $regex: /hcmue/i } },
+            { code: 'SV-2026' }
+          ]
+        });
+        console.log('🧹 Đã hoàn tất kiểm tra và làm sạch tài khoản trong MongoDB.');
+      } catch (cleanErr) {
+        console.warn('Thông báo dọn dẹp dữ liệu cũ:', cleanErr.message);
+      }
     })
     .catch(err => {
       console.warn('⚠️ Kết nối MongoDB Atlas thất bại, tự động chuyển về Local JSON DB:', err.message);
@@ -276,50 +290,71 @@ app.post('/api/auth/google', async (req, res) => {
 
     const payload = await googleRes.json();
     const { sub: googleId, email, name, picture } = payload;
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: 'Không thể trích xuất địa chỉ email từ Google' });
+    }
 
     // Phân quyền tự động dựa vào email
     let role = 'student';
-    if (email && email.toLowerCase().includes('teacher')) {
+    if (normalizedEmail.includes('teacher') || normalizedEmail.includes('giangvien')) {
       role = 'lecturer';
     }
-    if (email && (email.toLowerCase().includes('admin') || email === 'phanphiphu04@gmail.com')) {
+    if (normalizedEmail.includes('admin') || normalizedEmail === 'phanphiphu04@gmail.com') {
       role = 'admin';
     }
 
     let user;
     if (isMongoConnected) {
-      user = await UserModel.findOne({ email });
+      user = await UserModel.findOne({ email: normalizedEmail });
       if (!user) {
         user = new UserModel({
           id: `user-google-${googleId ? googleId.slice(-6) : Date.now().toString().slice(-6)}`,
-          name: name || email.split('@')[0],
-          username: email.split('@')[0],
-          email,
+          name: name || normalizedEmail.split('@')[0],
+          username: normalizedEmail.split('@')[0],
+          email: normalizedEmail,
           role,
-          code: email.split('@')[0].toUpperCase(),
+          code: normalizedEmail.split('@')[0].toUpperCase(),
           department: 'LMS Nhóm 2',
-          classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
-          avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+          classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên',
+          avatar: picture || '',
+          phone: '',
+          dateOfBirth: '',
+          address: ''
         });
+        await user.save();
+      } else {
+        user.name = name || user.name;
+        user.avatar = picture || user.avatar || '';
+        if (role === 'admin') user.role = 'admin';
         await user.save();
       }
     } else {
       const db = readDb();
       db.users = db.users || [];
-      user = db.users.find(u => u.email === email);
+      user = db.users.find(u => u.email === normalizedEmail);
       if (!user) {
         user = {
           id: `user-google-${googleId ? googleId.slice(-6) : Date.now().toString().slice(-6)}`,
-          name: name || email.split('@')[0],
-          username: email.split('@')[0],
-          email,
+          name: name || normalizedEmail.split('@')[0],
+          username: normalizedEmail.split('@')[0],
+          email: normalizedEmail,
           role,
-          code: email.split('@')[0].toUpperCase(),
+          code: normalizedEmail.split('@')[0].toUpperCase(),
           department: 'LMS Nhóm 2',
-          classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
-          avatar: picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+          classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên',
+          avatar: picture || '',
+          phone: '',
+          dateOfBirth: '',
+          address: ''
         };
         db.users.push(user);
+        writeDb(db);
+      } else {
+        user.name = name || user.name;
+        user.avatar = picture || user.avatar || '';
+        if (role === 'admin') user.role = 'admin';
         writeDb(db);
       }
     }
@@ -335,37 +370,87 @@ app.post('/api/auth/google', async (req, res) => {
   }
 });
 
-// 2. Auth: Get current user profile
+// 2. Auth: Get current user profile (Yêu cầu token hợp lệ, tuyệt đối không trả về mock user)
 app.get('/api/auth/me', async (req, res) => {
   const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Chưa đăng nhập' });
+  }
+
+  const token = authHeader.replace('Bearer ', '').trim();
+  const match = token.match(/^jwt_token_(.+)_\d+$/);
+  if (!match) {
+    return res.status(401).json({ message: 'Token không hợp lệ' });
+  }
+  const userId = match[1];
+
   if (isMongoConnected) {
     try {
-      if (authHeader && authHeader.includes('jwt_token_')) {
-        const parts = authHeader.split('_');
-        const userId = parts[2];
-        const user = await UserModel.findOne({ id: userId });
-        if (user) {
-          const u = user.toObject();
-          delete u.password;
-          return res.json(u);
-        }
-      }
-      const user = await UserModel.findOne();
+      const user = await UserModel.findOne({ id: userId });
       if (user) {
         const u = user.toObject();
         delete u.password;
         return res.json(u);
       }
-      return res.status(401).json({ message: 'Chưa đăng nhập' });
     } catch (err) {}
   }
 
   const db = readDb();
-  if (db.users && db.users.length > 0) {
-    const { password, ...defaultUser } = db.users[0];
-    return res.json(defaultUser);
+  const user = (db.users || []).find(u => u.id === userId);
+  if (user) {
+    const { password, ...safeUser } = user;
+    return res.json(safeUser);
   }
-  return res.status(401).json({ message: 'Chưa đăng nhập' });
+
+  return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
+});
+
+// 2.1 Auth: Update user profile (phone, dateOfBirth, address)
+app.put('/api/auth/profile', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Chưa đăng nhập' });
+  }
+
+  const token = authHeader.replace('Bearer ', '').trim();
+  const match = token.match(/^jwt_token_(.+)_\d+$/);
+  if (!match) {
+    return res.status(401).json({ message: 'Token không hợp lệ' });
+  }
+  const userId = match[1];
+  const { phone, dateOfBirth, address, name } = req.body;
+
+  if (isMongoConnected) {
+    try {
+      const user = await UserModel.findOne({ id: userId });
+      if (user) {
+        if (phone !== undefined) user.phone = phone;
+        if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+        if (address !== undefined) user.address = address;
+        if (name) user.name = name;
+        await user.save();
+        const u = user.toObject();
+        delete u.password;
+        return res.json(u);
+      }
+    } catch (err) {
+      return res.status(500).json({ message: 'Lỗi cập nhật hồ sơ: ' + err.message });
+    }
+  }
+
+  const db = readDb();
+  const user = (db.users || []).find(u => u.id === userId);
+  if (user) {
+    if (phone !== undefined) user.phone = phone;
+    if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
+    if (address !== undefined) user.address = address;
+    if (name) user.name = name;
+    writeDb(db);
+    const { password, ...safeUser } = user;
+    return res.json(safeUser);
+  }
+
+  return res.status(404).json({ message: 'Không tìm thấy người dùng' });
 });
 
 // 3. Courses: Get All (Không có dữ liệu ảo)

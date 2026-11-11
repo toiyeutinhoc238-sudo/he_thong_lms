@@ -64,7 +64,7 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
           <span>Trợ lý AI</span>
         </button>
 
-        {(!currentUser.id || currentUser.code === 'Chưa đăng nhập') ? (
+        {(!currentUser.id || !currentUser.email) ? (
           <button
             onClick={() => setIsLoginModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-bold transition-all shadow-xs"
@@ -73,11 +73,27 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
             <span className="hidden sm:inline">Đăng nhập</span>
           </button>
         ) : (
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <span className="text-xs text-slate-600 hidden md:inline">
-              Xin chào, <strong className="text-slate-900">{currentUser.name.split(' ').pop()}</strong>
+          <button 
+            onClick={() => setCurrentView('profile')}
+            className="flex items-center gap-2 pl-2 border-l border-slate-200 hover:opacity-85 transition-opacity text-left"
+            title="Xem hồ sơ cá nhân"
+          >
+            {currentUser.avatar ? (
+              <img 
+                src={currentUser.avatar} 
+                alt={currentUser.name} 
+                referrerPolicy="no-referrer"
+                className="w-7 h-7 rounded-full object-cover border border-slate-300"
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-[#0374b5] text-white flex items-center justify-center text-xs font-bold">
+                {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
+            <span className="text-xs text-slate-700 font-bold hidden md:inline truncate max-w-[160px]">
+              {currentUser.name}
             </span>
-          </div>
+          </button>
         )}
       </div>
     </header>

@@ -44,6 +44,8 @@ interface AppContextType {
   setIsLoginModalOpen: (open: boolean) => void;
   isLoading: boolean;
   refreshData: () => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<User | void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -51,12 +53,25 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeRole, setActiveRole] = useState<Role>('student');
   const [currentUser, setCurrentUser] = useState<User>(() => {
-    const saved = localStorage.getItem('lms2_user') || localStorage.getItem('hcmue_vle_user');
-    return saved ? JSON.parse(saved) : { ...initialUser, name: 'Học viên LMS Nhóm 2', code: 'Chưa đăng nhập' };
+    if (typeof window !== 'undefined') {
+      ['hcmue_vle_user', 'hcmue_vle_courses', 'hcmue_vle_notifs', 'hcmue_vle_certs', 'hcmue_vle_token'].forEach(k => {
+        try { localStorage.removeItem(k); } catch (e) {}
+      });
+    }
+    const saved = localStorage.getItem('lms2_user');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.id && !parsed.email?.includes('hcmue') && !parsed.name?.includes('HCMUE')) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return { ...initialUser, name: '', code: '' };
   });
 
   const [courses, setCourses] = useState<Course[]>(() => {
-    const saved = localStorage.getItem('lms2_courses') || localStorage.getItem('hcmue_vle_courses');
+    const saved = localStorage.getItem('lms2_courses');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -67,12 +82,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem('lms2_notifs') || localStorage.getItem('hcmue_vle_notifs');
+    const saved = localStorage.getItem('lms2_notifs');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [certificates, setCertificates] = useState<Certificate[]>(() => {
-    const saved = localStorage.getItem('lms2_certs') || localStorage.getItem('hcmue_vle_certs');
+    const saved = localStorage.getItem('lms2_certs');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -137,15 +152,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshData();
   }, [refreshData]);
 
+  const logout = useCallback(async () => {
+    await api.auth.logout();
+    setCurrentUser({ ...initialUser, name: '', code: '' });
+    setActiveRole('student');
+    setCurrentView('dashboard');
+  }, []);
+
+  const updateProfile = useCallback(async (data: Partial<User>) => {
+    try {
+      const updated = await api.auth.updateProfile(data);
+      if (updated && updated.id) {
+        setCurrentUser(updated);
+        localStorage.setItem('lms2_user', JSON.stringify(updated));
+        return updated;
+      }
+    } catch (err) {
+      // Local fallback
+      setCurrentUser(prev => {
+        const next = { ...prev, ...data };
+        localStorage.setItem('lms2_user', JSON.stringify(next));
+        return next;
+      });
+    }
+  }, []);
+
   const switchRole = (role: Role) => {
     setActiveRole(role);
-    setCurrentUser(prev => ({
-      ...prev,
-      role,
-      name: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên',
-      code: role === 'student' ? 'HV-2026' : role === 'lecturer' ? 'GV-2026' : 'ADMIN-001',
-      department: 'Hệ thống Đào tạo LMS Nhóm 2'
-    }));
+    setCurrentUser(prev => {
+      if (!prev.id) return prev;
+      return {
+        ...prev,
+        role,
+        classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên'
+      };
+    });
 
     if (role === 'lecturer') {
       setCurrentView('teacher-studio');
@@ -543,7 +584,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isLoginModalOpen,
         setIsLoginModalOpen,
         isLoading,
-        refreshData
+        refreshData,
+        logout,
+        updateProfile
       }}
     >
       {children}

@@ -31,9 +31,10 @@ export const LoginModal: React.FC = () => {
     try {
       const res = await api.auth.googleLogin(response.credential);
       if (res && res.token) {
-        localStorage.setItem('hcmue_vle_token', res.token);
+        localStorage.setItem('lms2_token', res.token);
       }
       if (res && res.user) {
+        localStorage.setItem('lms2_user', JSON.stringify(res.user));
         setCurrentUser(res.user);
         switchRole(res.user.role || 'student');
       }
@@ -102,9 +103,10 @@ export const LoginModal: React.FC = () => {
       });
 
       if (res && res.token) {
-        localStorage.setItem('hcmue_vle_token', res.token);
+        localStorage.setItem('lms2_token', res.token);
       }
       if (res && res.user) {
+        localStorage.setItem('lms2_user', JSON.stringify(res.user));
         setCurrentUser(res.user);
         switchRole(res.user.role || 'student');
       }
@@ -163,51 +165,11 @@ export const LoginModal: React.FC = () => {
           </div>
         )}
 
-        {/* Quick Demo Switcher Accounts */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/60 space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-hcmue-900">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Chuyển nhanh vai trò thử nghiệm:</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('student')}
-              className={`p-2 rounded-xl text-xs font-bold transition-all text-center border ${
-                activeRole === 'student'
-                  ? 'bg-amber-400 text-slate-900 border-amber-500 shadow-sm'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-100'
-              }`}
-            >
-              Sinh viên
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('lecturer')}
-              className={`p-2 rounded-xl text-xs font-bold transition-all text-center border ${
-                activeRole === 'lecturer'
-                  ? 'bg-amber-400 text-slate-900 border-amber-500 shadow-sm'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-100'
-              }`}
-            >
-              Giảng viên
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('admin')}
-              className={`p-2 rounded-xl text-xs font-bold transition-all text-center border ${
-                activeRole === 'admin'
-                  ? 'bg-amber-400 text-slate-900 border-amber-500 shadow-sm'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-100'
-              }`}
-            >
-              Quản trị viên
-            </button>
-          </div>
-        </div>
-
         {/* Google OAuth Section */}
-        <div className="space-y-2 pt-1">
+        <div className="space-y-3 pt-1">
+          <div className="text-center">
+            <span className="text-xs font-bold text-slate-700">Đăng nhập nhanh an toàn bằng Google:</span>
+          </div>
           <div className="flex justify-center w-full min-h-[44px]" id="google-btn-container">
             {/* Fallback button when GIS is loading or rendered */}
             <button
@@ -231,7 +193,7 @@ export const LoginModal: React.FC = () => {
             </button>
           </div>
           <p className="text-[11px] text-slate-400 text-center">
-            Hỗ trợ đăng nhập nhanh bằng tài khoản Google cá nhân & tổ chức
+            Dữ liệu họ tên, email và ảnh đại diện sẽ được đồng bộ tự động từ Google
           </p>
         </div>
 

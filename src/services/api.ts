@@ -51,9 +51,16 @@ class ApiClient {
         body: JSON.stringify({ credential })
       }),
     getMe: () => this.request<User>('/auth/me'),
+    updateProfile: (data: Partial<User>) =>
+      this.request<User>('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
     logout: () => {
       localStorage.removeItem('lms2_token');
+      localStorage.removeItem('lms2_user');
       localStorage.removeItem('hcmue_vle_token');
+      localStorage.removeItem('hcmue_vle_user');
       return Promise.resolve();
     }
   };

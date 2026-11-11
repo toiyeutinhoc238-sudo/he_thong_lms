@@ -3,14 +3,14 @@ import { Course, User, NotificationItem, ForumTopic, Certificate } from '../type
 // Dữ liệu ban đầu rỗng để sẵn sàng nhận dữ liệu thật từ API backend
 export const initialUser: User = {
   id: '',
-  name: 'Người dùng',
+  name: 'Chưa đăng nhập',
   username: '',
   email: '',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  avatar: '',
   role: 'student',
   code: '',
-  department: 'Đang tải...',
-  classOrPosition: ''
+  department: 'LMS Nhóm 2',
+  classOrPosition: 'Khách'
 };
 
 export const initialCourses: Course[] = [];
