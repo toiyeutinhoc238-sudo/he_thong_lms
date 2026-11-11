@@ -3,6 +3,11 @@ import { AppProvider, useApp } from './context/AppContext';
 import { CanvasGlobalNav } from './components/CanvasGlobalNav';
 import { CanvasTopBar } from './components/CanvasTopBar';
 import { CanvasDashboard } from './components/CanvasDashboard';
+import { CanvasCoursesList } from './components/CanvasCoursesList';
+import { CanvasCalendar } from './components/CanvasCalendar';
+import { CanvasInbox } from './components/CanvasInbox';
+import { CanvasHistory } from './components/CanvasHistory';
+import { CanvasHelp } from './components/CanvasHelp';
 import { CourseDetail } from './components/CourseDetail';
 import { ActivityViewer } from './components/ActivityViewer';
 import { Gradebook } from './components/Gradebook';
@@ -36,6 +41,11 @@ const MainLayout: React.FC = () => {
         {/* Dynamic Workspace */}
         <main className="flex-1 flex min-w-0 overflow-y-auto bg-white">
           {currentView === 'dashboard' && <CanvasDashboard />}
+          {currentView === 'courses-list' && <CanvasCoursesList />}
+          {currentView === 'calendar' && <CanvasCalendar />}
+          {currentView === 'inbox' && <CanvasInbox />}
+          {currentView === 'history' && <CanvasHistory />}
+          {currentView === 'help' && <CanvasHelp />}
           {currentView === 'course-detail' && <CourseDetail isCourseNavOpen={isCourseNavOpen} />}
           {currentView === 'activity' && <ActivityViewer />}
           {currentView === 'gradebook' && <Gradebook />}

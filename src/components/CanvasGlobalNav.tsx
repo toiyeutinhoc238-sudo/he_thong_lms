@@ -9,14 +9,12 @@ import {
   HelpCircle,
   GraduationCap
 } from 'lucide-react';
-import { AppView } from '../types';
 
 export const CanvasGlobalNav: React.FC = () => {
   const { 
     currentView, 
     setCurrentView, 
     currentUser, 
-    setIsLoginModalOpen, 
     notifications,
     activeCourse
   } = useApp();
@@ -25,16 +23,28 @@ export const CanvasGlobalNav: React.FC = () => {
 
   const isNavActive = (key: string) => {
     if (key === 'account') return currentView === 'profile';
-    if (key === 'dashboard') return currentView === 'dashboard';
-    if (key === 'courses') return currentView === 'course-detail' || currentView === 'activity';
+    if (key === 'dashboard') return currentView === 'dashboard' || currentView === 'admin-panel';
+    if (key === 'courses') return currentView === 'courses-list' || currentView === 'course-detail' || currentView === 'activity';
+    if (key === 'calendar') return currentView === 'calendar';
+    if (key === 'inbox') return currentView === 'inbox';
+    if (key === 'history') return currentView === 'history';
+    if (key === 'help') return currentView === 'help';
     return false;
+  };
+
+  const handleGoDashboard = () => {
+    if (currentUser?.role === 'admin') {
+      setCurrentView('admin-panel');
+    } else {
+      setCurrentView('dashboard');
+    }
   };
 
   return (
     <aside className="w-[78px] shrink-0 min-h-screen bg-[#0374b5] flex flex-col items-center py-2 text-white select-none z-30 shadow-md">
       {/* Brand Logo / Institution Top Icon */}
       <div 
-        onClick={() => setCurrentView('dashboard')}
+        onClick={handleGoDashboard}
         className="w-12 h-12 flex flex-col items-center justify-center cursor-pointer mb-2 group transition-transform active:scale-95"
         title="LMS Nhóm 2 - Bảng điều khiển"
       >
@@ -78,13 +88,13 @@ export const CanvasGlobalNav: React.FC = () => {
 
         {/* 2. Dashboard / Bảng điều khiển */}
         <button
-          onClick={() => setCurrentView('dashboard')}
+          onClick={handleGoDashboard}
           className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
             isNavActive('dashboard')
               ? 'bg-white text-[#0374b5] shadow-xs'
               : 'text-white/90 hover:bg-[#02629b] hover:text-white'
           }`}
-          title="Bảng điều khiển khóa học"
+          title="Bảng điều khiển học tập & Quản trị"
         >
           <Gauge className="w-6 h-6 stroke-[1.8]" />
           <span className="text-[11px] font-medium mt-1 leading-tight">Bảng điều khiển</span>
@@ -92,19 +102,13 @@ export const CanvasGlobalNav: React.FC = () => {
 
         {/* 3. Courses / Khóa học */}
         <button
-          onClick={() => {
-            if (activeCourse) {
-              setCurrentView('course-detail');
-            } else {
-              setCurrentView('dashboard');
-            }
-          }}
+          onClick={() => setCurrentView('courses-list')}
           className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
             isNavActive('courses')
               ? 'bg-white text-[#0374b5] shadow-xs'
               : 'text-white/90 hover:bg-[#02629b] hover:text-white'
           }`}
-          title="Khóa học đang học"
+          title="Danh sách tất cả Khóa học"
         >
           <BookOpen className="w-6 h-6 stroke-[1.8]" />
           <span className="text-[11px] font-medium mt-1 leading-tight">Khóa học</span>
@@ -112,7 +116,7 @@ export const CanvasGlobalNav: React.FC = () => {
 
         {/* 4. Calendar / Lịch */}
         <button
-          onClick={() => setCurrentView('dashboard')}
+          onClick={() => setCurrentView('calendar')}
           className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
             isNavActive('calendar')
               ? 'bg-white text-[#0374b5] shadow-xs'
@@ -126,7 +130,7 @@ export const CanvasGlobalNav: React.FC = () => {
 
         {/* 5. Inbox / Hộp thư */}
         <button
-          onClick={() => setCurrentView('dashboard')}
+          onClick={() => setCurrentView('inbox')}
           className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center relative group ${
             isNavActive('inbox')
               ? 'bg-white text-[#0374b5] shadow-xs'
@@ -147,8 +151,12 @@ export const CanvasGlobalNav: React.FC = () => {
 
         {/* 6. History / Lịch sử */}
         <button
-          onClick={() => setCurrentView('dashboard')}
-          className="w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-white/90 hover:bg-[#02629b] hover:text-white text-center"
+          onClick={() => setCurrentView('history')}
+          className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
+            isNavActive('history')
+              ? 'bg-white text-[#0374b5] shadow-xs'
+              : 'text-white/90 hover:bg-[#02629b] hover:text-white'
+          }`}
           title="Lịch sử xem gần đây"
         >
           <History className="w-6 h-6 stroke-[1.8]" />
@@ -159,9 +167,13 @@ export const CanvasGlobalNav: React.FC = () => {
       {/* 7. Help / Trợ giúp Bottom */}
       <div className="w-full flex flex-col items-center pt-2 border-t border-white/10">
         <button
-          onClick={() => alert('Trung tâm hỗ trợ LMS Nhóm 2:\n- Hệ thống Quản lý Học tập LMS Nhóm 2\n- Chức năng: Thêm, xóa, sửa khóa học, mô-đun, bài tập, video, tài liệu\n- Hỗ trợ kỹ thuật: support@lms2.edu.vn')}
-          className="w-[72px] py-2 flex flex-col items-center justify-center rounded-lg text-white/90 hover:bg-[#02629b] hover:text-white transition-all text-center"
-          title="Trợ giúp & Hướng dẫn"
+          onClick={() => setCurrentView('help')}
+          className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center ${
+            isNavActive('help')
+              ? 'bg-white text-[#0374b5] shadow-xs'
+              : 'text-white/90 hover:bg-[#02629b] hover:text-white'
+          }`}
+          title="Trợ giúp & Hướng dẫn sử dụng"
         >
           <HelpCircle className="w-6 h-6 stroke-[1.8]" />
           <span className="text-[11px] font-medium mt-1 leading-tight">Trợ giúp</span>

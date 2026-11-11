@@ -94,7 +94,7 @@ export const Dashboard: React.FC = () => {
         <div className="relative z-10 max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Cổng học tập trực tuyến VLE - ĐH Sư phạm TP.HCM</span>
+            <span>Cổng học tập trực tuyến LMS Nhóm 2</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
@@ -182,7 +182,7 @@ export const Dashboard: React.FC = () => {
           className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between cursor-pointer hover:border-amber-400 transition-all group"
         >
           <div>
-            <p className="text-xs font-medium text-slate-500">Chứng chỉ VLE</p>
+            <p className="text-xs font-medium text-slate-500">Chứng chỉ hoàn thành</p>
             <h3 className="text-2xl font-black text-amber-500 mt-1">{certificates.length}</h3>
             <span className="text-[11px] text-amber-600 font-medium group-hover:underline flex items-center gap-0.5">
               Xem chứng nhận <ChevronRight className="w-3 h-3" />
@@ -388,7 +388,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* VLE Study Guidelines */}
+          {/* LMS Nhóm 2 Study Guidelines */}
           <div className="bg-gradient-to-br from-hcmue-900 to-hcmue-800 text-white p-5 rounded-2xl shadow-sm space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
@@ -405,7 +405,7 @@ export const Dashboard: React.FC = () => {
               </li>
               <li className="flex items-start gap-1.5">
                 <span className="text-amber-400 font-bold">•</span>
-                <span>Mọi thắc mắc kỹ thuật liên hệ: <strong>hotrovle@hcmue.edu.vn</strong>.</span>
+                <span>Mọi thắc mắc kỹ thuật liên hệ: <strong>support@lms2.edu.vn</strong>.</span>
               </li>
             </ul>
           </div>

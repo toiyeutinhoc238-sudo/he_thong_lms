@@ -13,11 +13,11 @@ export const Footer: React.FC = () => {
                 <GraduationCap className="w-5 h-5 text-amber-300" />
               </div>
               <span className="text-white font-extrabold text-sm tracking-tight">
-                VLE HCMUE
+                LMS Nhóm 2
               </span>
             </div>
             <p className="text-slate-400 text-[11px] leading-relaxed">
-              Cổng thông tin Đào tạo Trực tuyến (Virtual Learning Environment) của Trường Đại học Sư phạm Thành phố Hồ Chí Minh.
+              Cổng thông tin Đào tạo Trực tuyến Hiện đại của Hệ thống LMS Nhóm 2.
             </p>
             <div className="flex items-center gap-2 text-[11px] text-amber-400 font-medium">
               <ShieldCheck className="w-4 h-4" />
@@ -37,11 +37,11 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>hotrovle@hcmue.edu.vn</span>
+                <span>support@lms2.edu.vn</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>(028) 3835 2020 (Số máy lẻ 142)</span>
+                <span>(028) 3835 2026</span>
               </div>
             </div>
           </div>
@@ -53,35 +53,35 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-1.5 text-slate-400 text-[11px]">
               <li>
-                <a href="https://hcmue.edu.vn" target="_blank" rel="noreferrer" className="hover:text-amber-400 transition-colors flex items-center gap-1">
-                  Trang chủ HCMUE <ExternalLink className="w-3 h-3 text-slate-500" />
-                </a>
+                <span className="hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer">
+                  Khóa học Trực tuyến <ExternalLink className="w-3 h-3 text-slate-500" />
+                </span>
               </li>
               <li>
-                <a href="https://online.hcmue.edu.vn" target="_blank" rel="noreferrer" className="hover:text-amber-400 transition-colors flex items-center gap-1">
-                  Cổng Thông tin Sinh viên <ExternalLink className="w-3 h-3 text-slate-500" />
-                </a>
+                <span className="hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer">
+                  Kho Học liệu Điện tử <ExternalLink className="w-3 h-3 text-slate-500" />
+                </span>
               </li>
               <li>
-                <a href="https://lib.hcmue.edu.vn" target="_blank" rel="noreferrer" className="hover:text-amber-400 transition-colors flex items-center gap-1">
-                  Thư viện điện tử HCMUE <ExternalLink className="w-3 h-3 text-slate-500" />
-                </a>
+                <span className="hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer">
+                  Diễn đàn Thảo luận <ExternalLink className="w-3 h-3 text-slate-500" />
+                </span>
               </li>
               <li>
-                <a href="#" className="hover:text-amber-400 transition-colors">
+                <span className="hover:text-amber-400 transition-colors cursor-pointer">
                   Quy chế Đào tạo & Khung Chuẩn Đầu ra
-                </a>
+                </span>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Tải ứng dụng VLE */}
+          {/* Col 4: Tải ứng dụng LMS */}
           <div className="space-y-3">
             <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-2">
               Ứng dụng di động
             </h4>
             <p className="text-slate-400 text-[11px] leading-relaxed">
-              Tải ứng dụng <strong>HCMUE VLE</strong> để học tập mọi lúc, mọi nơi trên thiết bị di động của bạn.
+              Tải ứng dụng <strong>LMS Nhóm 2</strong> để học tập mọi lúc, mọi nơi trên thiết bị di động của bạn.
             </p>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2.5 px-3 py-2 bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700/60 cursor-pointer transition-colors">
@@ -98,7 +98,7 @@ export const Footer: React.FC = () => {
         {/* Bottom copyright */}
         <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
           <div>
-            © 2026 Trường Đại học Sư phạm Thành phố Hồ Chí Minh. Phát triển trên nền tảng Loop LMS.
+            © 2026 Hệ thống LMS Nhóm 2. Bản quyền thuộc về LMS Nhóm 2.
           </div>
           <div className="flex items-center gap-4">
             <span className="hover:text-slate-400 cursor-pointer">Chính sách bảo mật</span>

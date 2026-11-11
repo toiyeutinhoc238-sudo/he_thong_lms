@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType } from '../types';
+import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView } from '../types';
 import { initialUser } from '../data/mockData';
 import api from '../services/api';
 
@@ -12,8 +12,8 @@ interface AppContextType {
   setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   activeCourse: Course | null;
   activeActivity: Activity | null;
-  currentView: 'dashboard' | 'course-detail' | 'activity' | 'gradebook' | 'certificates' | 'teacher-studio' | 'admin-panel' | 'profile';
-  setCurrentView: (view: 'dashboard' | 'course-detail' | 'activity' | 'gradebook' | 'certificates' | 'teacher-studio' | 'admin-panel' | 'profile') => void;
+  currentView: AppView;
+  setCurrentView: (view: AppView) => void;
   navigateToCourse: (courseId: string) => void;
   navigateToActivity: (courseId: string, activityId: string) => void;
   trainingProgramFilter: TrainingType | 'all';
@@ -77,7 +77,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'course-detail' | 'activity' | 'gradebook' | 'certificates' | 'teacher-studio' | 'admin-panel' | 'profile'>('dashboard');
+  const [currentView, setCurrentView] = useState<AppView>('dashboard');
   const [trainingProgramFilter, setTrainingProgramFilter] = useState<TrainingType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   

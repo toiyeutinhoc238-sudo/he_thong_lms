@@ -154,7 +154,7 @@ export const Gradebook: React.FC = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <p className="text-xs font-medium text-slate-400">Trạng thái hồ sơ</p>
           <h3 className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">Đang hoạt động</h3>
-          <span className="text-[11px] text-emerald-700 font-medium">Đồng bộ từ hệ thống VLE</span>
+          <span className="text-[11px] text-emerald-700 font-medium">Đồng bộ từ hệ thống LMS Nhóm 2</span>
         </div>
       </div>
 

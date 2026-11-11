@@ -78,7 +78,7 @@ export const CertificateModal: React.FC = () => {
           <div className="py-2 space-y-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Hệ thống Đào tạo Trực tuyến VLE</span>
+              <span>Hệ thống Đào tạo Trực tuyến LMS Nhóm 2</span>
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-slate-900 tracking-wide uppercase">

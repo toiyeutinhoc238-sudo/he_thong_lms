@@ -11,7 +11,11 @@ export type AppView =
   | 'teacher-studio' 
   | 'admin-panel' 
   | 'profile'
+  | 'courses-list'
   | 'calendar'
+  | 'inbox'
+  | 'history'
+  | 'help'
   | 'resources'
   | 'verify';
 

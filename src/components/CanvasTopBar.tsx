@@ -36,9 +36,15 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
           </button>
           <span className="text-slate-400 font-normal">›</span>
 
-          {currentView === 'dashboard' ? (
-            <span className="text-slate-600 font-medium">Bảng điều khiển</span>
-          ) : (
+          {currentView === 'dashboard' && <span className="text-slate-600 font-medium">Bảng điều khiển</span>}
+          {currentView === 'admin-panel' && <span className="text-slate-600 font-medium">Quản trị Hệ thống</span>}
+          {currentView === 'courses-list' && <span className="text-slate-600 font-medium">Tất cả Khóa học</span>}
+          {currentView === 'calendar' && <span className="text-slate-600 font-medium">Lịch học tập</span>}
+          {currentView === 'inbox' && <span className="text-slate-600 font-medium">Hộp thư</span>}
+          {currentView === 'history' && <span className="text-slate-600 font-medium">Lịch sử hoạt động</span>}
+          {currentView === 'help' && <span className="text-slate-600 font-medium">Trợ giúp & Hướng dẫn</span>}
+          {currentView === 'profile' && <span className="text-slate-600 font-medium">Hồ sơ cá nhân</span>}
+          {(currentView === 'course-detail' || currentView === 'activity') && (
             <>
               <button 
                 onClick={() => setCurrentView('course-detail')}

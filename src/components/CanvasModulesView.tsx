@@ -553,7 +553,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       )}
 
-      {/* MODAL 3: THÊM HỌC LIỆU / HOẠT ĐỘNG (FULL COHOTA CAPABILITIES) */}
+      {/* MODAL 3: THÊM HỌC LIỆU / HOẠT ĐỘNG (ĐẦY ĐỦ TÍNH NĂNG LMS NHÓM 2) */}
       {isAddActivityOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8">

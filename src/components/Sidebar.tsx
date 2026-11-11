@@ -69,7 +69,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
-                <span>Trang tổng quan (VLE)</span>
+                <span>Trang tổng quan</span>
               </button>
 
               <button
@@ -99,7 +99,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
               >
                 <div className="flex items-center gap-3">
                   <Award className="w-4 h-4" />
-                  <span>Chứng chỉ VLE</span>
+                  <span>Chứng chỉ hoàn thành</span>
                 </div>
                 {certificates.length > 0 && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
                     }`}
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Trung tâm Quản trị VLE</span>
+                    <span>Trung tâm Quản trị LMS Nhóm 2</span>
                   </button>
                 )}
               </nav>
@@ -152,7 +152,7 @@ export const Sidebar: React.FC<{ isOpen: boolean; onClose?: () => void }> = ({ i
           {/* Filter By Training Program */}
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2 flex items-center justify-between">
-              <span>Hệ đào tạo HCMUE</span>
+              <span>Hệ đào tạo trực tuyến</span>
               <Layers className="w-3.5 h-3.5" />
             </div>
             <div className="space-y-1">

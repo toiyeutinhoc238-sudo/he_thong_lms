@@ -122,11 +122,11 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                   LMS Nhóm 2
                 </span>
                 <span className="px-1.5 py-0.5 bg-blue-100 text-hcmue-800 text-[10px] font-bold rounded uppercase tracking-wider">
-                  Loop LMS 2.0
+                  Trực tuyến
                 </span>
               </div>
               <span className="text-xs text-slate-500 font-medium leading-tight mt-0.5 hidden sm:block">
-                Hệ thống Quản lý Học tập Trực tuyến - ĐH Sư phạm TP.HCM
+                Hệ thống Quản lý Học tập Trực tuyến - LMS Nhóm 2
               </span>
             </div>
           </div>
@@ -260,7 +260,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                   <p className="text-xs text-slate-500 font-medium">Đang đăng nhập với vai trò</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-hcmue-100 text-hcmue-800">
-                      {activeRole === 'student' ? 'Sinh viên chính quy' : activeRole === 'lecturer' ? 'Giảng viên' : 'Quản trị viên VLE'}
+                      {activeRole === 'student' ? 'Học viên chính quy' : activeRole === 'lecturer' ? 'Giảng viên' : 'Quản trị viên'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 mt-1 truncate">{currentUser.department}</p>
@@ -326,7 +326,7 @@ export const Header: React.FC<{ onToggleSidebar?: () => void }> = ({ onToggleSid
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                     >
                       <ShieldCheck className="w-4 h-4 text-slate-500" />
-                      Trung tâm Quản trị VLE
+                      Trung tâm Quản trị LMS Nhóm 2
                     </button>
                   )}
 
