@@ -37,8 +37,18 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     deleteCourseModule,
     addCourseActivity, 
     updateCourseActivity, 
-    deleteCourseActivity 
+    deleteCourseActivity,
+    currentUser,
+    activeRole
   } = useApp();
+
+  const canManage = Boolean(
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    activeRole === 'admin' || 
+    activeRole === 'lecturer' || 
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+  );
 
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
@@ -224,14 +234,16 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             {allCollapsed ? 'Mở Rộng Tất Cả' : 'Thu Gọn Tất Cả'}
           </button>
 
-          {/* Nút + Thêm Mô-đun */}
-          <button
-            onClick={() => setIsAddModuleOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-md text-xs font-bold transition-all shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>+ Mô-đun</span>
-          </button>
+          {/* Nút + Thêm Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
+          {canManage && (
+            <button
+              onClick={() => setIsAddModuleOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-md text-xs font-bold transition-all shadow-xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Mô-đun</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -244,16 +256,20 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
           <div>
             <h3 className="text-sm font-bold text-slate-900">Khóa học chưa có mô-đun hoặc học liệu nào</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-              Bạn có thể tự do thêm bài giảng video YouTube/MP4, chèn link tài liệu, giao bài tập hoặc câu hỏi trắc nghiệm ngay bây giờ.
+              {canManage 
+                ? 'Bạn có thể tự do thêm bài giảng video YouTube/MP4, chèn link tài liệu, giao bài tập hoặc câu hỏi trắc nghiệm ngay bây giờ.'
+                : 'Nội dung bài học và học liệu đang được giáo viên chuẩn bị.'}
             </p>
           </div>
-          <button
-            onClick={() => setIsAddModuleOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tạo Mô-đun Đầu Tiên</span>
-          </button>
+          {canManage && (
+            <button
+              onClick={() => setIsAddModuleOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold rounded-lg shadow-sm transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tạo Mô-đun Đầu Tiên</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -297,50 +313,55 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     </span>
                     <Lock className="w-4 h-4 text-slate-600" />
 
-                    {/* Sửa Mô-đun */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingModule(mod);
-                        setEditModTitle(mod.title);
-                        setEditModPrereq(mod.description || '');
-                      }}
-                      className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-300/80 transition-colors"
-                      title="Sửa tên mô-đun"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
+                    {/* Hành động quản trị Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
+                    {canManage && (
+                      <>
+                        {/* Sửa Mô-đun */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingModule(mod);
+                            setEditModTitle(mod.title);
+                            setEditModPrereq(mod.description || '');
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-300/80 transition-colors"
+                          title="Sửa tên mô-đun"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
 
-                    {/* Xóa Mô-đun */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Bạn có chắc chắn muốn xóa mô-đun "${mod.title}" cùng toàn bộ bài học bên trong?`)) {
-                          deleteCourseModule(activeCourse.id, mod.id);
-                        }
-                      }}
-                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Xóa mô-đun"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                        {/* Xóa Mô-đun */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`Bạn có chắc chắn muốn xóa mô-đun "${mod.title}" cùng toàn bộ bài học bên trong?`)) {
+                              deleteCourseModule(activeCourse.id, mod.id);
+                            }
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          title="Xóa mô-đun"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
 
-                    {/* Thêm bài học vào mô-đun */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTargetModuleId(mod.id);
-                        setIsAddActivityOpen(true);
-                      }}
-                      className="p-1 rounded bg-[#0374b5] text-white hover:bg-[#025a8c] text-xs font-bold flex items-center gap-1 shadow-xs ml-1"
-                      title="Thêm bài học / học liệu vào mô-đun"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span className="hidden md:inline text-[11px] pr-1">Thêm mục</span>
-                    </button>
+                        {/* Thêm bài học vào mô-đun */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTargetModuleId(mod.id);
+                            setIsAddActivityOpen(true);
+                          }}
+                          className="p-1 rounded bg-[#0374b5] text-white hover:bg-[#025a8c] text-xs font-bold flex items-center gap-1 shadow-xs ml-1"
+                          title="Thêm bài học / học liệu vào mô-đun"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span className="hidden md:inline text-[11px] pr-1">Thêm mục</span>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -349,16 +370,21 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                   <div>
                     {activities.length === 0 ? (
                       <div className="py-6 px-4 text-center text-xs text-slate-400 bg-slate-50/30">
-                        Chưa có học liệu nào trong mô-đun này.{' '}
-                        <button
-                          onClick={() => {
-                            setTargetModuleId(mod.id);
-                            setIsAddActivityOpen(true);
-                          }}
-                          className="text-[#0374b5] font-bold hover:underline"
-                        >
-                          + Thêm bài học, video, bài tập ngay
-                        </button>
+                        Chưa có học liệu nào trong mô-đun này.
+                        {canManage && (
+                          <>
+                            {' '}
+                            <button
+                              onClick={() => {
+                                setTargetModuleId(mod.id);
+                                setIsAddActivityOpen(true);
+                              }}
+                              className="text-[#0374b5] font-bold hover:underline"
+                            >
+                              + Thêm bài học, video, bài tập ngay
+                            </button>
+                          </>
+                        )}
                       </div>
                     ) : (
                       activities.map((act) => {
@@ -410,29 +436,33 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                               </div>
                             </div>
 
-                            {/* Right: Actions (Edit, Delete, Check) */}
+                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Sửa / Xóa) */}
                             <div className="flex items-center gap-2 shrink-0 pl-3">
-                              {/* Edit Activity Button */}
-                              <button
-                                onClick={() => setEditingActivity(act)}
-                                className="p-1 rounded text-slate-400 hover:text-[#0374b5] hover:bg-slate-200 transition-colors opacity-70 group-hover:opacity-100"
-                                title="Chỉnh sửa học liệu"
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </button>
+                              {canManage && (
+                                <>
+                                  {/* Edit Activity Button */}
+                                  <button
+                                    onClick={() => setEditingActivity(act)}
+                                    className="p-1 rounded text-slate-400 hover:text-[#0374b5] hover:bg-slate-200 transition-colors opacity-70 group-hover:opacity-100"
+                                    title="Chỉnh sửa học liệu"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
 
-                              {/* Delete Activity Button */}
-                              <button
-                                onClick={() => {
-                                  if (confirm(`Bạn có chắc chắn muốn xóa bài học "${act.title}"?`)) {
-                                    deleteCourseActivity(activeCourse.id, act.id);
-                                  }
-                                }}
-                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
-                                title="Xóa học liệu này"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                                  {/* Delete Activity Button */}
+                                  <button
+                                    onClick={() => {
+                                      if (confirm(`Bạn có chắc chắn muốn xóa bài học "${act.title}"?`)) {
+                                        deleteCourseActivity(activeCourse.id, act.id);
+                                      }
+                                    }}
+                                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
+                                    title="Xóa học liệu này"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
 
                               {/* Status circle */}
                               <div 
@@ -458,7 +488,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       )}
 
-      {/* MODAL 1: THÊM MÔ-ĐUN */}
+      {/* CÁC MODAL QUẢN TRỊ HỌC LIỆU (CHỈ DÀNH CHO GIÁO VIÊN / ADMIN) */}
+      {canManage && (
+        <>
+          {/* MODAL 1: THÊM MÔ-ĐUN */}
       {isAddModuleOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
@@ -1185,6 +1218,8 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

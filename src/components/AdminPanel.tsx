@@ -59,6 +59,32 @@ export const AdminPanel: React.FC = () => {
 
   const totalModulesCount = courses.reduce((acc, c) => acc + (c.modules || []).length, 0);
 
+  const canManage = Boolean(
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+  );
+
+  if (!canManage) {
+    return (
+      <div className="flex-1 p-8 text-center space-y-4 max-w-md mx-auto my-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
+        <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+          🔒
+        </div>
+        <h2 className="text-lg font-extrabold text-slate-900">Truy cập bị giới hạn</h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Chỉ Quản trị viên và Giáo viên mới có quyền truy cập vào Trung tâm Quản trị hệ thống.
+        </p>
+        <button
+          onClick={() => setCurrentView('dashboard')}
+          className="px-5 py-2.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95"
+        >
+          Quay lại Bảng điều khiển
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 p-6 max-w-7xl mx-auto space-y-6">
       {/* Admin Hero Header */}

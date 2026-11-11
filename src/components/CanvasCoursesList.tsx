@@ -26,7 +26,13 @@ export const CanvasCoursesList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
-  const canManage = activeRole === 'admin' || currentUser?.role === 'admin' || currentUser?.email === 'phanphiphu04@gmail.com';
+  const canManage = Boolean(
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    activeRole === 'admin' || 
+    activeRole === 'lecturer' || 
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+  );
 
   // Form tạo khóa học mới chuẩn phổ thông Lớp 1 - 12
   const [formData, setFormData] = useState<{
@@ -136,7 +142,7 @@ export const CanvasCoursesList: React.FC = () => {
           </p>
         </div>
 
-        {activeRole === 'admin' && (
+        {canManage && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-5 py-3 rounded-2xl bg-white hover:bg-sky-50 text-[#0374b5] font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0"
@@ -204,10 +210,10 @@ export const CanvasCoursesList: React.FC = () => {
             <h3 className="text-base font-extrabold text-slate-800">Chưa có khóa học nào</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               Hệ thống hiện tại chưa có khóa học trong chuyên đề hoặc khối lớp này.
-              {activeRole === 'admin' ? ' Bấm nút bên dưới để tạo khóa học mới!' : ''}
+              {canManage ? ' Bấm nút bên dưới để tạo khóa học mới!' : ''}
             </p>
           </div>
-          {activeRole === 'admin' && (
+          {canManage && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-bold shadow-md transition-all active:scale-95"
@@ -309,7 +315,10 @@ export const CanvasCoursesList: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Tạo Khóa Học */}
+      {/* Modals Quản lý Khóa học (Chỉ dành cho Giáo viên / Admin) */}
+      {canManage && (
+        <>
+          {/* Modal Tạo Khóa Học */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
@@ -491,6 +500,8 @@ export const CanvasCoursesList: React.FC = () => {
           await updateCourse(courseId, data);
         }}
       />
+        </>
+      )}
     </div>
   );
 };
