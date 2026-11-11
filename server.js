@@ -733,6 +733,21 @@ app.get('/api/notifications', async (req, res) => {
   res.json(db.notifications || []);
 });
 
+app.put('/api/notifications/:id/read', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      await NotifModel.updateOne({ id: req.params.id }, { $set: { read: true } });
+      return res.json({ success: true });
+    } catch (err) {}
+  }
+  const db = readDb();
+  (db.notifications || []).forEach(n => {
+    if (n.id === req.params.id) n.read = true;
+  });
+  writeDb(db);
+  res.json({ success: true });
+});
+
 // 12. Forum
 app.get('/api/courses/:id/forum', async (req, res) => {
   if (isMongoConnected) {
