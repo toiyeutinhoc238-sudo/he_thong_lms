@@ -1030,27 +1030,6 @@ app.post('/api/courses/:id/enroll', async (req, res) => {
 
   res.status(404).json({ message: 'Không tìm thấy khóa học để đăng ký' });
 });
-      }
-    } catch (err) {}
-  }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id);
-  if (course && course.modules) {
-    for (const mod of course.modules) {
-      if (mod.activities) {
-        const beforeCount = mod.activities.length;
-        mod.activities = mod.activities.filter(a => a.id !== actId);
-        if (mod.activities.length !== beforeCount) {
-          course.totalActivities = Math.max(0, (course.totalActivities || 1) - 1);
-          writeDb(db);
-          return res.json({ success: true, message: 'Đã xóa bài học thành công' });
-        }
-      }
-    }
-  }
-  res.status(404).json({ message: 'Không tìm thấy bài học để xóa' });
-});
 
 // 6. Activities: Mark Completed
 app.post('/api/courses/:id/activities/:actId/complete', async (req, res) => {
