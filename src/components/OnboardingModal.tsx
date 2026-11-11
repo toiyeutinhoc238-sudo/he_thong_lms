@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { GraduationCap, School, BookOpen, User, Phone, CheckCircle2, ArrowRight } from 'lucide-react';
+import { GraduationCap, School, BookOpen, User, Phone, CheckCircle2, ArrowRight, X } from 'lucide-react';
 
 export const OnboardingModal: React.FC = () => {
   const { currentUser, updateProfile } = useApp();
@@ -10,6 +10,7 @@ export const OnboardingModal: React.FC = () => {
   const [school, setSchool] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export const OnboardingModal: React.FC = () => {
   const isStudent = currentUser?.id && currentUser?.role !== 'admin';
   const isProfileIncomplete = !currentUser?.isProfileCompleted || !currentUser?.school || (!currentUser?.className && !currentUser?.classOrPosition);
 
-  if (!isStudent || !isProfileIncomplete) {
+  if (isDismissed || !isStudent || !isProfileIncomplete) {
     return null;
   }
 
@@ -59,9 +60,11 @@ export const OnboardingModal: React.FC = () => {
           isProfileCompleted: true
         });
       }
+      setIsDismissed(true);
     } catch (err: any) {
       console.error('Lỗi lưu thông tin học viên:', err);
-      setError(err.message || 'Không thể lưu thông tin. Vui lòng thử lại.');
+      // Vẫn đảm bảo đóng modal khi học viên đã bấm xác nhận
+      setIsDismissed(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -69,7 +72,17 @@ export const OnboardingModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 my-8">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 my-8 relative">
+        {/* Nút đóng X phòng khi cần bỏ qua */}
+        <button
+          type="button"
+          onClick={() => setIsDismissed(true)}
+          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          title="Đóng cửa sổ này"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0374b5] to-sky-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-sky-600/25">
@@ -118,7 +131,7 @@ export const OnboardingModal: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder="Nhập tên lớp học"
+                placeholder="Nhập tên lớp học (VD: 6A5)"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#0374b5] focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all"
@@ -161,7 +174,7 @@ export const OnboardingModal: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 px-5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] active:scale-[0.99] text-white font-extrabold text-sm transition-all shadow-md shadow-sky-900/15 flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full py-3.5 px-5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] active:scale-[0.98] text-white font-extrabold text-sm transition-all shadow-lg shadow-sky-900/15 flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {isSubmitting ? (
                 <span>Đang lưu thông tin...</span>
@@ -183,4 +196,3 @@ export const OnboardingModal: React.FC = () => {
     </div>
   );
 };
-

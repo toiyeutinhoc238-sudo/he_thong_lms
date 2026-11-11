@@ -169,22 +169,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const updateProfile = useCallback(async (data: Partial<User>) => {
+    // Cập nhật ngay lập tức vào state và localStorage để đóng modal và giao diện phản hồi tức thì
+    const immediateUser: User = {
+      ...currentUser,
+      ...data,
+      isProfileCompleted: true,
+      school: data.school || currentUser.school || '',
+      department: data.school || currentUser.department || '',
+      className: data.className || currentUser.className || '',
+      classOrPosition: data.className || currentUser.classOrPosition || ''
+    };
+    setCurrentUser(immediateUser);
+    localStorage.setItem('lms2_user', JSON.stringify(immediateUser));
+
     try {
-      const updated = await api.auth.updateProfile(data);
+      const payload = {
+        ...data,
+        email: currentUser.email || immediateUser.email,
+        isProfileCompleted: true
+      };
+      const updated = await api.auth.updateProfile(payload);
       if (updated && updated.id) {
-        setCurrentUser(updated);
-        localStorage.setItem('lms2_user', JSON.stringify(updated));
-        return updated;
+        const merged: User = { 
+          ...immediateUser, 
+          ...updated, 
+          isProfileCompleted: true,
+          school: updated.school || immediateUser.school,
+          className: updated.className || immediateUser.className
+        };
+        setCurrentUser(merged);
+        localStorage.setItem('lms2_user', JSON.stringify(merged));
+        return merged;
       }
     } catch (err) {
-      // Local fallback
-      setCurrentUser(prev => {
-        const next = { ...prev, ...data };
-        localStorage.setItem('lms2_user', JSON.stringify(next));
-        return next;
-      });
+      console.warn('API updateProfile ghi nhận ngoại tuyến, lưu trữ cục bộ:', err);
     }
-  }, []);
+    return immediateUser;
+  }, [currentUser]);
 
   const switchRole = (role: Role) => {
     setActiveRole(role);

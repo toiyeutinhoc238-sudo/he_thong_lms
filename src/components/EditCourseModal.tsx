@@ -310,3 +310,4 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
     </div>
   );
 };
+
