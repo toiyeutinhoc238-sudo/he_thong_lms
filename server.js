@@ -296,14 +296,9 @@ app.post('/api/auth/google', async (req, res) => {
       return res.status(400).json({ message: 'Không thể trích xuất địa chỉ email từ Google' });
     }
 
-    // Phân quyền tự động dựa vào email
-    let role = 'student';
-    if (normalizedEmail.includes('teacher') || normalizedEmail.includes('giangvien')) {
-      role = 'lecturer';
-    }
-    if (normalizedEmail.includes('admin') || normalizedEmail === 'phanphiphu04@gmail.com') {
-      role = 'admin';
-    }
+    // Phân quyền: CHỈ DUY NHẤT phanphiphu04@gmail.com là admin, tất cả người khác mặc định là student (học viên)
+    const isAdmin = normalizedEmail === 'phanphiphu04@gmail.com';
+    const role = isAdmin ? 'admin' : 'student';
 
     let user;
     if (isMongoConnected) {
@@ -316,18 +311,26 @@ app.post('/api/auth/google', async (req, res) => {
           email: normalizedEmail,
           role,
           code: normalizedEmail.split('@')[0].toUpperCase(),
-          department: 'LMS Nhóm 2',
-          classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên',
+          department: isAdmin ? 'Ban Quản trị LMS Nhóm 2' : '',
+          school: isAdmin ? 'LMS Nhóm 2' : '',
+          className: isAdmin ? 'Quản trị viên' : '',
+          classOrPosition: isAdmin ? 'Quản trị viên' : '',
           avatar: picture || '',
           phone: '',
           dateOfBirth: '',
-          address: ''
+          address: '',
+          isProfileCompleted: isAdmin ? true : false
         });
         await user.save();
       } else {
         user.name = name || user.name;
         user.avatar = picture || user.avatar || '';
-        if (role === 'admin') user.role = 'admin';
+        user.role = role; // Luôn đảm bảo chỉ phanphiphu04@gmail.com là admin, còn lại là student
+        if (isAdmin) {
+          user.isProfileCompleted = true;
+        } else {
+          user.isProfileCompleted = !!(user.isProfileCompleted && user.school && (user.className || user.classOrPosition));
+        }
         await user.save();
       }
     } else {
@@ -342,19 +345,27 @@ app.post('/api/auth/google', async (req, res) => {
           email: normalizedEmail,
           role,
           code: normalizedEmail.split('@')[0].toUpperCase(),
-          department: 'LMS Nhóm 2',
-          classOrPosition: role === 'admin' ? 'Quản trị viên' : role === 'lecturer' ? 'Giảng viên' : 'Học viên',
+          department: isAdmin ? 'Ban Quản trị LMS Nhóm 2' : '',
+          school: isAdmin ? 'LMS Nhóm 2' : '',
+          className: isAdmin ? 'Quản trị viên' : '',
+          classOrPosition: isAdmin ? 'Quản trị viên' : '',
           avatar: picture || '',
           phone: '',
           dateOfBirth: '',
-          address: ''
+          address: '',
+          isProfileCompleted: isAdmin ? true : false
         };
         db.users.push(user);
         writeDb(db);
       } else {
         user.name = name || user.name;
         user.avatar = picture || user.avatar || '';
-        if (role === 'admin') user.role = 'admin';
+        user.role = role;
+        if (isAdmin) {
+          user.isProfileCompleted = true;
+        } else {
+          user.isProfileCompleted = !!(user.isProfileCompleted && user.school && (user.className || user.classOrPosition));
+        }
         writeDb(db);
       }
     }
@@ -418,16 +429,32 @@ app.put('/api/auth/profile', async (req, res) => {
     return res.status(401).json({ message: 'Token không hợp lệ' });
   }
   const userId = match[1];
-  const { phone, dateOfBirth, address, name } = req.body;
+  const { phone, dateOfBirth, address, name, school, className, classOrPosition, isProfileCompleted } = req.body;
 
   if (isMongoConnected) {
     try {
       const user = await UserModel.findOne({ id: userId });
       if (user) {
+        if (name) user.name = name;
+        if (school !== undefined) {
+          user.school = school;
+          user.department = school;
+        }
+        if (className !== undefined || classOrPosition !== undefined) {
+          const cls = className || classOrPosition;
+          user.className = cls;
+          user.classOrPosition = cls;
+        }
         if (phone !== undefined) user.phone = phone;
         if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
         if (address !== undefined) user.address = address;
-        if (name) user.name = name;
+
+        if (isProfileCompleted !== undefined) {
+          user.isProfileCompleted = isProfileCompleted;
+        } else if (user.school && (user.className || user.classOrPosition)) {
+          user.isProfileCompleted = true;
+        }
+
         await user.save();
         const u = user.toObject();
         delete u.password;
@@ -441,10 +468,26 @@ app.put('/api/auth/profile', async (req, res) => {
   const db = readDb();
   const user = (db.users || []).find(u => u.id === userId);
   if (user) {
+    if (name) user.name = name;
+    if (school !== undefined) {
+      user.school = school;
+      user.department = school;
+    }
+    if (className !== undefined || classOrPosition !== undefined) {
+      const cls = className || classOrPosition;
+      user.className = cls;
+      user.classOrPosition = cls;
+    }
     if (phone !== undefined) user.phone = phone;
     if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
     if (address !== undefined) user.address = address;
-    if (name) user.name = name;
+
+    if (isProfileCompleted !== undefined) {
+      user.isProfileCompleted = isProfileCompleted;
+    } else if (user.school && (user.className || user.classOrPosition)) {
+      user.isProfileCompleted = true;
+    }
+
     writeDb(db);
     const { password, ...safeUser } = user;
     return res.json(safeUser);

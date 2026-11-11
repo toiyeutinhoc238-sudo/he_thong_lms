@@ -13,7 +13,9 @@ import {
   Edit3, 
   Save, 
   X,
-  AlertCircle
+  AlertCircle,
+  BookOpen,
+  School
 } from 'lucide-react';
 
 export const ProfileModal: React.FC = () => {
@@ -21,6 +23,9 @@ export const ProfileModal: React.FC = () => {
   
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [formData, setFormData] = useState({
+    name: currentUser?.name || '',
+    className: currentUser?.className || currentUser?.classOrPosition || '',
+    school: currentUser?.school || currentUser?.department || '',
     phone: currentUser?.phone || '',
     dateOfBirth: currentUser?.dateOfBirth || '',
     address: currentUser?.address || ''
@@ -67,7 +72,17 @@ export const ProfileModal: React.FC = () => {
     setSaveMessage(null);
     try {
       if (updateProfile) {
-        await updateProfile(formData);
+        await updateProfile({
+          name: formData.name.trim(),
+          className: formData.className.trim(),
+          classOrPosition: formData.className.trim(),
+          school: formData.school.trim(),
+          department: formData.school.trim(),
+          phone: formData.phone.trim(),
+          dateOfBirth: formData.dateOfBirth.trim(),
+          address: formData.address.trim(),
+          isProfileCompleted: true
+        });
       }
       setSaveMessage('Cập nhật hồ sơ thành công!');
       setTimeout(() => {
@@ -83,9 +98,10 @@ export const ProfileModal: React.FC = () => {
 
   const roleLabel = activeRole === 'admin' 
     ? 'Quản trị viên Hệ thống' 
-    : activeRole === 'lecturer' 
-    ? 'Giảng viên' 
     : 'Học viên';
+
+  const userSchool = currentUser.school || currentUser.department || '';
+  const userClass = currentUser.className || currentUser.classOrPosition || '';
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto py-4">
@@ -118,15 +134,26 @@ export const ProfileModal: React.FC = () => {
             Mã định danh: <strong>{currentUser.code || currentUser.email.split('@')[0].toUpperCase()}</strong>
           </p>
 
-          <p className="text-xs text-slate-600 font-medium">
-            Đơn vị: <strong>{currentUser.department || 'LMS Nhóm 2'}</strong>
-          </p>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-600 font-medium pt-1">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100">
+              <School className="w-3.5 h-3.5 text-[#0374b5]" />
+              <span>Trường: <strong>{userSchool || 'Chưa cập nhật'}</strong></span>
+            </span>
+
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100">
+              <BookOpen className="w-3.5 h-3.5 text-[#0374b5]" />
+              <span>Lớp: <strong>{userClass || 'Chưa cập nhật'}</strong></span>
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 shrink-0 sm:self-start">
           <button
             onClick={() => {
               setFormData({
+                name: currentUser.name || '',
+                className: currentUser.className || currentUser.classOrPosition || '',
+                school: currentUser.school || currentUser.department || '',
                 phone: currentUser.phone || '',
                 dateOfBirth: currentUser.dateOfBirth || '',
                 address: currentUser.address || ''
@@ -155,7 +182,7 @@ export const ProfileModal: React.FC = () => {
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h3 className="font-extrabold text-slate-800 text-base">
-              Thông tin cá nhân
+              Thông tin học viên
             </h3>
             <span className="text-[11px] text-slate-400">Dữ liệu tài khoản</span>
           </div>
@@ -166,6 +193,26 @@ export const ProfileModal: React.FC = () => {
               <div>
                 <span className="text-slate-500 text-xs block">Email tài khoản:</span>
                 <strong className="text-slate-800 font-mono">{currentUser.email}</strong>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-slate-600">
+              <School className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-slate-500 text-xs block">Trường học:</span>
+                <span className={userSchool ? "text-slate-800 font-bold" : "text-slate-400 italic"}>
+                  {userSchool || 'Chưa cập nhật'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-slate-600">
+              <BookOpen className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-slate-500 text-xs block">Lớp học:</span>
+                <span className={userClass ? "text-slate-800 font-bold" : "text-slate-400 italic"}>
+                  {userClass || 'Chưa cập nhật'}
+                </span>
               </div>
             </div>
 
@@ -192,7 +239,7 @@ export const ProfileModal: React.FC = () => {
             <div className="flex items-start gap-3 text-slate-600">
               <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
               <div>
-                <span className="text-slate-500 text-xs block">Địa chỉ liên hệ:</span>
+                <span className="text-slate-500 text-xs block">Địa chỉ:</span>
                 <span className={currentUser.address ? "text-slate-800 font-bold" : "text-slate-400 italic"}>
                   {currentUser.address || 'Chưa cập nhật'}
                 </span>
@@ -213,7 +260,7 @@ export const ProfileModal: React.FC = () => {
           <div className="space-y-3">
             <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/60 flex items-center justify-between">
               <div className="text-xs space-y-0.5">
-                <div className="font-bold text-slate-800">Tài khoản học tập LMS Nhóm 2</div>
+                <div className="font-bold text-slate-800">Tài khoản LMS Nhóm 2</div>
                 <div className="text-slate-500 font-mono text-[11px]">{currentUser.email}</div>
               </div>
               <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
@@ -237,10 +284,10 @@ export const ProfileModal: React.FC = () => {
       {/* Edit Profile Modal */}
       {isEditOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-800 text-base">
-                Cập nhật thông tin cá nhân
+                Cập nhật thông tin học viên
               </h3>
               <button 
                 onClick={() => setIsEditOpen(false)}
@@ -262,6 +309,50 @@ export const ProfileModal: React.FC = () => {
             )}
 
             <form onSubmit={handleSaveProfile} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Họ và tên
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Nguyễn Văn An"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Lớp học
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ví dụ: 12A1"
+                    value={formData.className}
+                    onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Trường học
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ví dụ: THPT Lê Quý Đôn"
+                    value={formData.school}
+                    onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Số điện thoại

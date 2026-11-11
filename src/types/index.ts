@@ -24,11 +24,14 @@ export interface User {
   role: Role;
   code: string; // MSSV or Mã Cán bộ
   department: string;
+  school?: string;
+  className?: string;
   classOrPosition: string;
   phone?: string;
   gender?: string;
   dateOfBirth?: string;
   address?: string;
+  isProfileCompleted?: boolean;
 }
 
 export interface Activity {

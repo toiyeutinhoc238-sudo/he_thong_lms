@@ -12,6 +12,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ProfileModal } from './components/ProfileModal';
 import { CertificateModal } from './components/CertificateModal';
 import { LoginModal } from './components/LoginModal';
+import { OnboardingModal } from './components/OnboardingModal';
 import { AIAssistantModal } from './components/AIAssistantModal';
 
 const MainLayout: React.FC = () => {
@@ -52,6 +53,7 @@ const MainLayout: React.FC = () => {
       />
       <CertificateModal />
       <LoginModal />
+      <OnboardingModal />
     </div>
   );
 };
