@@ -4,7 +4,16 @@
 
 import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export interface StudentSubmission {
+  student: { id: string; name: string; email?: string; className?: string; avatar?: string };
+  isCompleted: boolean;
+  completedAt: string;
+  score: number | null;
+  submission: Activity['submission'] | null;
+  quizResult: Activity['quizResult'] | null;
+}
+
+const API_BASE_URL =import.meta.env.VITE_API_BASE_URL || '/api';
 
 class ApiClient {
   private getHeaders(): HeadersInit {
@@ -28,7 +37,9 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP Error ${response.status}: ${response.statusText}`);
+        const error: any = new Error(errorData.message || `HTTP Error ${response.status}: ${response.statusText}`);
+        error.status = response.status;
+        throw error;
       }
 
       return await response.json();
@@ -128,16 +139,19 @@ class ApiClient {
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'
       }),
-    submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileUrl?: string; textSubmission?: string }) => 
+    submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileSize?: string; textSubmission?: string }) =>
       this.request<{ success: boolean; submission: any }>(`/courses/${courseId}/activities/${activityId}/submit`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
-    gradeAssignment: (courseId: string, activityId: string, data: { grade: number; feedback: string }) => 
+    gradeAssignment: (courseId: string, activityId: string, data: { studentId: string; grade: number; feedback: string }) =>
       this.request<{ success: boolean }>(`/courses/${courseId}/activities/${activityId}/grade`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
+    // Giáo viên: bài nộp / kết quả của từng học sinh cho một hoạt động
+    getSubmissions: (courseId: string, activityId: string) =>
+      this.request<StudentSubmission[]>(`/courses/${courseId}/activities/${activityId}/submissions`),
     submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number }) => 
       this.request<{ success: boolean; result: any }>(`/courses/${courseId}/activities/${activityId}/quiz-submit`, {
         method: 'POST',

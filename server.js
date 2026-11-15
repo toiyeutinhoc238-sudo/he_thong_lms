@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,7 +27,7 @@ if (fs.existsSync(envPath)) {
         }
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 const PORT = process.env.PORT || 5000;
@@ -38,12 +39,12 @@ app.use(express.json());
 
 // Health check endpoint for Render & monitoring
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
-app.get('/api/health', (req, res) => res.json({ 
-  status: 'ok', 
-  service: 'LMS Nhóm 2 API', 
+app.get('/api/health', (req, res) => res.json({
+  status: 'ok',
+  service: 'LMS Nhóm 2 API',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
-  uptime: process.uptime(), 
-  timestamp: new Date().toISOString() 
+  uptime: process.uptime(),
+  timestamp: new Date().toISOString()
 }));
 
 // ====================== MONGODB ATLAS INTEGRATION ======================
@@ -141,6 +142,22 @@ const NotifModel = mongoose.model('Notification', notifSchema);
 const CertModel = mongoose.model('Certificate', certSchema);
 const ForumModel = mongoose.model('ForumTopic', forumSchema);
 
+// Tiến độ học tập lưu RIÊNG cho từng học sinh (mỗi bản ghi = 1 học sinh x 1 hoạt động)
+const progressSchema = new mongoose.Schema({
+  courseId: String,
+  userId: String,
+  activityId: String,
+  isCompleted: { type: Boolean, default: false },
+  completedAt: String,
+  score: Number,
+  maxScore: Number,
+  submission: Object,
+  quizResult: Object,
+  updatedAt: String
+}, { strict: false });
+progressSchema.index({ courseId: 1, userId: 1, activityId: 1 }, { unique: true });
+const ProgressModel = mongoose.model('Progress', progressSchema);
+
 // Helper tìm document khóa học an toàn (hỗ trợ cả id string và MongoDB _id)
 async function getCourseDoc(id) {
   if (!id) return null;
@@ -159,13 +176,16 @@ async function getCourseDoc(id) {
 }
 
 // Kết nối MongoDB Atlas (Không seed bất kỳ dữ liệu ảo nào)
+// mongoReady: các request chờ kết nối xong rồi mới xử lý (tránh đọc nhầm Local JSON lúc server vừa khởi động)
+let mongoReady = Promise.resolve();
+const MONGODB_DB = process.env.MONGODB_DB || 'lms_nhom2';
 if (MONGODB_URI) {
   console.log('🔄 Đang kết nối tới MongoDB Atlas...');
-  mongoose.connect(MONGODB_URI, { dbName: 'lms_nhom2' })
+  mongoReady = mongoose.connect(MONGODB_URI, { dbName: MONGODB_DB })
     .then(async () => {
       isMongoConnected = true;
-      console.log('✅ Đã kết nối thành công tới MongoDB Atlas (Database: lms_nhom2)!');
-      
+      console.log(`✅ Đã kết nối thành công tới MongoDB Atlas (Database: ${MONGODB_DB})!`);
+
       // Tự động dọn dẹp các tài khoản ảo hoặc mẫu thử nghiệm cũ nếu có
       try {
         await UserModel.deleteMany({
@@ -215,90 +235,211 @@ function writeDb(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-// ====================== API ROUTES ======================
+// ====================== XÁC THỰC & PHÂN QUYỀN ======================
+// Token được ký HMAC nên không thể tự bịa. Nên đặt biến môi trường JWT_SECRET;
+// nếu chưa đặt, khóa ký được suy ra từ MONGODB_URI (bí mật, ổn định qua các lần khởi động lại).
+const TOKEN_SECRET = process.env.JWT_SECRET
+  || (MONGODB_URI
+    ? crypto.createHash('sha256').update('lms2-token-secret:' + MONGODB_URI).digest('hex')
+    : crypto.randomBytes(32).toString('hex'));
+const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
 
-// 1. Auth: Đăng nhập
-app.post('/api/auth/login', async (req, res) => {
-  const { username, password } = req.body;
+function signToken(userId) {
+  const payload = Buffer.from(JSON.stringify({ uid: userId, exp: Date.now() + TOKEN_TTL_MS })).toString('base64url');
+  const sig = crypto.createHmac('sha256', TOKEN_SECRET).update(payload).digest('base64url');
+  return `lms2.${payload}.${sig}`;
+}
 
-  if (isMongoConnected) {
-    try {
-      let user = await UserModel.findOne({
-        $or: [{ username }, { code: username }, { email: username }]
-      });
+function verifyToken(token) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3 || parts[0] !== 'lms2') return null;
+  const expected = Buffer.from(crypto.createHmac('sha256', TOKEN_SECRET).update(parts[1]).digest('base64url'));
+  const given = Buffer.from(parts[2]);
+  if (expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    if (!data.uid || !data.exp || data.exp < Date.now()) return null;
+    return data.uid;
+  } catch {
+    return null;
+  }
+}
 
-      if (user) {
-        const token = `jwt_token_${user.id}_${Date.now()}`;
-        const userObj = user.toObject();
-        delete userObj.password;
-        return res.json({ token, user: userObj });
+async function findUserById(id) {
+  if (!id) return null;
+  if (isMongoConnected) return UserModel.findOne({ id }).lean();
+  return (readDb().users || []).find(u => u.id === id) || null;
+}
+
+async function findUsersByIds(ids) {
+  if (!ids.length) return [];
+  if (isMongoConnected) return UserModel.find({ id: { $in: ids } }).lean();
+  return (readDb().users || []).filter(u => ids.includes(u.id));
+}
+
+const safeUser = (u) => {
+  if (!u) return u;
+  const { password, ...rest } = u;
+  return rest;
+};
+
+const isStaff = (user) => !!user && (user.role === 'admin' || user.role === 'lecturer');
+
+// Gắn req.user từ token (vai trò luôn lấy từ cơ sở dữ liệu, không tin dữ liệu client gửi lên)
+app.use(async (req, res, next) => {
+  req.user = null;
+  await mongoReady;
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const uid = verifyToken(authHeader.slice(7).trim());
+    if (uid) {
+      try {
+        req.user = await findUserById(uid);
+      } catch (e) {
+        return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu, vui lòng thử lại.' });
       }
-
-      // Tạo tài khoản mới trực tiếp từ dữ liệu người dùng nhập
-      const role = username?.toLowerCase().includes('admin') ? 'admin' 
-                 : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
-                 : 'student';
-
-      const newUser = new UserModel({
-        id: `user-${Date.now()}`,
-        name: username,
-        username,
-        email: `${username}@lms2.edu.vn`,
-        role,
-        code: username,
-        department: 'LMS Nhóm 2',
-        classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-      });
-
-      await newUser.save();
-      const userObj = newUser.toObject();
-      delete userObj.password;
-
-      return res.json({
-        token: `jwt_token_${newUser.id}_${Date.now()}`,
-        user: userObj
-      });
-    } catch (err) {
-      console.error(err);
     }
   }
+  next();
+});
 
-  // Local JSON DB Fallback
-  const db = readDb();
-  let user = db.users.find(u => 
-    (u.username === username || u.code === username || u.email === username)
-  );
+function requireAuth(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Vui lòng đăng nhập để thực hiện thao tác này.' });
+  next();
+}
 
-  if (user) {
-    const token = `jwt_token_${user.id}_${Date.now()}`;
-    const { password, ...safeUser } = user;
-    return res.json({ token, user: safeUser });
+function requireStaff(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Vui lòng đăng nhập để thực hiện thao tác này.' });
+  if (!isStaff(req.user)) return res.status(403).json({ message: 'Chỉ giáo viên hoặc quản trị viên mới được thực hiện thao tác này.' });
+  next();
+}
+
+// ====================== TIẾN ĐỘ THEO TỪNG HỌC SINH ======================
+const nowVN = () => new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+
+async function listProgress(filter) {
+  if (isMongoConnected) return ProgressModel.find(filter).lean();
+  return (readDb().progress || []).filter(p => Object.entries(filter).every(([k, v]) => p[k] === v));
+}
+
+async function saveProgress(courseId, userId, activityId, patch) {
+  const key = { courseId, userId, activityId };
+  const data = { ...patch, updatedAt: new Date().toISOString() };
+  if (isMongoConnected) {
+    return ProgressModel.findOneAndUpdate(key, { $set: data }, { upsert: true, returnDocument: 'after' }).lean();
   }
-
-  const role = username?.toLowerCase().includes('admin') ? 'admin' 
-             : (username?.toLowerCase().includes('gv') || username?.toLowerCase().includes('teacher')) ? 'lecturer' 
-             : 'student';
-
-  const newUser = {
-    id: `user-${Date.now()}`,
-    name: username,
-    username,
-    email: `${username}@lms2.edu.vn`,
-    role,
-    code: username,
-    department: 'LMS Nhóm 2',
-    classOrPosition: role === 'student' ? 'Học viên' : role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-  };
-
-  db.users.push(newUser);
+  const db = readDb();
+  db.progress = db.progress || [];
+  let rec = db.progress.find(p => p.courseId === courseId && p.userId === userId && p.activityId === activityId);
+  if (!rec) {
+    rec = { ...key };
+    db.progress.push(rec);
+  }
+  Object.assign(rec, data);
   writeDb(db);
+  return rec;
+}
 
-  return res.json({
-    token: `jwt_token_${newUser.id}_${Date.now()}`,
-    user: newUser
-  });
+async function removeProgress(filter) {
+  if (isMongoConnected) {
+    await ProgressModel.deleteMany(filter);
+    return;
+  }
+  const db = readDb();
+  db.progress = (db.progress || []).filter(p => !Object.entries(filter).every(([k, v]) => p[k] === v));
+  writeDb(db);
+}
+
+async function loadCourseObj(id) {
+  if (isMongoConnected) {
+    const doc = await getCourseDoc(id);
+    return doc ? doc.toObject() : null;
+  }
+  return (readDb().courses || []).find(c => c.id === id || c._id === id) || null;
+}
+
+const allActivities = (course) => (course.modules || []).flatMap(m => m.activities || []);
+
+const isEnrolled = (course, user) => !!user && (course.enrolledStudents || []).some(
+  s => s.id === user.id || (user.email && s.email === user.email)
+);
+
+// Dữ liệu của học sinh không được nằm trong tài liệu khóa học dùng chung
+const STUDENT_STATE_FIELDS = ['submission', 'quizResult', 'score', 'watchedSeconds', 'videoNotes'];
+function stripStudentState(modules) {
+  return (modules || []).map(m => ({
+    ...m,
+    activities: (m.activities || []).map(a => {
+      const clean = { ...a, isCompleted: false };
+      for (const k of STUDENT_STATE_FIELDS) delete clean[k];
+      return clean;
+    })
+  }));
+}
+
+// Trả về khóa học theo góc nhìn của người đang đăng nhập: chỉ gắn tiến độ CỦA CHÍNH HỌ
+function viewCourse(courseObj, user, progressRecords) {
+  const byActivity = new Map((progressRecords || []).map(p => [p.activityId, p]));
+  let total = 0;
+  let completed = 0;
+  const modules = stripStudentState(courseObj.modules).map(m => ({
+    ...m,
+    activities: m.activities.map(a => {
+      total++;
+      const p = byActivity.get(a.id);
+      if (!p) return a;
+      const out = { ...a, isCompleted: !!p.isCompleted };
+      if (p.submission) out.submission = p.submission;
+      if (p.quizResult) out.quizResult = p.quizResult;
+      if (p.score !== undefined && p.score !== null) out.score = p.score;
+      if (out.isCompleted) completed++;
+      return out;
+    })
+  }));
+  const students = courseObj.enrolledStudents || [];
+  return {
+    ...courseObj,
+    modules,
+    totalActivities: total,
+    completedActivities: completed,
+    progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+    enrolledStudentsCount: students.length,
+    // Khách chưa đăng nhập không được xem danh sách (email) học sinh
+    enrolledStudents: user ? students : []
+  };
+}
+
+async function viewCourseFor(courseObj, user) {
+  const enriched = await resolveInstructorAvatar(courseObj);
+  const records = user ? await listProgress({ courseId: enriched.id, userId: user.id }) : [];
+  return viewCourse(enriched, user, records);
+}
+
+// Kiểm tra chung cho thao tác học tập: khóa học + hoạt động tồn tại, học sinh đã đăng ký
+async function learningContext(req, res) {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) {
+    res.status(404).json({ message: 'Không tìm thấy khóa học' });
+    return null;
+  }
+  const activity = allActivities(course).find(a => a.id === req.params.actId);
+  if (!activity) {
+    res.status(404).json({ message: 'Không tìm thấy hoạt động học tập' });
+    return null;
+  }
+  if (!isStaff(req.user) && !isEnrolled(course, req.user)) {
+    res.status(403).json({ message: 'Bạn cần đăng ký khóa học trước khi tham gia hoạt động này.' });
+    return null;
+  }
+  return { course, activity };
+}
+
+// ====================== API ROUTES ======================
+
+// 1. Auth: Đăng nhập bằng tên đăng nhập đã bị gỡ bỏ vì không kiểm tra mật khẩu
+// (ai cũng có thể đăng nhập thành người khác, kể cả quản trị viên). Chỉ còn đăng nhập Google.
+app.post('/api/auth/login', (req, res) => {
+  res.status(410).json({ message: 'Hình thức đăng nhập này đã ngừng hỗ trợ. Vui lòng đăng nhập bằng Google.' });
 });
 
 // 1.1 Auth: Đăng nhập bằng Google OAuth (Google Identity Services)
@@ -317,6 +458,19 @@ app.post('/api/auth/google', async (req, res) => {
 
     const payload = await googleRes.json();
     const { sub: googleId, email, name, picture } = payload;
+
+    // Chỉ chấp nhận token Google được cấp cho chính ứng dụng này
+    const allowedClientIds = [
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.VITE_GOOGLE_CLIENT_ID,
+      '976502172307-q6lsed0gssm2udppc8cda0ai8u5e4alg.apps.googleusercontent.com'
+    ].filter(Boolean);
+    if (!allowedClientIds.includes(payload.aud)) {
+      return res.status(401).json({ message: 'Google Token không được cấp cho ứng dụng này' });
+    }
+    if (String(payload.email_verified) !== 'true') {
+      return res.status(401).json({ message: 'Email Google chưa được xác minh' });
+    }
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
     if (!normalizedEmail) {
@@ -397,7 +551,7 @@ app.post('/api/auth/google', async (req, res) => {
       }
     }
 
-    const token = `jwt_token_${user.id}_${Date.now()}`;
+    const token = signToken(user.id);
     const userObj = user.toObject ? user.toObject() : { ...user };
     delete userObj.password;
 
@@ -409,92 +563,15 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 // 2. Auth: Get current user profile (Yêu cầu token hợp lệ, tuyệt đối không trả về mock user)
-app.get('/api/auth/me', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Chưa đăng nhập' });
-  }
-
-  const token = authHeader.replace('Bearer ', '').trim();
-  const match = token.match(/^jwt_token_(.+)_\d+$/);
-  if (!match) {
-    return res.status(401).json({ message: 'Token không hợp lệ' });
-  }
-  const userId = match[1];
-
-  if (isMongoConnected) {
-    try {
-      const user = await UserModel.findOne({ id: userId });
-      if (user) {
-        const u = user.toObject();
-        delete u.password;
-        return res.json(u);
-      }
-    } catch (err) {}
-  }
-
-  const db = readDb();
-  const user = (db.users || []).find(u => u.id === userId);
-  if (user) {
-    const { password, ...safeUser } = user;
-    return res.json(safeUser);
-  }
-
-  return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  res.json(safeUser(req.user));
 });
 
-// 2.1 Auth: Update user profile (phone, dateOfBirth, address, school, className)
-app.put('/api/auth/profile', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  let userId = null;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.replace('Bearer ', '').trim();
-    const match = token.match(/^jwt_token_(.+)_\d+$/);
-    if (match) {
-      userId = match[1];
-    }
-  }
+// 2.1 Auth: Update user profile — chỉ sửa được hồ sơ của chính mình (xác định bằng token)
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+  const { phone, dateOfBirth, address, name, school, className, classOrPosition } = req.body;
 
-  const { phone, dateOfBirth, address, name, school, className, classOrPosition, isProfileCompleted, email } = req.body;
-
-  if (isMongoConnected) {
-    try {
-      let user = userId ? await UserModel.findOne({ id: userId }) : null;
-      if (!user && email) {
-        user = await UserModel.findOne({ email: email.toLowerCase().trim() });
-      }
-      if (user) {
-        if (name) user.name = name;
-        if (school !== undefined) {
-          user.school = school;
-          user.department = school;
-        }
-        if (className !== undefined || classOrPosition !== undefined) {
-          const cls = className || classOrPosition;
-          user.className = cls;
-          user.classOrPosition = cls;
-        }
-        if (phone !== undefined) user.phone = phone;
-        if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
-        if (address !== undefined) user.address = address;
-        user.isProfileCompleted = true;
-
-        await user.save();
-        const u = user.toObject();
-        delete u.password;
-        u.isProfileCompleted = true;
-        u.school = user.school;
-        u.className = user.className;
-        return res.json(u);
-      }
-    } catch (err) {
-      console.error('Lỗi cập nhật hồ sơ Mongo:', err);
-    }
-  }
-
-  const db = readDb();
-  let user = (db.users || []).find(u => (userId && u.id === userId) || (email && u.email === email.toLowerCase().trim()));
-  if (user) {
+  const applyProfile = (user) => {
     if (name) user.name = name;
     if (school !== undefined) {
       user.school = school;
@@ -509,31 +586,22 @@ app.put('/api/auth/profile', async (req, res) => {
     if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
     if (address !== undefined) user.address = address;
     user.isProfileCompleted = true;
+  };
 
-    writeDb(db);
-    const { password, ...safeUser } = user;
-    safeUser.isProfileCompleted = true;
-    return res.json(safeUser);
+  if (isMongoConnected) {
+    const user = await UserModel.findOne({ id: req.user.id });
+    if (!user) return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
+    applyProfile(user);
+    await user.save();
+    return res.json(safeUser(user.toObject()));
   }
 
-  // Fallback: Tạo user mới nếu chưa tồn tại
-  const fallbackUser = {
-    id: userId || `user-${Date.now()}`,
-    name: name || 'Học viên',
-    username: name ? name.toLowerCase().replace(/\s+/g, '_') : 'hocvien',
-    email: email || `${userId || 'user'}@lms2.edu.vn`,
-    role: 'student',
-    school: school || 'LMS Nhóm 2',
-    department: school || 'LMS Nhóm 2',
-    className: className || classOrPosition || 'Lớp học',
-    classOrPosition: className || classOrPosition || 'Học viên',
-    phone: phone || '',
-    isProfileCompleted: true
-  };
-  db.users = db.users || [];
-  db.users.push(fallbackUser);
+  const db = readDb();
+  const user = (db.users || []).find(u => u.id === req.user.id);
+  if (!user) return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
+  applyProfile(user);
   writeDb(db);
-  return res.json(fallbackUser);
+  res.json(safeUser(user));
 });
 
 // 3. Courses: Get All (Không có dữ liệu ảo)
@@ -550,7 +618,7 @@ async function resolveInstructorAvatar(course) {
       if (!user && targetEmail !== 'phanphiphu04@gmail.com') {
         user = await UserModel.findOne({ email: 'phanphiphu04@gmail.com' });
       }
-    } catch (e) {}
+    } catch (e) { }
   } else {
     const db = readDb();
     user = (db.users || []).find(u => u.email?.toLowerCase().trim() === targetEmail);
@@ -583,59 +651,42 @@ async function resolveInstructorAvatar(course) {
 }
 
 app.get('/api/courses', async (req, res) => {
-  if (isMongoConnected) {
-    try {
-      const courses = await CourseModel.find();
-      const enriched = await Promise.all((courses || []).map(resolveInstructorAvatar));
-      return res.json(enriched);
-    } catch (err) {
-      return res.json([]);
-    }
-  }
-
-  const db = readDb();
-  const enriched = await Promise.all((db.courses || []).map(resolveInstructorAvatar));
-  res.json(enriched);
+  const list = isMongoConnected
+    ? (await CourseModel.find()).map(c => c.toObject())
+    : (readDb().courses || []);
+  const records = req.user ? await listProgress({ userId: req.user.id }) : [];
+  const result = await Promise.all(list.map(async (c) => {
+    const enriched = await resolveInstructorAvatar(c);
+    return viewCourse(enriched, req.user, records.filter(p => p.courseId === enriched.id));
+  }));
+  res.json(result);
 });
 
 // 4. Courses: Get By ID
 app.get('/api/courses/:id', async (req, res) => {
-  const { id } = req.params;
-  if (isMongoConnected) {
-    try {
-      const course = await getCourseDoc(id);
-      if (course) {
-        const enriched = await resolveInstructorAvatar(course);
-        return res.json(enriched);
-      }
-    } catch (err) {}
-  }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id || c._id === id);
+  const course = await loadCourseObj(req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
-  const enriched = await resolveInstructorAvatar(course);
-  res.json(enriched);
+  res.json(await viewCourseFor(course, req.user));
 });
 
 // 5. Courses: Create new Course (Thêm khóa học thật từ API)
-app.post('/api/courses', async (req, res) => {
+app.post('/api/courses', requireStaff, async (req, res) => {
   const creatorEmail = (req.body.instructor?.email || req.body.creator?.email || 'phanphiphu04@gmail.com').toLowerCase().trim();
   let userCreator = null;
   if (isMongoConnected) {
     try {
       userCreator = await UserModel.findOne({ email: creatorEmail });
-    } catch (e) {}
+    } catch (e) { }
   } else {
     const db = readDb();
     userCreator = (db.users || []).find(u => u.email?.toLowerCase().trim() === creatorEmail);
   }
 
-  const realAvatar = (userCreator && userCreator.avatar) 
-    ? userCreator.avatar 
+  const realAvatar = (userCreator && userCreator.avatar)
+    ? userCreator.avatar
     : (req.body.instructor?.avatar && !req.body.instructor.avatar.includes('unsplash.com') ? req.body.instructor.avatar : '');
-  const realName = (userCreator && userCreator.name) 
-    ? userCreator.name 
+  const realName = (userCreator && userCreator.name)
+    ? userCreator.name
     : (req.body.instructor?.name && req.body.instructor.name !== 'Giáo viên' && req.body.instructor.name !== 'Giáo viên phụ trách' ? req.body.instructor.name : 'Phú Phan');
 
   const newCourseData = {
@@ -690,9 +741,12 @@ app.post('/api/courses', async (req, res) => {
 });
 
 // 5.1 Courses: Update Course
-app.put('/api/courses/:id', async (req, res) => {
+app.put('/api/courses/:id', requireStaff, async (req, res) => {
   const { id } = req.params;
-  const updateData = req.body;
+  // Danh sách ghi danh do API đăng ký quản lý, tiến độ nằm ở bảng riêng:
+  // không cho bản dữ liệu (có thể đã cũ) từ trình duyệt ghi đè lên.
+  const { _id, __v, id: _ignoredId, enrolledStudents, enrolledStudentsCount, progress, completedActivities, ...updateData } = req.body || {};
+  if (updateData.modules) updateData.modules = stripStudentState(updateData.modules);
 
   if (isMongoConnected) {
     try {
@@ -721,14 +775,17 @@ app.put('/api/courses/:id', async (req, res) => {
 });
 
 // 5.2 Courses: Delete Course
-app.delete('/api/courses/:id', async (req, res) => {
+app.delete('/api/courses/:id', requireStaff, async (req, res) => {
   const { id } = req.params;
+
+  const existing = await loadCourseObj(id);
+  if (existing) await removeProgress({ courseId: existing.id });
 
   if (isMongoConnected) {
     try {
       await CourseModel.deleteOne({ $or: [{ id }, ...(mongoose.isValidObjectId(id) ? [{ _id: id }] : [])] });
       return res.json({ success: true, message: 'Đã xóa khóa học thành công' });
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const db = readDb();
@@ -738,7 +795,7 @@ app.delete('/api/courses/:id', async (req, res) => {
 });
 
 // 5.3 Modules: Add Module to Course
-app.post('/api/courses/:id/modules', async (req, res) => {
+app.post('/api/courses/:id/modules', requireStaff, async (req, res) => {
   const { id } = req.params;
   const newModule = {
     id: req.body.id || `mod-${Date.now()}`,
@@ -786,7 +843,7 @@ app.post('/api/courses/:id/modules', async (req, res) => {
 });
 
 // 5.4 Modules: Update Module
-app.put('/api/courses/:id/modules/:modId', async (req, res) => {
+app.put('/api/courses/:id/modules/:modId', requireStaff, async (req, res) => {
   const { id, modId } = req.params;
   const updateData = req.body;
 
@@ -802,7 +859,7 @@ app.put('/api/courses/:id/modules/:modId', async (req, res) => {
           return res.json(course.modules[modIdx]);
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const db = readDb();
@@ -819,7 +876,7 @@ app.put('/api/courses/:id/modules/:modId', async (req, res) => {
 });
 
 // 5.5 Modules: Delete Module
-app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
+app.delete('/api/courses/:id/modules/:modId', requireStaff, async (req, res) => {
   const { id, modId } = req.params;
 
   if (isMongoConnected) {
@@ -831,7 +888,7 @@ app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
         await course.save();
         return res.json({ success: true, message: 'Đã xóa mô-đun thành công' });
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const db = readDb();
@@ -845,7 +902,7 @@ app.delete('/api/courses/:id/modules/:modId', async (req, res) => {
 });
 
 // 5.6 Activities: Add Activity / Learning Resource (Video, Link, Assignment, Quiz,...)
-app.post('/api/courses/:id/modules/:modId/activities', async (req, res) => {
+app.post('/api/courses/:id/modules/:modId/activities', requireStaff, async (req, res) => {
   const { id, modId } = req.params;
   const newActivity = {
     id: req.body.id || `act-${Date.now()}`,
@@ -910,7 +967,7 @@ app.post('/api/courses/:id/modules/:modId/activities', async (req, res) => {
 });
 
 // 5.7 Activities: Update Activity
-app.put('/api/courses/:id/activities/:actId', async (req, res) => {
+app.put('/api/courses/:id/activities/:actId', requireStaff, async (req, res) => {
   const { id, actId } = req.params;
   const updateData = req.body;
 
@@ -930,7 +987,7 @@ app.put('/api/courses/:id/activities/:actId', async (req, res) => {
           }
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const db = readDb();
@@ -951,7 +1008,7 @@ app.put('/api/courses/:id/activities/:actId', async (req, res) => {
 });
 
 // 5.8 Activities: Delete Activity
-app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
+app.delete('/api/courses/:id/activities/:actId', requireStaff, async (req, res) => {
   const { id, actId } = req.params;
 
   if (isMongoConnected) {
@@ -971,7 +1028,7 @@ app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
           }
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const db = readDb();
@@ -992,308 +1049,174 @@ app.delete('/api/courses/:id/activities/:actId', async (req, res) => {
   res.status(404).json({ message: 'Không tìm thấy bài học để xóa' });
 });
 
-// 5.9 Courses: Đăng ký khóa học cho học viên (Enrollment)
-app.post('/api/courses/:id/enroll', async (req, res) => {
-  const { id } = req.params;
-  const authHeader = req.headers.authorization;
-  let userId = req.body.id || req.body.userId;
-  let userName = req.body.name;
-  let userEmail = req.body.email;
-  let userClass = req.body.className || req.body.classOrPosition;
-  let userSchool = req.body.school || req.body.department;
-  let userAvatar = req.body.avatar;
-
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.replace('Bearer ', '').trim();
-    const match = token.match(/^jwt_token_(.+)_\d+$/);
-    if (match) {
-      userId = userId || match[1];
-    }
-  }
-
-  let dbUser = null;
-  if (isMongoConnected) {
-    try {
-      if (userId) dbUser = await UserModel.findOne({ id: userId });
-      if (!dbUser && userEmail) dbUser = await UserModel.findOne({ email: userEmail.toLowerCase().trim() });
-    } catch (e) {}
-  }
-  if (!dbUser) {
-    const db = readDb();
-    dbUser = (db.users || []).find(u => (userId && u.id === userId) || (userEmail && u.email === userEmail.toLowerCase().trim()));
-  }
-
-  if (dbUser) {
-    userId = dbUser.id || userId;
-    userName = dbUser.name || userName;
-    userEmail = dbUser.email || userEmail;
-    userClass = dbUser.className || dbUser.classOrPosition || userClass;
-    userSchool = dbUser.school || dbUser.department || userSchool;
-    userAvatar = dbUser.avatar || userAvatar;
-  }
+// 5.9 Courses: Đăng ký khóa học — danh tính lấy từ token, không lấy từ dữ liệu client gửi lên
+app.post('/api/courses/:id/enroll', requireAuth, async (req, res) => {
+  const user = req.user;
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học để đăng ký' });
 
   const studentObj = {
-    id: userId || `user-${Date.now()}`,
-    name: userName || 'Học viên',
-    email: userEmail || 'hocvien@lms2.edu.vn',
-    className: userClass || 'Lớp học',
-    school: userSchool || 'LMS Nhóm 2',
-    avatar: userAvatar || '',
-    enrolledAt: new Date().toLocaleDateString('vi-VN'),
+    id: user.id,
+    name: user.name || 'Học viên',
+    email: user.email || '',
+    code: user.code || '',
+    className: user.className || user.classOrPosition || '',
+    school: user.school || user.department || '',
+    avatar: user.avatar || '',
+    enrolledAt: new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
     status: 'Đang học'
   };
 
-  // Add course ID to user's enrolledCourses
-  if (isMongoConnected && dbUser) {
-    try {
-      dbUser.enrolledCourses = dbUser.enrolledCourses || [];
-      if (!dbUser.enrolledCourses.includes(id)) {
-        dbUser.enrolledCourses.push(id);
-        dbUser.markModified('enrolledCourses');
-        await dbUser.save();
-      }
-    } catch (e) {}
-  } else if (dbUser) {
+  if (isMongoConnected) {
+    await UserModel.updateOne({ id: user.id }, { $addToSet: { enrolledCourses: course.id } });
+    if (!isEnrolled(course, user)) {
+      await CourseModel.updateOne(
+        { id: course.id, 'enrolledStudents.id': { $ne: user.id } },
+        { $push: { enrolledStudents: studentObj }, $inc: { enrolledStudentsCount: 1 } }
+      );
+    }
+  } else {
     const db = readDb();
-    const u = (db.users || []).find(x => x.id === dbUser.id);
+    const u = (db.users || []).find(x => x.id === user.id);
     if (u) {
       u.enrolledCourses = u.enrolledCourses || [];
-      if (!u.enrolledCourses.includes(id)) {
-        u.enrolledCourses.push(id);
-        writeDb(db);
-      }
+      if (!u.enrolledCourses.includes(course.id)) u.enrolledCourses.push(course.id);
     }
+    const c = (db.courses || []).find(x => x.id === course.id);
+    if (c && !isEnrolled(c, user)) {
+      c.enrolledStudents = c.enrolledStudents || [];
+      c.enrolledStudents.push(studentObj);
+      c.enrolledStudentsCount = c.enrolledStudents.length;
+    }
+    writeDb(db);
   }
 
-  // Add student to course's enrolledStudents
-  if (isMongoConnected) {
-    try {
-      const course = await getCourseDoc(id);
-      if (course) {
-        course.enrolledStudents = course.enrolledStudents || [];
-        const isAlreadyEnrolled = course.enrolledStudents.some(s => s.id === studentObj.id || (studentObj.email && s.email === studentObj.email));
-        if (!isAlreadyEnrolled) {
-          course.enrolledStudents.push(studentObj);
-          course.enrolledStudentsCount = course.enrolledStudents.length;
-          course.markModified('enrolledStudents');
-          await course.save();
-        }
-        return res.json({ success: true, course: course.toObject ? course.toObject() : course, message: 'Đăng ký khóa học thành công' });
-      }
-    } catch (err) {
-      console.error('Lỗi đăng ký khóa học Mongo:', err);
-    }
-  }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id || c._id === id);
-  if (course) {
-    course.enrolledStudents = course.enrolledStudents || [];
-    const isAlreadyEnrolled = course.enrolledStudents.some(s => s.id === studentObj.id || (studentObj.email && s.email === studentObj.email));
-    if (!isAlreadyEnrolled) {
-      course.enrolledStudents.push(studentObj);
-      course.enrolledStudentsCount = course.enrolledStudents.length;
-      writeDb(db);
-    }
-    return res.json({ success: true, course, message: 'Đăng ký khóa học thành công' });
-  }
-
-  res.status(404).json({ message: 'Không tìm thấy khóa học để đăng ký' });
+  const fresh = await loadCourseObj(course.id);
+  res.json({ success: true, course: await viewCourseFor(fresh, user), message: 'Đăng ký khóa học thành công' });
 });
 
-// 6. Activities: Mark Completed
-app.post('/api/courses/:id/activities/:actId/complete', async (req, res) => {
-  if (isMongoConnected) {
-    try {
-      const course = await CourseModel.findOne({ id: req.params.id });
-      if (course) {
-        let total = 0;
-        let completed = 0;
-        (course.modules || []).forEach(m => {
-          (m.activities || []).forEach(a => {
-            total++;
-            if (a.id === req.params.actId) a.isCompleted = true;
-            if (a.isCompleted) completed++;
-          });
-        });
-        course.completedActivities = completed;
-        course.totalActivities = total;
-        course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-        course.markModified('modules');
-        await course.save();
-        return res.json({ success: true, progress: course.progress });
-      }
-    } catch (err) {}
+async function courseProgressOf(course, userId) {
+  const ids = new Set(allActivities(course).map(a => a.id));
+  const records = await listProgress({ courseId: course.id, userId });
+  const completed = records.filter(p => p.isCompleted && ids.has(p.activityId)).length;
+  return ids.size > 0 ? Math.round((completed / ids.size) * 100) : 0;
+}
+
+// 6. Activities: Mark Completed (ghi nhận cho đúng học sinh đang đăng nhập)
+app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+  // Bài trắc nghiệm chỉ được tính hoàn thành khi nộp bài và đạt điểm (xử lý ở quiz-submit)
+  if (ctx.activity.type !== 'quiz') {
+    await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, { isCompleted: true, completedAt: nowVN() });
   }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
-  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  let total = 0;
-  let completed = 0;
-  (course.modules || []).forEach(m => {
-    (m.activities || []).forEach(a => {
-      total++;
-      if (a.id === req.params.actId) a.isCompleted = true;
-      if (a.isCompleted) completed++;
-    });
-  });
-
-  course.completedActivities = completed;
-  course.totalActivities = total;
-  course.progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-  writeDb(db);
-  res.json({ success: true, progress: course.progress });
+  res.json({ success: true, progress: await courseProgressOf(ctx.course, req.user.id) });
 });
 
-// 7. Activities: Submit Assignment
-app.post('/api/courses/:id/activities/:actId/submit', async (req, res) => {
-  const { fileName, textSubmission } = req.body;
+// 7. Activities: Submit Assignment (mỗi học sinh một bài nộp riêng)
+app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+
+  const fileName = String(req.body.fileName || '').slice(0, 300);
+  const textSubmission = String(req.body.textSubmission || '').slice(0, 50000);
+  if (!fileName && !textSubmission.trim()) {
+    return res.status(400).json({ message: 'Bài nộp đang trống.' });
+  }
+
   const subData = {
     status: 'submitted',
-    fileName: fileName || 'BaiTap_Nop.pdf',
-    fileSize: '2.1 MB',
-    submittedAt: new Date().toLocaleString('vi-VN'),
+    fileName,
+    fileSize: String(req.body.fileSize || '').slice(0, 30),
+    submittedAt: nowVN(),
     textSubmission
   };
-
-  if (isMongoConnected) {
-    try {
-      const course = await CourseModel.findOne({ id: req.params.id });
-      if (course) {
-        (course.modules || []).forEach(m => {
-          (m.activities || []).forEach(a => {
-            if (a.id === req.params.actId) {
-              a.isCompleted = true;
-              a.submission = subData;
-            }
-          });
-        });
-        course.markModified('modules');
-        await course.save();
-        return res.json({ success: true, submission: subData });
-      }
-    } catch (err) {}
-  }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
-  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  (course.modules || []).forEach(m => {
-    (m.activities || []).forEach(a => {
-      if (a.id === req.params.actId) {
-        a.isCompleted = true;
-        a.submission = subData;
-      }
-    });
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
+    isCompleted: true,
+    completedAt: nowVN(),
+    submission: subData,
+    score: null
   });
-
-  writeDb(db);
   res.json({ success: true, submission: subData });
 });
 
-// 8. Activities: Grade Assignment
-app.post('/api/courses/:id/activities/:actId/grade', async (req, res) => {
-  const { grade, feedback } = req.body;
-
-  if (isMongoConnected) {
-    try {
-      const course = await CourseModel.findOne({ id: req.params.id });
-      if (course) {
-        (course.modules || []).forEach(m => {
-          (m.activities || []).forEach(a => {
-            if (a.id === req.params.actId && a.submission) {
-              a.score = Number(grade);
-              a.submission.status = 'graded';
-              a.submission.grade = Number(grade);
-              a.submission.feedback = feedback;
-            }
-          });
-        });
-        course.markModified('modules');
-        await course.save();
-        return res.json({ success: true });
-      }
-    } catch (err) {}
-  }
-
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
-  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
-
-  (course.modules || []).forEach(m => {
-    (m.activities || []).forEach(a => {
-      if (a.id === req.params.actId && a.submission) {
-        a.score = Number(grade);
-        a.submission.status = 'graded';
-        a.submission.grade = Number(grade);
-        a.submission.feedback = feedback;
-      }
-    });
-  });
-
-  writeDb(db);
-  res.json({ success: true });
+// 7.1 Giáo viên xem bài nộp / kết quả của TỪNG học sinh cho một hoạt động
+app.get('/api/courses/:id/activities/:actId/submissions', requireStaff, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+  const records = await listProgress({ courseId: ctx.course.id, activityId: ctx.activity.id });
+  const byUser = new Map(records.map(p => [p.userId, p]));
+  res.json((ctx.course.enrolledStudents || []).map(s => {
+    const p = byUser.get(s.id);
+    return {
+      student: { id: s.id, name: s.name, email: s.email, className: s.className, avatar: s.avatar },
+      isCompleted: !!p?.isCompleted,
+      completedAt: p?.completedAt || '',
+      score: p?.score ?? null,
+      submission: p?.submission || null,
+      quizResult: p?.quizResult || null
+    };
+  }));
 });
 
-// 9. Activities: Submit Quiz
-app.post('/api/courses/:id/activities/:actId/quiz-submit', async (req, res) => {
-  const { answers, score, maxScore } = req.body;
-  const passed = score >= (maxScore * 0.5);
+// 8. Activities: Grade Assignment (chỉ giáo viên, chấm cho một học sinh cụ thể)
+app.post('/api/courses/:id/activities/:actId/grade', requireStaff, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
 
-  if (isMongoConnected) {
-    try {
-      const course = await CourseModel.findOne({ id: req.params.id });
-      if (course) {
-        (course.modules || []).forEach(m => {
-          (m.activities || []).forEach(a => {
-            if (a.id === req.params.actId) {
-              a.isCompleted = passed;
-              a.score = score;
-              a.maxScore = maxScore;
-              a.quizResult = {
-                score,
-                maxScore,
-                passed,
-                submittedAt: new Date().toLocaleString('vi-VN'),
-                answers
-              };
-            }
-          });
-        });
-        course.markModified('modules');
-        await course.save();
-        return res.json({ success: true, passed, score });
-      }
-    } catch (err) {}
+  const { studentId, feedback } = req.body;
+  const grade = Number(req.body.grade);
+  const maxScore = Number(ctx.activity.maxScore) || 10;
+  if (!studentId) return res.status(400).json({ message: 'Thiếu mã học sinh cần chấm điểm.' });
+  if (!Number.isFinite(grade) || grade < 0 || grade > maxScore) {
+    return res.status(400).json({ message: `Điểm phải nằm trong khoảng 0 - ${maxScore}.` });
   }
 
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === req.params.id);
-  if (!course) return res.status(404).json({ message: 'Không tìm thấy môn học' });
+  const [record] = await listProgress({ courseId: ctx.course.id, userId: studentId, activityId: ctx.activity.id });
+  if (!record || !record.submission) {
+    return res.status(404).json({ message: 'Học sinh này chưa nộp bài.' });
+  }
 
-  (course.modules || []).forEach(m => {
-    (m.activities || []).forEach(a => {
-      if (a.id === req.params.actId) {
-        a.isCompleted = passed;
-        a.score = score;
-        a.maxScore = maxScore;
-        a.quizResult = {
-          score,
-          maxScore,
-          passed,
-          submittedAt: new Date().toLocaleString('vi-VN'),
-          answers
-        };
-      }
-    });
+  const submission = {
+    ...record.submission,
+    status: 'graded',
+    grade,
+    feedback: String(feedback || '').slice(0, 5000),
+    gradedAt: nowVN(),
+    gradedBy: req.user.name || req.user.email
+  };
+  await saveProgress(ctx.course.id, studentId, ctx.activity.id, { score: grade, submission });
+  res.json({ success: true, submission });
+});
+
+// 9. Activities: Submit Quiz (điểm do server tự chấm theo đáp án, không tin điểm client gửi lên)
+app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+
+  const answers = (req.body.answers && typeof req.body.answers === 'object') ? req.body.answers : {};
+  const questions = Array.isArray(ctx.activity.quizQuestions) ? ctx.activity.quizQuestions : [];
+  const maxScore = 10; // cùng thang điểm 10 với giao diện làm bài
+
+  let score;
+  if (questions.length > 0) {
+    const correct = questions.filter(q => answers[q.id] === q.correctAnswer).length;
+    score = Number(((correct / questions.length) * maxScore).toFixed(1));
+  } else {
+    score = Math.min(Math.max(Number(req.body.score) || 0, 0), maxScore);
+  }
+  const passScore = Number(ctx.activity.passScore) || 5;
+  const passed = score >= passScore;
+
+  const quizResult = { score, maxScore, passed, submittedAt: nowVN(), answers };
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
+    isCompleted: passed,
+    completedAt: passed ? nowVN() : '',
+    score,
+    maxScore,
+    quizResult
   });
-
-  writeDb(db);
-  res.json({ success: true, passed, score });
+  res.json({ success: true, passed, score, result: quizResult });
 });
 
 // 10. Certificates
@@ -1324,12 +1247,12 @@ app.get('/api/notifications', async (req, res) => {
   res.json(db.notifications || []);
 });
 
-app.put('/api/notifications/:id/read', async (req, res) => {
+app.put('/api/notifications/:id/read', requireAuth, async (req, res) => {
   if (isMongoConnected) {
     try {
       await NotifModel.updateOne({ id: req.params.id }, { $set: { read: true } });
       return res.json({ success: true });
-    } catch (err) {}
+    } catch (err) { }
   }
   const db = readDb();
   (db.notifications || []).forEach(n => {
@@ -1355,7 +1278,7 @@ app.get('/api/courses/:id/forum', async (req, res) => {
 });
 
 // 13. Users (Admin)
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', requireStaff, async (req, res) => {
   if (isMongoConnected) {
     try {
       const users = await UserModel.find({}, { password: 0 });
@@ -1369,30 +1292,62 @@ app.get('/api/users', async (req, res) => {
   res.json(safeUsers || []);
 });
 
-// 14. Students in Course (Lấy danh sách học viên cùng lớp đã đăng ký khóa học này)
-app.get('/api/courses/:id/students', async (req, res) => {
-  const { id } = req.params;
-  if (isMongoConnected) {
-    try {
-      const course = await getCourseDoc(id);
-      if (course && Array.isArray(course.enrolledStudents)) {
-        return res.json(course.enrolledStudents);
-      }
-    } catch (err) {}
+// 14. Students in Course — giáo viên nhận kèm tiến độ chi tiết của từng học sinh
+app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.json([]);
+  const students = course.enrolledStudents || [];
+
+  if (!isStaff(req.user)) {
+    if (!isEnrolled(course, req.user)) {
+      return res.status(403).json({ message: 'Bạn chưa đăng ký khóa học này.' });
+    }
+    return res.json(students.map(s => ({
+      id: s.id, name: s.name, className: s.className, school: s.school, avatar: s.avatar, enrolledAt: s.enrolledAt, status: s.status
+    })));
   }
-  const db = readDb();
-  const course = (db.courses || []).find(c => c.id === id || c._id === id);
-  if (course && Array.isArray(course.enrolledStudents)) {
-    return res.json(course.enrolledStudents);
-  }
-  return res.json([]);
+
+  const activities = allActivities(course);
+  const records = await listProgress({ courseId: course.id });
+  const users = await findUsersByIds(students.map(s => s.id));
+  const userById = new Map(users.map(u => [u.id, u]));
+
+  res.json(students.map(s => {
+    const mine = new Map(records.filter(p => p.userId === s.id).map(p => [p.activityId, p]));
+    const detail = activities.map(a => {
+      const p = mine.get(a.id);
+      return {
+        activityId: a.id,
+        title: a.title,
+        type: a.type,
+        isCompleted: !!p?.isCompleted,
+        completedAt: p?.completedAt || '',
+        score: p?.score ?? null,
+        maxScore: a.maxScore || 10,
+        submissionStatus: p?.submission?.status || (p?.quizResult ? 'quiz_done' : 'none')
+      };
+    });
+    const completed = detail.filter(d => d.isCompleted).length;
+    const lastActivityAt = [...mine.values()].map(p => p.updatedAt || '').sort().pop() || '';
+    const u = userById.get(s.id);
+    return {
+      ...s,
+      code: u?.code || s.code || '',
+      className: u?.className || u?.classOrPosition || s.className || '',
+      totalActivities: activities.length,
+      completedActivities: completed,
+      progress: activities.length > 0 ? Math.round((completed / activities.length) * 100) : 0,
+      lastActivityAt,
+      activities: detail
+    };
+  }));
 });
 
 // ====================== SERVE PRODUCTION FRONTEND ======================
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  
+
   // SPA Fallback cho Express 5 (không dùng app.get('*') để tránh lỗi PathError trong Express 5)
   app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api/')) {

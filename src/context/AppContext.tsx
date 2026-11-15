@@ -29,8 +29,8 @@ interface AppContextType {
   addForumReply: (topicId: string, content: string) => void;
   createForumTopic: (courseId: string, title: string, content: string) => void;
   markActivityCompleted: (courseId: string, activityId: string) => void;
-  submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string) => void;
-  gradeAssignment: (courseId: string, activityId: string, grade: number, feedback: string) => void;
+  submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string) => void;
+  gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
   submitQuiz: (courseId: string, activityId: string, score: number, maxScore: number, answers: Record<string, number | number[]>) => void;
   addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
   updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
@@ -146,7 +146,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // 4. Fetch current user profile
-      const userRes = await api.auth.getMe().catch(() => null);
+      const hasSession = !!localStorage.getItem('lms2_token');
+      const userRes = await api.auth.getMe().catch((err: any) => {
+        // Phiên đăng nhập không còn hợp lệ (hết hạn hoặc token đời cũ): đăng xuất để người dùng đăng nhập lại,
+        // tránh tình trạng giao diện báo "đã đăng nhập" nhưng mọi thao tác đều bị server từ chối.
+        if (err?.status === 401 && (hasSession || /"id":"[^"]/.test(localStorage.getItem('lms2_user') || ''))) {
+          api.auth.logout();
+          setCurrentUser({ ...initialUser, name: '', code: '' });
+          setActiveRole('student');
+          if (hasSession) setIsLoginModalOpen(true);
+        }
+        return null;
+      });
       if (userRes && userRes.id) {
         setCurrentUser(userRes);
         setActiveRole(userRes.role);
@@ -167,7 +178,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser({ ...initialUser, name: '', code: '' });
     setActiveRole('student');
     setCurrentView('dashboard');
-  }, []);
+    // Tải lại dữ liệu ở chế độ khách để xóa tiến độ cá nhân của tài khoản vừa đăng xuất
+    refreshData();
+  }, [refreshData]);
+
+  // Thao tác học tập không lưu được lên máy chủ: báo rõ cho người dùng và đồng bộ lại dữ liệu thật
+  const reportSyncFailure = useCallback((action: string, err: any) => {
+    console.warn(`[LMS] ${action} thất bại:`, err);
+    window.alert(`${action} CHƯA được lưu lên hệ thống.
+${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
+    refreshData();
+  }, [refreshData]);
 
   const updateProfile = useCallback(async (data: Partial<User>) => {
     // Cập nhật ngay lập tức vào state và localStorage để đóng modal và giao diện phản hồi tức thì
@@ -304,10 +325,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     // Call API backend
-    api.activities.markCompleted(courseId, activityId).catch(() => {});
+    api.activities.markCompleted(courseId, activityId).catch(err => reportSyncFailure('Đánh dấu hoàn thành', err));
   };
 
-  const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string) => {
+  const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string) => {
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => ({
@@ -320,7 +341,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               submission: {
                 status: 'submitted' as const,
                 fileName,
-                fileSize: '2.4 MB',
+                fileSize: fileSize || '',
                 submittedAt: new Date().toLocaleString('vi-VN'),
                 textSubmission
               }
@@ -333,36 +354,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     // Call API backend
-    api.activities.submitAssignment(courseId, activityId, { fileName, textSubmission }).catch(() => {});
+    api.activities.submitAssignment(courseId, activityId, { fileName, fileSize, textSubmission }).catch(err => reportSyncFailure('Bài nộp', err));
   };
 
-  const gradeAssignment = (courseId: string, activityId: string, grade: number, feedback: string) => {
-    setCourses(prev => prev.map(course => {
-      if (course.id !== courseId) return course;
-      const updatedModules = (course.modules || []).map(m => ({
-        ...m,
-        activities: (m.activities || []).map(act => {
-          if (act.id === activityId && act.submission) {
-            return {
-              ...act,
-              isCompleted: true,
-              score: grade,
-              submission: {
-                ...act.submission,
-                status: 'graded' as const,
-                grade,
-                feedback
-              }
-            };
-          }
-          return act;
-        })
-      }));
-      return calculateCourseProgress({ ...course, modules: updatedModules });
-    }));
-
-    // Call API backend
-    api.activities.gradeAssignment(courseId, activityId, { grade, feedback }).catch(() => {});
+  // Giáo viên chấm điểm cho MỘT học sinh cụ thể (dữ liệu nằm trên máy chủ, không nằm trong state của giáo viên)
+  const gradeAssignment = async (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => {
+    await api.activities.gradeAssignment(courseId, activityId, { studentId, grade, feedback });
   };
 
   const submitQuiz = (courseId: string, activityId: string, score: number, maxScore: number, answers: Record<string, number | number[]>) => {
@@ -394,7 +391,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     // Call API backend
-    api.activities.submitQuiz(courseId, activityId, { answers, score, maxScore }).catch(() => {});
+    api.activities.submitQuiz(courseId, activityId, { answers, score, maxScore }).catch(err => reportSyncFailure('Kết quả bài kiểm tra', err));
   };
 
   const addCourseActivity = (courseId: string, moduleId: string, newAct: Partial<Activity>) => {
@@ -586,11 +583,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Call API backend
     try {
-      await api.courses.enroll(courseId, studentInfo);
+      await api.courses.enroll(courseId);
       return true;
-    } catch (err) {
-      console.warn('API enroll failed, saved in local state', err);
-      return true;
+    } catch (err: any) {
+      reportSyncFailure('Đăng ký khóa học', err);
+      return false;
     }
   };
 

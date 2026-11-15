@@ -25,7 +25,6 @@ export const TeacherDashboard: React.FC = () => {
     courses, 
     addCourseActivity, 
     addAnnouncement,
-    gradeAssignment,
     navigateToCourse
   } = useApp();
 
@@ -33,6 +32,8 @@ export const TeacherDashboard: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'modules' | 'students' | 'announcements'>('modules');
   const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [studentsError, setStudentsError] = useState<string | null>(null);
+  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
 
   // Form states for adding new activity
   const [isAddActivityOpen, setIsAddActivityOpen] = useState(false);
@@ -57,15 +58,21 @@ export const TeacherDashboard: React.FC = () => {
       api.users.getStudentsByCourse(selectedCourse.id)
         .then(res => {
           if (Array.isArray(res)) setEnrolledStudents(res);
+          setStudentsError(null);
         })
-        .catch(() => {
+        .catch((err: any) => {
           setEnrolledStudents([]);
+          setStudentsError(err?.message || 'Không tải được danh sách học sinh.');
         })
         .finally(() => {
           setLoadingStudents(false);
         });
     }
-  }, [selectedCourse?.id]);
+  }, [selectedCourse?.id, selectedTab]);
+
+  const classAverage = enrolledStudents.length > 0
+    ? Math.round(enrolledStudents.reduce((sum, st) => sum + (st.progress || 0), 0) / enrolledStudents.length)
+    : 0;
 
   const handleCreateActivity = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +176,7 @@ export const TeacherDashboard: React.FC = () => {
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
             <p className="text-xs font-medium text-slate-500">Tiến độ khóa học</p>
-            <h3 className="text-2xl font-black text-emerald-600 mt-1">{selectedCourse.progress || 0}%</h3>
+            <h3 className="text-2xl font-black text-emerald-600 mt-1">{classAverage}%</h3>
             <span className="text-[11px] text-emerald-700 font-medium">Trung bình lớp</span>
           </div>
         </div>
@@ -396,6 +403,10 @@ export const TeacherDashboard: React.FC = () => {
                 <div className="py-12 text-center text-xs text-slate-400">
                   Đang tải danh sách học sinh từ API...
                 </div>
+              ) : studentsError ? (
+                <div className="py-4 px-4 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                  {studentsError}
+                </div>
               ) : enrolledStudents.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
@@ -405,24 +416,70 @@ export const TeacherDashboard: React.FC = () => {
                         <th className="py-3 px-4">Họ và Tên</th>
                         <th className="py-3 px-4">Lớp học</th>
                         <th className="py-3 px-4 text-center">Tiến độ</th>
-                        <th className="py-3 px-4 text-center">Trạng thái</th>
+                        <th className="py-3 px-4 text-center">Hoạt động gần nhất</th>
+                        <th className="py-3 px-4 text-center">Chi tiết</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {enrolledStudents.map((st, idx) => (
-                        <tr key={idx} className="hover:bg-amber-50/20">
-                          <td className="py-3 px-4 font-mono font-bold text-hcmue-700">{st.code}</td>
-                          <td className="py-3 px-4 font-bold text-slate-800">{st.name}</td>
-                          <td className="py-3 px-4 text-slate-500">{st.class}</td>
-                          <td className="py-3 px-4 text-center">
-                            <span className="font-bold">{st.progress || 0}%</span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-hcmue-800">
-                              {st.status || 'Đang học'}
-                            </span>
-                          </td>
-                        </tr>
+                      {enrolledStudents.map((st) => (
+                        <React.Fragment key={st.id}>
+                          <tr className="hover:bg-amber-50/20">
+                            <td className="py-3 px-4 font-mono font-bold text-hcmue-700">{st.code || '—'}</td>
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-slate-800">{st.name}</div>
+                              <div className="text-[11px] text-slate-400">{st.email}</div>
+                            </td>
+                            <td className="py-3 px-4 text-slate-500">{st.className || '—'}</td>
+                            <td className="py-3 px-4 text-center">
+                              <span className="font-bold">{st.progress || 0}%</span>
+                              <div className="text-[11px] text-slate-400">
+                                {st.completedActivities || 0}/{st.totalActivities || 0} hoạt động
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-center text-slate-500">
+                              {st.lastActivityAt
+                                ? new Date(st.lastActivityAt).toLocaleString('vi-VN')
+                                : 'Chưa tham gia'}
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <button
+                                type="button"
+                                onClick={() => setExpandedStudentId(expandedStudentId === st.id ? null : st.id)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-slate-700"
+                              >
+                                {expandedStudentId === st.id ? 'Ẩn' : 'Xem'}
+                              </button>
+                            </td>
+                          </tr>
+                          {expandedStudentId === st.id && (
+                            <tr className="bg-slate-50/60">
+                              <td colSpan={6} className="py-3 px-4">
+                                {(st.activities || []).length === 0 ? (
+                                  <span className="text-slate-400">Khóa học chưa có hoạt động nào.</span>
+                                ) : (
+                                  <ul className="space-y-1.5">
+                                    {(st.activities || []).map((a: any) => (
+                                      <li key={a.activityId} className="flex flex-wrap items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${a.isCompleted ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                                        <span className="font-semibold text-slate-800">{a.title}</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">{a.type}</span>
+                                        <span className={a.isCompleted ? 'text-emerald-700 font-bold' : 'text-slate-400'}>
+                                          {a.isCompleted
+                                            ? `Hoàn thành${a.completedAt ? ' lúc ' + a.completedAt : ''}`
+                                            : a.submissionStatus === 'quiz_done' ? 'Đã làm bài, chưa đạt' : 'Chưa hoàn thành'}
+                                        </span>
+                                        {a.submissionStatus === 'submitted' && <span className="text-amber-700 font-bold">• Chờ chấm</span>}
+                                        {a.score !== null && a.score !== undefined && (
+                                          <span className="text-purple-700 font-bold">• Điểm: {a.score}/{a.maxScore}</span>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>

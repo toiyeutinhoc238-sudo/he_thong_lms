@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Activity } from '../types';
 import { useApp } from '../context/AppContext';
+import api, { StudentSubmission } from '../services/api';
 import { 
   UploadCloud, 
   FileCheck, 
@@ -23,7 +24,7 @@ interface AssignmentSubmitterProps {
 }
 
 export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activity, courseId }) => {
-  const { submitAssignment, gradeAssignment, activeRole, currentUser } = useApp();
+  const { submitAssignment, activeRole, currentUser } = useApp();
 
   const isTeacherOrAdmin = activeRole === 'lecturer' || activeRole === 'admin' || currentUser?.role === 'admin' || currentUser?.email === 'phanphiphu04@gmail.com';
 
@@ -32,11 +33,6 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
   const [onlineText, setOnlineText] = useState(activity.submission?.textSubmission || activity.starterCode || '');
   const [commentText, setCommentText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-
-  // Teacher grading states
-  const [gradeScore, setGradeScore] = useState<number>(activity.submission?.grade || 9.0);
-  const [feedbackText, setFeedbackText] = useState<string>(activity.submission?.feedback || 'Bài làm tốt, cấu trúc rõ ràng.');
-  const [isGradingSaved, setIsGradingSaved] = useState(false);
 
   const submission = activity.submission;
   const isSubmitted = submission && submission.status !== 'not_submitted';
@@ -58,17 +54,13 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
         ? selectedFile.name 
         : (submission?.fileName || (submissionTab === 'online_text' ? 'bai_lam_truc_tuyen.txt' : 'BaiTap_Nop.pdf'));
       
-      submitAssignment(courseId, activity.id, fileName, onlineText.trim() ? onlineText.trim() : commentText);
+      const fileSize = selectedFile
+        ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
+        : (submission?.fileSize || '');
+      submitAssignment(courseId, activity.id, fileName, onlineText.trim() ? onlineText.trim() : commentText, fileSize);
       setIsUploading(false);
       setSelectedFile(null);
     }, 600);
-  };
-
-  const handleTeacherGrade = (e: React.FormEvent) => {
-    e.preventDefault();
-    gradeAssignment(courseId, activity.id, Number(gradeScore), feedbackText);
-    setIsGradingSaved(true);
-    setTimeout(() => setIsGradingSaved(false), 3000);
   };
 
   return (
@@ -131,6 +123,7 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
         )}
       </div>
 
+      {!isTeacherOrAdmin && (<>
       {/* Submission Status Table */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
         <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700">
@@ -282,6 +275,11 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
               </div>
             </div>
 
+            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-relaxed">
+              <strong>Lưu ý:</strong> hệ thống hiện chỉ ghi nhận <strong>tên tệp</strong>, chưa lưu nội dung tệp.
+              Hãy tải tệp lên Google Drive rồi dán đường dẫn chia sẻ vào ô ghi chú bên dưới, hoặc dùng thẻ "Soạn thảo / Nhập code trực tiếp".
+            </p>
+
             {selectedFile && (
               <div className="flex items-center justify-between p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs">
                 <div className="flex items-center gap-2 text-sky-950 font-bold">
@@ -349,63 +347,188 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
         </div>
       </form>
 
-      {/* Teacher / Admin Grading Studio */}
-      {isTeacherOrAdmin && (
-        <form onSubmit={handleTeacherGrade} className="bg-amber-50/60 rounded-3xl p-6 border border-amber-200/80 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 text-amber-600" />
-            <h4 className="font-extrabold text-sm text-slate-800">
-              Bảng Chấm Điểm của Giáo viên (Teacher Grading Studio)
-            </h4>
-          </div>
+      </>)}
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Điểm số (Thang điểm {activity.maxScore || 10})
-              </label>
-              <input 
-                type="number" 
-                step="0.25" 
-                min="0" 
-                max={activity.maxScore || 10} 
-                value={gradeScore}
-                onChange={(e) => setGradeScore(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-sm focus:outline-none focus:border-[#0374b5]"
-                required
-              />
-            </div>
+      {/* Giáo viên: bài nộp của từng học sinh */}
+      {isTeacherOrAdmin && <TeacherSubmissions activity={activity} courseId={courseId} />}
+    </div>
+  );
+};
 
-            <div className="sm:col-span-3">
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nhận xét & Hướng dẫn sửa bài
-              </label>
-              <input 
-                type="text"
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Nhận xét chi tiết cho học sinh..."
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#0374b5]"
-                required
-              />
-            </div>
-          </div>
+// ====================== GIÁO VIÊN: DANH SÁCH BÀI NỘP THEO TỪNG HỌC SINH ======================
+const TeacherSubmissions: React.FC<AssignmentSubmitterProps> = ({ activity, courseId }) => {
+  const [rows, setRows] = useState<StudentSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-          <div className="flex items-center justify-between pt-2">
-            {isGradingSaved && (
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> Đã cập nhật điểm vào hệ thống!
-              </span>
+  const load = useCallback(() => {
+    setLoading(true);
+    api.activities.getSubmissions(courseId, activity.id)
+      .then(res => {
+        setRows(Array.isArray(res) ? res : []);
+        setError(null);
+      })
+      .catch((err: any) => setError(err?.message || 'Không tải được danh sách bài nộp.'))
+      .finally(() => setLoading(false));
+  }, [courseId, activity.id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const submittedCount = rows.filter(r => r.submission).length;
+  const gradedCount = rows.filter(r => r.submission?.status === 'graded').length;
+
+  return (
+    <div className="bg-amber-50/60 rounded-3xl p-6 border border-amber-200/80 shadow-xs space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Award className="w-5 h-5 text-amber-600" />
+          <h4 className="font-extrabold text-sm text-slate-800">
+            Bài nộp của học sinh & Chấm điểm
+          </h4>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="font-bold text-slate-700">
+            Đã nộp {submittedCount}/{rows.length} • Đã chấm {gradedCount}
+          </span>
+          <button
+            type="button"
+            onClick={load}
+            className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Tải lại
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="py-6 text-center text-xs text-slate-500">Đang tải bài nộp...</p>
+      ) : error ? (
+        <p className="py-4 px-4 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-xl">{error}</p>
+      ) : rows.length === 0 ? (
+        <p className="py-6 text-center text-xs text-slate-500">Chưa có học sinh nào đăng ký khóa học này.</p>
+      ) : (
+        <div className="space-y-3">
+          {rows.map(row => (
+            <SubmissionRow
+              key={row.student.id}
+              row={row}
+              courseId={courseId}
+              activityId={activity.id}
+              maxScore={activity.maxScore || 10}
+              onGraded={load}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SubmissionRow: React.FC<{
+  row: StudentSubmission;
+  courseId: string;
+  activityId: string;
+  maxScore: number;
+  onGraded: () => void;
+}> = ({ row, courseId, activityId, maxScore, onGraded }) => {
+  const { gradeAssignment } = useApp();
+  const sub = row.submission;
+  const [grade, setGrade] = useState<string>(sub?.grade !== undefined ? String(sub.grade) : '');
+  const [feedback, setFeedback] = useState<string>(sub?.feedback || '');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const handleGrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+    try {
+      await gradeAssignment(courseId, activityId, row.student.id, Number(grade), feedback);
+      setMessage({ ok: true, text: 'Đã lưu điểm.' });
+      onGraded();
+    } catch (err: any) {
+      setMessage({ ok: false, text: err?.message || 'Không lưu được điểm.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span className="font-bold text-slate-800 text-sm">{row.student.name}</span>
+          {row.student.className && <span className="text-slate-500"> • {row.student.className}</span>}
+          {row.student.email && <span className="text-slate-400"> • {row.student.email}</span>}
+        </div>
+        {!sub ? (
+          <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-medium">Chưa nộp bài</span>
+        ) : sub.status === 'graded' ? (
+          <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-bold">
+            Đã chấm: {sub.grade} / {maxScore}
+          </span>
+        ) : (
+          <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold">Đã nộp, chờ chấm</span>
+        )}
+      </div>
+
+      {sub && (
+        <>
+          <div className="text-slate-600 space-y-1">
+            {sub.submittedAt && <p>Thời gian nộp: <span className="font-mono">{sub.submittedAt}</span></p>}
+            {sub.fileName && (
+              <p className="flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-purple-600" />
+                <span>Tên tệp: <strong>{sub.fileName}</strong>{sub.fileSize ? ` (${sub.fileSize})` : ''}</span>
+              </p>
             )}
+          </div>
+
+          {sub.textSubmission && (
+            <pre className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800 max-h-48 overflow-y-auto whitespace-pre-wrap">
+              {sub.textSubmission}
+            </pre>
+          )}
+
+          <form onSubmit={handleGrade} className="flex flex-wrap items-end gap-3 pt-1">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Điểm (0 - {maxScore})</label>
+              <input
+                type="number"
+                step="0.25"
+                min="0"
+                max={maxScore}
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+                className="w-24 px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-[#0374b5]"
+                required
+              />
+            </div>
+            <div className="flex-1 min-w-[12rem]">
+              <label className="block font-bold text-slate-700 mb-1">Nhận xét</label>
+              <input
+                type="text"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Nhận xét cho học sinh..."
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:border-[#0374b5]"
+              />
+            </div>
             <button
               type="submit"
-              className="ml-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold text-xs rounded-xl shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+              disabled={saving || grade === ''}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-900 font-extrabold rounded-xl shadow-sm flex items-center gap-1.5"
             >
               <Check className="w-4 h-4" />
-              <span>Lưu điểm & Công bố cho học sinh</span>
+              <span>{saving ? 'Đang lưu...' : 'Lưu điểm'}</span>
             </button>
-          </div>
-        </form>
+            {message && (
+              <span className={`font-bold ${message.ok ? 'text-emerald-600' : 'text-red-600'}`}>{message.text}</span>
+            )}
+          </form>
+        </>
       )}
     </div>
   );
