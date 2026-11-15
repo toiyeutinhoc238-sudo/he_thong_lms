@@ -6,7 +6,7 @@ export const CertificatesView: React.FC = () => {
   const { certificates, setActiveCertificate, courses, navigateToCourse } = useApp();
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 min-w-0 w-full p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">

@@ -36,7 +36,7 @@ export const ProfileModal: React.FC = () => {
   // Người dùng chưa đăng nhập Google
   if (!currentUser.id || !currentUser.email) {
     return (
-      <div className="max-w-xl mx-auto py-12 px-4 text-center">
+      <div className="flex-1 w-full max-w-xl mx-auto py-12 px-4 text-center">
         <div className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-md space-y-6">
           <div className="w-20 h-20 mx-auto rounded-3xl bg-blue-50 text-[#0374b5] flex items-center justify-center shadow-inner">
             <UserIcon className="w-10 h-10" />
@@ -104,7 +104,7 @@ export const ProfileModal: React.FC = () => {
   const userClass = currentUser.className || currentUser.classOrPosition || '';
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto py-4">
+    <div className="flex-1 min-w-0 w-full space-y-6 max-w-4xl mx-auto p-6">
       {/* Profile Card Header */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {currentUser.avatar ? (

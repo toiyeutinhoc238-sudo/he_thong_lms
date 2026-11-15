@@ -105,7 +105,7 @@ export const TeacherDashboard: React.FC = () => {
 
   if (!selectedCourse && courses.length === 0) {
     return (
-      <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs space-y-4">
+      <div className="flex-1 m-6 self-start bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs space-y-4">
         <BookOpen className="w-16 h-16 text-slate-300 mx-auto" />
         <h2 className="text-xl font-bold text-slate-800">Chưa có khóa học nào để quản lý</h2>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
@@ -116,9 +116,9 @@ export const TeacherDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 min-w-0 w-full p-6 max-w-7xl mx-auto space-y-6">
       {/* Studio Header */}
-      <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4">
+      <div className="bg-gradient-to-r from-[#0374b5] via-sky-700 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
@@ -127,7 +127,7 @@ export const TeacherDashboard: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-extrabold">
               Không Gian Quản Lý & Điều Phối Học Phần
             </h1>
-            <p className="text-amber-100 text-xs sm:text-sm">
+            <p className="text-sky-100 text-xs sm:text-sm">
               Giáo viên: <strong>{currentUser.name}</strong> • {currentUser.department}
             </p>
           </div>
@@ -135,7 +135,7 @@ export const TeacherDashboard: React.FC = () => {
           {/* Select Course dropdown */}
           {courses.length > 0 && (
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 space-y-1 shrink-0">
-              <label className="text-xs text-amber-200 block font-semibold">
+              <label className="text-xs text-sky-100 block font-semibold">
                 Chọn học phần giảng dạy:
               </label>
               <select
@@ -165,7 +165,7 @@ export const TeacherDashboard: React.FC = () => {
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
             <p className="text-xs font-medium text-slate-500">Số lượng chương học</p>
-            <h3 className="text-2xl font-black text-amber-600 mt-1">{selectedCourse.modules?.length || 0}</h3>
+            <h3 className="text-2xl font-black text-sky-700 mt-1">{selectedCourse.modules?.length || 0}</h3>
             <span className="text-[11px] text-slate-500 font-medium">{selectedCourse.totalActivities || 0} bài học</span>
           </div>
 
@@ -191,7 +191,7 @@ export const TeacherDashboard: React.FC = () => {
               onClick={() => setSelectedTab('modules')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 selectedTab === 'modules'
-                  ? 'bg-hcmue-700 text-white shadow-xs'
+                  ? 'bg-[#0374b5] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -202,7 +202,7 @@ export const TeacherDashboard: React.FC = () => {
               onClick={() => setSelectedTab('students')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 selectedTab === 'students'
-                  ? 'bg-hcmue-700 text-white shadow-xs'
+                  ? 'bg-[#0374b5] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -213,7 +213,7 @@ export const TeacherDashboard: React.FC = () => {
               onClick={() => setSelectedTab('announcements')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 selectedTab === 'announcements'
-                  ? 'bg-hcmue-700 text-white shadow-xs'
+                  ? 'bg-[#0374b5] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -240,7 +240,7 @@ export const TeacherDashboard: React.FC = () => {
                       setTargetModuleId(selectedCourse.modules[0]?.id || '');
                       setIsAddActivityOpen(true);
                     }}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                    className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Thêm hoạt động mới</span>
@@ -250,8 +250,8 @@ export const TeacherDashboard: React.FC = () => {
 
               {/* Form to add activity */}
               {isAddActivityOpen && (
-                <form onSubmit={handleCreateActivity} className="p-5 bg-amber-50/50 border border-amber-200 rounded-2xl space-y-4">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-amber-900">
+                <form onSubmit={handleCreateActivity} className="p-5 bg-sky-50/60 border border-sky-200 rounded-2xl space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-800">
                     Tạo hoạt động giảng dạy mới (Đẩy lên API)
                   </h4>
 
@@ -299,7 +299,7 @@ export const TeacherDashboard: React.FC = () => {
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="Ví dụ: Bài giảng Video: Phương pháp Dạy học..."
-                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-amber-600"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#0374b5]"
                       required
                     />
                   </div>
@@ -341,7 +341,7 @@ export const TeacherDashboard: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-900 shadow-sm"
+                      className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0374b5] hover:bg-[#025a8c] text-white shadow-sm"
                     >
                       Lưu hoạt động vào khóa học
                     </button>
@@ -366,7 +366,7 @@ export const TeacherDashboard: React.FC = () => {
                       {(m.activities || []).map(act => (
                         <div key={act.id} className="p-3 bg-white rounded-xl border border-slate-200/70 flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-amber-500" />
+                            <span className="w-2 h-2 rounded-full bg-[#0374b5]" />
                             <span className="font-semibold text-slate-800">{act.title}</span>
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
                               {act.type}
@@ -424,7 +424,7 @@ export const TeacherDashboard: React.FC = () => {
                     <tbody className="divide-y divide-slate-100">
                       {enrolledStudents.map((st) => (
                         <React.Fragment key={st.id}>
-                          <tr className="hover:bg-amber-50/20">
+                          <tr className="hover:bg-sky-50/40">
                             <td className="py-3 px-4 font-mono font-bold text-hcmue-700">{st.code || '—'}</td>
                             <td className="py-3 px-4">
                               <div className="font-bold text-slate-800">{st.name}</div>
@@ -517,7 +517,7 @@ export const TeacherDashboard: React.FC = () => {
                     value={ancTitle}
                     onChange={(e) => setAncTitle(e.target.value)}
                     placeholder="Ví dụ: Nhắc nhở hạn nộp bài tập..."
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-amber-600 focus:bg-white"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] focus:bg-white"
                     required
                   />
                 </div>
@@ -531,7 +531,7 @@ export const TeacherDashboard: React.FC = () => {
                     value={ancContent}
                     onChange={(e) => setAncContent(e.target.value)}
                     placeholder="Nhập nội dung chi tiết thông báo..."
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-amber-600 focus:bg-white"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] focus:bg-white"
                     required
                   />
                 </div>
@@ -541,14 +541,14 @@ export const TeacherDashboard: React.FC = () => {
                     type="checkbox"
                     checked={ancImportant}
                     onChange={(e) => setAncImportant(e.target.checked)}
-                    className="rounded text-amber-600"
+                    className="rounded text-[#0374b5]"
                   />
                   <span className="font-semibold">Đánh dấu là thông báo quan trọng (Ghim đầu trang)</span>
                 </label>
 
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="px-6 py-2.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all shadow-md"
                 >
                   Phát hành thông báo
                 </button>

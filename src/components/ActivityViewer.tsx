@@ -33,7 +33,7 @@ export const ActivityViewer: React.FC = () => {
 
   if (!activeCourse || !activeActivity) {
     return (
-      <div className="text-center py-20 space-y-4">
+      <div className="flex-1 w-full text-center py-20 space-y-4">
         <p className="text-slate-600">Không tìm thấy hoạt động học tập.</p>
         <button 
           onClick={() => setCurrentView('course-detail')}
@@ -81,7 +81,7 @@ export const ActivityViewer: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="flex-1 min-w-0 w-full p-6 max-w-5xl mx-auto space-y-6">
       {/* Navigation Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
