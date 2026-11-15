@@ -259,7 +259,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold rounded-md"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Thảo luận</span>
+                <span>Thảo luận mới</span>
               </button>
             </div>
 

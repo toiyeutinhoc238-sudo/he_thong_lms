@@ -146,7 +146,7 @@ export const CanvasDashboard: React.FC = () => {
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all active:scale-95"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Tạo Khóa Học Mới Ngay</span>
+              <span>Tạo Khóa Học Mới Ngay</span>
             </button>
           )}
         </div>

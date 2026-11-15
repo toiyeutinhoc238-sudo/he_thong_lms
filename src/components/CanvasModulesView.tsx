@@ -241,7 +241,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-md text-xs font-bold transition-all shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>+ Mô-đun</span>
+              <span>Thêm mô-đun</span>
             </button>
           )}
         </div>
@@ -257,7 +257,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             <h3 className="text-sm font-bold text-slate-900">Khóa học chưa có mô-đun hoặc học liệu nào</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
               {canManage 
-                ? 'Bạn có thể tự do thêm bài giảng video YouTube/MP4, chèn link tài liệu, giao bài tập hoặc câu hỏi trắc nghiệm ngay bây giờ.'
+                ? 'Bước 1: tạo một mô-đun (chương). Bước 2: bấm "Thêm bài học" ở mô-đun đó để chèn video YouTube/MP4, link tài liệu, bài tập hoặc câu hỏi trắc nghiệm.'
                 : 'Nội dung bài học và học liệu đang được giáo viên chuẩn bị.'}
             </p>
           </div>
@@ -354,11 +354,11 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                             setTargetModuleId(mod.id);
                             setIsAddActivityOpen(true);
                           }}
-                          className="p-1 rounded bg-[#0374b5] text-white hover:bg-[#025a8c] text-xs font-bold flex items-center gap-1 shadow-xs ml-1"
+                          className="px-2 py-1 rounded-md bg-[#0374b5] text-white hover:bg-[#025a8c] text-xs font-bold flex items-center gap-1 shadow-xs ml-1"
                           title="Thêm bài học / học liệu vào mô-đun"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span className="hidden md:inline text-[11px] pr-1">Thêm mục</span>
+                          <span className="text-[11px] pr-1">Thêm bài học</span>
                         </button>
                       </>
                     )}

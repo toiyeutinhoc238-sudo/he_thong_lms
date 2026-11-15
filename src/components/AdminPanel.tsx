@@ -234,7 +234,7 @@ export const AdminPanel: React.FC = () => {
                   className="px-6 py-2.5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-extrabold shadow-sm transition-all flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>+ Tạo Khóa Học Mới</span>
+                  <span>Tạo Khóa Học Mới</span>
                 </button>
               </div>
             </div>
