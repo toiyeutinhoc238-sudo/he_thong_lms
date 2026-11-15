@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { CanvasCourseNav, CourseNavTab } from './CanvasCourseNav';
 import { CanvasModulesView } from './CanvasModulesView';
 import { CanvasRightSidebar } from './CanvasRightSidebar';
+import { defaultGrade6Course } from '../data/mockData';
 import { 
   Users, 
   MessageSquare, 
@@ -41,7 +42,8 @@ interface CourseDetailProps {
 
 export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = true }) => {
   const { 
-    activeCourse, 
+    activeCourse: contextActiveCourse, 
+    courses,
     setCurrentView, 
     navigateToActivity, 
     forumTopics, 
@@ -53,6 +55,11 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     uploadCourseFile,
     deleteCourseFile
   } = useApp();
+
+  const activeCourse = contextActiveCourse || 
+    courses.find(c => c.code === '6AIAB01' || c.id === '6AIAB01' || (c.name && c.name.toLowerCase().includes('lớp 6'))) || 
+    courses[0] || 
+    defaultGrade6Course;
 
   const [activeTab, setActiveTab] = useState<CourseNavTab>('modules');
   const [newTopicTitle, setNewTopicTitle] = useState('');
@@ -70,20 +77,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
   const [fileDescription, setFileDescription] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-
-  if (!activeCourse) {
-    return (
-      <div className="text-center py-20 space-y-4">
-        <p className="text-slate-600">Không tìm thấy thông tin khóa học.</p>
-        <button 
-          onClick={() => setCurrentView('courses-list')}
-          className="px-4 py-2 bg-[#0374b5] text-white rounded-lg text-xs font-bold"
-        >
-          Quay lại Danh sách khóa học
-        </button>
-      </div>
-    );
-  }
 
   const isEnrolled = Boolean(
     currentUser?.role === 'admin' ||

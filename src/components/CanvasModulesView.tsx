@@ -50,16 +50,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   const [uploadedActFileName, setUploadedActFileName] = useState('');
 
   // Phân quyền: Học viên tuyệt đối KHÔNG được thêm/sửa/xóa học liệu hoặc mô-đun
-  // Chỉ duy nhất Quản trị viên (phanphiphu04@gmail.com) hoặc Giáo viên mới có quyền quản lý
+  // Chỉ Quản trị viên (phanphiphu04@gmail.com / admin) hoặc Giáo viên mới có quyền toàn quyền thêm/xóa/sửa
   const canManage = Boolean(
-    currentUser && 
-    currentUser.id && 
-    currentUser.role !== 'student' &&
-    (
-      currentUser.role === 'admin' || 
-      currentUser.role === 'lecturer' || 
-      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
-    )
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    activeRole === 'admin' || 
+    activeRole === 'lecturer'
   );
 
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});

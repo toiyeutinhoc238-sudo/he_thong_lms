@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView, QuizQuestion, CourseFile } from '../types';
-import { initialUser } from '../data/mockData';
+import { initialUser, defaultGrade6Course } from '../data/mockData';
 import api from '../services/api';
 
 interface AppContextType {
@@ -79,12 +79,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('lms2_courses');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((c: any) => !c.id?.includes('sample') && c.code !== 'AI-101');
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const valid = parsed.filter((c: any) => !c.id?.includes('sample') && c.code !== 'AI-101');
+          if (valid.length > 0) return valid;
         }
       }
     } catch {}
-    return [];
+    return [defaultGrade6Course];
   });
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
@@ -131,8 +132,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       // 1. Fetch courses from API
       const coursesRes = await api.courses.getAll().catch(() => null);
-      if (coursesRes && Array.isArray(coursesRes)) {
+      if (coursesRes && Array.isArray(coursesRes) && coursesRes.length > 0) {
         setCourses(coursesRes);
+      } else {
+        setCourses(prev => (prev && prev.length > 0) ? prev : [defaultGrade6Course]);
       }
 
       // 2. Fetch notifications
@@ -246,14 +249,31 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     setCurrentView('courses-list');
   };
 
+  // Đảm bảo tài khoản phanphiphu04@gmail.com luôn có vai trò admin toàn quyền
+  useEffect(() => {
+    if (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser.role !== 'admin') {
+      setCurrentUser(prev => ({
+        ...prev,
+        role: 'admin',
+        classOrPosition: 'Quản trị viên'
+      }));
+    }
+  }, [currentUser?.email, currentUser?.role]);
+
   const navigateToCourse = (courseId: string) => {
-    setActiveCourseId(courseId);
+    const target = courses.find(c => 
+      c.id === courseId || 
+      c.code === courseId || 
+      (c.code === '6AIAB01' && (courseId === 'course-6aiab01' || courseId === '6AIAB01' || courseId.includes('6AIAB01')))
+    ) || courses[0] || defaultGrade6Course;
+
+    setActiveCourseId(target.id);
     setActiveActivityId(null);
     setCurrentView('course-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Fetch forum topics for this course from API
-    api.forum.getByCourse(courseId)
+    api.forum.getByCourse(target.id)
       .then(res => {
         if (Array.isArray(res)) setForumTopics(res);
       })
@@ -261,13 +281,23 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
   };
 
   const navigateToActivity = (courseId: string, activityId: string) => {
-    setActiveCourseId(courseId);
+    const target = courses.find(c => 
+      c.id === courseId || 
+      c.code === courseId || 
+      (c.code === '6AIAB01' && (courseId === 'course-6aiab01' || courseId === '6AIAB01' || courseId.includes('6AIAB01')))
+    ) || courses[0] || defaultGrade6Course;
+
+    setActiveCourseId(target.id);
     setActiveActivityId(activityId);
     setCurrentView('activity');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const activeCourse = courses.find(c => c.id === activeCourseId) || null;
+  const activeCourse: Course = courses.find(c => 
+    c.id === activeCourseId || 
+    c.code === activeCourseId ||
+    (c.code === '6AIAB01' && (activeCourseId === 'course-6aiab01' || activeCourseId === '6AIAB01' || activeCourseId?.includes('6AIAB01')))
+  ) || courses[0] || defaultGrade6Course;
   
   let activeActivity: Activity | null = null;
   if (activeCourse && activeActivityId) {

@@ -20,6 +20,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { EditCourseModal } from './EditCourseModal';
+import { defaultGrade6Course } from '../data/mockData';
 
 export const CanvasCoursesList: React.FC = () => {
   const { 
@@ -49,14 +50,11 @@ export const CanvasCoursesList: React.FC = () => {
   const [isSavingLesson, setIsSavingLesson] = useState(false);
 
   const canManage = Boolean(
-    currentUser && 
-    currentUser.id && 
-    currentUser.role !== 'student' &&
-    (
-      currentUser.role === 'admin' || 
-      currentUser.role === 'lecturer' || 
-      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
-    )
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    activeRole === 'admin' || 
+    activeRole === 'lecturer'
   );
 
   // Form tạo khóa học mới chuẩn phổ thông Lớp 1 - 12
@@ -230,7 +228,7 @@ export const CanvasCoursesList: React.FC = () => {
           )
         );
 
-        const foundCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
+        const foundCourse = courses.find(c => c.code === '6AIAB01' || c.id === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
 
         // Khóa học chuẩn luôn sẵn sàng để hiển thị đầy đủ 8 bài học
         const mainCourse: Course = foundCourse ? {
@@ -238,32 +236,7 @@ export const CanvasCoursesList: React.FC = () => {
           name: 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B',
           category: 'Chuyên đề AI',
           gradeLevel: 'Lớp 6'
-        } : {
-          id: 'course-6aiab01',
-          code: '6AIAB01',
-          name: 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B',
-          category: 'Chuyên đề AI',
-          gradeLevel: 'Lớp 6',
-          instructor: {
-            id: 'gv-phanphiphu',
-            name: 'Phan Phi Phú',
-            email: 'phanphiphu04@gmail.com',
-            avatar: '',
-            title: 'Giáo viên phụ trách'
-          },
-          thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-          progress: 0,
-          totalActivities: 8,
-          completedActivities: 0,
-          description: 'Chương trình đào tạo Chuyên đề Trí tuệ Nhân tạo Lớp 6: Chủ đề A và B',
-          targetAudience: 'Học sinh Lớp 6',
-          modules: [],
-          syllabus: [],
-          announcements: [],
-          enrolledStudents: [],
-          enrolledStudentsCount: 0,
-          certificateEligible: true
-        };
+        } : defaultGrade6Course;
 
         const isMainEnrolled = Boolean(
           canManage ||

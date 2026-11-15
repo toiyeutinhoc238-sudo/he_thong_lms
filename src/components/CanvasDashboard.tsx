@@ -22,14 +22,11 @@ export const CanvasDashboard: React.FC = () => {
   const { courses, setCourses, navigateToCourse, activeRole, deleteCourse, updateCourse, currentUser, enrollCourse } = useApp();
 
   const canManage = Boolean(
-    currentUser && 
-    currentUser.id && 
-    currentUser.role !== 'student' &&
-    (
-      currentUser.role === 'admin' || 
-      currentUser.role === 'lecturer' || 
-      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
-    )
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    currentUser?.role === 'admin' || 
+    currentUser?.role === 'lecturer' || 
+    activeRole === 'admin' || 
+    activeRole === 'lecturer'
   );
 
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
