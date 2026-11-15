@@ -14,18 +14,39 @@ import {
   GraduationCap,
   Sparkles,
   X,
-  UserCheck
+  UserCheck,
+  CheckCircle2,
+  Layers,
+  Loader2
 } from 'lucide-react';
 import { EditCourseModal } from './EditCourseModal';
 
 export const CanvasCoursesList: React.FC = () => {
-  const { courses, setCourses, navigateToCourse, currentUser, activeRole, deleteCourse, updateCourse, enrollCourse } = useApp();
+  const { 
+    courses, 
+    setCourses, 
+    navigateToCourse, 
+    currentUser, 
+    activeRole, 
+    deleteCourse, 
+    updateCourse, 
+    enrollCourse,
+    addCourseModule,
+    updateCourseModule,
+    deleteCourseModule
+  } = useApp();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedGrade, setSelectedGrade] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+
+  // Quản lý Khung Bài học (Bài 1, Bài 2, Bài 3... theo yêu cầu)
+  const [isAddLessonModalOpen, setIsAddLessonModalOpen] = useState(false);
+  const [newLessonTitle, setNewLessonTitle] = useState('');
+  const [editingLesson, setEditingLesson] = useState<{ courseId: string; moduleId: string; title: string } | null>(null);
+  const [editLessonTitle, setEditLessonTitle] = useState('');
+  const [isSavingLesson, setIsSavingLesson] = useState(false);
 
   const canManage = Boolean(
     currentUser && 
@@ -72,9 +93,11 @@ export const CanvasCoursesList: React.FC = () => {
                      (selectedCategory === 'Khoa học máy tính' && (c.category === 'computer_science' || c.category === 'CS')) ||
                      (selectedCategory === 'Tin học ứng dụng' && (c.category === 'applied_informatics' || c.category === 'ICT'));
     
-    const matchGrade = selectedGrade === 'all' || c.gradeLevel === selectedGrade;
+    const matchGrade = true;
     return matchSearch && matchCat && matchGrade;
   });
+
+  const mainCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,13 +159,13 @@ export const CanvasCoursesList: React.FC = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold backdrop-blur-xs">
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Học liệu Trực tuyến</span>
+            <span>Tất cả Khóa học</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Chuyên đề Trí tuệ Nhân tạo Lớp 6: Chủ đề A và B
+            Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B
           </h1>
           <p className="text-sky-100 text-xs sm:text-sm max-w-xl leading-relaxed">
-            Khám phá các bài học, bài giảng tương tác và thực hiện bài tập trực tuyến môn Tin học Lớp 6.
+            Khám phá các học phần đào tạo, theo dõi lộ trình bài giảng và thực hiện bài tập trực tuyến.
           </p>
         </div>
 
@@ -157,181 +180,329 @@ export const CanvasCoursesList: React.FC = () => {
         )}
       </div>
 
-      {/* Filter & Search Bar - Tối giản, gọn gàng, không gây xao nhãng */}
+      {/* Filter & Search Bar - Tinh gọn, dễ nhìn, bỏ hết râu ria */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
         <div className="relative w-full sm:w-96">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Tìm kiếm bài học, chủ đề hoặc mã khóa học..."
+            placeholder="Tìm kiếm bài học..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-          {[
-            { id: 'all', label: 'Tất cả bài học' },
-            { id: 'Chuyên đề AI', label: '🤖 Chuyên đề AI' },
-            { id: 'Khoa học máy tính', label: '💻 Khoa học máy tính' },
-            { id: 'Tin học ứng dụng', label: '📱 Tin học ứng dụng' }
-          ].map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                selectedCategory === cat.id
-                  ? 'bg-[#0374b5] text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        {canManage && (
+          <button
+            onClick={() => {
+              const currentModCount = (mainCourse?.modules || []).length;
+              setNewLessonTitle(`Bài ${currentModCount + 1}: `);
+              setIsAddLessonModalOpen(true);
+            }}
+            className="px-4 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0 self-end sm:self-auto active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Thêm bài học mới</span>
+          </button>
+        )}
       </div>
 
-      {/* Courses Grid */}
-      {filteredCourses.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 p-8 space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto text-2xl">
-            📚
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-extrabold text-slate-800">Chưa có khóa học nào</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Hệ thống hiện tại chưa có khóa học trong chuyên đề hoặc khối lớp này.
-              {canManage ? ' Bấm nút bên dưới để tạo khóa học mới!' : ''}
-            </p>
-          </div>
-          {canManage && (
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white text-xs font-bold shadow-md transition-all active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm khóa học ngay</span>
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map(course => {
-            const isEnrolled = Boolean(
-              canManage ||
-              (currentUser?.enrolledCourses && currentUser.enrolledCourses.includes(course.id)) ||
-              (course.enrolledStudents && course.enrolledStudents.some((s: any) => s.id === currentUser?.id || (currentUser?.email && s.email === currentUser.email)))
-            );
+      {/* Hiển thị Danh sách Khung Bài Học (Bài 1, Bài 2, Bài 3... theo yêu cầu) */}
+      {(() => {
+        const mainCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
 
-            return (
-              <div
-                key={course.id}
-                className="bg-white rounded-3xl border border-slate-200/90 hover:border-[#0374b5] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
-                onClick={() => navigateToCourse(course.id)}
-              >
-                <div>
-                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+        if (!mainCourse) {
+          return (
+            <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 p-8 space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto text-2xl">
+                📚
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-800">Chưa có bài học nào</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  {canManage ? 'Bấm nút "Tạo khóa học mới" hoặc "Thêm bài học" để bắt đầu xây dựng nội dung.' : 'Nội dung khóa học đang được giáo viên chuẩn bị.'}
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        const isMainEnrolled = Boolean(
+          canManage ||
+          (currentUser?.enrolledCourses && currentUser.enrolledCourses.includes(mainCourse.id)) ||
+          (mainCourse.enrolledStudents && mainCourse.enrolledStudents.some((s: any) => s.id === currentUser?.id || (currentUser?.email && s.email === currentUser.email)))
+        );
+
+        const instructorAvatar = 
+          (currentUser?.avatar && (currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' || mainCourse.instructor?.email?.toLowerCase().trim() === currentUser.email?.toLowerCase().trim()))
+            ? currentUser.avatar
+            : (mainCourse.instructor?.avatar && !mainCourse.instructor.avatar.includes('unsplash.com'))
+              ? mainCourse.instructor.avatar
+              : '';
+
+        const instructorName = 
+          (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser.name)
+            ? currentUser.name
+            : (mainCourse.instructor?.name && mainCourse.instructor.name !== 'Giáo viên' && mainCourse.instructor.name !== 'Giáo viên phụ trách')
+              ? mainCourse.instructor.name
+              : 'Phan Phi Phú';
+
+        const modules = (mainCourse.modules || []).filter(m => !search || m.title.toLowerCase().includes(search.toLowerCase()));
+
+        return (
+          <div className="space-y-6">
+            {/* Thanh Giáo viên phụ trách & Trạng thái ghi danh */}
+            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  {instructorAvatar ? (
                     <img
-                      src={course.thumbnail}
-                      alt={course.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      src={instructorAvatar}
+                      alt={instructorName}
+                      referrerPolicy="no-referrer"
+                      className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[#0374b5] text-[10px] font-black uppercase tracking-wider shadow-xs">
-                        {course.code}
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold shadow-xs">
-                        {course.gradeLevel || 'Lớp 1 - 12'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-xs text-white text-[10px] font-semibold">
-                        {course.category}
-                      </span>
-                      {isEnrolled && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black shadow-xs">
-                          ✓ Đã ghi danh
-                        </span>
-                      )}
-                    </div>
-                    <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <span className="text-[11px] font-semibold opacity-90 block">
-                        GV: {course.instructor?.name || 'Giáo viên phụ trách'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-5 space-y-3">
-                    <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0374b5] transition-colors line-clamp-2">
-                      {course.name}
-                    </h3>
-
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {course.description || 'Chương trình đào tạo chất lượng cao trên LMS Nhóm 2.'}
-                    </p>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-                      <span className="flex items-center gap-1 font-medium">
-                        <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-                        {(course.modules || []).length} Chương học
-                      </span>
-                      <span className="flex items-center gap-1 font-medium">
-                        <Users className="w-3.5 h-3.5 text-slate-400" />
-                        {course.enrolledStudentsCount || course.enrolledStudents?.length || 0} Học viên
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
-                  {isEnrolled ? (
-                    <span className="text-xs font-bold text-[#0374b5] group-hover:underline flex items-center gap-1">
-                      Vào học ngay →
-                    </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await enrollCourse(course.id);
-                        navigateToCourse(course.id);
-                      }}
-                      className="px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-black shadow-xs transition-all active:scale-95 flex items-center gap-1.5"
-                    >
-                      <UserCheck className="w-3.5 h-3.5" />
-                      <span>Đăng ký học ngay</span>
-                    </button>
-                  )}
-                  {canManage && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingCourse(course);
-                        }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-[#0374b5] hover:bg-sky-50 transition-colors"
-                        title="Sửa thông tin khóa học"
-                      >
-                        <Edit3 className="w-4 h-4 text-[#0374b5]" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm(`Bạn có chắc muốn xóa khóa học "${course.name}"?`)) {
-                            deleteCourse(course.id);
-                          }
-                        }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                        title="Xóa khóa học"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <div className="w-11 h-11 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-base shadow-xs">
+                      {instructorName.charAt(0).toUpperCase()}
                     </div>
                   )}
+                  <span className="absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-[#0374b5] text-white text-[9px] font-black rounded-full shadow-2xs">
+                    GV
+                  </span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-black text-slate-900">
+                      {instructorName}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-sky-100 text-[#0374b5] text-[10px] font-bold">
+                      Người tạo khóa học
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+                      Lớp 6
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Email: <strong>phanphiphu04@gmail.com</strong> • {mainCourse.category || 'Chuyên đề AI'}
+                  </p>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigateToCourse(mainCourse.id)}
+                  className="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0374b5] rounded-xl text-xs font-bold transition-all border border-sky-200 flex items-center gap-1"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Toàn bộ học phần</span>
+                </button>
+
+                {isMainEnrolled ? (
+                  <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Đã ghi danh
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await enrollCourse(mainCourse.id);
+                    }}
+                    className="px-4 py-1.5 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>Đăng ký học ngay</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Các khung bài học: Bài 1, Bài 2, Bài 3,... */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#0374b5]" />
+                  <span>Khung Bài học Khóa học ({modules.length} bài)</span>
+                </h2>
+                <span className="text-xs text-slate-400 font-medium">Bấm vào bài để mở học liệu</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {modules.map((mod, idx) => {
+                  const lessonNum = idx + 1;
+                  const lessonTitle = mod.title.replace(/^BÀI\s*\d+\s*:\s*/i, '');
+                  const actCount = (mod.activities || []).length;
+
+                  return (
+                    <div
+                      key={mod.id}
+                      onClick={() => navigateToCourse(mainCourse.id)}
+                      className="bg-white rounded-2xl border-2 border-slate-200 hover:border-[#0374b5] p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 min-h-[170px]"
+                    >
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-1 rounded-lg bg-sky-100 text-[#0374b5] font-black text-xs uppercase tracking-wider">
+                            Bài {lessonNum}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-bold">
+                            {actCount > 0 ? `${actCount} mục` : 'Bài học'}
+                          </span>
+                        </div>
+
+                        <h4 className="font-extrabold text-slate-900 text-sm leading-snug group-hover:text-[#0374b5] transition-colors line-clamp-3">
+                          {lessonTitle || mod.title}
+                        </h4>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-3">
+                        <span className="text-xs font-bold text-[#0374b5] group-hover:underline flex items-center gap-1">
+                          Vào học ngay →
+                        </span>
+                        {canManage && (
+                          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => {
+                                setEditingLesson({ courseId: mainCourse.id, moduleId: mod.id, title: mod.title });
+                                setEditLessonTitle(mod.title);
+                              }}
+                              className="p-1 rounded text-slate-400 hover:text-[#0374b5] hover:bg-slate-100 transition-colors"
+                              title="Sửa tên bài học"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (window.confirm(`Xác nhận xóa bài "${mod.title}"?`)) {
+                                  await deleteCourseModule(mainCourse.id, mod.id);
+                                }
+                              }}
+                              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              title="Xóa bài học"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Khung thêm bài mới cho giáo viên / quản trị viên */}
+                {canManage && (
+                  <button
+                    onClick={() => {
+                      setNewLessonTitle(`Bài ${(mainCourse.modules || []).length + 1}: `);
+                      setIsAddLessonModalOpen(true);
+                    }}
+                    className="border-2 border-dashed border-slate-300 hover:border-[#0374b5] bg-slate-50/60 hover:bg-sky-50/50 rounded-2xl p-5 flex flex-col items-center justify-center text-center space-y-2 transition-all min-h-[170px] group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-white border border-slate-200 group-hover:border-[#0374b5] text-[#0374b5] flex items-center justify-center shadow-2xs">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 group-hover:text-[#0374b5]">
+                      + Thêm Bài Mới (Bài {(mainCourse.modules || []).length + 1}...)
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Modal Thêm Bài Học Mới (Cho giáo viên) */}
+      {isAddLessonModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-slate-900">Thêm Bài Học Mới</h3>
+              <button onClick={() => setIsAddLessonModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!newLessonTitle.trim()) return;
+              const mainCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
+              if (!mainCourse) return;
+              setIsSavingLesson(true);
+              try {
+                await addCourseModule(mainCourse.id, newLessonTitle.trim());
+                setNewLessonTitle('');
+                setIsAddLessonModalOpen(false);
+              } finally {
+                setIsSavingLesson(false);
+              }
+            }} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Tên bài học *</label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: Bài 4: Khám phá ứng dụng AI trong đời sống"
+                  value={newLessonTitle}
+                  onChange={(e) => setNewLessonTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setIsAddLessonModalOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">
+                  Hủy
+                </button>
+                <button type="submit" disabled={isSavingLesson} className="px-5 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl font-bold shadow-xs">
+                  {isSavingLesson ? 'Đang tạo...' : 'Tạo bài học'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Sửa Tên Bài Học */}
+      {editingLesson && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-slate-900">Sửa Tên Bài Học</h3>
+              <button onClick={() => setEditingLesson(null)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!editLessonTitle.trim()) return;
+              setIsSavingLesson(true);
+              try {
+                await updateCourseModule(editingLesson.courseId, editingLesson.moduleId, { title: editLessonTitle.trim() });
+                setEditingLesson(null);
+              } finally {
+                setIsSavingLesson(false);
+              }
+            }} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Tên bài học *</label>
+                <input
+                  type="text"
+                  value={editLessonTitle}
+                  onChange={(e) => setEditLessonTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setEditingLesson(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">
+                  Hủy
+                </button>
+                <button type="submit" disabled={isSavingLesson} className="px-5 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl font-bold shadow-xs">
+                  {isSavingLesson ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

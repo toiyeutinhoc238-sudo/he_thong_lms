@@ -727,6 +727,11 @@ async function resolveInstructorAvatar(course) {
     courseObj.instructor.avatar = '';
   }
 
+  // Chuẩn hóa tên khóa học chính theo yêu cầu
+  if (courseObj.code === '6AIAB01' || (courseObj.name && courseObj.name.includes('Chuyên đề AI'))) {
+    courseObj.name = 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B';
+  }
+
   return courseObj;
 }
 
