@@ -38,6 +38,7 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
 
           {currentView === 'dashboard' && <span className="text-slate-600 font-medium">Bảng điều khiển</span>}
           {currentView === 'admin-panel' && <span className="text-slate-600 font-medium">Quản trị Hệ thống</span>}
+          {currentView === 'teacher-studio' && <span className="text-slate-600 font-medium">Giảng dạy & Tiến độ học sinh</span>}
           {currentView === 'courses-list' && <span className="text-slate-600 font-medium">Tất cả Khóa học</span>}
           {currentView === 'calendar' && <span className="text-slate-600 font-medium">Lịch học tập</span>}
           {currentView === 'inbox' && <span className="text-slate-600 font-medium">Hộp thư</span>}

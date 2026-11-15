@@ -91,11 +91,12 @@ export const TeacherDashboard: React.FC = () => {
     setIsAddActivityOpen(false);
   };
 
-  const handlePostAnnouncement = (e: React.FormEvent) => {
+  const handlePostAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ancTitle.trim() || !ancContent.trim() || !selectedCourse) return;
 
-    addAnnouncement(selectedCourse.id, ancTitle, ancContent, ancImportant);
+    const ok = await addAnnouncement(selectedCourse.id, ancTitle.trim(), ancContent.trim(), ancImportant);
+    if (!ok) return; // giữ nguyên nội dung để giáo viên thử lại
     setAncTitle('');
     setAncContent('');
     setIsAncSuccess(true);

@@ -217,6 +217,28 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         </div>
 
+        {/* Thông báo lớp học do giáo viên đăng */}
+        {(activeTab === 'modules' || activeTab === 'home') && (activeCourse.announcements || []).length > 0 && (
+          <div className="mx-4 sm:mx-8 mt-4 space-y-2">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
+            {(activeCourse.announcements || []).slice(0, 3).map(anc => (
+              <div
+                key={anc.id}
+                className={`p-3.5 rounded-2xl border text-xs ${anc.isImportant ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-200'}`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  {anc.isImportant && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">QUAN TRỌNG</span>
+                  )}
+                  <h4 className="font-extrabold text-slate-900 text-sm">{anc.title}</h4>
+                </div>
+                <p className="text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{anc.content}</p>
+                <p className="text-[11px] text-slate-400 mt-1.5">{anc.author} • {anc.createdAt}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Tab 1: Nội dung học tập (Modules View - EXACTLY LIKE SCREENSHOT) */}
         {(activeTab === 'modules' || activeTab === 'home') && (
           <CanvasModulesView 
@@ -246,10 +268,12 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (newTopicTitle.trim()) {
-                    createForumTopic(activeCourse.id, newTopicTitle.trim(), newTopicContent.trim());
-                    setNewTopicTitle('');
-                    setNewTopicContent('');
-                    setIsCreatingTopic(false);
+                    createForumTopic(activeCourse.id, newTopicTitle.trim(), newTopicContent.trim()).then(ok => {
+                      if (!ok) return; // giữ nguyên nội dung để người dùng thử lại
+                      setNewTopicTitle('');
+                      setNewTopicContent('');
+                      setIsCreatingTopic(false);
+                    });
                   }
                 }}
                 className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3"

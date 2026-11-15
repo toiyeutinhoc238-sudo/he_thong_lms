@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView } from '../types';
+import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView, QuizQuestion } from '../types';
 import { initialUser } from '../data/mockData';
 import api from '../services/api';
 
@@ -27,11 +27,11 @@ interface AppContextType {
   setActiveCertificate: (cert: Certificate | null) => void;
   forumTopics: ForumTopic[];
   addForumReply: (topicId: string, content: string) => void;
-  createForumTopic: (courseId: string, title: string, content: string) => void;
+  createForumTopic: (courseId: string, title: string, content: string) => Promise<boolean>;
   markActivityCompleted: (courseId: string, activityId: string) => void;
   submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
-  submitQuiz: (courseId: string, activityId: string, score: number, maxScore: number, answers: Record<string, number | number[]>) => void;
+  submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
   addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
   updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
   deleteCourseModule: (courseId: string, moduleId: string) => Promise<void>;
@@ -41,7 +41,7 @@ interface AppContextType {
   updateCourse: (courseId: string, data: Partial<Course>) => Promise<void>;
   deleteCourse: (courseId: string) => void;
   enrollCourse: (courseId: string) => Promise<boolean>;
-  addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => void;
+  addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => Promise<boolean>;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
   isLoading: boolean;
@@ -240,13 +240,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       };
     });
 
-    if (role === 'lecturer') {
-      setCurrentView('teacher-studio');
-    } else if (role === 'admin') {
-      setCurrentView('admin-panel');
-    } else {
-      setCurrentView('dashboard');
-    }
+    // Sau khi đăng nhập, mọi vai trò đều vào Bảng điều khiển; Giảng dạy / Quản trị là mục riêng trên thanh bên
+    setCurrentView('dashboard');
   };
 
   const navigateToCourse = (courseId: string) => {
@@ -362,36 +357,31 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     await api.activities.gradeAssignment(courseId, activityId, { studentId, grade, feedback });
   };
 
-  const submitQuiz = (courseId: string, activityId: string, score: number, maxScore: number, answers: Record<string, number | number[]>) => {
-    const passed = score >= (maxScore * 0.5);
-    setCourses(prev => prev.map(course => {
-      if (course.id !== courseId) return course;
-      const updatedModules = (course.modules || []).map(m => ({
-        ...m,
-        activities: (m.activities || []).map(act => {
-          if (act.id === activityId) {
-            return {
-              ...act,
-              isCompleted: passed,
-              score,
-              maxScore,
-              quizResult: {
-                score,
-                maxScore,
-                passed,
-                submittedAt: new Date().toLocaleString('vi-VN'),
-                answers
+  // Bài trắc nghiệm do máy chủ chấm; giao diện chỉ hiển thị kết quả máy chủ trả về
+  const submitQuiz = async (courseId: string, activityId: string, answers: Record<string, number>) => {
+    try {
+      const res = await api.activities.submitQuiz(courseId, activityId, { answers, score: 0, maxScore: 10 });
+      setCourses(prev => prev.map(course => {
+        if (course.id !== courseId) return course;
+        const updatedModules = (course.modules || []).map(m => ({
+          ...m,
+          activities: (m.activities || []).map(act => act.id === activityId
+            ? {
+                ...act,
+                isCompleted: res.result.passed,
+                score: res.result.score,
+                quizResult: res.result,
+                quizQuestions: res.questions || act.quizQuestions
               }
-            };
-          }
-          return act;
-        })
+            : act)
+        }));
+        return calculateCourseProgress({ ...course, modules: updatedModules });
       }));
-      return calculateCourseProgress({ ...course, modules: updatedModules });
-    }));
-
-    // Call API backend
-    api.activities.submitQuiz(courseId, activityId, { answers, score, maxScore }).catch(err => reportSyncFailure('Kết quả bài kiểm tra', err));
+      return { result: res.result, questions: res.questions };
+    } catch (err) {
+      reportSyncFailure('Kết quả bài kiểm tra', err);
+      return null;
+    }
   };
 
   const addCourseActivity = (courseId: string, moduleId: string, newAct: Partial<Activity>) => {
@@ -414,7 +404,6 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       ...newAct
     };
 
-    let updatedCourseModules: CourseModule[] = [];
 
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
@@ -425,16 +414,10 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
           activities: [...(m.activities || []), completeAct]
         };
       });
-      updatedCourseModules = updatedModules;
       return calculateCourseProgress({ ...course, modules: updatedModules });
     }));
 
-    // 1. Post to activity endpoint
-    api.activities.create(courseId, moduleId, completeAct).catch(() => {});
-    // 2. Also sync course modules for 100% database persistence
-    if (updatedCourseModules.length > 0) {
-      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
-    }
+    api.activities.create(courseId, moduleId, completeAct).catch(err => reportSyncFailure('Thêm hoạt động', err));
   };
 
   const addCourseModule = async (courseId: string, title: string, description?: string) => {
@@ -447,82 +430,61 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       activities: []
     };
 
-    let updatedCourseModules: CourseModule[] = [];
 
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
       const modules = [...(c.modules || []), newMod];
-      updatedCourseModules = modules;
       return { ...c, modules };
     }));
 
-    api.modules.create(courseId, newMod).catch(() => {});
-    if (updatedCourseModules.length > 0) {
-      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
-    }
+    api.modules.create(courseId, newMod).catch(err => reportSyncFailure('Thêm mô-đun', err));
     return newMod;
   };
 
   const updateCourseModule = async (courseId: string, moduleId: string, data: Partial<CourseModule>) => {
-    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
       const modules = (c.modules || []).map(m => m.id === moduleId ? { ...m, ...data } : m);
-      updatedCourseModules = modules;
       return { ...c, modules };
     }));
 
-    api.modules.update(courseId, moduleId, data).catch(() => {});
-    if (updatedCourseModules.length > 0) {
-      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
-    }
+    api.modules.update(courseId, moduleId, data).catch(err => reportSyncFailure('Cập nhật mô-đun', err));
   };
 
   const deleteCourseModule = async (courseId: string, moduleId: string) => {
-    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(c => {
       if (c.id !== courseId) return c;
       const modules = (c.modules || []).filter(m => m.id !== moduleId);
-      updatedCourseModules = modules;
       return calculateCourseProgress({ ...c, modules });
     }));
 
-    api.modules.delete(courseId, moduleId).catch(() => {});
-    api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    api.modules.delete(courseId, moduleId).catch(err => reportSyncFailure('Xóa mô-đun', err));
   };
 
   const updateCourseActivity = (courseId: string, activityId: string, data: Partial<Activity>) => {
-    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => {
         const activities = (m.activities || []).map(a => a.id === activityId ? { ...a, ...data } : a);
         return { ...m, activities };
       });
-      updatedCourseModules = updatedModules;
       return { ...course, modules: updatedModules };
     }));
 
-    api.activities.update(courseId, activityId, data).catch(() => {});
-    if (updatedCourseModules.length > 0) {
-      api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
-    }
+    api.activities.update(courseId, activityId, data).catch(err => reportSyncFailure('Cập nhật hoạt động', err));
   };
 
   const deleteCourseActivity = (courseId: string, activityId: string) => {
-    let updatedCourseModules: CourseModule[] = [];
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => ({
         ...m,
         activities: (m.activities || []).filter(a => a.id !== activityId)
       }));
-      updatedCourseModules = updatedModules;
       return calculateCourseProgress({ ...course, modules: updatedModules });
     }));
 
-    api.activities.delete(courseId, activityId).catch(() => {});
-    api.courses.update(courseId, { modules: updatedCourseModules }).catch(() => {});
+    api.activities.delete(courseId, activityId).catch(err => reportSyncFailure('Xóa hoạt động', err));
   };
 
   const updateCourse = async (courseId: string, data: Partial<Course>) => {
@@ -537,7 +499,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     try {
       await api.courses.update(courseId, data);
     } catch (err) {
-      console.warn('API updateCourse failed or offline, updated in local cache', err);
+      reportSyncFailure('Cập nhật khóa học', err);
     }
   };
 
@@ -547,7 +509,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       setActiveCourseId(null);
       setCurrentView('dashboard');
     }
-    api.courses.delete(courseId).catch(() => {});
+    api.courses.delete(courseId).catch(err => reportSyncFailure('Xóa khóa học', err));
   };
 
   const enrollCourse = async (courseId: string): Promise<boolean> => {
@@ -591,24 +553,17 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }
   };
 
-  const addAnnouncement = (courseId: string, title: string, content: string, isImportant: boolean = false) => {
-    const newAnc = {
-      id: `anc-${Date.now()}`,
-      title,
-      content,
-      author: currentUser.name,
-      authorRole: currentUser.role === 'lecturer' ? 'Giáo viên' : 'Quản trị viên',
-      createdAt: new Date().toLocaleString('vi-VN'),
-      isImportant
-    };
-
-    setCourses(prev => prev.map(course => {
-      if (course.id !== courseId) return course;
-      return {
-        ...course,
-        announcements: [newAnc, ...(course.announcements || [])]
-      };
-    }));
+  const addAnnouncement = async (courseId: string, title: string, content: string, isImportant: boolean = false) => {
+    try {
+      const saved = await api.courses.addAnnouncement(courseId, { title, content, isImportant });
+      setCourses(prev => prev.map(course => course.id !== courseId
+        ? course
+        : { ...course, announcements: [saved, ...(course.announcements || [])] }));
+      return true;
+    } catch (err) {
+      reportSyncFailure('Thông báo', err);
+      return false;
+    }
   };
 
   const addForumReply = (topicId: string, content: string) => {
@@ -633,30 +588,18 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }));
 
     // Call API backend
-    api.forum.postReply(topicId, { content }).catch(() => {});
+    api.forum.postReply(topicId, { content }).catch(err => reportSyncFailure('Phản hồi thảo luận', err));
   };
 
-  const createForumTopic = (courseId: string, title: string, content: string) => {
-    const newTopic: ForumTopic = {
-      id: `topic-${Date.now()}`,
-      courseId,
-      title,
-      content,
-      author: {
-        name: currentUser.name,
-        avatar: currentUser.avatar,
-        role: currentUser.role === 'student' ? 'Học sinh' : 'Giáo viên'
-      },
-      createdAt: 'Vừa xong',
-      replies: [],
-      views: 1,
-      likes: 0
-    };
-
-    setForumTopics(prev => [newTopic, ...prev]);
-
-    // Call API backend
-    api.forum.createTopic(courseId, { title, content }).catch(() => {});
+  const createForumTopic = async (courseId: string, title: string, content: string) => {
+    try {
+      const saved = await api.forum.createTopic(courseId, { title, content });
+      setForumTopics(prev => [saved, ...prev]);
+      return true;
+    } catch (err) {
+      reportSyncFailure('Chủ đề thảo luận', err);
+      return false;
+    }
   };
 
   return (

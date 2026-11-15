@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Activity, QuizQuestion } from '../types';
 import { useApp } from '../context/AppContext';
 import { 
@@ -21,13 +21,22 @@ interface QuizEngineProps {
 }
 
 export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFinish }) => {
-  const { submitQuiz, markActivityCompleted } = useApp();
+  const { submitQuiz } = useApp();
 
-  const questions: QuizQuestion[] = activity.quizQuestions || [];
+  // Sau khi nộp bài, máy chủ trả về bộ câu hỏi kèm đáp án để xem lại
+  const [reviewQuestions, setReviewQuestions] = useState<QuizQuestion[] | null>(null);
+  const questions: QuizQuestion[] = reviewQuestions || activity.quizQuestions || [];
   const timeLimitSeconds = (activity.timeLimitMinutes || 15) * 60;
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>(
+    () => (activity.quizResult?.answers as Record<string, number>) || {}
+  );
+  // Bản mới nhất của câu trả lời, để lúc hết giờ tự nộp đúng những gì học sinh đã chọn
+  const answersRef = useRef(selectedAnswers);
+  answersRef.current = selectedAnswers;
+  const submittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState(timeLimitSeconds);
   const [isSubmitted, setIsSubmitted] = useState(!!activity.quizResult);
@@ -67,34 +76,22 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
     }));
   };
 
-  const handleSubmitQuiz = () => {
-    let correctCount = 0;
-    questions.forEach(q => {
-      if (selectedAnswers[q.id] === q.correctAnswer) {
-        correctCount++;
-      }
-    });
-
-    const maxScore = 10;
-    const score = Number(((correctCount / (questions.length || 1)) * maxScore).toFixed(1));
-    const passed = score >= (activity.passScore || 5.0);
-
-    const result = {
-      score,
-      maxScore,
-      passed,
-      submittedAt: new Date().toLocaleString('vi-VN'),
-      answers: selectedAnswers
-    };
-
-    setQuizResult(result);
-    setIsSubmitted(true);
+  const handleSubmitQuiz = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
     setShowConfirmModal(false);
 
-    // Persist to context
-    submitQuiz(courseId, activity.id, score, maxScore, selectedAnswers);
-    if (passed) {
-      markActivityCompleted(courseId, activity.id);
+    // Điểm do máy chủ chấm theo đáp án
+    const res = await submitQuiz(courseId, activity.id, answersRef.current);
+    submittingRef.current = false;
+    setIsSubmitting(false);
+    if (!res) return; // lỗi đã được thông báo, học sinh có thể bấm nộp lại
+
+    if (res.questions) setReviewQuestions(res.questions);
+    setQuizResult(res.result);
+    setIsSubmitted(true);
+    if (res.result.passed) {
       confetti({
         particleCount: 80,
         spread: 70,
@@ -274,9 +271,10 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
                 ) : !isSubmitted ? (
                   <button
                     onClick={() => setShowConfirmModal(true)}
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/20"
+                    disabled={isSubmitting}
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
-                    Nộp bài thi
+                    {isSubmitting ? 'Đang nộp bài...' : 'Nộp bài thi'}
                   </button>
                 ) : null}
               </div>
@@ -345,9 +343,10 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
             {!isSubmitted && (
               <button
                 onClick={() => setShowConfirmModal(true)}
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+                disabled={isSubmitting}
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
               >
-                Nộp bài kết thúc ({answeredCount}/{questions.length})
+                {isSubmitting ? 'Đang nộp bài...' : `Nộp bài kết thúc (${answeredCount}/${questions.length})`}
               </button>
             )}
           </div>

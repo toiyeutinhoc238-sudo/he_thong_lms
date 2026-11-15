@@ -34,8 +34,16 @@ const PORT = process.env.PORT || 5000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
 const app = express();
+app.disable('x-powered-by');
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (req.path.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 // Health check endpoint for Render & monitoring
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
@@ -136,6 +144,10 @@ const forumSchema = new mongoose.Schema({
   likes: Number
 }, { strict: false });
 
+userSchema.index({ id: 1 });
+userSchema.index({ email: 1 });
+courseSchema.index({ id: 1 });
+forumSchema.index({ courseId: 1 });
 const UserModel = mongoose.model('User', userSchema);
 const CourseModel = mongoose.model('Course', courseSchema);
 const NotifModel = mongoose.model('Notification', notifSchema);
@@ -380,13 +392,19 @@ function stripStudentState(modules) {
 // Trả về khóa học theo góc nhìn của người đang đăng nhập: chỉ gắn tiến độ CỦA CHÍNH HỌ
 function viewCourse(courseObj, user, progressRecords) {
   const byActivity = new Map((progressRecords || []).map(p => [p.activityId, p]));
+  const hideAnswers = !isStaff(user);
   let total = 0;
   let completed = 0;
   const modules = stripStudentState(courseObj.modules).map(m => ({
     ...m,
-    activities: m.activities.map(a => {
+    activities: m.activities.map(original => {
       total++;
-      const p = byActivity.get(a.id);
+      const p = byActivity.get(original.id);
+      let a = original;
+      // Học sinh chỉ nhận đáp án & lời giải SAU KHI đã nộp bài trắc nghiệm
+      if (hideAnswers && Array.isArray(a.quizQuestions) && !p?.quizResult) {
+        a = { ...a, quizQuestions: a.quizQuestions.map(({ correctAnswer, explanation, ...q }) => q) };
+      }
       if (!p) return a;
       const out = { ...a, isCompleted: !!p.isCompleted };
       if (p.submission) out.submission = p.submission;
@@ -1216,7 +1234,106 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
     maxScore,
     quizResult
   });
-  res.json({ success: true, passed, score, result: quizResult });
+  res.json({ success: true, passed, score, result: quizResult, questions });
+});
+
+// 9.1 Thông báo lớp học (giáo viên đăng, lưu vào khóa học)
+app.post('/api/courses/:id/announcements', requireStaff, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+  const title = String(req.body.title || '').trim().slice(0, 300);
+  const content = String(req.body.content || '').trim().slice(0, 10000);
+  if (!title || !content) return res.status(400).json({ message: 'Thông báo cần có tiêu đề và nội dung.' });
+
+  const announcement = {
+    id: `anc-${Date.now()}`,
+    title,
+    content,
+    author: req.user.name || 'Giáo viên',
+    authorRole: req.user.role === 'admin' ? 'Quản trị viên' : 'Giáo viên',
+    createdAt: nowVN(),
+    isImportant: !!req.body.isImportant
+  };
+
+  if (isMongoConnected) {
+    await CourseModel.updateOne({ id: course.id }, { $push: { announcements: { $each: [announcement], $position: 0 } } });
+  } else {
+    const db = readDb();
+    const c = db.courses.find(x => x.id === course.id);
+    c.announcements = [announcement, ...(c.announcements || [])];
+    writeDb(db);
+  }
+  res.status(201).json(announcement);
+});
+
+// 9.2 Diễn đàn: tạo chủ đề & phản hồi (tác giả lấy từ token)
+const forumAuthor = (user) => ({
+  id: user.id,
+  name: user.name || 'Thành viên',
+  avatar: user.avatar || '',
+  role: user.role === 'admin' ? 'Quản trị viên' : user.role === 'lecturer' ? 'Giáo viên' : 'Học sinh'
+});
+
+app.post('/api/courses/:id/forum', requireAuth, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+  if (!isStaff(req.user) && !isEnrolled(course, req.user)) {
+    return res.status(403).json({ message: 'Bạn cần đăng ký khóa học trước khi tham gia thảo luận.' });
+  }
+  const title = String(req.body.title || '').trim().slice(0, 300);
+  const content = String(req.body.content || '').trim().slice(0, 10000);
+  if (!title) return res.status(400).json({ message: 'Chủ đề cần có tiêu đề.' });
+
+  const topic = {
+    id: `topic-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    courseId: course.id,
+    title,
+    content,
+    author: forumAuthor(req.user),
+    createdAt: nowVN(),
+    replies: [],
+    views: 0,
+    likes: 0
+  };
+  if (isMongoConnected) {
+    await ForumModel.create(topic);
+  } else {
+    const db = readDb();
+    db.forumTopics = [topic, ...(db.forumTopics || [])];
+    writeDb(db);
+  }
+  res.status(201).json(topic);
+});
+
+app.post('/api/forum/:topicId/replies', requireAuth, async (req, res) => {
+  const content = String(req.body.content || '').trim().slice(0, 10000);
+  if (!content) return res.status(400).json({ message: 'Nội dung phản hồi đang trống.' });
+
+  const topic = isMongoConnected
+    ? await ForumModel.findOne({ id: req.params.topicId }).lean()
+    : (readDb().forumTopics || []).find(t => t.id === req.params.topicId);
+  if (!topic) return res.status(404).json({ message: 'Không tìm thấy chủ đề thảo luận' });
+  const course = await loadCourseObj(topic.courseId);
+  if (!isStaff(req.user) && !(course && isEnrolled(course, req.user))) {
+    return res.status(403).json({ message: 'Bạn cần đăng ký khóa học trước khi tham gia thảo luận.' });
+  }
+
+  const reply = {
+    id: `reply-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    author: forumAuthor(req.user),
+    content,
+    createdAt: nowVN(),
+    isInstructorAnswer: isStaff(req.user)
+  };
+  if (isMongoConnected) {
+    await ForumModel.updateOne({ id: topic.id }, { $push: { replies: reply } });
+  } else {
+    const db = readDb();
+    const t = db.forumTopics.find(x => x.id === topic.id);
+    t.replies = [...(t.replies || []), reply];
+    writeDb(db);
+  }
+  res.status(201).json(reply);
 });
 
 // 10. Certificates
@@ -1346,11 +1463,21 @@ app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
 // ====================== SERVE PRODUCTION FRONTEND ======================
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+  // Tệp trong /assets có mã băm trong tên nên cache dài hạn; index.html luôn kiểm tra bản mới
+  app.use(express.static(distPath, {
+    setHeaders(res, filePath) {
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  }));
 
   // SPA Fallback cho Express 5 (không dùng app.get('*') để tránh lỗi PathError trong Express 5)
   app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+      res.setHeader('Cache-Control', 'no-cache');
       return res.sendFile(path.join(distPath, 'index.html'));
     }
     if (req.path.startsWith('/api/')) {

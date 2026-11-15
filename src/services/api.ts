@@ -2,7 +2,7 @@
  * API Service Client for LMS Nhóm 2
  */
 
-import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem } from '../types';
+import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem, QuizQuestion, CourseAnnouncement } from '../types';
 
 export interface StudentSubmission {
   student: { id: string; name: string; email?: string; className?: string; avatar?: string };
@@ -94,6 +94,11 @@ class ApiClient {
     delete: (id: string) => this.request<{ success: boolean }>(`/courses/${id}`, {
       method: 'DELETE'
     }),
+    addAnnouncement: (id: string, data: { title: string; content: string; isImportant?: boolean }) =>
+      this.request<CourseAnnouncement>(`/courses/${id}/announcements`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
     enroll: (id: string, studentData?: any) => this.request<{ success: boolean; course: Course; message?: string }>(`/courses/${id}/enroll`, {
       method: 'POST',
       body: JSON.stringify(studentData || {})
@@ -153,7 +158,7 @@ class ApiClient {
     getSubmissions: (courseId: string, activityId: string) =>
       this.request<StudentSubmission[]>(`/courses/${courseId}/activities/${activityId}/submissions`),
     submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number }) => 
-      this.request<{ success: boolean; result: any }>(`/courses/${courseId}/activities/${activityId}/quiz-submit`, {
+      this.request<{ success: boolean; passed: boolean; score: number; result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] }>(`/courses/${courseId}/activities/${activityId}/quiz-submit`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),

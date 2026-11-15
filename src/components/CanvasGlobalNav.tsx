@@ -7,7 +7,9 @@ import {
   Mail, 
   History, 
   HelpCircle,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck,
+  Presentation
 } from 'lucide-react';
 
 export const CanvasGlobalNav: React.FC = () => {
@@ -23,7 +25,9 @@ export const CanvasGlobalNav: React.FC = () => {
 
   const isNavActive = (key: string) => {
     if (key === 'account') return currentView === 'profile';
-    if (key === 'dashboard') return currentView === 'dashboard' || currentView === 'admin-panel';
+    if (key === 'dashboard') return currentView === 'dashboard';
+    if (key === 'teaching') return currentView === 'teacher-studio';
+    if (key === 'admin') return currentView === 'admin-panel';
     if (key === 'courses') return currentView === 'courses-list' || currentView === 'course-detail' || currentView === 'activity';
     if (key === 'calendar') return currentView === 'calendar';
     if (key === 'inbox') return currentView === 'inbox';
@@ -32,13 +36,11 @@ export const CanvasGlobalNav: React.FC = () => {
     return false;
   };
 
-  const handleGoDashboard = () => {
-    if (currentUser?.role === 'admin') {
-      setCurrentView('admin-panel');
-    } else {
-      setCurrentView('dashboard');
-    }
-  };
+  // Bảng điều khiển và Quản trị hệ thống là hai mục riêng biệt
+  const handleGoDashboard = () => setCurrentView('dashboard');
+
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
+  const isStaff = isAdmin || currentUser?.role === 'lecturer';
 
   return (
     <aside className="w-[78px] shrink-0 min-h-screen bg-[#0374b5] flex flex-col items-center py-2 text-white select-none z-30 shadow-md">
@@ -94,7 +96,7 @@ export const CanvasGlobalNav: React.FC = () => {
               ? 'bg-white text-[#0374b5] shadow-xs'
               : 'text-white/90 hover:bg-[#02629b] hover:text-white'
           }`}
-          title="Bảng điều khiển học tập & Quản trị"
+          title="Bảng điều khiển học tập"
         >
           <Gauge className="w-6 h-6 stroke-[1.8]" />
           <span className="text-[11px] font-medium mt-1 leading-tight">Bảng điều khiển</span>
@@ -162,9 +164,41 @@ export const CanvasGlobalNav: React.FC = () => {
           <History className="w-6 h-6 stroke-[1.8]" />
           <span className="text-[11px] font-medium mt-1 leading-tight">Lịch sử</span>
         </button>
+
+        {/* 7. Teaching / Giảng dạy — chỉ giáo viên & quản trị viên */}
+        {isStaff && (
+          <button
+            onClick={() => setCurrentView('teacher-studio')}
+            className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
+              isNavActive('teaching')
+                ? 'bg-white text-[#0374b5] shadow-xs'
+                : 'text-white/90 hover:bg-[#02629b] hover:text-white'
+            }`}
+            title="Quản lý giảng dạy & Tiến độ học sinh"
+          >
+            <Presentation className="w-6 h-6 stroke-[1.8]" />
+            <span className="text-[11px] font-medium mt-1 leading-tight">Giảng dạy</span>
+          </button>
+        )}
+
+        {/* 8. Admin / Quản trị hệ thống — chỉ quản trị viên */}
+        {isAdmin && (
+          <button
+            onClick={() => setCurrentView('admin-panel')}
+            className={`w-[72px] py-2 flex flex-col items-center justify-center rounded-lg transition-all text-center group ${
+              isNavActive('admin')
+                ? 'bg-white text-[#0374b5] shadow-xs'
+                : 'text-white/90 hover:bg-[#02629b] hover:text-white'
+            }`}
+            title="Quản trị hệ thống"
+          >
+            <ShieldCheck className="w-6 h-6 stroke-[1.8]" />
+            <span className="text-[11px] font-medium mt-1 leading-tight">Quản trị</span>
+          </button>
+        )}
       </nav>
 
-      {/* 7. Help / Trợ giúp Bottom */}
+      {/* 9. Help / Trợ giúp Bottom */}
       <div className="w-full flex flex-col items-center pt-2 border-t border-white/10">
         <button
           onClick={() => setCurrentView('help')}
