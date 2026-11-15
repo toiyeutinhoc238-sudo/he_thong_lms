@@ -29,7 +29,7 @@ const uploadStorage = multer.diskStorage({
     let originalName = file.originalname;
     try {
       originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    } catch (e) {}
+    } catch (e) { }
     const ext = path.extname(originalName);
     const base = path.basename(originalName, ext).replace(/[^a-zA-Z0-9_\-\u00C0-\u1EF9]/g, '_').slice(0, 80);
     const unique = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
@@ -1420,11 +1420,11 @@ app.post('/api/upload', (req, res, next) => {
   let originalName = req.file.originalname;
   try {
     originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-  } catch (e) {}
+  } catch (e) { }
 
   const fileBytes = req.file.size;
-  const sizeFormatted = fileBytes > 1024 * 1024 
-    ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB` 
+  const sizeFormatted = fileBytes > 1024 * 1024
+    ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB`
     : `${(fileBytes / 1024).toFixed(1)} KB`;
 
   const fileUrl = `/uploads/${req.file.filename}`;
@@ -1481,11 +1481,11 @@ app.post('/api/courses/:id/files', (req, res, next) => {
     let originalName = req.file.originalname;
     try {
       originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-    } catch (e) {}
+    } catch (e) { }
 
     const fileBytes = req.file.size;
-    const sizeFormatted = fileBytes > 1024 * 1024 
-      ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB` 
+    const sizeFormatted = fileBytes > 1024 * 1024
+      ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB`
       : `${(fileBytes / 1024).toFixed(1)} KB`;
 
     const fileUrl = `/uploads/${req.file.filename}`;
@@ -1564,7 +1564,7 @@ app.delete('/api/courses/:id/files/:fileId', async (req, res) => {
   if (fileToDelete && fileToDelete.filename) {
     const diskPath = path.join(uploadsDir, fileToDelete.filename);
     if (fs.existsSync(diskPath)) {
-      try { fs.unlinkSync(diskPath); } catch (e) {}
+      try { fs.unlinkSync(diskPath); } catch (e) { }
     }
   }
 
@@ -1666,6 +1666,85 @@ app.get('/api/users', requireStaff, async (req, res) => {
   const db = readDb();
   const safeUsers = (db.users || []).map(({ password, ...u }) => u);
   res.json(safeUsers || []);
+});
+
+// 13.1 Thêm người dùng mới (Quyền Quản trị viên - Đáp ứng chuẩn rubric quản trị)
+app.post('/api/users', requireStaff, async (req, res) => {
+  const { name, email, role, code, className, school, department } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ Họ tên và Email.' });
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+  const userCode = (code || normalizedEmail.split('@')[0]).toUpperCase();
+  const userRole = role === 'admin' && normalizedEmail !== 'phanphiphu04@gmail.com' ? 'student' : (role || 'student');
+
+  const newUser = {
+    id: `user-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    name: name.trim(),
+    username: normalizedEmail.split('@')[0],
+    email: normalizedEmail,
+    role: userRole,
+    code: userCode,
+    className: className || '',
+    classOrPosition: className || (userRole === 'admin' ? 'Quản trị viên' : userRole === 'lecturer' ? 'Giáo viên' : 'Học viên'),
+    school: school || department || 'LMS Nhóm 2',
+    department: school || department || 'LMS Nhóm 2',
+    avatar: '',
+    isProfileCompleted: true,
+    enrolledCourses: [],
+    createdAt: nowVN()
+  };
+
+  if (isMongoConnected) {
+    try {
+      const existing = await UserModel.findOne({ email: normalizedEmail });
+      if (existing) {
+        return res.status(409).json({ message: 'Email người dùng này đã tồn tại trong hệ thống.' });
+      }
+      const created = await UserModel.create(newUser);
+      const obj = created.toObject ? created.toObject() : created;
+      delete obj.password;
+      return res.status(201).json(obj);
+    } catch (err) {
+      return res.status(500).json({ message: 'Lỗi khi lưu người dùng vào MongoDB.' });
+    }
+  } else {
+    const db = readDb();
+    if ((db.users || []).some(u => u.email?.toLowerCase().trim() === normalizedEmail)) {
+      return res.status(409).json({ message: 'Email người dùng này đã tồn tại trong hệ thống.' });
+    }
+    db.users = db.users || [];
+    db.users.push(newUser);
+    writeDb(db);
+    return res.status(201).json(newUser);
+  }
+});
+
+// 13.2 Xóa người dùng (Quyền Quản trị viên)
+app.delete('/api/users/:userId', requireStaff, async (req, res) => {
+  const userId = req.params.userId;
+  if (isMongoConnected) {
+    try {
+      const target = await UserModel.findOne({ id: userId });
+      if (target && target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com') {
+        return res.status(403).json({ message: 'Không thể xóa tài khoản Quản trị viên gốc.' });
+      }
+      await UserModel.deleteOne({ id: userId });
+      return res.json({ success: true, userId });
+    } catch (err) {
+      return res.status(500).json({ message: 'Lỗi khi xóa người dùng.' });
+    }
+  } else {
+    const db = readDb();
+    const target = (db.users || []).find(u => u.id === userId);
+    if (target && target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com') {
+      return res.status(403).json({ message: 'Không thể xóa tài khoản Quản trị viên gốc.' });
+    }
+    db.users = (db.users || []).filter(u => u.id !== userId);
+    writeDb(db);
+    return res.json({ success: true, userId });
+  }
 });
 
 // 14. Students in Course — giáo viên nhận kèm tiến độ chi tiết của từng học sinh

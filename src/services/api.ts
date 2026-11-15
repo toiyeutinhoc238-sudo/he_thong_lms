@@ -207,7 +207,14 @@ class ApiClient {
   // Users (Admin)
   users = {
     getAll: () => this.request<User[]>('/users'),
-    getStudentsByCourse: (courseId: string) => this.request<any[]>(`/courses/${courseId}/students`)
+    getStudentsByCourse: (courseId: string) => this.request<any[]>(`/courses/${courseId}/students`),
+    create: (data: Partial<User>) => this.request<User>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    delete: (userId: string) => this.request<{ success: boolean; userId: string }>(`/users/${userId}`, {
+      method: 'DELETE'
+    })
   };
 
   // Files / Tập tin học liệu (Hỗ trợ upload mọi loại tệp tùy ý)

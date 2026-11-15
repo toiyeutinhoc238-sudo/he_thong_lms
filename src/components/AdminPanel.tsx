@@ -16,7 +16,10 @@ import {
   ExternalLink,
   Sparkles,
   School,
-  GraduationCap
+  GraduationCap,
+  UserPlus,
+  X,
+  Loader2
 } from 'lucide-react';
 import api from '../services/api';
 import { EditCourseModal } from './EditCourseModal';
@@ -29,6 +32,63 @@ export const AdminPanel: React.FC = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [searchUser, setSearchUser] = useState('');
+
+  // Modal Thêm Người Dùng (Quyền Quản trị viên)
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState<'student' | 'lecturer'>('student');
+  const [newUserCode, setNewUserCode] = useState('');
+  const [newUserClass, setNewUserClass] = useState('');
+  const [newUserSchool, setNewUserSchool] = useState('');
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [userModalError, setUserModalError] = useState<string | null>(null);
+  const [userModalSuccess, setUserModalSuccess] = useState<string | null>(null);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName.trim() || !newUserEmail.trim()) {
+      setUserModalError('Vui lòng nhập đầy đủ Họ tên và Email.');
+      return;
+    }
+    setIsCreatingUser(true);
+    setUserModalError(null);
+    try {
+      const created = await api.users.create({
+        name: newUserName.trim(),
+        email: newUserEmail.trim(),
+        role: newUserRole,
+        code: newUserCode.trim() || undefined,
+        className: newUserClass.trim() || undefined,
+        school: newUserSchool.trim() || undefined
+      });
+      setUsersList(prev => [created, ...prev]);
+      setUserModalSuccess(`Đã thêm thành công người dùng "${created.name}"!`);
+      setTimeout(() => {
+        setIsAddUserModalOpen(false);
+        setUserModalSuccess(null);
+        setNewUserName('');
+        setNewUserEmail('');
+        setNewUserCode('');
+        setNewUserClass('');
+        setNewUserSchool('');
+      }, 1500);
+    } catch (err: any) {
+      setUserModalError(err.message || 'Lỗi khi thêm người dùng mới.');
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa người dùng "${userName}" khỏi hệ thống?`)) return;
+    try {
+      await api.users.delete(userId);
+      setUsersList(prev => prev.filter(u => u.id !== userId));
+    } catch (err: any) {
+      alert(err.message || 'Không thể xóa người dùng này.');
+    }
+  };
 
   // Fetch users from API (Chỉ lấy tài khoản thật từ hệ thống)
   useEffect(() => {
@@ -317,15 +377,25 @@ export const AdminPanel: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Tìm theo tên, email, lớp..."
-                value={searchUser}
-                onChange={(e) => setSearchUser(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0374b5] focus:bg-white"
-              />
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên, email, lớp..."
+                  value={searchUser}
+                  onChange={(e) => setSearchUser(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                />
+              </div>
+
+              <button
+                onClick={() => setIsAddUserModalOpen(true)}
+                className="px-4 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0 active:scale-95 w-full sm:w-auto justify-center"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Thêm Người Dùng</span>
+              </button>
             </div>
           </div>
 
@@ -338,13 +408,14 @@ export const AdminPanel: React.FC = () => {
                   <th className="py-3 px-4">EMAIL</th>
                   <th className="py-3 px-4">LỚP</th>
                   <th className="py-3 px-4">TRƯỜNG HỌC</th>
-                  <th className="py-3 px-4 rounded-r-xl">VAI TRÒ</th>
+                  <th className="py-3 px-4">VAI TRÒ</th>
+                  <th className="py-3 px-4 text-right rounded-r-xl">THAO TÁC</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                    <td colSpan={7} className="py-8 text-center text-slate-400 italic">
                       Chưa có học viên nào phù hợp với tìm kiếm
                     </td>
                   </tr>
@@ -370,10 +441,23 @@ export const AdminPanel: React.FC = () => {
                         <span className={`px-2.5 py-0.5 rounded-full font-black text-[10px] uppercase tracking-wider ${
                           u.role === 'admin'
                             ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                            : 'bg-blue-100 text-[#0374b5] border border-blue-200'
+                            : u.role === 'lecturer'
+                              ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                              : 'bg-blue-100 text-[#0374b5] border border-blue-200'
                         }`}>
-                          {u.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
+                          {u.role === 'admin' ? 'Quản trị viên' : u.role === 'lecturer' ? 'Giáo viên' : 'Học viên'}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {u.email?.toLowerCase().trim() !== 'phanphiphu04@gmail.com' && (
+                          <button
+                            onClick={() => handleDeleteUser(u.id, u.name)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Xóa người dùng khỏi hệ thống"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -428,6 +512,161 @@ export const AdminPanel: React.FC = () => {
           await updateCourse(courseId, data);
         }}
       />
+
+      {/* Modal Thêm Người Dùng Mới (Quyền Quản trị viên) */}
+      {isAddUserModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-sky-100 text-[#0374b5] flex items-center justify-center">
+                  <UserPlus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">Thêm Người Dùng Mới</h3>
+                  <p className="text-[11px] text-slate-500">Cấp quyền và tạo tài khoản vào hệ thống LMS</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddUserModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Họ và tên <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: Nguyễn Văn An"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Địa chỉ Email (Định danh đăng nhập) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Ví dụ: vanan.nguyen@gmail.com"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Vai trò trên hệ thống
+                  </label>
+                  <select
+                    value={newUserRole}
+                    onChange={(e) => setNewUserRole(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-[#0374b5]"
+                  >
+                    <option value="student">🎓 Học viên (Học sinh)</option>
+                    <option value="lecturer">👨‍🏫 Giáo viên phụ trách</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Mã số học viên / GV
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="HV001"
+                    value={newUserCode}
+                    onChange={(e) => setNewUserCode(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Lớp học
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Lớp 6A1"
+                    value={newUserClass}
+                    onChange={(e) => setNewUserClass(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Trường / Đơn vị
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="THCS LMS Nhóm 2"
+                    value={newUserSchool}
+                    onChange={(e) => setNewUserSchool(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5]"
+                  />
+                </div>
+              </div>
+
+              {userModalError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 font-bold flex items-center gap-1.5 animate-in fade-in">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{userModalError}</span>
+                </div>
+              )}
+
+              {userModalSuccess && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold flex items-center gap-1.5 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{userModalSuccess}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddUserModalOpen(false)}
+                  disabled={isCreatingUser}
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingUser}
+                  className="px-5 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                >
+                  {isCreatingUser ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang tạo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Tạo Người Dùng</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
