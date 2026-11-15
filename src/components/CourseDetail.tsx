@@ -123,12 +123,21 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     )
   );
 
+  const isStockAvatar = (url?: string) => Boolean(
+    url && (
+      url.includes('unsplash.com') ||
+      url.includes('photo-1507003211169') ||
+      url.includes('photo-') ||
+      url.includes('images.unsplash')
+    )
+  );
+
   const instructorAvatar = 
-    (currentUser?.avatar && isCreatorCurrent)
+    (currentUser?.avatar && isCreatorCurrent && !isStockAvatar(currentUser.avatar))
       ? currentUser.avatar
-      : (activeCourse.instructor?.avatar && !activeCourse.instructor.avatar.includes('unsplash.com'))
+      : (activeCourse.instructor?.avatar && !isStockAvatar(activeCourse.instructor.avatar))
         ? activeCourse.instructor.avatar
-        : (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser?.avatar)
+        : (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser?.avatar && !isStockAvatar(currentUser.avatar))
           ? currentUser.avatar
           : '';
 
@@ -137,7 +146,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
       ? currentUser.name
       : (activeCourse.instructor?.name && activeCourse.instructor.name !== 'Giáo viên' && activeCourse.instructor.name !== 'Giáo viên phụ trách')
         ? activeCourse.instructor.name
-        : (currentUser?.name || 'Phú Phan');
+        : (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser?.name ? currentUser.name : 'Phan Phi Phú');
 
   return (
     <div className="flex-1 flex min-w-0 bg-white">

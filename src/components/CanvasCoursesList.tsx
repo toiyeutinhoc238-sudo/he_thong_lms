@@ -210,23 +210,60 @@ export const CanvasCoursesList: React.FC = () => {
 
       {/* Hiển thị Danh sách Khung Bài Học (Bài 1, Bài 2, Bài 3... theo yêu cầu) */}
       {(() => {
-        const mainCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
+        const OFFICIAL_8_LESSONS = [
+          'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+          'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+          'BÀI 3: THỰC CHỨNG THÔNG TIN - LÀM CHỦ AI',
+          'BÀI 4: KHÁM PHÁ MẶT TÍCH CỰC VÀ TIÊU CỰC CỦA MỘT SỐ TÍNH NĂNG AI',
+          'BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO',
+          'BÀI 6: DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI',
+          'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
+          'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO'
+        ];
 
-        if (!mainCourse) {
-          return (
-            <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 p-8 space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto text-2xl">
-                📚
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-extrabold text-slate-800">Chưa có bài học nào</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  {canManage ? 'Bấm nút "Tạo khóa học mới" hoặc "Thêm bài học" để bắt đầu xây dựng nội dung.' : 'Nội dung khóa học đang được giáo viên chuẩn bị.'}
-                </p>
-              </div>
-            </div>
-          );
-        }
+        const isStockAvatar = (url?: string) => Boolean(
+          url && (
+            url.includes('unsplash.com') ||
+            url.includes('photo-1507003211169') ||
+            url.includes('photo-') ||
+            url.includes('images.unsplash')
+          )
+        );
+
+        const foundCourse = courses.find(c => c.code === '6AIAB01' || (c.name && (c.name.toLowerCase().includes('lớp 6') || c.name.toLowerCase().includes('ai')))) || courses[0];
+
+        // Khóa học chuẩn luôn sẵn sàng để hiển thị đầy đủ 8 bài học
+        const mainCourse: Course = foundCourse ? {
+          ...foundCourse,
+          name: 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B',
+          category: 'Chuyên đề AI',
+          gradeLevel: 'Lớp 6'
+        } : {
+          id: 'course-6aiab01',
+          code: '6AIAB01',
+          name: 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B',
+          category: 'Chuyên đề AI',
+          gradeLevel: 'Lớp 6',
+          instructor: {
+            id: 'gv-phanphiphu',
+            name: 'Phan Phi Phú',
+            email: 'phanphiphu04@gmail.com',
+            avatar: '',
+            title: 'Giáo viên phụ trách'
+          },
+          thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+          progress: 0,
+          totalActivities: 8,
+          completedActivities: 0,
+          description: 'Chương trình đào tạo Chuyên đề Trí tuệ Nhân tạo Lớp 6: Chủ đề A và B',
+          targetAudience: 'Học sinh Lớp 6',
+          modules: [],
+          syllabus: [],
+          announcements: [],
+          enrolledStudents: [],
+          enrolledStudentsCount: 0,
+          certificateEligible: true
+        };
 
         const isMainEnrolled = Boolean(
           canManage ||
@@ -235,11 +272,13 @@ export const CanvasCoursesList: React.FC = () => {
         );
 
         const instructorAvatar = 
-          (currentUser?.avatar && (currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' || mainCourse.instructor?.email?.toLowerCase().trim() === currentUser.email?.toLowerCase().trim()))
+          (currentUser?.avatar && !isStockAvatar(currentUser.avatar) && (currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' || mainCourse.instructor?.email?.toLowerCase().trim() === currentUser.email?.toLowerCase().trim()))
             ? currentUser.avatar
-            : (mainCourse.instructor?.avatar && !mainCourse.instructor.avatar.includes('unsplash.com'))
+            : (mainCourse.instructor?.avatar && !isStockAvatar(mainCourse.instructor.avatar))
               ? mainCourse.instructor.avatar
-              : '';
+              : (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser?.avatar && !isStockAvatar(currentUser.avatar))
+                ? currentUser.avatar
+                : '';
 
         const instructorName = 
           (currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' && currentUser.name)
@@ -248,7 +287,25 @@ export const CanvasCoursesList: React.FC = () => {
               ? mainCourse.instructor.name
               : 'Phan Phi Phú';
 
-        const modules = (mainCourse.modules || []).filter(m => !search || m.title.toLowerCase().includes(search.toLowerCase()));
+        // Xây dựng danh sách chuẩn đảm bảo luôn có ít nhất 8 bài học
+        const baseModules = Array.isArray(mainCourse.modules) ? [...mainCourse.modules] : [];
+        for (let i = 0; i < OFFICIAL_8_LESSONS.length; i++) {
+          const expectedTitle = OFFICIAL_8_LESSONS[i];
+          if (!baseModules[i]) {
+            baseModules.push({
+              id: `module-lesson-${i + 1}`,
+              courseId: mainCourse.id,
+              order: i + 1,
+              title: expectedTitle,
+              description: `Nội dung học tập và bài thực hành cho ${expectedTitle}`,
+              activities: []
+            });
+          } else if (!baseModules[i].title.startsWith('BÀI ')) {
+            baseModules[i].title = expectedTitle;
+          }
+        }
+
+        const modules = baseModules.filter(m => !search || m.title.toLowerCase().includes(search.toLowerCase()));
 
         return (
           <div className="space-y-6">

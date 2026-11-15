@@ -11,15 +11,19 @@ import {
   BookOpen, 
   Plus, 
   Trash2, 
-  Edit3,
+  Edit3, 
   Search, 
-  ExternalLink,
-  Sparkles,
-  School,
-  GraduationCap,
-  UserPlus,
-  X,
-  Loader2
+  ExternalLink, 
+  Sparkles, 
+  School, 
+  GraduationCap, 
+  UserPlus, 
+  X, 
+  Loader2,
+  Sliders,
+  UploadCloud,
+  FileCheck2,
+  MessageSquare
 } from 'lucide-react';
 import api from '../services/api';
 import { EditCourseModal } from './EditCourseModal';
@@ -175,6 +179,106 @@ export const AdminPanel: React.FC = () => {
         </div>
       </div>
 
+      {/* 3 Trụ Cột Quyền Quản Trị Hệ Thống (Theo Đúng Yêu Cầu Chuyên Đề: Tạo khóa học, Thêm người dùng, Cấu hình hoạt động) */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#0374b5] bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
+              Yêu cầu Chuyên đề LMS
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+              Xác định và Trình bày 3 Quyền Quản Trị Hệ Thống
+            </h2>
+          </div>
+          <span className="text-xs text-slate-500 font-semibold">
+            Tài khoản: <strong>{currentUser?.email}</strong> (Quản trị viên)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Quyền 1: Tạo khóa học */}
+          <div 
+            onClick={() => { setActiveTab('courses'); setCurrentView('courses-list'); }}
+            className="p-4 rounded-2xl border-2 border-sky-100 bg-sky-50/40 hover:bg-sky-50 hover:border-[#0374b5] transition-all cursor-pointer group space-y-2 flex flex-col justify-between"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-[#0374b5] text-white flex items-center justify-center shadow-xs">
+                  <BookOpen className="w-4 h-4" />
+                </span>
+                <span className="px-2 py-0.5 bg-[#0374b5]/10 text-[#0374b5] text-[10px] font-black rounded-lg">
+                  Quyền 1
+                </span>
+              </div>
+              <h3 className="text-sm font-black text-slate-900 group-hover:text-[#0374b5] transition-colors">
+                Tạo khóa học
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Khởi tạo môn học mới, thiết lập mã môn, khối lớp (Lớp 1 - 12), phân công giáo viên phụ trách và xây dựng cấu trúc các chương, bài học.
+              </p>
+            </div>
+            <div className="pt-2 text-xs font-bold text-[#0374b5] flex items-center gap-1 group-hover:underline">
+              <span>Thực hiện: Tạo khóa học mới</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          {/* Quyền 2: Thêm người dùng */}
+          <div 
+            onClick={() => { setActiveTab('users'); setIsAddUserModalOpen(true); }}
+            className="p-4 rounded-2xl border-2 border-emerald-100 bg-emerald-50/40 hover:bg-emerald-50 hover:border-emerald-600 transition-all cursor-pointer group space-y-2 flex flex-col justify-between"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                  <UserPlus className="w-4 h-4" />
+                </span>
+                <span className="px-2 py-0.5 bg-emerald-600/10 text-emerald-700 text-[10px] font-black rounded-lg">
+                  Quyền 2
+                </span>
+              </div>
+              <h3 className="text-sm font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                Thêm người dùng
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Cấp tài khoản mới vào hệ thống, phân quyền vai trò (Admin / Giáo viên / Học viên), cấu hình mã số, trường học và danh sách lớp.
+              </p>
+            </div>
+            <div className="pt-2 text-xs font-bold text-emerald-700 flex items-center gap-1 group-hover:underline">
+              <span>Thực hiện: Thêm người dùng ngay</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          {/* Quyền 3: Cấu hình hoạt động */}
+          <div 
+            onClick={() => setActiveTab('settings')}
+            className="p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-600 transition-all cursor-pointer group space-y-2 flex flex-col justify-between"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                  <Sliders className="w-4 h-4" />
+                </span>
+                <span className="px-2 py-0.5 bg-indigo-600/10 text-indigo-700 text-[10px] font-black rounded-lg">
+                  Quyền 3
+                </span>
+              </div>
+              <h3 className="text-sm font-black text-slate-900 group-hover:text-indigo-700 transition-colors">
+                Cấu hình hoạt động
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Thiết lập quy chế nộp bài tập (tải tệp tùy ý 100MB), cấu hình làm bài trắc nghiệm Quiz chấm điểm tự động, diễn đàn và cấp chứng chỉ.
+              </p>
+            </div>
+            <div className="pt-2 text-xs font-bold text-indigo-700 flex items-center gap-1 group-hover:underline">
+              <span>Thực hiện: Cấu hình hoạt động</span>
+              <span>→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 4 Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
@@ -256,8 +360,8 @@ export const AdminPanel: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Settings className="w-4 h-4" />
-          <span>Cấu hình Hệ thống</span>
+          <Sliders className="w-4 h-4" />
+          <span>Cấu hình Hoạt động & Hệ thống</span>
         </button>
       </div>
 
@@ -468,37 +572,168 @@ export const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 3: Cấu hình Hệ thống */}
+      {/* Tab 3: Cấu hình Hoạt động & Hệ thống */}
       {activeTab === 'settings' && (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-8 space-y-6">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-extrabold text-slate-900">
-              Thông số Kỹ thuật & Cấu hình Nền tảng
-            </h2>
-            <p className="text-xs text-slate-500">
-              Thông tin cấu hình hệ thống LMS Nhóm 2
-            </p>
+        <div className="space-y-6">
+          {/* Nhóm 1: Cấu hình Hoạt động Đào tạo & Học tập (Quyền Quản trị 3) */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-8 space-y-6">
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+                  Quyền Quản Trị: Cấu hình hoạt động
+                </span>
+                <h2 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                  Cấu hình Hoạt Động Đào Tạo & Kiểm Tra Trực Tuyến
+                </h2>
+              </div>
+              <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5 self-start sm:self-auto">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Đang áp dụng toàn hệ thống
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Cấu hình 1: Tải lên tệp tùy ý & nộp bài tập */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-sky-100 text-[#0374b5] flex items-center justify-center shrink-0">
+                    <UploadCloud className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900">
+                      Cấu hình Tải Tệp Lên & Nộp Bài Tập (Assignment)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Quy tắc nộp tài liệu bài học và bài làm của học sinh</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
+                    <span>Cho phép tải lên tệp tùy ý (PDF, Word, Excel, PowerPoint, Ảnh, Video, ZIP, Mã nguồn...)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
+                    <span>Dung lượng tối đa mỗi tệp: <strong>100 MB</strong> (Động cơ Multer Streaming)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
+                    <span>Cho phép học sinh nộp lại bài trước thời hạn chót của giáo viên</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Cấu hình 2: Trắc nghiệm Quiz */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <FileCheck2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900">
+                      Cấu hình Hoạt Động Kiểm Tra Trắc Nghiệm (Quiz)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Đánh giá và chấm điểm tự động bài làm</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
+                    <span>Tự động chấm điểm trắc nghiệm tức thì ngay khi học sinh bấm nộp bài</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
+                    <span>Hiển thị đáp án chính xác và phần giải thích chi tiết sau khi nộp</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
+                    <span>Tự động khóa đáp án đối với học sinh chưa hoàn thành bài làm</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Cấu hình 3: Diễn đàn & Trợ lý AI */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900">
+                      Cấu hình Diễn Đàn & Tương Tác Học Tập
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Trao đổi bài học giữa học sinh, giáo viên và AI</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-amber-600 w-4 h-4" />
+                    <span>Cho phép học sinh đặt câu hỏi và bình luận thảo luận trong từng bài học</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-amber-600 w-4 h-4" />
+                    <span>Kích hoạt Trợ lý Trí tuệ Nhân tạo AI LMS hỗ trợ học tập trực tuyến 24/7</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Cấu hình 4: Cấp chứng chỉ & Đánh giá tiến độ */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900">
+                      Cấu hình Đánh Giá Tiến Độ & Cấp Chứng Chỉ
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Điều kiện hoàn thành khóa học và cấp giấy chứng nhận</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-indigo-600 w-4 h-4" />
+                    <span>Tự động cập nhật thanh tiến độ % học tập cho học sinh sau mỗi bài nộp</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded accent-indigo-600 w-4 h-4" />
+                    <span>Tự động cấp Giấy chứng nhận số khi học sinh đạt 100% tiến độ bài học</span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-slate-400 font-bold block">Tên Nền tảng Đào tạo</span>
-              <strong className="text-slate-800 text-sm">Hệ thống LMS Nhóm 2</strong>
+          {/* Nhóm 2: Thông số Kỹ thuật & Cấu hình Nền tảng Cloud */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-8 space-y-4">
+            <div className="border-b border-slate-100 pb-3">
+              <h2 className="text-base font-extrabold text-slate-900">
+                Thông số Kỹ thuật & Hạ tầng Nền tảng
+              </h2>
+              <p className="text-xs text-slate-500">
+                Thông tin cấu hình hạ tầng hệ thống LMS Nhóm 2
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-slate-400 font-bold block">Xác thực Danh tính</span>
-              <strong className="text-slate-800 text-sm">Google OAuth 2.0 Identity Services</strong>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-400 font-bold block">Tên Nền tảng Đào tạo</span>
+                <strong className="text-slate-800 text-sm">Hệ thống LMS Nhóm 2</strong>
+              </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-slate-400 font-bold block">Cơ sở dữ liệu Đám mây</span>
-              <strong className="text-slate-800 text-sm">MongoDB Atlas Cloud Cluster (vjKs2Siuwi5Kpcfx)</strong>
-            </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-400 font-bold block">Xác thực Danh tính</span>
+                <strong className="text-slate-800 text-sm">Google OAuth 2.0 Identity Services</strong>
+              </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-slate-400 font-bold block">Giao thức Điều khiển Khóa học</span>
-              <strong className="text-slate-800 text-sm">Tiêu chuẩn Kiến trúc LMS Nhóm 2</strong>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-400 font-bold block">Cơ sở dữ liệu Đám mây</span>
+                <strong className="text-slate-800 text-sm">MongoDB Atlas Cloud Cluster (vjKs2Siuwi5Kpcfx)</strong>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-400 font-bold block">Động cơ Tải Tệp Lên</span>
+                <strong className="text-slate-800 text-sm">Multer 100MB Multi-format Engine</strong>
+              </div>
             </div>
           </div>
         </div>

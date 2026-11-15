@@ -685,6 +685,18 @@ app.put('/api/auth/profile', requireAuth, async (req, res) => {
 });
 
 // 3. Courses: Get All (Không có dữ liệu ảo)
+// Danh sách 8 bài học chuẩn theo Chuyên đề Trí tuệ Nhân tạo Lớp 6 (Chủ đề A và B)
+const OFFICIAL_AI_GRADE6_LESSONS = [
+  'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+  'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+  'BÀI 3: THỰC CHỨNG THÔNG TIN - LÀM CHỦ AI',
+  'BÀI 4: KHÁM PHÁ MẶT TÍCH CỰC VÀ TIÊU CỰC CỦA MỘT SỐ TÍNH NĂNG AI',
+  'BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO',
+  'BÀI 6: DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI',
+  'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
+  'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO'
+];
+
 // Helper: Lấy thông tin & Avatar thật từ tài khoản Google của giáo viên/người tạo
 async function resolveInstructorAvatar(course) {
   if (!course) return course;
@@ -707,29 +719,85 @@ async function resolveInstructorAvatar(course) {
     }
   }
 
-  if (user) {
-    if (!courseObj.instructor) courseObj.instructor = {};
-    if (user.avatar) {
-      courseObj.instructor.avatar = user.avatar;
-    } else if (courseObj.instructor.avatar && courseObj.instructor.avatar.includes('unsplash.com')) {
-      courseObj.instructor.avatar = '';
-    }
+  if (!courseObj.instructor) courseObj.instructor = {};
+  courseObj.instructor.email = targetEmail;
 
-    if (user.name && (!courseObj.instructor.name || courseObj.instructor.name === 'Giáo viên' || courseObj.instructor.name === 'Giáo viên phụ trách')) {
-      courseObj.instructor.name = user.name;
-    }
+  // Xóa bỏ hoàn toàn mọi URL ảnh stock man/unsplash
+  const isStockAvatar = (url) => typeof url === 'string' && (
+    url.includes('unsplash.com') || 
+    url.includes('photo-1507003211169') || 
+    url.includes('photo-') ||
+    url.includes('images.unsplash')
+  );
 
-    if (courseObj.creator) {
-      if (user.avatar) courseObj.creator.avatar = user.avatar;
-      if (user.name) courseObj.creator.name = user.name;
-    }
-  } else if (courseObj.instructor?.avatar && courseObj.instructor.avatar.includes('unsplash.com')) {
+  if (isStockAvatar(courseObj.instructor.avatar)) {
     courseObj.instructor.avatar = '';
   }
 
-  // Chuẩn hóa tên khóa học chính theo yêu cầu
-  if (courseObj.code === '6AIAB01' || (courseObj.name && courseObj.name.includes('Chuyên đề AI'))) {
+  if (user) {
+    if (user.avatar && !isStockAvatar(user.avatar)) {
+      courseObj.instructor.avatar = user.avatar;
+    }
+    courseObj.instructor.name = user.name || 'Phan Phi Phú';
+
+    if (courseObj.creator) {
+      if (user.avatar && !isStockAvatar(user.avatar)) courseObj.creator.avatar = user.avatar;
+      courseObj.creator.name = user.name || 'Phan Phi Phú';
+    }
+  } else {
+    courseObj.instructor.name = (!courseObj.instructor.name || courseObj.instructor.name === 'Giáo viên' || courseObj.instructor.name === 'Giáo viên phụ trách')
+      ? 'Phan Phi Phú'
+      : courseObj.instructor.name;
+  }
+
+  // Chuẩn hóa tên khóa học chính và khởi tạo chuẩn 8 bài học
+  const isMainCourse = courseObj.code === '6AIAB01' || (courseObj.name && (courseObj.name.includes('Chuyên đề AI') || courseObj.name.includes('lớp 6') || courseObj.name.includes('trí tuệ nhân tạo')));
+  if (isMainCourse) {
     courseObj.name = 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B';
+    courseObj.code = '6AIAB01';
+    courseObj.gradeLevel = 'Lớp 6';
+    courseObj.category = 'Chuyên đề AI';
+
+    courseObj.modules = Array.isArray(courseObj.modules) ? courseObj.modules : [];
+    let modulesChanged = false;
+
+    // Đảm bảo đủ 8 bài học chuẩn xác theo danh sách đề ra
+    for (let i = 0; i < OFFICIAL_AI_GRADE6_LESSONS.length; i++) {
+      const officialTitle = OFFICIAL_AI_GRADE6_LESSONS[i];
+      if (!courseObj.modules[i]) {
+        courseObj.modules.push({
+          id: `module-lesson-${i + 1}`,
+          title: officialTitle,
+          description: `Chương trình học tập và bài thực hành cho ${officialTitle}`,
+          isLocked: false,
+          activities: []
+        });
+        modulesChanged = true;
+      } else if (courseObj.modules[i].title !== officialTitle && !courseObj.modules[i].title.startsWith(`BÀI ${i + 1}:`)) {
+        courseObj.modules[i].title = officialTitle;
+        modulesChanged = true;
+      }
+    }
+
+    if (modulesChanged) {
+      if (isMongoConnected) {
+        try {
+          await CourseModel.updateOne(
+            { $or: [{ id: courseObj.id }, { code: '6AIAB01' }] },
+            { $set: { modules: courseObj.modules, name: courseObj.name, instructor: courseObj.instructor } }
+          );
+        } catch (e) { }
+      } else {
+        const db = readDb();
+        const found = (db.courses || []).find(c => c.id === courseObj.id || c.code === '6AIAB01');
+        if (found) {
+          found.modules = courseObj.modules;
+          found.name = courseObj.name;
+          found.instructor = courseObj.instructor;
+          writeDb(db);
+        }
+      }
+    }
   }
 
   return courseObj;
