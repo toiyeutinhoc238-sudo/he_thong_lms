@@ -13,6 +13,53 @@ export const OFFICIAL_AI_GRADE6_LESSONS = [
 
 // Khóa học chuẩn không gắn bất kỳ dữ liệu ảo nào bên trong các bài
 // Giáo viên / Quản trị viên tự do thêm/xóa/sửa học liệu theo nhu cầu thực tế
+export const DEFAULT_GRADE6_STUDENTS = [
+  {
+    id: 'hs-601',
+    name: 'Trần Văn An',
+    email: 'an.tran6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS601',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '12/11/2026',
+    status: 'active' as const
+  },
+  {
+    id: 'hs-602',
+    name: 'Lê Thị Bích Ngọc',
+    email: 'ngoc.le6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS602',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '12/11/2026',
+    status: 'active' as const
+  },
+  {
+    id: 'hs-603',
+    name: 'Nguyễn Hoàng Long',
+    email: 'long.nguyen6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS603',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '13/11/2026',
+    status: 'active' as const
+  },
+  {
+    id: 'hs-604',
+    name: 'Võ Minh Khôi',
+    email: 'khoi.vo6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS604',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '13/11/2026',
+    status: 'active' as const
+  }
+];
+
 export const defaultGrade6Course: Course = {
   id: '6AIAB01',
   code: '6AIAB01',
@@ -58,8 +105,8 @@ export const defaultGrade6Course: Course = {
     }
   ],
   files: [],
-  enrolledStudentsCount: 0,
-  enrolledStudents: [],
+  enrolledStudentsCount: DEFAULT_GRADE6_STUDENTS.length,
+  enrolledStudents: DEFAULT_GRADE6_STUDENTS,
   certificateEligible: true
 };
 

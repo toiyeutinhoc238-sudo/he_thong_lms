@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { CanvasCourseNav, CourseNavTab } from './CanvasCourseNav';
 import { CanvasModulesView } from './CanvasModulesView';
 import { CanvasRightSidebar } from './CanvasRightSidebar';
+import { CourseGradebookTracker } from './CourseGradebookTracker';
 import { defaultGrade6Course } from '../data/mockData';
 import { 
   Users, 
@@ -77,6 +78,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
   const [fileDescription, setFileDescription] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
+  const canManage = Boolean(
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    currentUser?.role === 'admin' ||
+    currentUser?.role === 'lecturer' ||
+    activeRole === 'admin' ||
+    activeRole === 'lecturer'
+  );
 
   const isEnrolled = Boolean(
     currentUser?.role === 'admin' ||
@@ -363,42 +372,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Tab 3: Số điểm (Grades) */}
+        {/* Tab 3: Số điểm & Theo dõi tiến độ học sinh (Gradebook & Progress Tracker) */}
         {activeTab === 'grades' && (
-          <div className="p-6 max-w-4xl space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3">
-              Bảng điểm cá nhân: {activeCourse.name}
-            </h2>
-            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                  <tr>
-                    <th className="py-2.5 px-4">Tên bài kiểm tra / Hoạt động</th>
-                    <th className="py-2.5 px-4">Hạn nộp</th>
-                    <th className="py-2.5 px-4">Điểm số</th>
-                    <th className="py-2.5 px-4">Thang điểm</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {activeCourse.modules?.flatMap(m => m.activities || []).map(act => (
-                    <tr key={act.id} className="hover:bg-slate-50">
-                      <td className="py-2.5 px-4 font-medium text-slate-900">{act.title}</td>
-                      <td className="py-2.5 px-4 text-slate-500">{act.dueDate || 'Không giới hạn'}</td>
-                      <td className="py-2.5 px-4 font-bold text-[#0374b5]">{act.score !== undefined ? act.score : '-'}</td>
-                      <td className="py-2.5 px-4 text-slate-500">{act.maxScore || 10}</td>
-                    </tr>
-                  ))}
-                  {(!activeCourse.modules || activeCourse.modules.length === 0) && (
-                    <tr>
-                      <td colSpan={4} className="py-8 text-center text-xs text-slate-400">
-                        Chưa có dữ liệu bài nộp nào để chấm điểm.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <CourseGradebookTracker
+            course={activeCourse}
+            canManage={canManage}
+            currentUser={currentUser}
+            onNavigateToModules={() => setActiveTab('modules')}
+          />
         )}
 
         {/* Tab 4: Thành viên (People - Giảng viên & Học viên cùng lớp) */}

@@ -103,6 +103,18 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(studentData || {})
     }),
+    enrollStudent: (courseId: string, studentData: { name: string; email: string; className?: string; code?: string; school?: string }) =>
+      this.request<{ success: boolean; student: any }>(`/courses/${courseId}/enroll-student`, {
+        method: 'POST',
+        body: JSON.stringify(studentData)
+      }),
+    getGradebook: (courseId: string) =>
+      this.request<{
+        courseId: string;
+        courseName: string;
+        activities: any[];
+        students: any[];
+      }>(`/courses/${courseId}/gradebook`),
     getEnrolledStudents: (id: string) => this.request<any[]>(`/courses/${id}/students`)
   };
 
@@ -143,6 +155,11 @@ class ApiClient {
     markCompleted: (courseId: string, activityId: string) => 
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'
+      }),
+    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number }) =>
+      this.request<{ success: boolean; isCompleted: boolean; videoProgress: any; overallCourseProgress?: number }>(`/courses/${courseId}/activities/${activityId}/video-progress`, {
+        method: 'POST',
+        body: JSON.stringify(data)
       }),
     submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileSize?: string; fileUrl?: string; textSubmission?: string }) =>
       this.request<{ success: boolean; submission: any }>(`/courses/${courseId}/activities/${activityId}/submit`, {

@@ -821,6 +821,54 @@ async function resolveInstructorAvatar(course) {
   return courseObj;
 }
 
+// Danh sách học sinh mẫu chuẩn Lớp 6 tham gia khóa học
+const DEFAULT_GRADE6_STUDENTS = [
+  {
+    id: 'hs-601',
+    name: 'Trần Văn An',
+    email: 'an.tran6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS601',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '12/11/2026',
+    status: 'active'
+  },
+  {
+    id: 'hs-602',
+    name: 'Lê Thị Bích Ngọc',
+    email: 'ngoc.le6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS602',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '12/11/2026',
+    status: 'active'
+  },
+  {
+    id: 'hs-603',
+    name: 'Nguyễn Hoàng Long',
+    email: 'long.nguyen6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS603',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '13/11/2026',
+    status: 'active'
+  },
+  {
+    id: 'hs-604',
+    name: 'Võ Minh Khôi',
+    email: 'khoi.vo6a@lms2.edu.vn',
+    className: 'Lớp 6A',
+    code: 'HS604',
+    school: 'THCS Giảng Võ',
+    avatar: '',
+    enrolledAt: '13/11/2026',
+    status: 'active'
+  }
+];
+
 // Khởi tạo và bảo đảm khóa học Chuyên đề Trí tuệ Nhân tạo Lớp 6 luôn tồn tại đầy đủ 8 bài học
 async function ensureDefaultCourse() {
   const defaultCourse = {
@@ -849,8 +897,8 @@ async function ensureDefaultCourse() {
       description: `Nội dung học tập và bài thực hành cho ${title}`,
       activities: []
     })),
-    enrolledStudents: [],
-    enrolledStudentsCount: 0,
+    enrolledStudents: DEFAULT_GRADE6_STUDENTS,
+    enrolledStudentsCount: DEFAULT_GRADE6_STUDENTS.length,
     files: [],
     announcements: [
       {
@@ -892,6 +940,12 @@ async function ensureDefaultCourse() {
           existing.name = defaultCourse.name;
           changed = true;
         }
+        if (!existing.enrolledStudents || existing.enrolledStudents.length === 0) {
+          existing.enrolledStudents = DEFAULT_GRADE6_STUDENTS;
+          existing.enrolledStudentsCount = DEFAULT_GRADE6_STUDENTS.length;
+          existing.markModified('enrolledStudents');
+          changed = true;
+        }
         if (changed) {
           existing.markModified('modules');
           await existing.save();
@@ -928,6 +982,11 @@ async function ensureDefaultCourse() {
       }
       if (existing.name !== defaultCourse.name) {
         existing.name = defaultCourse.name;
+        changed = true;
+      }
+      if (!existing.enrolledStudents || existing.enrolledStudents.length === 0) {
+        existing.enrolledStudents = DEFAULT_GRADE6_STUDENTS;
+        existing.enrolledStudentsCount = DEFAULT_GRADE6_STUDENTS.length;
         changed = true;
       }
       if (changed) {
@@ -1412,6 +1471,44 @@ app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req,
   res.json({ success: true, progress: await courseProgressOf(ctx.course, req.user.id) });
 });
 
+// 6.1 Activities: Track Video Progress (thời lượng xem, %, tự động hoàn thành khi >= 80%)
+app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+
+  const watchedSeconds = Math.max(0, Math.floor(Number(req.body.watchedSeconds) || 0));
+  const totalSeconds = Math.max(0, Math.floor(Number(req.body.totalSeconds) || 0));
+  let progressPercent = Math.min(100, Math.max(0, Math.round(Number(req.body.progressPercent) || 0)));
+  if (totalSeconds > 0 && (!progressPercent || progressPercent === 0)) {
+    progressPercent = Math.min(100, Math.round((watchedSeconds / totalSeconds) * 100));
+  }
+
+  const isCompleted = progressPercent >= 80;
+  const videoProgress = {
+    watchedSeconds,
+    totalSeconds,
+    progressPercent,
+    lastWatchedAt: nowVN()
+  };
+
+  const patch = {
+    videoProgress,
+    updatedAt: new Date().toISOString()
+  };
+  if (isCompleted) {
+    patch.isCompleted = true;
+    patch.completedAt = nowVN();
+  }
+
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch);
+  res.json({
+    success: true,
+    isCompleted,
+    videoProgress,
+    overallCourseProgress: await courseProgressOf(ctx.course, req.user.id)
+  });
+});
+
 // 7. Activities: Submit Assignment (mỗi học sinh một bài nộp riêng)
 app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
@@ -1517,6 +1614,156 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
     quizResult
   });
   res.json({ success: true, passed, score, result: quizResult, questions });
+});
+
+// 9.01 Sổ điểm & Bảng theo dõi tiến độ toàn diện của cả lớp (cho Giáo viên / Admin & Học sinh)
+app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+
+  const acts = allActivities(course);
+  const records = await listProgress({ courseId: course.id });
+
+  let students = course.enrolledStudents || [];
+  if (!isStaff(req.user)) {
+    students = students.filter(s => s.id === req.user.id || s.email === req.user.email);
+    if (students.length === 0) {
+      students = [{
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        className: req.user.className || 'Lớp 6A',
+        code: req.user.code || 'HS-ME',
+        avatar: req.user.avatar || ''
+      }];
+    }
+  }
+
+  const users = await findUsersByIds(students.map(s => s.id));
+  const userById = new Map(users.map(u => [u.id, u]));
+
+  const activitiesList = acts.map(a => ({
+    id: a.id,
+    moduleId: a.moduleId,
+    title: a.title,
+    type: a.type,
+    maxScore: a.maxScore || 10,
+    dueDate: a.dueDate || '',
+    videoDuration: a.videoDuration || 0,
+    quizQuestions: a.quizQuestions || []
+  }));
+
+  const studentRows = students.map(s => {
+    const u = userById.get(s.id);
+    const mineRecords = records.filter(p => p.userId === s.id);
+    const recByAct = new Map(mineRecords.map(p => [p.activityId, p]));
+
+    let totalScore = 0;
+    let scoreCount = 0;
+    let completedCount = 0;
+
+    const activityProgress = activitiesList.map(act => {
+      const p = recByAct.get(act.id);
+      const isCompleted = !!p?.isCompleted;
+      if (isCompleted) completedCount++;
+
+      let score = p?.score ?? null;
+      if (score !== null && Number.isFinite(score)) {
+        totalScore += score;
+        scoreCount++;
+      }
+
+      return {
+        activityId: act.id,
+        title: act.title,
+        type: act.type,
+        maxScore: act.maxScore,
+        isCompleted,
+        completedAt: p?.completedAt || '',
+        score,
+        videoProgress: p?.videoProgress || null,
+        submission: p?.submission || null,
+        quizResult: p?.quizResult || null,
+        quizQuestions: act.quizQuestions || []
+      };
+    });
+
+    const overallProgress = acts.length > 0 ? Math.round((completedCount / acts.length) * 100) : 0;
+    const averageScore = scoreCount > 0 ? Number((totalScore / scoreCount).toFixed(1)) : null;
+
+    return {
+      student: {
+        id: s.id,
+        name: s.name || u?.name || 'Học sinh',
+        email: s.email || u?.email || '',
+        className: s.className || u?.className || u?.classOrPosition || 'Lớp 6A',
+        code: s.code || u?.code || '',
+        avatar: s.avatar || u?.avatar || ''
+      },
+      overallProgress,
+      completedCount,
+      totalActivities: acts.length,
+      averageScore,
+      activities: activityProgress
+    };
+  });
+
+  res.json({
+    courseId: course.id,
+    courseName: course.name,
+    activities: activitiesList,
+    students: studentRows
+  });
+});
+
+// 9.02 Giáo viên ghi danh học viên mới vào lớp
+app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+
+  const name = String(req.body.name || '').trim();
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const className = String(req.body.className || 'Lớp 6A').trim();
+  const code = String(req.body.code || '').trim();
+
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Vui lòng nhập họ tên và email học sinh.' });
+  }
+
+  const existing = (course.enrolledStudents || []).find(s => s.email === email || (s.id && s.id === req.body.id));
+  if (existing) {
+    return res.status(400).json({ message: 'Học sinh này đã có trong danh sách lớp.' });
+  }
+
+  const studentObj = {
+    id: req.body.id || `student-${Date.now()}`,
+    name,
+    email,
+    className,
+    code: code || `HS${Math.floor(100 + Math.random() * 900)}`,
+    school: req.body.school || 'THCS Giảng Võ',
+    avatar: req.body.avatar || '',
+    enrolledAt: nowVN(),
+    status: 'active'
+  };
+
+  if (isMongoConnected) {
+    await CourseModel.updateOne(
+      { $or: [{ id: course.id }, { code: course.id }] },
+      { $push: { enrolledStudents: studentObj }, $inc: { enrolledStudentsCount: 1 } }
+    );
+  } else {
+    const db = readDb();
+    const c = db.courses?.find(x => x.id === course.id || x.code === course.id);
+    if (c) {
+      c.enrolledStudents = c.enrolledStudents || [];
+      c.enrolledStudents.push(studentObj);
+      c.enrolledStudentsCount = c.enrolledStudents.length;
+      writeDb(db);
+    }
+  }
+
+  res.json({ success: true, student: studentObj });
 });
 
 // 9.1 Thông báo lớp học (giáo viên đăng, lưu vào khóa học)
@@ -1997,7 +2244,11 @@ app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
         completedAt: p?.completedAt || '',
         score: p?.score ?? null,
         maxScore: a.maxScore || 10,
-        submissionStatus: p?.submission?.status || (p?.quizResult ? 'quiz_done' : 'none')
+        submissionStatus: p?.submission?.status || (p?.quizResult ? 'quiz_done' : 'none'),
+        videoProgress: p?.videoProgress || null,
+        submission: p?.submission || null,
+        quizResult: p?.quizResult || null,
+        quizQuestions: a.quizQuestions || []
       };
     });
     const completed = detail.filter(d => d.isCompleted).length;

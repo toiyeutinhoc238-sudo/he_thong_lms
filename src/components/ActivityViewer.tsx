@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { QuizEngine } from './QuizEngine';
 import { AssignmentSubmitter } from './AssignmentSubmitter';
+import { VideoPlayerTracker } from './VideoPlayerTracker';
 import { 
   ArrowLeft, 
   CheckCircle2, 
@@ -138,83 +139,12 @@ export const ActivityViewer: React.FC = () => {
         />
       )}
 
-      {/* 3. VIDEO TYPE */}
+      {/* 3. VIDEO TYPE: Trình phát video bài giảng kèm theo dõi tiến độ và % */}
       {activeActivity.type === 'video' && (
-        <div className="space-y-6">
-          <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800">
-            {/* Video Player Box */}
-            <div className="relative aspect-video w-full bg-slate-900 flex items-center justify-center">
-              {activeActivity.videoUrl && isYouTube(activeActivity.videoUrl) ? (
-                <iframe 
-                  className="w-full h-full"
-                  src={getYouTubeEmbedUrl(activeActivity.videoUrl)} 
-                  title={activeActivity.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                />
-              ) : activeActivity.videoUrl ? (
-                <video 
-                  controls 
-                  src={activeActivity.videoUrl} 
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="text-center p-8 text-slate-400 space-y-2">
-                  <Play className="w-12 h-12 mx-auto text-slate-600" />
-                  <p className="text-sm">Chưa có đường dẫn video. Bạn có thể bấm Sửa ở ngoài để chèn link YouTube hoặc MP4.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Video Action Toolbar */}
-            <div className="p-4 bg-slate-900 border-t border-slate-800 text-white flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-xs text-slate-300">
-                  Hệ thống LMS Nhóm 2 ghi nhận tiến độ học tập
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleMarkDone}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeActivity.isCompleted
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-amber-400 hover:bg-amber-300 text-slate-900'
-                  }`}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>{activeActivity.isCompleted ? 'Đã hoàn thành' : 'Đánh dấu đã xem xong'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Video Description and Notes */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-            <h2 className="text-lg font-bold text-slate-800">
-              {activeActivity.title}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              {activeActivity.description || 'Bài giảng video trực tuyến cung cấp kiến thức trọng tâm của bài học.'}
-            </p>
-
-            {activeActivity.videoUrl && (
-              <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span>Nguồn video:</span>
-                <a 
-                  href={activeActivity.videoUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-[#0374b5] hover:underline font-mono truncate max-w-md"
-                >
-                  {activeActivity.videoUrl}
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
+        <VideoPlayerTracker 
+          activity={activeActivity} 
+          courseId={activeCourse.id} 
+        />
       )}
 
       {/* 4. DOCUMENT TYPE */}
