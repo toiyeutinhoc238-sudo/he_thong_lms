@@ -5,9 +5,62 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// ====================== FILE UPLOAD CONFIGURATION (MULTER) ======================
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  } catch (e) {
+    console.error('Không thể tạo thư mục uploads:', e);
+  }
+}
+
+// Cấu hình Multer lưu tệp vào uploads/ với tên an toàn và hỗ trợ đầy đủ tiếng Việt/Unicode
+const uploadStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    let originalName = file.originalname;
+    try {
+      originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    } catch (e) {}
+    const ext = path.extname(originalName);
+    const base = path.basename(originalName, ext).replace(/[^a-zA-Z0-9_\-\u00C0-\u1EF9]/g, '_').slice(0, 80);
+    const unique = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    cb(null, `${base}-${unique}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: uploadStorage,
+  limits: {
+    fileSize: 100 * 1024 * 1024 // 100MB cho phép tải tùy ý tệp lớn
+  }
+});
+
+// Helper: Phân loại loại tệp để hiển thị icon và giao diện trực quan
+function getFileTypeCategory(filename, mimetype) {
+  const ext = (path.extname(filename || '')).toLowerCase().replace('.', '');
+  const mime = (mimetype || '').toLowerCase();
+
+  if (ext === 'pdf' || mime.includes('pdf')) return 'pdf';
+  if (['doc', 'docx'].includes(ext) || mime.includes('word') || mime.includes('officedocument.wordprocessingml')) return 'word';
+  if (['xls', 'xlsx', 'csv'].includes(ext) || mime.includes('excel') || mime.includes('spreadsheetml')) return 'excel';
+  if (['ppt', 'pptx'].includes(ext) || mime.includes('powerpoint') || mime.includes('presentationml')) return 'powerpoint';
+  if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp'].includes(ext) || mime.startsWith('image/')) return 'image';
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext) || mime.startsWith('video/')) return 'video';
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext) || mime.startsWith('audio/')) return 'audio';
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext) || mime.includes('zip') || mime.includes('compressed')) return 'archive';
+  if (['py', 'js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'c', 'cpp', 'java', 'sql', 'sh'].includes(ext)) return 'code';
+  if (['txt', 'md', 'rtf'].includes(ext) || mime.startsWith('text/')) return 'text';
+  return 'other';
+}
 
 // Tự động nạp cấu hình từ .env nếu có (không cần cài thêm thư viện phụ thuộc)
 const envPath = path.join(__dirname, '.env');
@@ -36,7 +89,15 @@ const DB_FILE = path.join(__dirname, 'db.json');
 const app = express();
 app.disable('x-powered-by');
 app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Phục vụ tệp tĩnh trong uploads trực tiếp
+app.use('/uploads', express.static(uploadsDir, {
+  setHeaders(res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+}));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -101,6 +162,7 @@ const courseSchema = new mongoose.Schema({
   syllabus: [String],
   modules: Array,
   announcements: Array,
+  files: Array,
   enrolledStudentsCount: { type: Number, default: 0 },
   enrolledStudents: { type: Array, default: [] },
   certificateEligible: Boolean
@@ -736,6 +798,7 @@ app.post('/api/courses', requireStaff, async (req, res) => {
     syllabus: req.body.syllabus || [],
     modules: req.body.modules || [],
     announcements: req.body.announcements || [],
+    files: req.body.files || [],
     enrolledStudentsCount: 0,
     enrolledStudents: [],
     certificateEligible: true,
@@ -1146,6 +1209,7 @@ app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, r
     status: 'submitted',
     fileName,
     fileSize: String(req.body.fileSize || '').slice(0, 30),
+    fileUrl: String(req.body.fileUrl || '').slice(0, 500),
     submittedAt: nowVN(),
     textSubmission
   };
@@ -1336,6 +1400,201 @@ app.post('/api/forum/:topicId/replies', requireAuth, async (req, res) => {
   res.status(201).json(reply);
 });
 
+// ====================== 9.3 TẬP TIN HỌC LIỆU & TẢI TỆP TÙY Ý (FILE UPLOAD ENGINE) ======================
+// 1. Upload tệp tùy ý (hỗ trợ bất kỳ định dạng nào: PDF, Word, Excel, PowerPoint, Ảnh, Video, Code, ZIP...)
+app.post('/api/upload', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'Tệp quá lớn. Giới hạn tối đa là 100MB.' });
+      }
+      return res.status(400).json({ message: err.message || 'Lỗi khi tải tệp lên' });
+    }
+    next();
+  });
+}, (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Vui lòng chọn một tệp để tải lên.' });
+  }
+
+  let originalName = req.file.originalname;
+  try {
+    originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+  } catch (e) {}
+
+  const fileBytes = req.file.size;
+  const sizeFormatted = fileBytes > 1024 * 1024 
+    ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB` 
+    : `${(fileBytes / 1024).toFixed(1)} KB`;
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+  const fileType = getFileTypeCategory(originalName, req.file.mimetype);
+
+  const fileData = {
+    id: `file-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    name: originalName,
+    filename: req.file.filename,
+    url: fileUrl,
+    size: sizeFormatted,
+    sizeBytes: fileBytes,
+    mimetype: req.file.mimetype,
+    fileType,
+    uploadedBy: req.user ? {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      avatar: req.user.avatar
+    } : {
+      name: 'Thành viên',
+      email: ''
+    },
+    uploadedAt: nowVN()
+  };
+
+  res.status(201).json(fileData);
+});
+
+// 2. Lấy danh sách tập tin học liệu của khóa học
+app.get('/api/courses/:id/files', async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+  res.json(course.files || []);
+});
+
+// 3. Thêm tập tin vào khóa học (Hỗ trợ upload trực tiếp hoặc gửi thông tin tệp đã upload)
+app.post('/api/courses/:id/files', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'Tệp quá lớn. Giới hạn tối đa là 100MB.' });
+      }
+      return res.status(400).json({ message: err.message || 'Lỗi khi tải tệp lên' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+
+  let fileItem;
+  if (req.file) {
+    let originalName = req.file.originalname;
+    try {
+      originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+    } catch (e) {}
+
+    const fileBytes = req.file.size;
+    const sizeFormatted = fileBytes > 1024 * 1024 
+      ? `${(fileBytes / (1024 * 1024)).toFixed(2)} MB` 
+      : `${(fileBytes / 1024).toFixed(1)} KB`;
+
+    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileType = getFileTypeCategory(originalName, req.file.mimetype);
+
+    fileItem = {
+      id: `file-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      name: originalName,
+      filename: req.file.filename,
+      url: fileUrl,
+      size: sizeFormatted,
+      sizeBytes: fileBytes,
+      mimetype: req.file.mimetype,
+      fileType,
+      description: req.body.description || '',
+      uploadedBy: req.user ? {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        avatar: req.user.avatar
+      } : {
+        name: req.body.authorName || 'Thành viên',
+        email: req.body.authorEmail || ''
+      },
+      uploadedAt: nowVN()
+    };
+  } else if (req.body.url && req.body.name) {
+    fileItem = {
+      id: req.body.id || `file-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      name: req.body.name,
+      filename: req.body.filename || path.basename(req.body.url),
+      url: req.body.url,
+      size: req.body.size || '0 KB',
+      sizeBytes: req.body.sizeBytes || 0,
+      mimetype: req.body.mimetype || 'application/octet-stream',
+      fileType: req.body.fileType || getFileTypeCategory(req.body.name, req.body.mimetype),
+      description: req.body.description || '',
+      uploadedBy: req.user ? {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        avatar: req.user.avatar
+      } : (req.body.uploadedBy || { name: 'Thành viên', email: '' }),
+      uploadedAt: nowVN()
+    };
+  } else {
+    return res.status(400).json({ message: 'Vui lòng cung cấp tệp hợp lệ.' });
+  }
+
+  if (isMongoConnected) {
+    await CourseModel.updateOne(
+      { id: course.id },
+      { $push: { files: { $each: [fileItem], $position: 0 } } }
+    );
+  } else {
+    const db = readDb();
+    const c = db.courses.find(x => x.id === course.id);
+    if (c) {
+      c.files = [fileItem, ...(c.files || [])];
+      writeDb(db);
+    }
+  }
+
+  res.status(201).json(fileItem);
+});
+
+// 4. Xóa tập tin khỏi khóa học
+app.delete('/api/courses/:id/files/:fileId', async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+
+  const fileId = req.params.fileId;
+  const fileToDelete = (course.files || []).find(f => f.id === fileId);
+
+  // Xóa tệp vật lý trên ổ đĩa nếu nằm trong thư mục uploads
+  if (fileToDelete && fileToDelete.filename) {
+    const diskPath = path.join(uploadsDir, fileToDelete.filename);
+    if (fs.existsSync(diskPath)) {
+      try { fs.unlinkSync(diskPath); } catch (e) {}
+    }
+  }
+
+  if (isMongoConnected) {
+    await CourseModel.updateOne(
+      { id: course.id },
+      { $pull: { files: { id: fileId } } }
+    );
+  } else {
+    const db = readDb();
+    const c = db.courses.find(x => x.id === course.id);
+    if (c) {
+      c.files = (c.files || []).filter(f => f.id !== fileId);
+      writeDb(db);
+    }
+  }
+
+  res.json({ success: true, fileId });
+});
+
+// 5. Tải tệp xuống trực tiếp với tên gốc UTF-8
+app.get('/api/files/download/:filename', (req, res) => {
+  const filePath = path.join(uploadsDir, req.params.filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
+  }
+  const downloadName = req.query.name || req.params.filename;
+  res.download(filePath, downloadName);
+});
+
 // 10. Certificates
 app.get('/api/certificates', async (req, res) => {
   if (isMongoConnected) {
@@ -1476,12 +1735,15 @@ if (fs.existsSync(distPath)) {
 
   // SPA Fallback cho Express 5 (không dùng app.get('*') để tránh lỗi PathError trong Express 5)
   app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    if (req.method === 'GET' && !req.path.startsWith('/api/') && !req.path.startsWith('/uploads/')) {
       res.setHeader('Cache-Control', 'no-cache');
       return res.sendFile(path.join(distPath, 'index.html'));
     }
     if (req.path.startsWith('/api/')) {
       return res.status(404).json({ message: `API route ${req.method} ${req.path} không tồn tại.` });
+    }
+    if (req.path.startsWith('/uploads/')) {
+      return res.status(404).json({ message: `Tệp không tồn tại hoặc đã bị xóa.` });
     }
     next();
   });

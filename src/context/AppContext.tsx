@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView, QuizQuestion } from '../types';
+import { Course, CourseModule, User, Activity, Certificate, NotificationItem, ForumTopic, Role, TrainingType, AppView, QuizQuestion, CourseFile } from '../types';
 import { initialUser } from '../data/mockData';
 import api from '../services/api';
 
@@ -29,7 +29,7 @@ interface AppContextType {
   addForumReply: (topicId: string, content: string) => void;
   createForumTopic: (courseId: string, title: string, content: string) => Promise<boolean>;
   markActivityCompleted: (courseId: string, activityId: string) => void;
-  submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string) => void;
+  submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
   submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
   addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
@@ -42,6 +42,8 @@ interface AppContextType {
   deleteCourse: (courseId: string) => void;
   enrollCourse: (courseId: string) => Promise<boolean>;
   addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => Promise<boolean>;
+  uploadCourseFile: (courseId: string, file: File, description?: string) => Promise<CourseFile | null>;
+  deleteCourseFile: (courseId: string, fileId: string) => Promise<boolean>;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
   isLoading: boolean;
@@ -87,7 +89,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>('dashboard');
+  const [currentView, setCurrentView] = useState<AppView>('courses-list');
   const [trainingProgramFilter, setTrainingProgramFilter] = useState<TrainingType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
@@ -177,7 +179,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await api.auth.logout();
     setCurrentUser({ ...initialUser, name: '', code: '' });
     setActiveRole('student');
-    setCurrentView('dashboard');
+    setCurrentView('courses-list');
     // Tải lại dữ liệu ở chế độ khách để xóa tiến độ cá nhân của tài khoản vừa đăng xuất
     refreshData();
   }, [refreshData]);
@@ -240,8 +242,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       };
     });
 
-    // Sau khi đăng nhập, mọi vai trò đều vào Bảng điều khiển; Giảng dạy / Quản trị là mục riêng trên thanh bên
-    setCurrentView('dashboard');
+    // Sau khi đăng nhập, chuyển tới danh sách khóa học
+    setCurrentView('courses-list');
   };
 
   const navigateToCourse = (courseId: string) => {
@@ -323,7 +325,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     api.activities.markCompleted(courseId, activityId).catch(err => reportSyncFailure('Đánh dấu hoàn thành', err));
   };
 
-  const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string) => {
+  const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => {
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
       const updatedModules = (course.modules || []).map(m => ({
@@ -337,6 +339,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
                 status: 'submitted' as const,
                 fileName,
                 fileSize: fileSize || '',
+                fileUrl: fileUrl || '',
                 submittedAt: new Date().toLocaleString('vi-VN'),
                 textSubmission
               }
@@ -349,7 +352,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }));
 
     // Call API backend
-    api.activities.submitAssignment(courseId, activityId, { fileName, fileSize, textSubmission }).catch(err => reportSyncFailure('Bài nộp', err));
+    api.activities.submitAssignment(courseId, activityId, { fileName, fileSize, fileUrl, textSubmission }).catch(err => reportSyncFailure('Bài nộp', err));
   };
 
   // Giáo viên chấm điểm cho MỘT học sinh cụ thể (dữ liệu nằm trên máy chủ, không nằm trong state của giáo viên)
@@ -507,7 +510,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     setCourses(prev => prev.filter(c => c.id !== courseId));
     if (activeCourseId === courseId) {
       setActiveCourseId(null);
-      setCurrentView('dashboard');
+      setCurrentView('courses-list');
     }
     api.courses.delete(courseId).catch(err => reportSyncFailure('Xóa khóa học', err));
   };
@@ -562,6 +565,64 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       return true;
     } catch (err) {
       reportSyncFailure('Thông báo', err);
+      return false;
+    }
+  };
+
+  const uploadCourseFile = async (courseId: string, file: File, description?: string): Promise<CourseFile | null> => {
+    try {
+      // 1. Upload file vật lý lên server
+      const uploaded = await api.files.upload(file);
+
+      // 2. Lưu thông tin file vào khóa học
+      const fileData: Partial<CourseFile> = {
+        name: uploaded.name,
+        filename: uploaded.filename,
+        url: uploaded.url,
+        size: uploaded.size,
+        sizeBytes: uploaded.sizeBytes,
+        mimetype: uploaded.mimetype,
+        fileType: uploaded.fileType,
+        description: description || '',
+        uploadedBy: {
+          id: currentUser.id,
+          name: currentUser.name || 'Người dùng',
+          email: currentUser.email,
+          avatar: currentUser.avatar
+        }
+      };
+
+      const saved = await api.files.addToCourse(courseId, fileData);
+
+      // 3. Cập nhật state
+      setCourses(prev => prev.map(c => {
+        if (c.id !== courseId) return c;
+        return {
+          ...c,
+          files: [saved, ...(c.files || [])]
+        };
+      }));
+
+      return saved;
+    } catch (err: any) {
+      reportSyncFailure('Tải tệp lên', err);
+      return null;
+    }
+  };
+
+  const deleteCourseFile = async (courseId: string, fileId: string): Promise<boolean> => {
+    try {
+      await api.files.deleteFromCourse(courseId, fileId);
+      setCourses(prev => prev.map(c => {
+        if (c.id !== courseId) return c;
+        return {
+          ...c,
+          files: (c.files || []).filter(f => f.id !== fileId)
+        };
+      }));
+      return true;
+    } catch (err: any) {
+      reportSyncFailure('Xóa tệp', err);
       return false;
     }
   };
@@ -643,6 +704,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         deleteCourse,
         enrollCourse,
         addAnnouncement,
+        uploadCourseFile,
+        deleteCourseFile,
         isLoginModalOpen,
         setIsLoginModalOpen,
         isLoading,

@@ -28,11 +28,14 @@ export const CanvasCoursesList: React.FC = () => {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   const canManage = Boolean(
-    currentUser?.role === 'admin' || 
-    currentUser?.role === 'lecturer' || 
-    activeRole === 'admin' || 
-    activeRole === 'lecturer' || 
-    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+    currentUser && 
+    currentUser.id && 
+    currentUser.role !== 'student' &&
+    (
+      currentUser.role === 'admin' || 
+      currentUser.role === 'lecturer' || 
+      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+    )
   );
 
   // Form tạo khóa học mới chuẩn phổ thông Lớp 1 - 12
@@ -133,13 +136,13 @@ export const CanvasCoursesList: React.FC = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold backdrop-blur-xs">
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Tất cả Khóa học</span>
+            <span>Học liệu Trực tuyến</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Kho Khóa Học LMS Nhóm 2
+            Chuyên đề Trí tuệ Nhân tạo Lớp 6: Chủ đề A và B
           </h1>
           <p className="text-sky-100 text-xs sm:text-sm max-w-xl leading-relaxed">
-            Khám phá các học phần đào tạo, theo dõi lộ trình bài giảng và thực hiện bài tập trực tuyến.
+            Khám phá các bài học, bài giảng tương tác và thực hiện bài tập trực tuyến môn Tin học Lớp 6.
           </p>
         </div>
 
@@ -154,13 +157,13 @@ export const CanvasCoursesList: React.FC = () => {
         )}
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* Filter & Search Bar - Tối giản, gọn gàng, không gây xao nhãng */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div className="relative w-full sm:w-80">
+        <div className="relative w-full sm:w-96">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Tìm theo tên hoặc mã khóa học..."
+            placeholder="Tìm kiếm bài học, chủ đề hoặc mã khóa học..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
@@ -169,7 +172,7 @@ export const CanvasCoursesList: React.FC = () => {
 
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
           {[
-            { id: 'all', label: 'Tất cả chuyên đề' },
+            { id: 'all', label: 'Tất cả bài học' },
             { id: 'Chuyên đề AI', label: '🤖 Chuyên đề AI' },
             { id: 'Khoa học máy tính', label: '💻 Khoa học máy tính' },
             { id: 'Tin học ứng dụng', label: '📱 Tin học ứng dụng' }
@@ -186,18 +189,6 @@ export const CanvasCoursesList: React.FC = () => {
               {cat.label}
             </button>
           ))}
-
-          {/* Bộ lọc khối lớp Lớp 1 -> Lớp 12 */}
-          <select
-            value={selectedGrade}
-            onChange={(e) => setSelectedGrade(e.target.value)}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 focus:outline-none focus:border-[#0374b5] shrink-0 cursor-pointer"
-          >
-            <option value="all">Tất cả Khối lớp (1 - 12)</option>
-            {Array.from({ length: 12 }, (_, i) => `Lớp ${i + 1}`).map(g => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
         </div>
       </div>
 

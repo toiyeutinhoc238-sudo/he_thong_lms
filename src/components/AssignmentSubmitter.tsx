@@ -44,23 +44,43 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile && !onlineText.trim() && !submission?.fileName) return;
 
     setIsUploading(true);
-    setTimeout(() => {
-      const fileName = selectedFile 
+    try {
+      let fileName = selectedFile 
         ? selectedFile.name 
         : (submission?.fileName || (submissionTab === 'online_text' ? 'bai_lam_truc_tuyen.txt' : 'BaiTap_Nop.pdf'));
       
-      const fileSize = selectedFile
+      let fileSize = selectedFile
         ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
         : (submission?.fileSize || '');
-      submitAssignment(courseId, activity.id, fileName, onlineText.trim() ? onlineText.trim() : commentText, fileSize);
-      setIsUploading(false);
+
+      let fileUrl = submission?.fileUrl || '';
+
+      if (selectedFile) {
+        const uploaded = await api.files.upload(selectedFile);
+        fileName = uploaded.name;
+        fileSize = uploaded.size;
+        fileUrl = uploaded.url;
+      }
+
+      submitAssignment(
+        courseId, 
+        activity.id, 
+        fileName, 
+        onlineText.trim() ? onlineText.trim() : commentText, 
+        fileSize,
+        fileUrl
+      );
       setSelectedFile(null);
-    }, 600);
+    } catch (err: any) {
+      alert('Lỗi nộp bài: ' + (err?.message || 'Không thể tải tệp lên máy chủ.'));
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -184,11 +204,25 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
                     Tệp bài làm đã nộp
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex items-center gap-2 text-[#0374b5] font-medium hover:underline cursor-pointer">
-                      <FileText className="w-4 h-4 text-purple-600" />
-                      <span>{submission.fileName}</span>
-                      <span className="text-slate-400 text-[11px]">({submission.fileSize || 'Tệp đính kèm'})</span>
-                    </div>
+                    {submission.fileUrl ? (
+                      <a 
+                        href={submission.fileUrl}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-[#0374b5] font-bold hover:underline"
+                        title="Bấm để tải về hoặc mở tệp bài làm"
+                      >
+                        <FileText className="w-4 h-4 text-purple-600" />
+                        <span>{submission.fileName}</span>
+                        <span className="text-slate-400 text-[11px] font-normal">({submission.fileSize || 'Tệp đính kèm'})</span>
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-2 text-[#0374b5] font-medium">
+                        <FileText className="w-4 h-4 text-purple-600" />
+                        <span>{submission.fileName}</span>
+                        <span className="text-slate-400 text-[11px]">({submission.fileSize || 'Tệp đính kèm'})</span>
+                      </div>
+                    )}
                   </td>
                 </tr>
               )}
@@ -481,7 +515,21 @@ const SubmissionRow: React.FC<{
             {sub.fileName && (
               <p className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-purple-600" />
-                <span>Tên tệp: <strong>{sub.fileName}</strong>{sub.fileSize ? ` (${sub.fileSize})` : ''}</span>
+                <span>Tên tệp: </span>
+                {sub.fileUrl ? (
+                  <a
+                    href={sub.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[#0374b5] hover:underline"
+                    title="Bấm để tải tệp hoặc xem bài làm của học sinh"
+                  >
+                    {sub.fileName}
+                  </a>
+                ) : (
+                  <strong>{sub.fileName}</strong>
+                )}
+                {sub.fileSize ? ` (${sub.fileSize})` : ''}
               </p>
             )}
           </div>

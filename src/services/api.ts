@@ -2,7 +2,7 @@
  * API Service Client for LMS Nhóm 2
  */
 
-import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem, QuizQuestion, CourseAnnouncement } from '../types';
+import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem, QuizQuestion, CourseAnnouncement, CourseFile } from '../types';
 
 export interface StudentSubmission {
   student: { id: string; name: string; email?: string; className?: string; avatar?: string };
@@ -144,7 +144,7 @@ class ApiClient {
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'
       }),
-    submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileSize?: string; textSubmission?: string }) =>
+    submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileSize?: string; fileUrl?: string; textSubmission?: string }) =>
       this.request<{ success: boolean; submission: any }>(`/courses/${courseId}/activities/${activityId}/submit`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -208,6 +208,37 @@ class ApiClient {
   users = {
     getAll: () => this.request<User[]>('/users'),
     getStudentsByCourse: (courseId: string) => this.request<any[]>(`/courses/${courseId}/students`)
+  };
+
+  // Files / Tập tin học liệu (Hỗ trợ upload mọi loại tệp tùy ý)
+  files = {
+    upload: async (file: File): Promise<CourseFile> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = localStorage.getItem('lms2_token') || localStorage.getItem('hcmue_vle_token');
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: formData
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Lỗi khi tải tệp lên máy chủ');
+      }
+      return await response.json();
+    },
+    getByCourse: (courseId: string) => this.request<CourseFile[]>(`/courses/${courseId}/files`),
+    addToCourse: (courseId: string, data: Partial<CourseFile>) =>
+      this.request<CourseFile>(`/courses/${courseId}/files`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    deleteFromCourse: (courseId: string, fileId: string) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/files/${fileId}`, {
+        method: 'DELETE'
+      })
   };
 }
 

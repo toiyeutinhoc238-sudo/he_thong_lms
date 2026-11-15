@@ -132,6 +132,25 @@ export interface CourseModule {
   activities: Activity[];
 }
 
+export interface CourseFile {
+  id: string;
+  name: string;
+  filename?: string;
+  url: string;
+  size: string;
+  sizeBytes?: number;
+  mimetype?: string;
+  fileType?: string;
+  description?: string;
+  uploadedBy?: {
+    id?: string;
+    name: string;
+    email?: string;
+    avatar?: string;
+  };
+  uploadedAt: string;
+}
+
 export interface Course {
   id: string;
   code: string;
@@ -157,6 +176,7 @@ export interface Course {
   syllabus: string[];
   modules: CourseModule[];
   announcements: CourseAnnouncement[];
+  files?: CourseFile[];
   enrolledStudentsCount: number;
   enrolledStudents?: EnrolledStudent[];
   creator?: {

@@ -21,7 +21,10 @@ import {
   Clock,
   Sparkles,
   Award,
-  Code2
+  Code2,
+  UploadCloud,
+  Paperclip,
+  Loader2
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion } from '../types';
 
@@ -39,15 +42,24 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     updateCourseActivity, 
     deleteCourseActivity,
     currentUser,
-    activeRole
+    activeRole,
+    uploadCourseFile
   } = useApp();
 
+  const [isUploadingActFile, setIsUploadingActFile] = useState(false);
+  const [uploadedActFileName, setUploadedActFileName] = useState('');
+
+  // Phân quyền: Học viên tuyệt đối KHÔNG được thêm/sửa/xóa học liệu hoặc mô-đun
+  // Chỉ duy nhất Quản trị viên (phanphiphu04@gmail.com) hoặc Giáo viên mới có quyền quản lý
   const canManage = Boolean(
-    currentUser?.role === 'admin' || 
-    currentUser?.role === 'lecturer' || 
-    activeRole === 'admin' || 
-    activeRole === 'lecturer' || 
-    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+    currentUser && 
+    currentUser.id && 
+    currentUser.role !== 'student' &&
+    (
+      currentUser.role === 'admin' || 
+      currentUser.role === 'lecturer' || 
+      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com'
+    )
   );
 
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});
@@ -750,6 +762,63 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </div>
               )}
 
+              {/* Tải tệp trực tiếp từ máy tính (Hỗ trợ tùy ý mọi tệp cho Bài học / Học liệu) */}
+              {(actType === 'document' || actType === 'video' || actType === 'assignment') && (
+                <div className="p-3 bg-sky-50/60 rounded-xl border border-sky-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+                      <UploadCloud className="w-4 h-4 text-[#0374b5]" />
+                      <span>Hoặc tải tệp trực tiếp từ máy tính lên hệ thống (Tùy ý mọi tệp)</span>
+                    </label>
+                    {isUploadingActFile && (
+                      <span className="text-[11px] text-[#0374b5] font-bold flex items-center gap-1">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang tải...
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Hỗ trợ tệp PDF, Word, PowerPoint, Excel, Video MP4, Audio MP3, ZIP, Code... (Tối đa 100MB)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <label className="px-3 py-1.5 bg-white hover:bg-sky-50 text-[#0374b5] border border-[#0374b5] rounded-lg text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-2xs">
+                      <Paperclip className="w-3.5 h-3.5" />
+                      <span>{uploadedActFileName ? 'Đổi tệp khác' : 'Chọn tệp từ máy tính...'}</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        disabled={isUploadingActFile}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploadingActFile(true);
+                          try {
+                            const saved = await uploadCourseFile(activeCourse.id, file);
+                            if (saved) {
+                              setUploadedActFileName(file.name);
+                              setActFileUrl(saved.url);
+                              if (!actTitle) setActTitle(file.name.replace(/\.[^/.]+$/, ''));
+                              if (saved.fileType === 'video') {
+                                setActVideoUrl(saved.url);
+                              }
+                            }
+                          } catch (err: any) {
+                            alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
+                          } finally {
+                            setIsUploadingActFile(false);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                    </label>
+                    {uploadedActFileName && (
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 truncate max-w-xs">
+                        ✓ {uploadedActFileName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Trường riêng cho BÀI TẬP */}
               {actType === 'assignment' && (
                 <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-200/60 space-y-3">
@@ -1009,6 +1078,33 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     onChange={(e) => setEditingActivity({ ...editingActivity, fileUrl: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
                   />
+                  <div className="pt-2">
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-[#0374b5] hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                      <Paperclip className="w-3.5 h-3.5" />
+                      <span>{isUploadingActFile ? 'Đang tải tệp lên...' : 'Tải tệp mới từ máy tính'}</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        disabled={isUploadingActFile}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploadingActFile(true);
+                          try {
+                            const saved = await uploadCourseFile(activeCourse.id, file);
+                            if (saved) {
+                              setEditingActivity({ ...editingActivity, fileUrl: saved.url });
+                            }
+                          } catch (err: any) {
+                            alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
+                          } finally {
+                            setIsUploadingActFile(false);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               )}
 
