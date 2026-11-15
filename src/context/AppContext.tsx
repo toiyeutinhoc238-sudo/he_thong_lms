@@ -52,6 +52,16 @@ interface AppContextType {
   updateProfile: (data: Partial<User>) => Promise<User | void>;
 }
 
+const cleanDummyActivities = (courseList: Course[]): Course[] => {
+  return courseList.map(c => ({
+    ...c,
+    modules: (c.modules || []).map(m => ({
+      ...m,
+      activities: (m.activities || []).filter(a => !a?.id || !/^act-\d+-[1234]$/.test(a.id))
+    }))
+  }));
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -81,7 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const valid = parsed.filter((c: any) => !c.id?.includes('sample') && c.code !== 'AI-101');
-          if (valid.length > 0) return valid;
+          if (valid.length > 0) return cleanDummyActivities(valid);
         }
       }
     } catch {}
@@ -133,9 +143,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // 1. Fetch courses from API
       const coursesRes = await api.courses.getAll().catch(() => null);
       if (coursesRes && Array.isArray(coursesRes) && coursesRes.length > 0) {
-        setCourses(coursesRes);
+        setCourses(cleanDummyActivities(coursesRes));
       } else {
-        setCourses(prev => (prev && prev.length > 0) ? prev : [defaultGrade6Course]);
+        setCourses(prev => (prev && prev.length > 0) ? cleanDummyActivities(prev) : [defaultGrade6Course]);
       }
 
       // 2. Fetch notifications

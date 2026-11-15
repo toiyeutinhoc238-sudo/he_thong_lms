@@ -846,70 +846,8 @@ async function ensureDefaultCourse() {
       courseId: '6AIAB01',
       order: idx + 1,
       title: title,
-      description: `Nội dung học tập, bài giảng và bài thực hành cho ${title}`,
-      activities: [
-        {
-          id: `act-${idx + 1}-1`,
-          moduleId: `module-lesson-${idx + 1}`,
-          courseId: '6AIAB01',
-          title: `Video bài giảng: ${title.replace(/^BÀI\s*\d+\s*:\s*/i, '')}`,
-          type: 'video',
-          description: 'Xem video bài giảng tương tác và ghi chép nội dung chính',
-          videoUrl: 'https://www.youtube.com/watch?v=JMUxmLyrhSk',
-          durationMinutes: 15,
-          isRequired: true,
-          order: 1
-        },
-        {
-          id: `act-${idx + 1}-2`,
-          moduleId: `module-lesson-${idx + 1}`,
-          courseId: '6AIAB01',
-          title: `Tài liệu học tập & Đọc hiểu: ${title.replace(/^BÀI\s*\d+\s*:\s*/i, '')}`,
-          type: 'document',
-          description: 'Đọc kỹ tài liệu chuyên đề trước khi làm bài thực hành',
-          fileUrl: '',
-          durationMinutes: 20,
-          isRequired: true,
-          order: 2
-        },
-        {
-          id: `act-${idx + 1}-3`,
-          moduleId: `module-lesson-${idx + 1}`,
-          courseId: '6AIAB01',
-          title: `Bài tập thực hành: ${title.replace(/^BÀI\s*\d+\s*:\s*/i, '')}`,
-          type: 'assignment',
-          description: 'Thực hiện bài tập và tải tệp bài làm lên hệ thống',
-          assignmentPrompt: `Yêu cầu: Học sinh vận dụng kiến thức đã học ở ${title} để hoàn thành câu hỏi thực hành và tải tệp bài làm lên hệ thống.`,
-          maxScore: 10,
-          isRequired: true,
-          order: 3
-        },
-        {
-          id: `act-${idx + 1}-4`,
-          moduleId: `module-lesson-${idx + 1}`,
-          courseId: '6AIAB01',
-          title: `Trắc nghiệm củng cố: ${title.replace(/^BÀI\s*\d+\s*:\s*/i, '')}`,
-          type: 'quiz',
-          description: 'Hoàn thành các câu hỏi trắc nghiệm kiểm tra nhanh kiến thức',
-          maxScore: 10,
-          isRequired: true,
-          quizQuestions: [
-            {
-              id: `q-${idx + 1}-1`,
-              question: `Khái niệm cốt lõi được đề cập trong ${title} là gì?`,
-              options: [
-                'Trí tuệ nhân tạo học từ dữ liệu và hỗ trợ con người ra quyết định',
-                'Máy tính tự động làm tất cả không cần con người kiểm soát',
-                'Chỉ cài đặt phần mềm trò chơi trên máy tính',
-                'Không có ứng dụng nào trong học tập và đời sống'
-              ],
-              correctAnswer: 0,
-              explanation: 'AI học hỏi từ dữ liệu huấn luyện để đưa ra gợi ý, con người giữ vai trò làm chủ và kiểm chứng thông tin.'
-            }
-          ],
-          order: 4
-        }
-      ]
+      description: `Nội dung học tập và bài thực hành cho ${title}`,
+      activities: []
     })),
     enrolledStudents: [],
     enrolledStudentsCount: 0,
@@ -917,8 +855,8 @@ async function ensureDefaultCourse() {
     announcements: [
       {
         id: 'anc-welcome',
-        title: 'Chào mừng các em học sinh đến với Chuyên đề Trí tuệ Nhân tạo Lớp 6!',
-        content: 'Thầy Phan Phi Phú chúc các em học tập hiệu quả, tích cực trao đổi trên diễn đàn và nộp bài đúng hạn nhé.',
+        title: 'Thông báo môn học Chuyên đề Trí tuệ Nhân tạo Lớp 6',
+        content: 'Chào mừng các em học sinh tham gia học tập. Hãy theo dõi các bài học và nộp bài tập đúng hạn.',
         author: 'Phan Phi Phú',
         createdAt: '15/11/2026',
         isImportant: true
@@ -934,9 +872,28 @@ async function ensureDefaultCourse() {
         const created = await CourseModel.create(defaultCourse);
         return created.toObject();
       } else {
+        let changed = false;
         if (!existing.modules || existing.modules.length < 8) {
           existing.modules = defaultCourse.modules;
+          changed = true;
+        } else {
+          existing.modules = existing.modules.map((m, idx) => {
+            const cleanActs = (m.activities || []).filter(a => !a?.id || !/^act-\d+-[1234]$/.test(a.id));
+            if (cleanActs.length !== (m.activities || []).length) changed = true;
+            return {
+              ...m,
+              id: m.id || `module-lesson-${idx + 1}`,
+              title: OFFICIAL_AI_GRADE6_LESSONS[idx] || m.title,
+              activities: cleanActs
+            };
+          });
+        }
+        if (existing.name !== defaultCourse.name) {
           existing.name = defaultCourse.name;
+          changed = true;
+        }
+        if (changed) {
+          existing.markModified('modules');
           await existing.save();
         }
         return existing.toObject();
@@ -953,9 +910,27 @@ async function ensureDefaultCourse() {
       writeDb(db);
       return defaultCourse;
     } else {
+      let changed = false;
       if (!existing.modules || existing.modules.length < 8) {
         existing.modules = defaultCourse.modules;
+        changed = true;
+      } else {
+        existing.modules = existing.modules.map((m, idx) => {
+          const cleanActs = (m.activities || []).filter(a => !a?.id || !/^act-\d+-[1234]$/.test(a.id));
+          if (cleanActs.length !== (m.activities || []).length) changed = true;
+          return {
+            ...m,
+            id: m.id || `module-lesson-${idx + 1}`,
+            title: OFFICIAL_AI_GRADE6_LESSONS[idx] || m.title,
+            activities: cleanActs
+          };
+        });
+      }
+      if (existing.name !== defaultCourse.name) {
         existing.name = defaultCourse.name;
+        changed = true;
+      }
+      if (changed) {
         writeDb(db);
       }
       return existing;
