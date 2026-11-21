@@ -1,24 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { CanvasGlobalNav } from './components/CanvasGlobalNav';
 import { CanvasTopBar } from './components/CanvasTopBar';
-import { CanvasDashboard } from './components/CanvasDashboard';
 import { CanvasCoursesList } from './components/CanvasCoursesList';
-import { CanvasCalendar } from './components/CanvasCalendar';
-import { CanvasInbox } from './components/CanvasInbox';
-import { CanvasHistory } from './components/CanvasHistory';
-import { CanvasHelp } from './components/CanvasHelp';
-import { CourseDetail } from './components/CourseDetail';
-import { ActivityViewer } from './components/ActivityViewer';
-import { Gradebook } from './components/Gradebook';
-import { CertificatesView } from './components/CertificatesView';
-import { TeacherDashboard } from './components/TeacherDashboard';
-import { AdminPanel } from './components/AdminPanel';
-import { ProfileModal } from './components/ProfileModal';
-import { CertificateModal } from './components/CertificateModal';
 import { LoginModal } from './components/LoginModal';
 import { OnboardingModal } from './components/OnboardingModal';
-import { AIAssistantModal } from './components/AIAssistantModal';
+import { CertificateModal } from './components/CertificateModal';
+
+// Tối ưu tải trang bằng Code-Splitting (React.lazy) cho các trang phụ và trang quản trị nặng
+const CanvasDashboard = lazy(() => import('./components/CanvasDashboard').then(m => ({ default: m.CanvasDashboard })));
+const CanvasCalendar = lazy(() => import('./components/CanvasCalendar').then(m => ({ default: m.CanvasCalendar })));
+const CanvasInbox = lazy(() => import('./components/CanvasInbox').then(m => ({ default: m.CanvasInbox })));
+const CanvasHistory = lazy(() => import('./components/CanvasHistory').then(m => ({ default: m.CanvasHistory })));
+const CanvasHelp = lazy(() => import('./components/CanvasHelp').then(m => ({ default: m.CanvasHelp })));
+const CourseDetail = lazy(() => import('./components/CourseDetail').then(m => ({ default: m.CourseDetail })));
+const ActivityViewer = lazy(() => import('./components/ActivityViewer').then(m => ({ default: m.ActivityViewer })));
+const Gradebook = lazy(() => import('./components/Gradebook').then(m => ({ default: m.Gradebook })));
+const CertificatesView = lazy(() => import('./components/CertificatesView').then(m => ({ default: m.CertificatesView })));
+const TeacherDashboard = lazy(() => import('./components/TeacherDashboard').then(m => ({ default: m.TeacherDashboard })));
+const AdminPanel = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const ProfileModal = lazy(() => import('./components/ProfileModal').then(m => ({ default: m.ProfileModal })));
+const AIAssistantModal = lazy(() => import('./components/AIAssistantModal').then(m => ({ default: m.AIAssistantModal })));
+
+const ViewLoader: React.FC = () => (
+  <div className="flex-1 flex items-center justify-center py-20 text-slate-400 text-xs font-semibold gap-2">
+    <span className="w-4 h-4 rounded-full border-2 border-[#0374b5] border-t-transparent animate-spin" />
+    <span>Đang tải giao diện...</span>
+  </div>
+);
 
 const MainLayout: React.FC = () => {
   const { currentView } = useApp();
@@ -33,34 +42,40 @@ const MainLayout: React.FC = () => {
       {/* 2. Main Canvas Body Container */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Breadcrumb Bar */}
-        <CanvasTopBar 
+        <CanvasTopBar
           onToggleCourseNav={() => setIsCourseNavOpen(!isCourseNavOpen)}
           onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
         />
 
         {/* Dynamic Workspace */}
         <main className="flex-1 flex min-w-0 overflow-y-auto bg-white">
-          {currentView === 'dashboard' && <CanvasDashboard />}
-          {currentView === 'courses-list' && <CanvasCoursesList />}
-          {currentView === 'calendar' && <CanvasCalendar />}
-          {currentView === 'inbox' && <CanvasInbox />}
-          {currentView === 'history' && <CanvasHistory />}
-          {currentView === 'help' && <CanvasHelp />}
-          {currentView === 'course-detail' && <CourseDetail isCourseNavOpen={isCourseNavOpen} />}
-          {currentView === 'activity' && <ActivityViewer />}
-          {currentView === 'gradebook' && <Gradebook />}
-          {currentView === 'certificates' && <CertificatesView />}
-          {currentView === 'teacher-studio' && <TeacherDashboard />}
-          {currentView === 'admin-panel' && <AdminPanel />}
-          {currentView === 'profile' && <ProfileModal />}
+          <Suspense fallback={<ViewLoader />}>
+            {currentView === 'dashboard' && <CanvasDashboard />}
+            {currentView === 'courses-list' && <CanvasCoursesList />}
+            {currentView === 'calendar' && <CanvasCalendar />}
+            {currentView === 'inbox' && <CanvasInbox />}
+            {currentView === 'history' && <CanvasHistory />}
+            {currentView === 'help' && <CanvasHelp />}
+            {currentView === 'course-detail' && <CourseDetail isCourseNavOpen={isCourseNavOpen} />}
+            {currentView === 'activity' && <ActivityViewer />}
+            {currentView === 'gradebook' && <Gradebook />}
+            {currentView === 'certificates' && <CertificatesView />}
+            {currentView === 'teacher-studio' && <TeacherDashboard />}
+            {currentView === 'admin-panel' && <AdminPanel />}
+            {currentView === 'profile' && <ProfileModal />}
+          </Suspense>
         </main>
       </div>
 
       {/* Modals & AI Drawer */}
-      <AIAssistantModal 
-        isOpen={isAIAssistantOpen} 
-        onClose={() => setIsAIAssistantOpen(false)} 
-      />
+      {isAIAssistantOpen && (
+        <Suspense fallback={null}>
+          <AIAssistantModal
+            isOpen={isAIAssistantOpen}
+            onClose={() => setIsAIAssistantOpen(false)}
+          />
+        </Suspense>
+      )}
       <CertificateModal />
       <LoginModal />
       <OnboardingModal />

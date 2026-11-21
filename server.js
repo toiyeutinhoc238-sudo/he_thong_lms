@@ -220,6 +220,7 @@ const ForumModel = mongoose.model('ForumTopic', forumSchema);
 const progressSchema = new mongoose.Schema({
   courseId: String,
   userId: String,
+  userEmail: String,
   activityId: String,
   isCompleted: { type: Boolean, default: false },
   completedAt: String,
@@ -227,9 +228,17 @@ const progressSchema = new mongoose.Schema({
   maxScore: Number,
   submission: Object,
   quizResult: Object,
+  videoProgress: Object,
+  viewCount: { type: Number, default: 0 },
+  timeSpentSeconds: { type: Number, default: 0 },
+  firstAccessedAt: String,
+  lastAccessedAt: String,
+  lastAction: String,
   updatedAt: String
 }, { strict: false });
 progressSchema.index({ courseId: 1, userId: 1, activityId: 1 }, { unique: true });
+progressSchema.index({ userId: 1 });
+progressSchema.index({ courseId: 1, userEmail: 1 });
 const ProgressModel = mongoose.model('Progress', progressSchema);
 
 // Helper tìm document khóa học an toàn (hỗ trợ cả id string và MongoDB _id)
@@ -258,9 +267,9 @@ async function getCourseDoc(id) {
 // mongoReady: các request chờ kết nối xong rồi mới xử lý (tránh đọc nhầm Local JSON lúc server vừa khởi động)
 let mongoReady = Promise.resolve();
 const MONGODB_DB = process.env.MONGODB_DB || 'lms_nhom2';
-if (MONGODB_URI) {
+if (MONGODB_URI && process.env.DISABLE_MONGO !== '1') {
   console.log('🔄 Đang kết nối tới MongoDB Atlas...');
-  mongoReady = mongoose.connect(MONGODB_URI, { dbName: MONGODB_DB })
+  mongoReady = mongoose.connect(MONGODB_URI, { dbName: MONGODB_DB, serverSelectionTimeoutMS: 10000 })
     .then(async () => {
       isMongoConnected = true;
       console.log(`✅ Đã kết nối thành công tới MongoDB Atlas (Database: ${MONGODB_DB})!`);
@@ -302,16 +311,28 @@ function initDb() {
 
 initDb();
 
+let _dbCache = null;
+let _dbMtime = 0;
+
 function readDb() {
   try {
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    const stat = fs.statSync(DB_FILE);
+    if (_dbCache && stat.mtimeMs === _dbMtime) {
+      return structuredClone(_dbCache);
+    }
+    const parsed = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    _dbCache = parsed;
+    _dbMtime = stat.mtimeMs;
+    return structuredClone(parsed);
   } catch {
-    return { users: [], courses: [], notifications: [], certificates: [], forumTopics: [] };
+    return { users: [], courses: [], notifications: [], certificates: [], forumTopics: [], progress: [] };
   }
 }
 
 function writeDb(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  _dbCache = structuredClone(data);
+  try { _dbMtime = fs.statSync(DB_FILE).mtimeMs; } catch { _dbMtime = Date.now(); }
 }
 
 // ====================== XÁC THỰC & PHÂN QUYỀN ======================
@@ -351,9 +372,154 @@ async function findUserById(id) {
 }
 
 async function findUsersByIds(ids) {
-  if (!ids.length) return [];
-  if (isMongoConnected) return UserModel.find({ id: { $in: ids } }).lean();
-  return (readDb().users || []).filter(u => ids.includes(u.id));
+  const uniqueIds = [...new Set((ids || []).filter(Boolean))];
+  if (!uniqueIds.length) return [];
+  if (isMongoConnected) return UserModel.find({ id: { $in: uniqueIds } }).lean();
+  return (readDb().users || []).filter(u => uniqueIds.includes(u.id));
+}
+
+async function findUsersByEmails(emails) {
+  const normalized = [...new Set((emails || []).map(e => String(e || '').toLowerCase().trim()).filter(Boolean))];
+  if (!normalized.length) return [];
+  if (isMongoConnected) return UserModel.find({ email: { $in: normalized } }).lean();
+  return (readDb().users || []).filter(u => normalized.includes(String(u.email || '').toLowerCase().trim()));
+}
+
+// Đồng bộ ID, họ tên, avatar, lớp học thật của học sinh vào tất cả khóa học & bản ghi tiến độ khi đăng nhập/cập nhật hồ sơ
+async function syncStudentIdentityAcrossCourses(user) {
+  if (!user || !user.id || !user.email) return;
+  const normEmail = String(user.email).toLowerCase().trim();
+  if (!normEmail) return;
+
+  try {
+    if (isMongoConnected) {
+      // 1. Cập nhật thông tin học sinh trong enrolledStudents nếu trùng email
+      const courses = await CourseModel.find({ 'enrolledStudents.email': { $regex: new RegExp(`^${normEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } });
+      for (const course of courses) {
+        let changed = false;
+        const oldIds = [];
+        course.enrolledStudents = (course.enrolledStudents || []).map(s => {
+          if (String(s.email || '').toLowerCase().trim() === normEmail) {
+            if (s.id && s.id !== user.id) oldIds.push(s.id);
+            changed = true;
+            return {
+              ...s,
+              id: user.id,
+              name: user.name || s.name,
+              email: normEmail,
+              code: user.code || s.code || '',
+              className: user.className || user.classOrPosition || s.className || '',
+              school: user.school || user.department || s.school || '',
+              avatar: user.avatar || s.avatar || ''
+            };
+          }
+          return s;
+        });
+        if (changed) {
+          course.markModified('enrolledStudents');
+          await course.save();
+          // Gộp bản ghi tiến độ của id cũ (nếu có) sang user.id thật
+          for (const oldId of oldIds) {
+            const oldRecs = await ProgressModel.find({ courseId: course.id, userId: oldId }).lean();
+            for (const rec of oldRecs) {
+              const { _id, __v, ...rest } = rec;
+              await ProgressModel.findOneAndUpdate(
+                { courseId: course.id, userId: user.id, activityId: rec.activityId },
+                { $setOnInsert: { ...rest, userId: user.id, userEmail: normEmail } },
+                { upsert: true }
+              );
+              await ProgressModel.deleteOne({ _id });
+            }
+          }
+        }
+      }
+      // 2. Gắn userEmail cho mọi bản ghi progress hiện có của user.id
+      await ProgressModel.updateMany({ userId: user.id, $or: [{ userEmail: { $exists: false } }, { userEmail: '' }] }, { $set: { userEmail: normEmail } });
+    } else {
+      const db = readDb();
+      let changed = false;
+      (db.courses || []).forEach(course => {
+        (course.enrolledStudents || []).forEach(s => {
+          if (String(s.email || '').toLowerCase().trim() === normEmail) {
+            const oldId = s.id;
+            s.id = user.id;
+            s.name = user.name || s.name;
+            s.email = normEmail;
+            s.code = user.code || s.code || '';
+            s.className = user.className || user.classOrPosition || s.className || '';
+            s.school = user.school || user.department || s.school || '';
+            s.avatar = user.avatar || s.avatar || '';
+            changed = true;
+            if (oldId && oldId !== user.id) {
+              (db.progress || []).forEach(p => {
+                if (p.courseId === course.id && p.userId === oldId) {
+                  p.userId = user.id;
+                  p.userEmail = normEmail;
+                }
+              });
+            }
+          }
+        });
+      });
+      (db.progress || []).forEach(p => {
+        if (p.userId === user.id && !p.userEmail) {
+          p.userEmail = normEmail;
+          changed = true;
+        }
+      });
+      if (changed) writeDb(db);
+    }
+  } catch (err) {
+    console.warn('Đồng bộ danh tính học sinh:', err.message);
+  }
+}
+
+// Tự động ghi danh học sinh khi học sinh bắt đầu tương tác/học bài trong khóa học để KHÔNG BAO GIỜ bị mất tiến độ
+async function ensureStudentEnrolled(course, user) {
+  if (!course || !user || isStaff(user)) return course;
+  if (isEnrolled(course, user)) return course;
+
+  const normEmail = String(user.email || '').toLowerCase().trim();
+  const studentObj = {
+    id: user.id,
+    name: user.name || 'Học viên',
+    email: normEmail,
+    code: user.code || '',
+    className: user.className || user.classOrPosition || '',
+    school: user.school || user.department || '',
+    avatar: user.avatar || '',
+    enrolledAt: new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+    status: 'Đang học'
+  };
+
+  try {
+    if (isMongoConnected) {
+      await UserModel.updateOne({ id: user.id }, { $addToSet: { enrolledCourses: course.id } });
+      await CourseModel.updateOne(
+        { id: course.id, 'enrolledStudents.id': { $ne: user.id } },
+        { $push: { enrolledStudents: studentObj }, $inc: { enrolledStudentsCount: 1 } }
+      );
+    } else {
+      const db = readDb();
+      const u = (db.users || []).find(x => x.id === user.id);
+      if (u) {
+        u.enrolledCourses = u.enrolledCourses || [];
+        if (!u.enrolledCourses.includes(course.id)) u.enrolledCourses.push(course.id);
+      }
+      const c = (db.courses || []).find(x => x.id === course.id);
+      if (c && !isEnrolled(c, user)) {
+        c.enrolledStudents = c.enrolledStudents || [];
+        c.enrolledStudents.push(studentObj);
+        c.enrolledStudentsCount = c.enrolledStudents.length;
+      }
+      writeDb(db);
+    }
+    course.enrolledStudents = [...(course.enrolledStudents || []), studentObj];
+    course.enrolledStudentsCount = course.enrolledStudents.length;
+  } catch (err) {
+    console.warn('Auto-enroll error:', err.message);
+  }
+  return course;
 }
 
 const safeUser = (u) => {
@@ -405,9 +571,15 @@ async function listProgress(filter) {
   return (readDb().progress || []).filter(p => Object.entries(filter).every(([k, v]) => p[k] === v));
 }
 
-async function saveProgress(courseId, userId, activityId, patch) {
+async function getOneProgress(courseId, userId, activityId) {
+  if (isMongoConnected) return ProgressModel.findOne({ courseId, userId, activityId }).lean();
+  return (readDb().progress || []).find(p => p.courseId === courseId && p.userId === userId && p.activityId === activityId) || null;
+}
+
+async function saveProgress(courseId, userId, activityId, patch, userEmail = '') {
   const key = { courseId, userId, activityId };
   const data = { ...patch, updatedAt: new Date().toISOString() };
+  if (userEmail) data.userEmail = String(userEmail).toLowerCase().trim();
   if (isMongoConnected) {
     return ProgressModel.findOneAndUpdate(key, { $set: data }, { upsert: true, returnDocument: 'after' }).lean();
   }
@@ -453,11 +625,11 @@ async function loadCourseObj(id) {
 const allActivities = (course) => (course.modules || []).flatMap(m => m.activities || []);
 
 const isEnrolled = (course, user) => !!user && (course.enrolledStudents || []).some(
-  s => s.id === user.id || (user.email && s.email === user.email)
+  s => s.id === user.id || (user.email && s.email && String(s.email).toLowerCase().trim() === String(user.email).toLowerCase().trim())
 );
 
 // Dữ liệu của học sinh không được nằm trong tài liệu khóa học dùng chung
-const STUDENT_STATE_FIELDS = ['submission', 'quizResult', 'score', 'watchedSeconds', 'videoNotes'];
+const STUDENT_STATE_FIELDS = ['submission', 'quizResult', 'score', 'watchedSeconds', 'videoProgress', 'videoNotes', 'viewCount', 'timeSpentSeconds', 'firstAccessedAt', 'lastAccessedAt'];
 function stripStudentState(modules) {
   return (modules || []).map(m => ({
     ...m,
@@ -490,6 +662,15 @@ function viewCourse(courseObj, user, progressRecords) {
       if (p.submission) out.submission = p.submission;
       if (p.quizResult) out.quizResult = p.quizResult;
       if (p.score !== undefined && p.score !== null) out.score = p.score;
+      if (p.videoProgress) {
+        out.videoProgress = p.videoProgress;
+        out.watchedSeconds = p.videoProgress.watchedSeconds || 0;
+        if (p.videoProgress.totalSeconds) out.videoDuration = p.videoProgress.totalSeconds;
+      }
+      if (p.viewCount) out.viewCount = p.viewCount;
+      if (p.timeSpentSeconds) out.timeSpentSeconds = p.timeSpentSeconds;
+      if (p.firstAccessedAt) out.firstAccessedAt = p.firstAccessedAt;
+      if (p.lastAccessedAt) out.lastAccessedAt = p.lastAccessedAt;
       if (out.isCompleted) completed++;
       return out;
     })
@@ -513,7 +694,7 @@ async function viewCourseFor(courseObj, user) {
   return viewCourse(enriched, user, records);
 }
 
-// Kiểm tra chung cho thao tác học tập: khóa học + hoạt động tồn tại, học sinh đã đăng ký
+// Kiểm tra chung cho thao tác học tập: khóa học + hoạt động tồn tại, tự động ghi danh học sinh để không bao giờ mất tiến độ
 async function learningContext(req, res) {
   const course = await loadCourseObj(req.params.id);
   if (!course) {
@@ -525,9 +706,8 @@ async function learningContext(req, res) {
     res.status(404).json({ message: 'Không tìm thấy hoạt động học tập' });
     return null;
   }
-  if (!isStaff(req.user) && !isEnrolled(course, req.user)) {
-    res.status(403).json({ message: 'Bạn cần đăng ký khóa học trước khi tham gia hoạt động này.' });
-    return null;
+  if (req.user && !isStaff(req.user) && !isEnrolled(course, req.user)) {
+    await ensureStudentEnrolled(course, req.user);
   }
   return { course, activity };
 }
@@ -653,6 +833,9 @@ app.post('/api/auth/google', async (req, res) => {
     const userObj = user.toObject ? user.toObject() : { ...user };
     delete userObj.password;
 
+    // Đồng bộ ID, avatar, họ tên thật của học sinh vào danh sách lớp và bản ghi tiến độ
+    await syncStudentIdentityAcrossCourses(userObj);
+
     return res.json({ token, user: userObj });
   } catch (err) {
     console.error('Lỗi xác thực Google:', err);
@@ -691,7 +874,9 @@ app.put('/api/auth/profile', requireAuth, async (req, res) => {
     if (!user) return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
     applyProfile(user);
     await user.save();
-    return res.json(safeUser(user.toObject()));
+    const out = safeUser(user.toObject());
+    await syncStudentIdentityAcrossCourses(out);
+    return res.json(out);
   }
 
   const db = readDb();
@@ -699,7 +884,9 @@ app.put('/api/auth/profile', requireAuth, async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Phiên đăng nhập đã hết hạn' });
   applyProfile(user);
   writeDb(db);
-  res.json(safeUser(user));
+  const out = safeUser(user);
+  await syncStudentIdentityAcrossCourses(out);
+  res.json(out);
 });
 
 // 3. Courses: Get All (Không có dữ liệu ảo)
@@ -821,55 +1008,9 @@ async function resolveInstructorAvatar(course) {
   return courseObj;
 }
 
-// Danh sách học sinh mẫu chuẩn Lớp 6 tham gia khóa học
-const DEFAULT_GRADE6_STUDENTS = [
-  {
-    id: 'hs-601',
-    name: 'Trần Văn An',
-    email: 'an.tran6a@lms2.edu.vn',
-    className: 'Lớp 6A',
-    code: 'HS601',
-    school: 'THCS Giảng Võ',
-    avatar: '',
-    enrolledAt: '12/11/2026',
-    status: 'active'
-  },
-  {
-    id: 'hs-602',
-    name: 'Lê Thị Bích Ngọc',
-    email: 'ngoc.le6a@lms2.edu.vn',
-    className: 'Lớp 6A',
-    code: 'HS602',
-    school: 'THCS Giảng Võ',
-    avatar: '',
-    enrolledAt: '12/11/2026',
-    status: 'active'
-  },
-  {
-    id: 'hs-603',
-    name: 'Nguyễn Hoàng Long',
-    email: 'long.nguyen6a@lms2.edu.vn',
-    className: 'Lớp 6A',
-    code: 'HS603',
-    school: 'THCS Giảng Võ',
-    avatar: '',
-    enrolledAt: '13/11/2026',
-    status: 'active'
-  },
-  {
-    id: 'hs-604',
-    name: 'Võ Minh Khôi',
-    email: 'khoi.vo6a@lms2.edu.vn',
-    className: 'Lớp 6A',
-    code: 'HS604',
-    school: 'THCS Giảng Võ',
-    avatar: '',
-    enrolledAt: '13/11/2026',
-    status: 'active'
-  }
-];
+// Khởi tạo và bảo đảm khóa học Chuyên đề Trí tuệ Nhân tạo Lớp 6 luôn tồn tại đầy đủ 8 bài học (không gán dữ liệu ảo)
+const FAKE_DEMO_STUDENT_IDS = new Set(['hs-601', 'hs-602', 'hs-603', 'hs-604']);
 
-// Khởi tạo và bảo đảm khóa học Chuyên đề Trí tuệ Nhân tạo Lớp 6 luôn tồn tại đầy đủ 8 bài học
 async function ensureDefaultCourse() {
   const defaultCourse = {
     id: '6AIAB01',
@@ -897,8 +1038,8 @@ async function ensureDefaultCourse() {
       description: `Nội dung học tập và bài thực hành cho ${title}`,
       activities: []
     })),
-    enrolledStudents: DEFAULT_GRADE6_STUDENTS,
-    enrolledStudentsCount: DEFAULT_GRADE6_STUDENTS.length,
+    enrolledStudents: [],
+    enrolledStudentsCount: 0,
     files: [],
     announcements: [
       {
@@ -940,9 +1081,10 @@ async function ensureDefaultCourse() {
           existing.name = defaultCourse.name;
           changed = true;
         }
-        if (!existing.enrolledStudents || existing.enrolledStudents.length === 0) {
-          existing.enrolledStudents = DEFAULT_GRADE6_STUDENTS;
-          existing.enrolledStudentsCount = DEFAULT_GRADE6_STUDENTS.length;
+        // Dọn dẹp 4 học sinh ảo mẫu (hs-601..604) để bảng theo dõi chỉ hiển thị học sinh thật
+        if (Array.isArray(existing.enrolledStudents) && existing.enrolledStudents.some(s => FAKE_DEMO_STUDENT_IDS.has(s?.id))) {
+          existing.enrolledStudents = existing.enrolledStudents.filter(s => !FAKE_DEMO_STUDENT_IDS.has(s?.id));
+          existing.enrolledStudentsCount = existing.enrolledStudents.length;
           existing.markModified('enrolledStudents');
           changed = true;
         }
@@ -984,9 +1126,9 @@ async function ensureDefaultCourse() {
         existing.name = defaultCourse.name;
         changed = true;
       }
-      if (!existing.enrolledStudents || existing.enrolledStudents.length === 0) {
-        existing.enrolledStudents = DEFAULT_GRADE6_STUDENTS;
-        existing.enrolledStudentsCount = DEFAULT_GRADE6_STUDENTS.length;
+      if (Array.isArray(existing.enrolledStudents) && existing.enrolledStudents.some(s => FAKE_DEMO_STUDENT_IDS.has(s?.id))) {
+        existing.enrolledStudents = existing.enrolledStudents.filter(s => !FAKE_DEMO_STUDENT_IDS.has(s?.id));
+        existing.enrolledStudentsCount = existing.enrolledStudents.length;
         changed = true;
       }
       if (changed) {
@@ -1381,6 +1523,7 @@ app.delete('/api/courses/:id/activities/:actId', requireStaff, async (req, res) 
               course.totalActivities = Math.max(0, (course.totalActivities || 1) - 1);
               course.markModified('modules');
               await course.save();
+              await removeProgress({ courseId: course.id, activityId: actId });
               return res.json({ success: true, message: 'Đã xóa bài học thành công' });
             }
           }
@@ -1464,43 +1607,106 @@ async function courseProgressOf(course, userId) {
 app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
+  const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
+  const now = nowVN();
   // Bài trắc nghiệm chỉ được tính hoàn thành khi nộp bài và đạt điểm (xử lý ở quiz-submit)
   if (ctx.activity.type !== 'quiz') {
-    await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, { isCompleted: true, completedAt: nowVN() });
+    const patch = {
+      isCompleted: true,
+      completedAt: existing?.completedAt || now,
+      lastAccessedAt: now,
+      firstAccessedAt: existing?.firstAccessedAt || now,
+      viewCount: Math.max(1, existing?.viewCount || 0)
+    };
+    if (ctx.activity.type === 'video') {
+      const prevVp = existing?.videoProgress || {};
+      const totalSeconds = prevVp.totalSeconds || (ctx.activity.videoDuration || 0);
+      patch.videoProgress = {
+        ...prevVp,
+        watchedSeconds: Math.max(prevVp.watchedSeconds || 0, totalSeconds),
+        lastPositionSeconds: Math.max(prevVp.lastPositionSeconds || 0, totalSeconds),
+        totalSeconds,
+        progressPercent: 100,
+        lastWatchedAt: now
+      };
+    }
+    await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
   }
   res.json({ success: true, progress: await courseProgressOf(ctx.course, req.user.id) });
 });
 
-// 6.1 Activities: Track Video Progress (thời lượng xem, %, tự động hoàn thành khi >= 80%)
+// 6.05 Activities: Telemetry Tracking (ghi nhận lượt truy cập & thời gian học tập thực tế cho mọi hoạt động)
+app.post('/api/courses/:id/activities/:actId/track', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+
+  const event = req.body.event === 'heartbeat' ? 'heartbeat' : 'view';
+  const deltaSeconds = Math.min(120, Math.max(0, Math.floor(Number(req.body.deltaSeconds) || 0)));
+  const actionLabel = String(req.body.action || '').slice(0, 120);
+
+  const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
+  const now = nowVN();
+  const viewCount = (existing?.viewCount || 0) + (event === 'view' ? 1 : 0);
+  const timeSpentSeconds = (existing?.timeSpentSeconds || 0) + deltaSeconds;
+
+  const patch = {
+    viewCount: Math.max(1, viewCount),
+    timeSpentSeconds,
+    firstAccessedAt: existing?.firstAccessedAt || now,
+    lastAccessedAt: now,
+    lastAction: actionLabel || existing?.lastAction || 'Đang học'
+  };
+
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
+  res.json({ success: true, viewCount: patch.viewCount, timeSpentSeconds, lastAccessedAt: now });
+});
+
+// 6.1 Activities: Track Video Progress (giữ mốc % cao nhất, lưu vị trí xem, tự động hoàn thành khi >= 80%)
 app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
 
-  const watchedSeconds = Math.max(0, Math.floor(Number(req.body.watchedSeconds) || 0));
-  const totalSeconds = Math.max(0, Math.floor(Number(req.body.totalSeconds) || 0));
-  let progressPercent = Math.min(100, Math.max(0, Math.round(Number(req.body.progressPercent) || 0)));
-  if (totalSeconds > 0 && (!progressPercent || progressPercent === 0)) {
-    progressPercent = Math.min(100, Math.round((watchedSeconds / totalSeconds) * 100));
+  const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
+  const prevVp = existing?.videoProgress || {};
+
+  const currentPos = Math.max(0, Math.floor(Number(req.body.watchedSeconds) || 0));
+  const incomingTotal = Math.max(0, Math.floor(Number(req.body.totalSeconds) || 0));
+  const totalSeconds = Math.max(incomingTotal, prevVp.totalSeconds || 0);
+  const deltaSeconds = Math.min(120, Math.max(0, Math.floor(Number(req.body.deltaSeconds) || 0)));
+
+  let incomingPercent = Math.min(100, Math.max(0, Math.round(Number(req.body.progressPercent) || 0)));
+  if (totalSeconds > 0 && incomingPercent === 0 && currentPos > 0) {
+    incomingPercent = Math.min(100, Math.round((currentPos / totalSeconds) * 100));
   }
 
-  const isCompleted = progressPercent >= 80;
+  // Bảo toàn mốc tiến độ cao nhất (high-water mark) để học sinh tua lại xem không bị mất % đã đạt
+  const maxWatchedSeconds = Math.max(prevVp.watchedSeconds || 0, currentPos);
+  const maxProgressPercent = Math.min(100, Math.max(prevVp.progressPercent || 0, incomingPercent));
+  const isCompleted = !!existing?.isCompleted || maxProgressPercent >= 80;
+  const now = nowVN();
+
   const videoProgress = {
-    watchedSeconds,
+    watchedSeconds: maxWatchedSeconds,
+    lastPositionSeconds: currentPos,
     totalSeconds,
-    progressPercent,
-    lastWatchedAt: nowVN()
+    progressPercent: maxProgressPercent,
+    lastWatchedAt: now
   };
 
   const patch = {
     videoProgress,
-    updatedAt: new Date().toISOString()
+    viewCount: Math.max(1, existing?.viewCount || 0),
+    timeSpentSeconds: (existing?.timeSpentSeconds || 0) + deltaSeconds,
+    firstAccessedAt: existing?.firstAccessedAt || now,
+    lastAccessedAt: now,
+    lastAction: `Xem video (${maxProgressPercent}%)`
   };
   if (isCompleted) {
     patch.isCompleted = true;
-    patch.completedAt = nowVN();
+    patch.completedAt = existing?.completedAt || now;
   }
 
-  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch);
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
   res.json({
     success: true,
     isCompleted,
@@ -1520,38 +1726,139 @@ app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, r
     return res.status(400).json({ message: 'Bài nộp đang trống.' });
   }
 
+  const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
+  const now = nowVN();
   const subData = {
     status: 'submitted',
     fileName,
     fileSize: String(req.body.fileSize || '').slice(0, 30),
     fileUrl: String(req.body.fileUrl || '').slice(0, 500),
-    submittedAt: nowVN(),
+    submittedAt: now,
     textSubmission
   };
   await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
     isCompleted: true,
-    completedAt: nowVN(),
+    completedAt: existing?.completedAt || now,
     submission: subData,
-    score: null
-  });
+    score: null,
+    viewCount: Math.max(1, existing?.viewCount || 0),
+    firstAccessedAt: existing?.firstAccessedAt || now,
+    lastAccessedAt: now,
+    lastAction: 'Đã nộp bài tập'
+  }, req.user.email);
   res.json({ success: true, submission: subData });
 });
 
-// 7.1 Giáo viên xem bài nộp / kết quả của TỪNG học sinh cho một hoạt động
+// Helper: gom danh sách học sinh thực tế + khớp tiến độ theo cả userId và email (chống mất dữ liệu khi đăng nhập Google)
+async function buildStudentRosterWithProgress(course, allRecords, includeOnlyUser = null) {
+  const enrolledRaw = (course.enrolledStudents || []).filter(s => !FAKE_DEMO_STUDENT_IDS.has(s?.id));
+  const recordUserIds = [...new Set(allRecords.map(r => r.userId).filter(Boolean))];
+  const enrolledIds = enrolledRaw.map(s => s.id).filter(Boolean);
+  const enrolledEmails = enrolledRaw.map(s => String(s.email || '').toLowerCase().trim()).filter(Boolean);
+
+  const [usersById, usersByEmail] = await Promise.all([
+    findUsersByIds([...enrolledIds, ...recordUserIds]),
+    findUsersByEmails(enrolledEmails)
+  ]);
+
+  const userById = new Map(usersById.map(u => [u.id, u]));
+  const userByEmail = new Map();
+  [...usersById, ...usersByEmail].forEach(u => {
+    const em = String(u.email || '').toLowerCase().trim();
+    if (em) userByEmail.set(em, u);
+  });
+
+  // Xây dựng roster chuẩn không trùng lặp, tự động bao gồm cả học sinh có bản ghi tiến độ nhưng chưa nằm trong enrolledStudents
+  const rosterMap = new Map();
+  const addToRoster = (entry) => {
+    const normEmail = String(entry.email || '').toLowerCase().trim();
+    const realUser = userById.get(entry.id) || (normEmail ? userByEmail.get(normEmail) : null);
+    if (realUser && isStaff(realUser)) return; // Không trộn giáo viên/admin vào danh sách học sinh chấm điểm
+    const canonicalId = realUser?.id || entry.id;
+    const key = normEmail || canonicalId;
+    if (!key) return;
+    if (!rosterMap.has(key)) {
+      rosterMap.set(key, {
+        id: canonicalId,
+        rawIds: new Set([entry.id, canonicalId].filter(Boolean)),
+        name: realUser?.name || entry.name || 'Học sinh',
+        email: normEmail || String(realUser?.email || '').toLowerCase().trim(),
+        className: realUser?.className || realUser?.classOrPosition || entry.className || '',
+        code: realUser?.code || entry.code || '',
+        school: realUser?.school || realUser?.department || entry.school || '',
+        avatar: realUser?.avatar || entry.avatar || '',
+        enrolledAt: entry.enrolledAt || '',
+        status: entry.status || 'Đang học'
+      });
+    } else {
+      const ex = rosterMap.get(key);
+      if (entry.id) ex.rawIds.add(entry.id);
+      if (canonicalId) ex.rawIds.add(canonicalId);
+      if (!ex.avatar && (realUser?.avatar || entry.avatar)) ex.avatar = realUser?.avatar || entry.avatar;
+      if (!ex.className && (realUser?.className || entry.className)) ex.className = realUser?.className || entry.className;
+    }
+  };
+
+  enrolledRaw.forEach(addToRoster);
+  recordUserIds.forEach(uid => {
+    const u = userById.get(uid);
+    if (u && !isStaff(u)) {
+      addToRoster({ id: u.id, name: u.name, email: u.email, className: u.className, code: u.code, school: u.school, avatar: u.avatar });
+    }
+  });
+
+  let roster = [...rosterMap.values()];
+  if (includeOnlyUser) {
+    const myEmail = String(includeOnlyUser.email || '').toLowerCase().trim();
+    roster = roster.filter(s => s.id === includeOnlyUser.id || (myEmail && s.email === myEmail));
+    if (roster.length === 0) {
+      roster = [{
+        id: includeOnlyUser.id,
+        rawIds: new Set([includeOnlyUser.id]),
+        name: includeOnlyUser.name || 'Học sinh',
+        email: myEmail,
+        className: includeOnlyUser.className || includeOnlyUser.classOrPosition || '',
+        code: includeOnlyUser.code || '',
+        school: includeOnlyUser.school || '',
+        avatar: includeOnlyUser.avatar || '',
+        enrolledAt: '',
+        status: 'Đang học'
+      }];
+    }
+  }
+
+  // Gắn danh sách bản ghi tiến độ khớp theo cả userId (tất cả rawIds) lẫn userEmail
+  return roster.map(student => {
+    const studentRecords = allRecords.filter(p => {
+      if (student.rawIds.has(p.userId)) return true;
+      const recEmail = String(p.userEmail || userById.get(p.userId)?.email || '').toLowerCase().trim();
+      return !!(student.email && recEmail && recEmail === student.email);
+    });
+    const { rawIds, ...cleanStudent } = student;
+    return { student: cleanStudent, records: studentRecords };
+  });
+}
+
+// 7.1 Giáo viên xem bài nộp / kết quả / tiến độ của TỪNG học sinh cho một hoạt động (Video, Quiz, Assignment, Document)
 app.get('/api/courses/:id/activities/:actId/submissions', requireStaff, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
   const records = await listProgress({ courseId: ctx.course.id, activityId: ctx.activity.id });
-  const byUser = new Map(records.map(p => [p.userId, p]));
-  res.json((ctx.course.enrolledStudents || []).map(s => {
-    const p = byUser.get(s.id);
+  const roster = await buildStudentRosterWithProgress(ctx.course, records);
+
+  res.json(roster.map(({ student, records: mine }) => {
+    const p = mine[0] || null;
     return {
-      student: { id: s.id, name: s.name, email: s.email, className: s.className, avatar: s.avatar },
+      student: { id: student.id, name: student.name, email: student.email, code: student.code, className: student.className, avatar: student.avatar },
       isCompleted: !!p?.isCompleted,
       completedAt: p?.completedAt || '',
       score: p?.score ?? null,
       submission: p?.submission || null,
-      quizResult: p?.quizResult || null
+      quizResult: p?.quizResult || null,
+      videoProgress: p?.videoProgress || null,
+      timeSpentSeconds: p?.timeSpentSeconds || 0,
+      viewCount: p?.viewCount || 0,
+      lastAccessedAt: p?.lastAccessedAt || ''
     };
   }));
 });
@@ -1569,7 +1876,18 @@ app.post('/api/courses/:id/activities/:actId/grade', requireStaff, async (req, r
     return res.status(400).json({ message: `Điểm phải nằm trong khoảng 0 - ${maxScore}.` });
   }
 
-  const [record] = await listProgress({ courseId: ctx.course.id, userId: studentId, activityId: ctx.activity.id });
+  let [record] = await listProgress({ courseId: ctx.course.id, userId: studentId, activityId: ctx.activity.id });
+  let targetUserId = studentId;
+  if (!record) {
+    // Fallback tìm theo email của student trong lớp nếu ID trước đây khác
+    const enrolled = (ctx.course.enrolledStudents || []).find(s => s.id === studentId);
+    if (enrolled?.email) {
+      const actRecords = await listProgress({ courseId: ctx.course.id, activityId: ctx.activity.id });
+      const normEmail = String(enrolled.email).toLowerCase().trim();
+      record = actRecords.find(r => String(r.userEmail || '').toLowerCase().trim() === normEmail);
+      if (record) targetUserId = record.userId;
+    }
+  }
   if (!record || !record.submission) {
     return res.status(404).json({ message: 'Học sinh này chưa nộp bài.' });
   }
@@ -1582,141 +1900,335 @@ app.post('/api/courses/:id/activities/:actId/grade', requireStaff, async (req, r
     gradedAt: nowVN(),
     gradedBy: req.user.name || req.user.email
   };
-  await saveProgress(ctx.course.id, studentId, ctx.activity.id, { score: grade, submission });
+  await saveProgress(ctx.course.id, targetUserId, ctx.activity.id, { score: grade, submission }, record.userEmail || '');
   res.json({ success: true, submission });
 });
 
-// 9. Activities: Submit Quiz (điểm do server tự chấm theo đáp án, không tin điểm client gửi lên)
+// 9. Activities: Submit Quiz (điểm do server tự chấm theo đáp án, lưu số câu đúng, số lần làm & thời gian làm bài)
 app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
 
   const answers = (req.body.answers && typeof req.body.answers === 'object') ? req.body.answers : {};
   const questions = Array.isArray(ctx.activity.quizQuestions) ? ctx.activity.quizQuestions : [];
-  const maxScore = 10; // cùng thang điểm 10 với giao diện làm bài
+  const maxScore = 10;
+  const durationSeconds = Math.max(0, Math.floor(Number(req.body.durationSeconds) || 0));
 
   let score;
+  let correctCount = 0;
   if (questions.length > 0) {
-    const correct = questions.filter(q => answers[q.id] === q.correctAnswer).length;
-    score = Number(((correct / questions.length) * maxScore).toFixed(1));
+    correctCount = questions.filter(q => answers[q.id] === q.correctAnswer).length;
+    score = Number(((correctCount / questions.length) * maxScore).toFixed(1));
   } else {
     score = Math.min(Math.max(Number(req.body.score) || 0, 0), maxScore);
   }
   const passScore = Number(ctx.activity.passScore) || 5;
   const passed = score >= passScore;
 
-  const quizResult = { score, maxScore, passed, submittedAt: nowVN(), answers };
-  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
-    isCompleted: passed,
-    completedAt: passed ? nowVN() : '',
+  const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
+  const now = nowVN();
+  const attemptCount = (existing?.quizResult?.attemptCount || 0) + 1;
+  const quizResult = {
     score,
     maxScore,
-    quizResult
-  });
+    passed,
+    submittedAt: now,
+    answers,
+    correctCount,
+    totalQuestions: questions.length,
+    attemptCount,
+    durationSeconds
+  };
+  const isCompleted = !!existing?.isCompleted || passed;
+  const bestScore = existing?.score !== undefined && existing?.score !== null ? Math.max(existing.score, score) : score;
+
+  await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
+    isCompleted,
+    completedAt: isCompleted ? (existing?.completedAt || now) : '',
+    score: bestScore,
+    maxScore,
+    quizResult,
+    viewCount: Math.max(1, existing?.viewCount || 0),
+    timeSpentSeconds: (existing?.timeSpentSeconds || 0) + durationSeconds,
+    firstAccessedAt: existing?.firstAccessedAt || now,
+    lastAccessedAt: now,
+    lastAction: `Nộp trắc nghiệm (${score}/10)`
+  }, req.user.email);
   res.json({ success: true, passed, score, result: quizResult, questions });
 });
 
-// 9.01 Sổ điểm & Bảng theo dõi tiến độ toàn diện của cả lớp (cho Giáo viên / Admin & Học sinh)
+// 9.01 Sổ điểm & Bảng theo dõi tiến độ toàn diện của cả lớp (kèm phân tích mô-đun, câu hỏi trắc nghiệm & cảnh báo học sinh)
 app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
   const course = await loadCourseObj(req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
 
-  const acts = allActivities(course);
+  const modulesRaw = course.modules || [];
+  const moduleTitleById = new Map(modulesRaw.map(m => [m.id, m.title]));
+  const acts = modulesRaw.flatMap(m => (m.activities || []).map(a => ({ ...a, moduleId: a.moduleId || m.id, moduleTitle: m.title })));
   const records = await listProgress({ courseId: course.id });
 
-  let students = course.enrolledStudents || [];
-  if (!isStaff(req.user)) {
-    students = students.filter(s => s.id === req.user.id || s.email === req.user.email);
-    if (students.length === 0) {
-      students = [{
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-        className: req.user.className || 'Lớp 6A',
-        code: req.user.code || 'HS-ME',
-        avatar: req.user.avatar || ''
-      }];
-    }
-  }
+  const roster = await buildStudentRosterWithProgress(course, records, isStaff(req.user) ? null : req.user);
 
-  const users = await findUsersByIds(students.map(s => s.id));
-  const userById = new Map(users.map(u => [u.id, u]));
-
-  const activitiesList = acts.map(a => ({
+  const activitiesBase = acts.map(a => ({
     id: a.id,
     moduleId: a.moduleId,
+    moduleTitle: a.moduleTitle || moduleTitleById.get(a.moduleId) || '',
     title: a.title,
     type: a.type,
     maxScore: a.maxScore || 10,
     dueDate: a.dueDate || '',
     videoDuration: a.videoDuration || 0,
-    quizQuestions: a.quizQuestions || []
+    passScore: a.passScore || 5,
+    quizQuestions: isStaff(req.user) ? (a.quizQuestions || []) : (a.quizQuestions || [])
   }));
 
-  const studentRows = students.map(s => {
-    const u = userById.get(s.id);
-    const mineRecords = records.filter(p => p.userId === s.id);
-    const recByAct = new Map(mineRecords.map(p => [p.activityId, p]));
+  // Tính dòng tiến độ cho từng học sinh
+  const studentRows = roster.map(({ student, records: mineRecords }) => {
+    const recByAct = new Map();
+    mineRecords.forEach(p => {
+      const existing = recByAct.get(p.activityId);
+      if (!existing || (p.updatedAt || '') > (existing.updatedAt || '')) {
+        recByAct.set(p.activityId, p);
+      }
+    });
 
     let totalScore = 0;
     let scoreCount = 0;
     let completedCount = 0;
+    let inProgressCount = 0;
+    let totalTimeSpentSeconds = 0;
+    let totalViews = 0;
+    let latestIso = '';
 
-    const activityProgress = activitiesList.map(act => {
+    const activityProgress = activitiesBase.map(act => {
       const p = recByAct.get(act.id);
       const isCompleted = !!p?.isCompleted;
-      if (isCompleted) completedCount++;
+      const vp = p?.videoProgress || null;
+      const viewCount = p?.viewCount || 0;
+      const timeSpentSeconds = p?.timeSpentSeconds || 0;
+      const hasStarted = isCompleted || !!p?.submission || !!p?.quizResult || (vp?.progressPercent || 0) > 0 || viewCount > 0 || timeSpentSeconds > 0;
 
-      let score = p?.score ?? null;
+      if (isCompleted) completedCount++;
+      else if (hasStarted) inProgressCount++;
+
+      totalTimeSpentSeconds += timeSpentSeconds;
+      totalViews += viewCount;
+      if (p?.updatedAt && p.updatedAt > latestIso) latestIso = p.updatedAt;
+
+      const score = p?.score ?? null;
       if (score !== null && Number.isFinite(score)) {
         totalScore += score;
         scoreCount++;
       }
 
+      const status = isCompleted ? 'completed' : hasStarted ? 'in_progress' : 'not_started';
+      // Ẩn đáp án với học sinh chưa làm quiz
+      const questionsForRow = (isStaff(req.user) || p?.quizResult)
+        ? act.quizQuestions
+        : [];
+
       return {
         activityId: act.id,
+        moduleId: act.moduleId,
+        moduleTitle: act.moduleTitle,
         title: act.title,
         type: act.type,
         maxScore: act.maxScore,
+        status,
         isCompleted,
         completedAt: p?.completedAt || '',
         score,
-        videoProgress: p?.videoProgress || null,
+        videoProgress: vp,
         submission: p?.submission || null,
         quizResult: p?.quizResult || null,
-        quizQuestions: act.quizQuestions || []
+        quizQuestions: questionsForRow,
+        timeSpentSeconds,
+        viewCount,
+        lastAccessedAt: p?.lastAccessedAt || '',
+        lastAction: p?.lastAction || ''
+      };
+    });
+
+    // Tiến độ riêng theo từng bài học (8 mô-đun)
+    const moduleProgress = modulesRaw.map(m => {
+      const mActs = activityProgress.filter(ap => ap.moduleId === m.id);
+      const mDone = mActs.filter(ap => ap.isCompleted).length;
+      const mInProg = mActs.filter(ap => ap.status === 'in_progress').length;
+      return {
+        moduleId: m.id,
+        moduleTitle: m.title,
+        order: m.order,
+        total: mActs.length,
+        completed: mDone,
+        inProgress: mInProg,
+        percent: mActs.length > 0 ? Math.round((mDone / mActs.length) * 100) : 0
       };
     });
 
     const overallProgress = acts.length > 0 ? Math.round((completedCount / acts.length) * 100) : 0;
     const averageScore = scoreCount > 0 ? Number((totalScore / scoreCount).toFixed(1)) : null;
 
+    // Phân loại trạng thái học tập thông minh giúp giáo viên dễ nhận diện học sinh cần hỗ trợ
+    let engagementStatus = 'inactive';
+    if (acts.length > 0 && overallProgress === 100) engagementStatus = 'completed';
+    else if (overallProgress >= 50 || (averageScore !== null && averageScore >= 7)) engagementStatus = 'on_track';
+    else if (completedCount > 0 || inProgressCount > 0 || totalViews > 0) engagementStatus = 'needs_attention';
+
     return {
-      student: {
-        id: s.id,
-        name: s.name || u?.name || 'Học sinh',
-        email: s.email || u?.email || '',
-        className: s.className || u?.className || u?.classOrPosition || 'Lớp 6A',
-        code: s.code || u?.code || '',
-        avatar: s.avatar || u?.avatar || ''
-      },
+      student,
       overallProgress,
       completedCount,
+      inProgressCount,
       totalActivities: acts.length,
       averageScore,
+      totalTimeSpentSeconds,
+      totalViews,
+      lastActivityAt: latestIso,
+      engagementStatus,
+      moduleProgress,
       activities: activityProgress
     };
   });
 
+  // Thống kê theo từng hoạt động & phân tích từng câu hỏi trắc nghiệm (tỷ lệ đúng/sai)
+  const activitiesEnriched = activitiesBase.map(act => {
+    let completedCount = 0;
+    let inProgressCount = 0;
+    let notStartedCount = 0;
+    let scoreSum = 0;
+    let scoreNum = 0;
+    let videoPctSum = 0;
+    let videoWatchers = 0;
+    let pendingGradingCount = 0;
+    let submittedCount = 0;
+
+    const qCorrectMap = new Map();
+    const qAttemptMap = new Map();
+
+    studentRows.forEach(row => {
+      const ap = row.activities.find(x => x.activityId === act.id);
+      if (!ap) return;
+      if (ap.isCompleted) completedCount++;
+      else if (ap.status === 'in_progress') inProgressCount++;
+      else notStartedCount++;
+
+      if (ap.score !== null && Number.isFinite(ap.score)) {
+        scoreSum += ap.score;
+        scoreNum++;
+      }
+      if (act.type === 'video') {
+        const pct = ap.videoProgress?.progressPercent ?? (ap.isCompleted ? 100 : 0);
+        if (pct > 0) {
+          videoPctSum += pct;
+          videoWatchers++;
+        }
+      }
+      if (act.type === 'assignment' && ap.submission) {
+        submittedCount++;
+        if (ap.submission.status !== 'graded') pendingGradingCount++;
+      }
+      if (act.type === 'quiz' && ap.quizResult?.answers) {
+        submittedCount++;
+        (act.quizQuestions || []).forEach(q => {
+          qAttemptMap.set(q.id, (qAttemptMap.get(q.id) || 0) + 1);
+          if (ap.quizResult.answers[q.id] === q.correctAnswer) {
+            qCorrectMap.set(q.id, (qCorrectMap.get(q.id) || 0) + 1);
+          }
+        });
+      }
+    });
+
+    const questionStats = act.type === 'quiz' && isStaff(req.user)
+      ? (act.quizQuestions || []).map((q, idx) => {
+          const attempts = qAttemptMap.get(q.id) || 0;
+          const correct = qCorrectMap.get(q.id) || 0;
+          return {
+            id: q.id,
+            index: idx + 1,
+            question: q.question,
+            attempts,
+            correct,
+            wrong: Math.max(0, attempts - correct),
+            accuracyPercent: attempts > 0 ? Math.round((correct / attempts) * 100) : null
+          };
+        })
+      : [];
+
+    return {
+      ...act,
+      quizQuestions: isStaff(req.user) ? act.quizQuestions : [],
+      stats: {
+        completedCount,
+        inProgressCount,
+        notStartedCount,
+        completionRate: studentRows.length > 0 ? Math.round((completedCount / studentRows.length) * 100) : 0,
+        avgScore: scoreNum > 0 ? Number((scoreSum / scoreNum).toFixed(1)) : null,
+        avgVideoPercent: videoWatchers > 0 ? Math.round(videoPctSum / videoWatchers) : 0,
+        videoWatchers,
+        submittedCount,
+        pendingGradingCount
+      },
+      questionStats
+    };
+  });
+
+  // Thống kê theo từng mô-đun (8 bài học)
+  const modulesSummary = modulesRaw.map(m => {
+    const mActsCount = (m.activities || []).length;
+    let pctSum = 0;
+    let doneStudents = 0;
+    studentRows.forEach(r => {
+      const mp = r.moduleProgress.find(x => x.moduleId === m.id);
+      if (mp) {
+        pctSum += mp.percent;
+        if (mActsCount > 0 && mp.completed === mActsCount) doneStudents++;
+      }
+    });
+    return {
+      id: m.id,
+      title: m.title,
+      order: m.order,
+      activityCount: mActsCount,
+      avgCompletionPercent: studentRows.length > 0 && mActsCount > 0 ? Math.round(pctSum / studentRows.length) : 0,
+      completedStudentsCount: doneStudents
+    };
+  });
+
+  // Tóm tắt KPI toàn lớp
+  const totalStudents = studentRows.length;
+  const avgProgress = totalStudents > 0
+    ? Math.round(studentRows.reduce((s, r) => s + r.overallProgress, 0) / totalStudents)
+    : 0;
+  const scoredRows = studentRows.filter(r => r.averageScore !== null);
+  const classAvgScore = scoredRows.length > 0
+    ? Number((scoredRows.reduce((s, r) => s + r.averageScore, 0) / scoredRows.length).toFixed(1))
+    : null;
+  const pendingGrading = activitiesEnriched.reduce((s, a) => s + (a.stats.pendingGradingCount || 0), 0);
+  const completedStudentsCount = studentRows.filter(r => r.engagementStatus === 'completed').length;
+  const activeStudentsCount = studentRows.filter(r => r.engagementStatus !== 'inactive').length;
+  const atRiskStudentsCount = studentRows.filter(r => r.engagementStatus === 'inactive' || r.engagementStatus === 'needs_attention').length;
+  const totalTimeSpentSeconds = studentRows.reduce((s, r) => s + (r.totalTimeSpentSeconds || 0), 0);
+
   res.json({
     courseId: course.id,
     courseName: course.name,
-    activities: activitiesList,
-    students: studentRows
+    modules: modulesSummary,
+    activities: activitiesEnriched,
+    students: studentRows,
+    summary: {
+      totalStudents,
+      avgProgress,
+      classAvgScore,
+      pendingGrading,
+      completedStudentsCount,
+      activeStudentsCount,
+      atRiskStudentsCount,
+      totalTimeSpentSeconds
+    }
   });
 });
 
-// 9.02 Giáo viên ghi danh học viên mới vào lớp
+// 9.02 Giáo viên ghi danh học viên mới vào lớp (tự động liên kết tài khoản Google thật nếu đã tồn tại)
 app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
   const course = await loadCourseObj(req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
@@ -1730,21 +2242,25 @@ app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
     return res.status(400).json({ message: 'Vui lòng nhập họ tên và email học sinh.' });
   }
 
-  const existing = (course.enrolledStudents || []).find(s => s.email === email || (s.id && s.id === req.body.id));
+  const existing = (course.enrolledStudents || []).find(
+    s => String(s.email || '').toLowerCase().trim() === email || (req.body.id && s.id === req.body.id)
+  );
   if (existing) {
     return res.status(400).json({ message: 'Học sinh này đã có trong danh sách lớp.' });
   }
 
+  // Tìm tài khoản User thật đã tồn tại theo email để khớp đúng userId
+  const [matchedUser] = await findUsersByEmails([email]);
   const studentObj = {
-    id: req.body.id || `student-${Date.now()}`,
-    name,
+    id: matchedUser?.id || req.body.id || `student-${Date.now()}`,
+    name: matchedUser?.name || name,
     email,
-    className,
-    code: code || `HS${Math.floor(100 + Math.random() * 900)}`,
-    school: req.body.school || 'THCS Giảng Võ',
-    avatar: req.body.avatar || '',
+    className: matchedUser?.className || className,
+    code: matchedUser?.code || code || `HS${Math.floor(100 + Math.random() * 900)}`,
+    school: matchedUser?.school || req.body.school || 'THCS',
+    avatar: matchedUser?.avatar || req.body.avatar || '',
     enrolledAt: nowVN(),
-    status: 'active'
+    status: 'Đang học'
   };
 
   if (isMongoConnected) {
@@ -1752,6 +2268,9 @@ app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
       { $or: [{ id: course.id }, { code: course.id }] },
       { $push: { enrolledStudents: studentObj }, $inc: { enrolledStudentsCount: 1 } }
     );
+    if (matchedUser?.id) {
+      await UserModel.updateOne({ id: matchedUser.id }, { $addToSet: { enrolledCourses: course.id } });
+    }
   } else {
     const db = readDb();
     const c = db.courses?.find(x => x.id === course.id || x.code === course.id);
@@ -1759,11 +2278,106 @@ app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
       c.enrolledStudents = c.enrolledStudents || [];
       c.enrolledStudents.push(studentObj);
       c.enrolledStudentsCount = c.enrolledStudents.length;
-      writeDb(db);
     }
+    if (matchedUser?.id) {
+      const u = (db.users || []).find(x => x.id === matchedUser.id);
+      if (u) {
+        u.enrolledCourses = u.enrolledCourses || [];
+        if (!u.enrolledCourses.includes(course.id)) u.enrolledCourses.push(course.id);
+      }
+    }
+    writeDb(db);
   }
 
   res.json({ success: true, student: studentObj });
+});
+
+// 9.03 Giáo viên gỡ học viên khỏi danh sách lớp
+app.delete('/api/courses/:id/students/:studentId', requireStaff, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+  const targetId = req.params.studentId;
+
+  if (isMongoConnected) {
+    const doc = await getCourseDoc(course.id);
+    if (doc) {
+      doc.enrolledStudents = (doc.enrolledStudents || []).filter(s => s.id !== targetId);
+      doc.enrolledStudentsCount = doc.enrolledStudents.length;
+      doc.markModified('enrolledStudents');
+      await doc.save();
+    }
+  } else {
+    const db = readDb();
+    const c = (db.courses || []).find(x => x.id === course.id || x.code === course.id);
+    if (c) {
+      c.enrolledStudents = (c.enrolledStudents || []).filter(s => s.id !== targetId);
+      c.enrolledStudentsCount = c.enrolledStudents.length;
+      writeDb(db);
+    }
+  }
+  res.json({ success: true, studentId: targetId });
+});
+
+// 9.04 API Bảng điểm cá nhân (fix lỗi 404 cho Gradebook.tsx)
+app.get('/api/grades', requireAuth, async (req, res) => {
+  const list = isMongoConnected
+    ? (await CourseModel.find()).map(c => c.toObject())
+    : (readDb().courses || []);
+  const records = await listProgress({ userId: req.user.id });
+  const byCourse = new Map();
+  records.forEach(p => {
+    if (!byCourse.has(p.courseId)) byCourse.set(p.courseId, []);
+    byCourse.get(p.courseId).push(p);
+  });
+
+  const rows = list.map(course => {
+    const acts = allActivities(course);
+    const mine = byCourse.get(course.id) || [];
+    const byAct = new Map(mine.map(p => [p.activityId, p]));
+    let completed = 0;
+    let quizSum = 0, quizCnt = 0;
+    let assignSum = 0, assignCnt = 0;
+    acts.forEach(a => {
+      const p = byAct.get(a.id);
+      if (p?.isCompleted) completed++;
+      if (a.type === 'quiz' && p?.score !== null && p?.score !== undefined) { quizSum += p.score; quizCnt++; }
+      if (a.type === 'assignment' && p?.score !== null && p?.score !== undefined) { assignSum += p.score; assignCnt++; }
+    });
+    const attendance = acts.length > 0 ? Number(((completed / acts.length) * 10).toFixed(1)) : null;
+    const quizAvg = quizCnt > 0 ? Number((quizSum / quizCnt).toFixed(1)) : null;
+    const assignAvg = assignCnt > 0 ? Number((assignSum / assignCnt).toFixed(1)) : null;
+    return {
+      courseId: course.id,
+      courseCode: course.code,
+      courseName: course.name,
+      progress: acts.length > 0 ? Math.round((completed / acts.length) * 100) : 0,
+      attendanceScore: attendance,
+      quizScore: quizAvg,
+      assignmentScore: assignAvg
+    };
+  });
+  res.json(rows);
+});
+
+app.get('/api/courses/:id/grades', requireAuth, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+  const acts = allActivities(course);
+  const records = await listProgress({ courseId: course.id, userId: req.user.id });
+  const byAct = new Map(records.map(p => [p.activityId, p]));
+  res.json(acts.map(a => {
+    const p = byAct.get(a.id);
+    return {
+      activityId: a.id,
+      title: a.title,
+      type: a.type,
+      score: p?.score ?? null,
+      maxScore: a.maxScore || 10,
+      isCompleted: !!p?.isCompleted,
+      videoProgress: p?.videoProgress || null,
+      feedback: p?.submission?.feedback || ''
+    };
+  }));
 });
 
 // 9.1 Thông báo lớp học (giáo viên đăng, lưu vào khóa học)
@@ -2212,11 +2826,11 @@ app.delete('/api/users/:userId', requireStaff, async (req, res) => {
   }
 });
 
-// 14. Students in Course — giáo viên nhận kèm tiến độ chi tiết của từng học sinh
+// 14. Students in Course — giáo viên nhận kèm tiến độ chi tiết của từng học sinh (khớp chính xác theo cả ID & Email)
 app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
   const course = await loadCourseObj(req.params.id);
   if (!course) return res.json([]);
-  const students = course.enrolledStudents || [];
+  const students = (course.enrolledStudents || []).filter(s => !FAKE_DEMO_STUDENT_IDS.has(s?.id));
 
   if (!isStaff(req.user)) {
     if (!isEnrolled(course, req.user)) {
@@ -2229,13 +2843,21 @@ app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
 
   const activities = allActivities(course);
   const records = await listProgress({ courseId: course.id });
-  const users = await findUsersByIds(students.map(s => s.id));
-  const userById = new Map(users.map(u => [u.id, u]));
+  const roster = await buildStudentRosterWithProgress(course, records);
 
-  res.json(students.map(s => {
-    const mine = new Map(records.filter(p => p.userId === s.id).map(p => [p.activityId, p]));
+  res.json(roster.map(({ student, records: mineList }) => {
+    const mine = new Map(mineList.map(p => [p.activityId, p]));
+    let totalScore = 0;
+    let scoreCount = 0;
+    let totalTimeSpentSeconds = 0;
+
     const detail = activities.map(a => {
       const p = mine.get(a.id);
+      if (p?.score !== null && p?.score !== undefined && Number.isFinite(p.score)) {
+        totalScore += p.score;
+        scoreCount++;
+      }
+      totalTimeSpentSeconds += p?.timeSpentSeconds || 0;
       return {
         activityId: a.id,
         title: a.title,
@@ -2248,19 +2870,23 @@ app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
         videoProgress: p?.videoProgress || null,
         submission: p?.submission || null,
         quizResult: p?.quizResult || null,
-        quizQuestions: a.quizQuestions || []
+        quizQuestions: a.quizQuestions || [],
+        timeSpentSeconds: p?.timeSpentSeconds || 0,
+        viewCount: p?.viewCount || 0,
+        lastAccessedAt: p?.lastAccessedAt || ''
       };
     });
     const completed = detail.filter(d => d.isCompleted).length;
     const lastActivityAt = [...mine.values()].map(p => p.updatedAt || '').sort().pop() || '';
-    const u = userById.get(s.id);
+    const progress = activities.length > 0 ? Math.round((completed / activities.length) * 100) : 0;
+
     return {
-      ...s,
-      code: u?.code || s.code || '',
-      className: u?.className || u?.classOrPosition || s.className || '',
+      ...student,
       totalActivities: activities.length,
       completedActivities: completed,
-      progress: activities.length > 0 ? Math.round((completed / activities.length) * 100) : 0,
+      progress,
+      averageScore: scoreCount > 0 ? Number((totalScore / scoreCount).toFixed(1)) : null,
+      totalTimeSpentSeconds,
       lastActivityAt,
       activities: detail
     };

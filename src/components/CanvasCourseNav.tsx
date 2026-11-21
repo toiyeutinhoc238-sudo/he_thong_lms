@@ -25,12 +25,12 @@ export const CanvasCourseNav: React.FC<CanvasCourseNavProps> = ({
 
   const navItems: { id: CourseNavTab; label: string }[] = [
     { id: 'home', label: 'Trang chủ' },
-    { id: 'discussions', label: 'Thảo luận' },
-    { id: 'grades', label: 'Số điểm' },
+    { id: 'modules', label: 'Nội dung học tập' },
+    { id: 'grades', label: 'Tiến độ & Sổ điểm' },
     { id: 'people', label: 'Thành viên' },
+    { id: 'discussions', label: 'Thảo luận' },
     { id: 'files', label: 'Các tập tin' },
     { id: 'syllabus', label: 'Lịch trình khóa học' },
-    { id: 'modules', label: 'Nội dung học tập' },
     { id: 'resources3d', label: 'Kho học liệu số & Mô phỏng 3D' },
   ];
 

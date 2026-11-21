@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import api from '../services/api';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -24,15 +25,18 @@ import {
   Code2,
   UploadCloud,
   Paperclip,
-  Loader2
+  Loader2,
+  Users,
+  BarChart3
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion } from '../types';
 
 interface CanvasModulesViewProps {
   onSelectActivity: (activityId: string) => void;
+  onOpenGradebook?: () => void;
 }
 
-export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectActivity }) => {
+export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectActivity, onOpenGradebook }) => {
   const { 
     activeCourse, 
     addCourseModule, 
@@ -96,6 +100,29 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
   // Modal Sửa Hoạt Động
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+
+  // Dữ liệu thống kê tiến độ lớp trực tiếp trên từng mô-đun & hoạt động (chỉ cho Giáo viên/Admin)
+  const [activityStatsMap, setActivityStatsMap] = useState<Record<string, any>>({});
+  const [moduleStatsMap, setModuleStatsMap] = useState<Record<string, any>>({});
+  const [classStudentCount, setClassStudentCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!canManage || !activeCourse?.id) return;
+    let cancelled = false;
+    api.courses.getGradebook(activeCourse.id)
+      .then(res => {
+        if (cancelled || !res) return;
+        const aMap: Record<string, any> = {};
+        (res.activities || []).forEach((a: any) => { if (a.stats) aMap[a.id] = a.stats; });
+        const mMap: Record<string, any> = {};
+        (res.modules || []).forEach((m: any) => { mMap[m.id] = m; });
+        setActivityStatsMap(aMap);
+        setModuleStatsMap(mMap);
+        setClassStudentCount(res.summary?.totalStudents || (res.students || []).length || 0);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [canManage, activeCourse?.id, activeCourse?.modules?.length]);
 
   if (!activeCourse) {
     return (
@@ -317,9 +344,24 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full border border-slate-300 bg-white text-[11px] font-medium text-slate-700 shadow-2xs">
-                      Hoàn thành tất cả các mục
-                    </span>
+                    {canManage && moduleStatsMap[mod.id] && activities.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenGradebook) onOpenGradebook();
+                        }}
+                        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-sky-200 bg-sky-50 hover:bg-sky-100 text-[11px] font-bold text-[#0374b5] shadow-2xs transition-colors"
+                        title="Xem chi tiết tiến độ học sinh cho bài học này"
+                      >
+                        <BarChart3 className="w-3 h-3" />
+                        <span>TB lớp: {moduleStatsMap[mod.id].avgCompletionPercent}%</span>
+                      </button>
+                    ) : (
+                      <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full border border-slate-300 bg-white text-[11px] font-medium text-slate-700 shadow-2xs">
+                        {activities.length > 0 ? `${activities.filter(a => a.isCompleted).length}/${activities.length} hoàn thành` : 'Hoàn thành tất cả các mục'}
+                      </span>
+                    )}
                     <Lock className="w-4 h-4 text-slate-600" />
 
                     {/* Hành động quản trị Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
@@ -442,6 +484,37 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                                     </>
                                   )}
                                 </p>
+                                {/* Huy hiệu tiến độ học tập trực tiếp ngay trên từng học liệu */}
+                                {canManage && activityStatsMap[act.id] ? (
+                                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-[10px] font-bold">
+                                      <Users className="w-3 h-3" />
+                                      {activityStatsMap[act.id].completedCount}/{classStudentCount} HS xong ({activityStatsMap[act.id].completionRate}%)
+                                    </span>
+                                    {act.type === 'video' && (
+                                      <span className="px-2 py-0.5 rounded-md bg-sky-50 text-[#0374b5] text-[10px] font-bold">
+                                        TB xem: {activityStatsMap[act.id].avgVideoPercent}%
+                                      </span>
+                                    )}
+                                    {activityStatsMap[act.id].avgScore !== null && activityStatsMap[act.id].avgScore !== undefined && (
+                                      <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold">
+                                        TB điểm: {activityStatsMap[act.id].avgScore}/10
+                                      </span>
+                                    )}
+                                    {(activityStatsMap[act.id].pendingGradingCount || 0) > 0 && (
+                                      <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-black">
+                                        {activityStatsMap[act.id].pendingGradingCount} bài chờ chấm
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : !canManage && act.type === 'video' && (act.videoProgress?.progressPercent || 0) > 0 && !act.isCompleted ? (
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                      <div className="h-full bg-amber-400" style={{ width: `${act.videoProgress?.progressPercent || 0}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-amber-700">Đã xem {act.videoProgress?.progressPercent}%</span>
+                                  </div>
+                                ) : null}
                               </div>
                             </div>
 

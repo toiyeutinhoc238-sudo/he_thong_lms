@@ -82,8 +82,10 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
     setIsSubmitting(true);
     setShowConfirmModal(false);
 
+    const elapsedSeconds = Math.max(1, timeLimitSeconds - timeLeft);
+
     // Điểm do máy chủ chấm theo đáp án
-    const res = await submitQuiz(courseId, activity.id, answersRef.current);
+    const res = await submitQuiz(courseId, activity.id, answersRef.current, elapsedSeconds);
     submittingRef.current = false;
     setIsSubmitting(false);
     if (!res) return; // lỗi đã được thông báo, học sinh có thể bấm nộp lại
@@ -98,6 +100,16 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
         origin: { y: 0.6 }
       });
     }
+    if (onFinish) onFinish();
+  };
+
+  const handleRetakeQuiz = () => {
+    setSelectedAnswers({});
+    setFlaggedQuestions({});
+    setCurrentIndex(0);
+    setTimeLeft(timeLimitSeconds);
+    setIsSubmitted(false);
+    setReviewQuestions(null);
   };
 
   const formatTime = (secs: number) => {
@@ -167,10 +179,28 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
               </h3>
               <p className="text-sm">
                 Điểm số đạt được: <strong className="text-2xl font-black">{quizResult.score}</strong> / {quizResult.maxScore}
+                {quizResult.correctCount !== undefined && quizResult.totalQuestions ? (
+                  <span className="ml-2 text-xs font-bold">
+                    ({quizResult.correctCount}/{quizResult.totalQuestions} câu đúng)
+                  </span>
+                ) : null}
               </p>
               <p className="text-xs opacity-75">
                 Nộp bài lúc: {quizResult.submittedAt}
+                {quizResult.attemptCount && quizResult.attemptCount > 1 ? ` • Lần làm thứ ${quizResult.attemptCount}` : ''}
               </p>
+              {!quizResult.passed && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleRetakeQuiz}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-all"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Làm lại bài kiểm tra để đạt chuẩn</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

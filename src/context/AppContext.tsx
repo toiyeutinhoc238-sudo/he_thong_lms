@@ -29,9 +29,10 @@ interface AppContextType {
   addForumReply: (topicId: string, content: string) => void;
   createForumTopic: (courseId: string, title: string, content: string) => Promise<boolean>;
   markActivityCompleted: (courseId: string, activityId: string) => void;
+  updateLocalVideoProgress: (courseId: string, activityId: string, videoProgress: NonNullable<Activity['videoProgress']>, isCompleted: boolean) => void;
   submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
-  submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
+  submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>, durationSeconds?: number) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
   addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
   updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
   deleteCourseModule: (courseId: string, moduleId: string) => Promise<void>;
@@ -365,6 +366,26 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     api.activities.markCompleted(courseId, activityId).catch(err => reportSyncFailure('Đánh dấu hoàn thành', err));
   };
 
+  const updateLocalVideoProgress = useCallback((courseId: string, activityId: string, videoProgress: NonNullable<Activity['videoProgress']>, isCompleted: boolean) => {
+    setCourses(prev => prev.map(course => {
+      if (course.id !== courseId) return course;
+      const updatedModules = (course.modules || []).map(module => ({
+        ...module,
+        activities: (module.activities || []).map(act => {
+          if (act.id !== activityId) return act;
+          return {
+            ...act,
+            isCompleted: act.isCompleted || isCompleted,
+            watchedSeconds: videoProgress.watchedSeconds,
+            videoDuration: videoProgress.totalSeconds || act.videoDuration,
+            videoProgress
+          };
+        })
+      }));
+      return calculateCourseProgress({ ...course, modules: updatedModules });
+    }));
+  }, []);
+
   const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => {
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
@@ -401,9 +422,9 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
   };
 
   // Bài trắc nghiệm do máy chủ chấm; giao diện chỉ hiển thị kết quả máy chủ trả về
-  const submitQuiz = async (courseId: string, activityId: string, answers: Record<string, number>) => {
+  const submitQuiz = async (courseId: string, activityId: string, answers: Record<string, number>, durationSeconds?: number) => {
     try {
-      const res = await api.activities.submitQuiz(courseId, activityId, { answers, score: 0, maxScore: 10 });
+      const res = await api.activities.submitQuiz(courseId, activityId, { answers, score: 0, maxScore: 10, durationSeconds });
       setCourses(prev => prev.map(course => {
         if (course.id !== courseId) return course;
         const updatedModules = (course.modules || []).map(m => ({
@@ -411,8 +432,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
           activities: (m.activities || []).map(act => act.id === activityId
             ? {
                 ...act,
-                isCompleted: res.result.passed,
-                score: res.result.score,
+                isCompleted: act.isCompleted || res.result.passed,
+                score: act.score !== undefined ? Math.max(act.score, res.result.score) : res.result.score,
                 quizResult: res.result,
                 quizQuestions: res.questions || act.quizQuestions
               }
@@ -731,6 +752,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         addForumReply,
         createForumTopic,
         markActivityCompleted,
+        updateLocalVideoProgress,
         submitAssignment,
         gradeAssignment,
         submitQuiz,

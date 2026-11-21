@@ -5,12 +5,16 @@
 import { Course, CourseModule, User, Certificate, NotificationItem, ForumTopic, Activity, GradeItem, QuizQuestion, CourseAnnouncement, CourseFile } from '../types';
 
 export interface StudentSubmission {
-  student: { id: string; name: string; email?: string; className?: string; avatar?: string };
+  student: { id: string; name: string; email?: string; code?: string; className?: string; avatar?: string };
   isCompleted: boolean;
   completedAt: string;
   score: number | null;
   submission: Activity['submission'] | null;
   quizResult: Activity['quizResult'] | null;
+  videoProgress?: Activity['videoProgress'] | null;
+  timeSpentSeconds?: number;
+  viewCount?: number;
+  lastAccessedAt?: string;
 }
 
 const API_BASE_URL =import.meta.env.VITE_API_BASE_URL || '/api';
@@ -103,17 +107,23 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(studentData || {})
     }),
-    enrollStudent: (courseId: string, studentData: { name: string; email: string; className?: string; code?: string; school?: string }) =>
+    enrollStudent: (courseId: string, studentData: { id?: string; name: string; email: string; className?: string; code?: string; school?: string; avatar?: string }) =>
       this.request<{ success: boolean; student: any }>(`/courses/${courseId}/enroll-student`, {
         method: 'POST',
         body: JSON.stringify(studentData)
+      }),
+    removeStudent: (courseId: string, studentId: string) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/students/${studentId}`, {
+        method: 'DELETE'
       }),
     getGradebook: (courseId: string) =>
       this.request<{
         courseId: string;
         courseName: string;
+        modules: any[];
         activities: any[];
         students: any[];
+        summary: any;
       }>(`/courses/${courseId}/gradebook`),
     getEnrolledStudents: (id: string) => this.request<any[]>(`/courses/${id}/students`)
   };
@@ -156,7 +166,12 @@ class ApiClient {
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'
       }),
-    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number }) =>
+    trackActivity: (courseId: string, activityId: string, data: { event?: 'view' | 'heartbeat'; deltaSeconds?: number; action?: string }) =>
+      this.request<{ success: boolean; viewCount: number; timeSpentSeconds: number; lastAccessedAt: string }>(`/courses/${courseId}/activities/${activityId}/track`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number; deltaSeconds?: number }) =>
       this.request<{ success: boolean; isCompleted: boolean; videoProgress: any; overallCourseProgress?: number }>(`/courses/${courseId}/activities/${activityId}/video-progress`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -174,7 +189,7 @@ class ApiClient {
     // Giáo viên: bài nộp / kết quả của từng học sinh cho một hoạt động
     getSubmissions: (courseId: string, activityId: string) =>
       this.request<StudentSubmission[]>(`/courses/${courseId}/activities/${activityId}/submissions`),
-    submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number }) => 
+    submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number; durationSeconds?: number }) => 
       this.request<{ success: boolean; passed: boolean; score: number; result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] }>(`/courses/${courseId}/activities/${activityId}/quiz-submit`, {
         method: 'POST',
         body: JSON.stringify(data)

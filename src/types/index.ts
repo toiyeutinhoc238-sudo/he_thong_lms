@@ -56,11 +56,20 @@ export interface EnrolledStudent {
   id: string;
   name: string;
   email: string;
+  code?: string;
   className?: string;
   school?: string;
   avatar?: string;
   enrolledAt: string;
   status?: string;
+}
+
+export interface VideoProgressInfo {
+  watchedSeconds: number;
+  lastPositionSeconds?: number;
+  totalSeconds: number;
+  progressPercent: number;
+  lastWatchedAt?: string;
 }
 
 export interface Activity {
@@ -74,10 +83,16 @@ export interface Activity {
   score?: number;
   maxScore?: number;
   description?: string;
+  // Telemetry & tracking
+  viewCount?: number;
+  timeSpentSeconds?: number;
+  firstAccessedAt?: string;
+  lastAccessedAt?: string;
   // Video specific
   videoUrl?: string;
   videoDuration?: number; // seconds
   watchedSeconds?: number;
+  videoProgress?: VideoProgressInfo;
   videoNotes?: { id: string; timestamp: number; note: string; createdAt: string }[];
   // Document specific
   fileUrl?: string;
@@ -98,6 +113,8 @@ export interface Activity {
     codeSubmission?: string;
     grade?: number;
     feedback?: string;
+    gradedAt?: string;
+    gradedBy?: string;
     status: 'not_submitted' | 'submitted' | 'graded';
   };
   // Quiz specific
@@ -110,6 +127,10 @@ export interface Activity {
     passed: boolean;
     submittedAt: string;
     answers: Record<string, number | number[]>;
+    correctCount?: number;
+    totalQuestions?: number;
+    attemptCount?: number;
+    durationSeconds?: number;
   };
   // Forum specific
   discussionsCount?: number;

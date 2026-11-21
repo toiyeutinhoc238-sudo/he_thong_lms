@@ -1,39 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  Settings, 
-  Plus, 
-  Users, 
-  CheckSquare, 
-  BookOpen, 
-  Sparkles, 
-  Award, 
-  FileText, 
-  UploadCloud, 
-  Play, 
-  HelpCircle,
-  Clock,
+import { CourseGradebookTracker } from './CourseGradebookTracker';
+import {
+  Plus,
+  BookOpen,
   CheckCircle2,
-  AlertCircle
+  ExternalLink,
+  BarChart3,
+  Layers,
+  Bell
 } from 'lucide-react';
 import { Activity } from '../types';
-import api from '../services/api';
 
 export const TeacherDashboard: React.FC = () => {
-  const { 
-    currentUser, 
-    courses, 
-    addCourseActivity, 
+  const {
+    currentUser,
+    courses,
+    addCourseActivity,
     addAnnouncement,
     navigateToCourse
   } = useApp();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>(courses[0]?.id || '');
-  const [selectedTab, setSelectedTab] = useState<'modules' | 'students' | 'announcements'>('modules');
-  const [enrolledStudents, setEnrolledStudents] = useState<any[]>([]);
-  const [loadingStudents, setLoadingStudents] = useState(false);
-  const [studentsError, setStudentsError] = useState<string | null>(null);
-  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<'progress' | 'modules' | 'announcements'>('progress');
 
   // Form states for adding new activity
   const [isAddActivityOpen, setIsAddActivityOpen] = useState(false);
@@ -51,38 +40,21 @@ export const TeacherDashboard: React.FC = () => {
 
   const selectedCourse = courses.find(c => c.id === selectedCourseId) || courses[0] || null;
 
-  // Load real students enrolled in selected course from API
   useEffect(() => {
-    if (selectedCourse?.id) {
-      setLoadingStudents(true);
-      api.users.getStudentsByCourse(selectedCourse.id)
-        .then(res => {
-          if (Array.isArray(res)) setEnrolledStudents(res);
-          setStudentsError(null);
-        })
-        .catch((err: any) => {
-          setEnrolledStudents([]);
-          setStudentsError(err?.message || 'Không tải được danh sách học sinh.');
-        })
-        .finally(() => {
-          setLoadingStudents(false);
-        });
+    if (!selectedCourseId && courses[0]?.id) {
+      setSelectedCourseId(courses[0].id);
     }
-  }, [selectedCourse?.id, selectedTab]);
-
-  const classAverage = enrolledStudents.length > 0
-    ? Math.round(enrolledStudents.reduce((sum, st) => sum + (st.progress || 0), 0) / enrolledStudents.length)
-    : 0;
+  }, [courses, selectedCourseId]);
 
   const handleCreateActivity = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !targetModuleId || !selectedCourse) return;
 
     addCourseActivity(selectedCourse.id, targetModuleId, {
-      title: newTitle,
+      title: newTitle.trim(),
       type: newType,
-      durationMinutes: Number(newDuration),
-      description: newDescription,
+      durationMinutes: Number(newDuration) || 15,
+      description: newDescription.trim(),
       isRequired: true
     });
 
@@ -96,7 +68,7 @@ export const TeacherDashboard: React.FC = () => {
     if (!ancTitle.trim() || !ancContent.trim() || !selectedCourse) return;
 
     const ok = await addAnnouncement(selectedCourse.id, ancTitle.trim(), ancContent.trim(), ancImportant);
-    if (!ok) return; // giữ nguyên nội dung để giáo viên thử lại
+    if (!ok) return;
     setAncTitle('');
     setAncContent('');
     setIsAncSuccess(true);
@@ -109,128 +81,132 @@ export const TeacherDashboard: React.FC = () => {
         <BookOpen className="w-16 h-16 text-slate-300 mx-auto" />
         <h2 className="text-xl font-bold text-slate-800">Chưa có khóa học nào để quản lý</h2>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
-          Danh sách khóa học giảng dạy sẽ xuất hiện khi bạn gọi API hoặc tạo khóa học mới từ backend.
+          Hãy tạo khóa học mới trong mục "Khóa học" để bắt đầu giảng dạy và theo dõi tiến độ học sinh.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 min-w-0 w-full p-6 max-w-7xl mx-auto space-y-6">
+    <div className="flex-1 min-w-0 w-full p-5 sm:p-6 max-w-7xl mx-auto space-y-5">
       {/* Studio Header */}
-      <div className="bg-gradient-to-r from-[#0374b5] via-sky-700 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4">
+      <div className="bg-gradient-to-r from-[#0374b5] via-sky-700 to-indigo-900 rounded-3xl p-6 text-white shadow-lg space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
-              Không gian Giáo Viên • LMS Nhóm 2
+            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider">
+              Trung tâm Giảng dạy & Giám sát • LMS Nhóm 2
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold">
-              Không Gian Quản Lý & Điều Phối Học Phần
+            <h1 className="text-xl sm:text-2xl font-extrabold">
+              Quản Lý Giảng Dạy & Theo Dõi Tiến Độ Học Sinh
             </h1>
             <p className="text-sky-100 text-xs sm:text-sm">
-              Giáo viên: <strong>{currentUser.name}</strong> • {currentUser.department}
+              Giáo viên: <strong>{currentUser.name || 'Giáo viên'}</strong> • {currentUser.email}
             </p>
           </div>
 
-          {/* Select Course dropdown */}
-          {courses.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 space-y-1 shrink-0">
+          {courses.length > 0 && selectedCourse && (
+            <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 space-y-2 shrink-0">
               <label className="text-xs text-sky-100 block font-semibold">
-                Chọn học phần giảng dạy:
+                Chọn khóa học đang theo dõi:
               </label>
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="bg-white text-slate-900 text-xs sm:text-sm font-bold px-3 py-2 rounded-xl focus:outline-none w-full sm:w-64"
-              >
-                {courses.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.code} - {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedCourse.id}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  className="bg-white text-slate-900 text-xs sm:text-sm font-bold px-3 py-2 rounded-xl focus:outline-none w-full sm:w-64"
+                >
+                  {courses.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.code} - {c.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => navigateToCourse(selectedCourse.id)}
+                  className="p-2 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors shrink-0"
+                  title="Mở trang chi tiết khóa học"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Selected Course Quick Stats */}
+      {/* Main Tabs Workspace */}
       {selectedCourse && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Học sinh ghi danh</p>
-            <h3 className="text-2xl font-black text-slate-800 mt-1">{selectedCourse.enrolledStudentsCount || enrolledStudents.length || 0}</h3>
-            <span className="text-[11px] text-hcmue-700 font-medium">Lớp học</span>
-          </div>
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-3 border-b border-slate-200 bg-slate-50/70 overflow-x-auto">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedTab('progress')}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  selectedTab === 'progress'
+                    ? 'bg-[#0374b5] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Theo dõi Tiến độ & Sổ điểm Học sinh</span>
+              </button>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Số lượng chương học</p>
-            <h3 className="text-2xl font-black text-sky-700 mt-1">{selectedCourse.modules?.length || 0}</h3>
-            <span className="text-[11px] text-slate-500 font-medium">{selectedCourse.totalActivities || 0} bài học</span>
-          </div>
+              <button
+                onClick={() => setSelectedTab('modules')}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  selectedTab === 'modules'
+                    ? 'bg-[#0374b5] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Quản lý Bài học ({selectedCourse.modules?.length || 0})</span>
+              </button>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Khối lớp & Phân môn</p>
-            <h3 className="text-xl font-black text-purple-600 mt-1">{selectedCourse.gradeLevel || 'Lớp 1 - 12'}</h3>
-            <span className="text-[11px] text-purple-700 font-medium">{selectedCourse.category}</span>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Tiến độ khóa học</p>
-            <h3 className="text-2xl font-black text-emerald-600 mt-1">{classAverage}%</h3>
-            <span className="text-[11px] text-emerald-700 font-medium">Trung bình lớp</span>
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      {selectedCourse && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3 overflow-x-auto">
-            <button
-              onClick={() => setSelectedTab('modules')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                selectedTab === 'modules'
-                  ? 'bg-[#0374b5] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              Quản lý Nội dung & Bài học
-            </button>
+              <button
+                onClick={() => setSelectedTab('announcements')}
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  selectedTab === 'announcements'
+                    ? 'bg-[#0374b5] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-200/70'
+                }`}
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Phát Thông báo Lớp học</span>
+              </button>
+            </div>
 
             <button
-              onClick={() => setSelectedTab('students')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                selectedTab === 'students'
-                  ? 'bg-[#0374b5] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              type="button"
+              onClick={() => navigateToCourse(selectedCourse.id)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-sky-50 text-[#0374b5] text-xs font-bold shrink-0"
             >
-              Danh sách Sinh viên & Tiến độ
-            </button>
-
-            <button
-              onClick={() => setSelectedTab('announcements')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                selectedTab === 'announcements'
-                  ? 'bg-[#0374b5] text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              Phát Thông báo Lớp học
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Vào trang khóa học</span>
             </button>
           </div>
 
-          {/* Tab 1: Module Management */}
+          {/* Tab 1: Full Student Progress & Gradebook Center */}
+          {selectedTab === 'progress' && (
+            <CourseGradebookTracker
+              course={selectedCourse}
+              canManage={true}
+              currentUser={currentUser}
+              onNavigateToModules={() => navigateToCourse(selectedCourse.id)}
+            />
+          )}
+
+          {/* Tab 2: Quick Module & Activity Management */}
           {selectedTab === 'modules' && (
-            <div className="pt-4 space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="p-5 sm:p-6 space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-extrabold text-slate-800 text-base">
-                    Cấu trúc Chuyên đề & Hoạt động
+                    Cấu trúc Chuyên đề & Hoạt động học tập
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Thêm video bài giảng, tài liệu, đề kiểm tra trắc nghiệm hoặc bài tập nộp
+                    Thêm nhanh video bài giảng, tài liệu, đề trắc nghiệm hoặc bài tập nộp trực tuyến
                   </p>
                 </div>
 
@@ -248,18 +224,15 @@ export const TeacherDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* Form to add activity */}
               {isAddActivityOpen && (
                 <form onSubmit={handleCreateActivity} className="p-5 bg-sky-50/60 border border-sky-200 rounded-2xl space-y-4">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-slate-800">
-                    Tạo hoạt động giảng dạy mới (Đẩy lên API)
+                    Tạo hoạt động giảng dạy mới
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Thuộc Chuyên đề nào?
-                      </label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Thuộc Bài học nào?</label>
                       <select
                         value={targetModuleId}
                         onChange={(e) => setTargetModuleId(e.target.value)}
@@ -273,9 +246,7 @@ export const TeacherDashboard: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Loại hình hoạt động
-                      </label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Loại hình hoạt động</label>
                       <select
                         value={newType}
                         onChange={(e) => setNewType(e.target.value as any)}
@@ -291,14 +262,12 @@ export const TeacherDashboard: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Tiêu đề hoạt động
-                    </label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Tiêu đề hoạt động</label>
                     <input
                       type="text"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="Ví dụ: Bài giảng Video: Phương pháp Dạy học..."
+                      placeholder="Ví dụ: Video bài giảng: Khám phá AI..."
                       className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#0374b5]"
                       required
                     />
@@ -306,9 +275,7 @@ export const TeacherDashboard: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Thời lượng dự kiến (phút)
-                      </label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Thời lượng dự kiến (phút)</label>
                       <input
                         type="number"
                         value={newDuration}
@@ -316,11 +283,8 @@ export const TeacherDashboard: React.FC = () => {
                         className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs"
                       />
                     </div>
-
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Mô tả ngắn
-                      </label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả ngắn</label>
                       <input
                         type="text"
                         value={newDescription}
@@ -349,153 +313,41 @@ export const TeacherDashboard: React.FC = () => {
                 </form>
               )}
 
-              {/* Modules display */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {(selectedCourse.modules || []).map((m) => (
-                  <div key={m.id} className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-slate-800 text-sm">
-                        {m.title}
-                      </h4>
-                      <span className="text-xs text-slate-500">
-                        {m.activities?.length || 0} hoạt động
-                      </span>
+                  <div key={m.id} className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-bold text-slate-800 text-sm">{m.title}</h4>
+                      <span className="text-xs text-slate-500 shrink-0">{m.activities?.length || 0} hoạt động</span>
                     </div>
 
-                    <div className="space-y-2">
-                      {(m.activities || []).map(act => (
-                        <div key={act.id} className="p-3 bg-white rounded-xl border border-slate-200/70 flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-[#0374b5]" />
-                            <span className="font-semibold text-slate-800">{act.title}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
-                              {act.type}
-                            </span>
+                    {(m.activities || []).length === 0 ? (
+                      <p className="text-xs text-slate-400 italic">Chưa có học liệu trong bài học này.</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {(m.activities || []).map(act => (
+                          <div key={act.id} className="p-2.5 bg-white rounded-xl border border-slate-200/70 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-2 h-2 rounded-full bg-[#0374b5] shrink-0" />
+                              <span className="font-semibold text-slate-800 truncate">{act.title}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 shrink-0">
+                                {act.type}
+                              </span>
+                            </div>
+                            <span className="text-slate-400 shrink-0">{act.durationMinutes} phút</span>
                           </div>
-                          <span className="text-slate-400">{act.durationMinutes} phút</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
-
-                {(!selectedCourse.modules || selectedCourse.modules.length === 0) && (
-                  <div className="p-8 text-center text-xs text-slate-400">
-                    Chưa có chuyên đề nào trong học phần này.
-                  </div>
-                )}
               </div>
-            </div>
-          )}
-
-          {/* Tab 2: Students List */}
-          {selectedTab === 'students' && (
-            <div className="pt-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-extrabold text-slate-800 text-base">
-                  Danh Sách Học Sinh Ghi Danh
-                </h3>
-                <span className="text-xs text-slate-500">
-                  {enrolledStudents.length} học sinh
-                </span>
-              </div>
-
-              {loadingStudents ? (
-                <div className="py-12 text-center text-xs text-slate-400">
-                  Đang tải danh sách học sinh từ API...
-                </div>
-              ) : studentsError ? (
-                <div className="py-4 px-4 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-xl">
-                  {studentsError}
-                </div>
-              ) : enrolledStudents.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-                      <tr>
-                        <th className="py-3 px-4">Mã số</th>
-                        <th className="py-3 px-4">Họ và Tên</th>
-                        <th className="py-3 px-4">Lớp học</th>
-                        <th className="py-3 px-4 text-center">Tiến độ</th>
-                        <th className="py-3 px-4 text-center">Hoạt động gần nhất</th>
-                        <th className="py-3 px-4 text-center">Chi tiết</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {enrolledStudents.map((st) => (
-                        <React.Fragment key={st.id}>
-                          <tr className="hover:bg-sky-50/40">
-                            <td className="py-3 px-4 font-mono font-bold text-hcmue-700">{st.code || '—'}</td>
-                            <td className="py-3 px-4">
-                              <div className="font-bold text-slate-800">{st.name}</div>
-                              <div className="text-[11px] text-slate-400">{st.email}</div>
-                            </td>
-                            <td className="py-3 px-4 text-slate-500">{st.className || '—'}</td>
-                            <td className="py-3 px-4 text-center">
-                              <span className="font-bold">{st.progress || 0}%</span>
-                              <div className="text-[11px] text-slate-400">
-                                {st.completedActivities || 0}/{st.totalActivities || 0} hoạt động
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 text-center text-slate-500">
-                              {st.lastActivityAt
-                                ? new Date(st.lastActivityAt).toLocaleString('vi-VN')
-                                : 'Chưa tham gia'}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <button
-                                type="button"
-                                onClick={() => setExpandedStudentId(expandedStudentId === st.id ? null : st.id)}
-                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-slate-700"
-                              >
-                                {expandedStudentId === st.id ? 'Ẩn' : 'Xem'}
-                              </button>
-                            </td>
-                          </tr>
-                          {expandedStudentId === st.id && (
-                            <tr className="bg-slate-50/60">
-                              <td colSpan={6} className="py-3 px-4">
-                                {(st.activities || []).length === 0 ? (
-                                  <span className="text-slate-400">Khóa học chưa có hoạt động nào.</span>
-                                ) : (
-                                  <ul className="space-y-1.5">
-                                    {(st.activities || []).map((a: any) => (
-                                      <li key={a.activityId} className="flex flex-wrap items-center gap-2">
-                                        <span className={`w-2 h-2 rounded-full ${a.isCompleted ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                                        <span className="font-semibold text-slate-800">{a.title}</span>
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">{a.type}</span>
-                                        <span className={a.isCompleted ? 'text-emerald-700 font-bold' : 'text-slate-400'}>
-                                          {a.isCompleted
-                                            ? `Hoàn thành${a.completedAt ? ' lúc ' + a.completedAt : ''}`
-                                            : a.submissionStatus === 'quiz_done' ? 'Đã làm bài, chưa đạt' : 'Chưa hoàn thành'}
-                                        </span>
-                                        {a.submissionStatus === 'submitted' && <span className="text-amber-700 font-bold">• Chờ chấm</span>}
-                                        {a.score !== null && a.score !== undefined && (
-                                          <span className="text-purple-700 font-bold">• Điểm: {a.score}/{a.maxScore}</span>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="py-12 text-center text-xs text-slate-400">
-                  Chưa có học sinh nào trong danh sách. Dữ liệu sẽ hiển thị khi học sinh tham gia khóa học.
-                </div>
-              )}
             </div>
           )}
 
           {/* Tab 3: Announcements Post */}
           {selectedTab === 'announcements' && (
-            <div className="pt-4 space-y-4 max-w-2xl">
+            <div className="p-5 sm:p-6 space-y-4 max-w-2xl">
               <h3 className="font-extrabold text-slate-800 text-base">
                 Gửi Thông báo Mới đến Toàn thể Học sinh Lớp học
               </h3>
@@ -509,23 +361,19 @@ export const TeacherDashboard: React.FC = () => {
 
               <form onSubmit={handlePostAnnouncement} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Tiêu đề thông báo
-                  </label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tiêu đề thông báo</label>
                   <input
                     type="text"
                     value={ancTitle}
                     onChange={(e) => setAncTitle(e.target.value)}
-                    placeholder="Ví dụ: Nhắc nhở hạn nộp bài tập..."
+                    placeholder="Ví dụ: Nhắc nhở hoàn thành bài trắc nghiệm Bài 1..."
                     className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5] focus:bg-white"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nội dung thông báo
-                  </label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nội dung thông báo</label>
                   <textarea
                     rows={4}
                     value={ancContent}
