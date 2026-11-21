@@ -13,11 +13,13 @@ interface AppContextType {
   activeCourse: Course | null;
   activeModuleId: string | null;
   setActiveModuleId: (moduleId: string | null) => void;
+  activeCourseTab: string;
+  setActiveCourseTab: (tab: string) => void;
   activeActivity: Activity | null;
   isEmbedMode: boolean;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
-  navigateToCourse: (courseId: string, moduleId?: string | null) => void;
+  navigateToCourse: (courseId: string, moduleId?: string | null, tab?: string) => void;
   navigateToActivity: (courseId: string, activityId: string) => void;
   importCoursePackage: (courseId: string, pkg: { modules: any[]; targetModuleId?: string | null }) => Promise<{ addedModules: number; addedActivities: number } | null>;
   trainingProgramFilter: TrainingType | 'all';
@@ -116,6 +118,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (typeof window === 'undefined') return null;
     return new URLSearchParams(window.location.search).get('module');
   });
+  const [activeCourseTab, setActiveCourseTab] = useState<string>('modules');
   const [activeActivityId, setActiveActivityId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     return new URLSearchParams(window.location.search).get('activity');
@@ -319,7 +322,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }
   }, [currentView, activeCourseId, activeModuleId, activeActivityId, isEmbedMode]);
 
-  const navigateToCourse = (courseId: string, moduleId?: string | null) => {
+  const navigateToCourse = (courseId: string, moduleId?: string | null, tab?: string) => {
     const target = courses.find(c => 
       c.id === courseId || 
       c.code === courseId || 
@@ -328,6 +331,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
 
     setActiveCourseId(target.id);
     setActiveModuleId(moduleId ?? null);
+    setActiveCourseTab(tab || (moduleId ? 'modules' : 'home'));
     setActiveActivityId(null);
     setCurrentView('course-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -800,6 +804,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         activeCourse,
         activeModuleId,
         setActiveModuleId,
+        activeCourseTab,
+        setActiveCourseTab,
         activeActivity,
         isEmbedMode,
         currentView,

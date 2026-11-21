@@ -10,13 +10,24 @@ interface CanvasTopBarProps {
 
 export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({ 
   onToggleCourseNav, 
-  onOpenAIAssistant,
-  activeCourseTab = 'Nội dung học tập'
+  onOpenAIAssistant
 }) => {
-  const { activeCourse, activeModuleId, setActiveModuleId, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
+  const { activeCourse, activeModuleId, setActiveModuleId, activeCourseTab, setActiveCourseTab, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
   const activeModule = activeCourse && activeModuleId
     ? (activeCourse.modules || []).find(m => m.id === activeModuleId)
     : null;
+
+  const tabLabels: Record<string, string> = {
+    home: 'Trang chủ khóa học',
+    modules: 'Nội dung học tập',
+    grades: 'Tiến độ & Sổ điểm',
+    people: 'Thành viên',
+    discussions: 'Thảo luận',
+    files: 'Các tập tin',
+    syllabus: 'Lịch trình khóa học',
+    resources3d: 'Kho học liệu 3D'
+  };
+  const resolvedTabLabel = tabLabels[activeCourseTab] || 'Nội dung học tập';
 
   return (
     <header className="h-14 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between z-20 shrink-0">
@@ -53,15 +64,17 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
               <button 
                 onClick={() => {
                   setActiveModuleId(null);
+                  setActiveCourseTab('home');
                   setCurrentView('course-detail');
                 }}
                 className="text-[#0374b5] hover:underline font-bold truncate max-w-[160px] sm:max-w-[240px]"
+                title="Xem tổng quan toàn bộ khóa học (tất cả bài học)"
               >
                 {activeCourse ? (activeCourse.code || activeCourse.name) : 'Khóa học'}
               </button>
               <span className="text-slate-400 font-normal">›</span>
               <span className="text-slate-700 font-medium truncate max-w-[180px] sm:max-w-[340px]">
-                {activeModule ? activeModule.title : activeCourseTab}
+                {activeModule ? activeModule.title : resolvedTabLabel}
               </span>
             </>
           )}

@@ -17,10 +17,15 @@ import {
   UserCheck,
   CheckCircle2,
   Layers,
-  Loader2
+  Loader2,
+  Share2,
+  BarChart3
 } from 'lucide-react';
 import { EditCourseModal } from './EditCourseModal';
+import { ShareExportModal } from './ShareExportModal';
 import { defaultGrade6Course } from '../data/mockData';
+import { CourseModule } from '../types';
+import api from '../services/api';
 
 export const CanvasCoursesList: React.FC = () => {
   const { 
@@ -48,6 +53,7 @@ export const CanvasCoursesList: React.FC = () => {
   const [editingLesson, setEditingLesson] = useState<{ courseId: string; moduleId: string; title: string } | null>(null);
   const [editLessonTitle, setEditLessonTitle] = useState('');
   const [isSavingLesson, setIsSavingLesson] = useState(false);
+  const [shareTarget, setShareTarget] = useState<{ course: Course; module?: CourseModule | null } | null>(null);
 
   const canManage = Boolean(
     currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
@@ -133,7 +139,12 @@ export const CanvasCoursesList: React.FC = () => {
         certificateEligible: true
       };
 
-      setCourses(prev => [newCourse, ...prev]);
+      try {
+        const saved = await api.courses.create(newCourse);
+        setCourses(prev => [saved || newCourse, ...prev]);
+      } catch {
+        setCourses(prev => [newCourse, ...prev]);
+      }
       setIsCreateModalOpen(false);
       setFormData({
         name: '',
@@ -320,15 +331,40 @@ export const CanvasCoursesList: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => navigateToCourse(mainCourse.id, null)}
-                  className="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0374b5] rounded-xl text-xs font-bold transition-all border border-sky-200 flex items-center gap-1"
+                  onClick={() => navigateToCourse(mainCourse.id, null, 'home')}
+                  className="px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                  title="Mở trang tổng quan khóa học với đầy đủ 8 bài, thông báo, sổ điểm và quản lý học liệu"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
-                  <span>Toàn bộ học phần</span>
+                  <span>Mở trang quản lý khóa học</span>
                 </button>
+
+                {canManage && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => navigateToCourse(mainCourse.id, null, 'grades')}
+                      className="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0374b5] rounded-xl text-xs font-bold transition-all border border-sky-200 flex items-center gap-1.5"
+                      title="Xem bảng theo dõi tiến độ học sinh, tỷ lệ xem video và điểm số"
+                    >
+                      <BarChart3 className="w-3.5 h-3.5" />
+                      <span>Tiến độ & Sổ điểm HS</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShareTarget({ course: mainCourse, module: null })}
+                      className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold transition-all border border-emerald-200 flex items-center gap-1.5"
+                      title="Lấy link chia sẻ, mã nhúng iframe hoặc xuất SCORM/IMSCC/Quiz/JSON sang LMS khác"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>Chia sẻ / Xuất LMS</span>
+                    </button>
+                  </>
+                )}
 
                 {isMainEnrolled ? (
                   <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1">
@@ -393,6 +429,14 @@ export const CanvasCoursesList: React.FC = () => {
                         </span>
                         {canManage && (
                           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => setShareTarget({ course: mainCourse, module: mod })}
+                              className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                              title="Chia sẻ link & Xuất bài học này sang LMS khác"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               onClick={() => {
                                 setEditingLesson({ courseId: mainCourse.id, moduleId: mod.id, title: mod.title });
@@ -722,6 +766,14 @@ export const CanvasCoursesList: React.FC = () => {
         }}
       />
         </>
+      )}
+
+      {shareTarget && (
+        <ShareExportModal
+          course={shareTarget.course}
+          module={shareTarget.module}
+          onClose={() => setShareTarget(null)}
+        />
       )}
     </div>
   );

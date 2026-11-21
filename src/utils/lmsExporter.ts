@@ -236,24 +236,24 @@ export function exportJsonPackage(course: Course, module?: CourseModule | null, 
     },
     modules: activity
       ? [{
-          id: module?.id || activity.moduleId,
-          title: module?.title || 'Học liệu nhập vào',
-          description: module?.description || '',
-          activities: [stripRuntimeFields(activity)]
-        }]
+        id: module?.id || activity.moduleId,
+        title: module?.title || 'Học liệu nhập vào',
+        description: module?.description || '',
+        activities: [stripRuntimeFields(activity)]
+      }]
       : module
         ? [{
-            id: module.id,
-            title: module.title,
-            description: module.description,
-            activities: (module.activities || []).map(stripRuntimeFields)
-          }]
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          activities: (module.activities || []).map(stripRuntimeFields)
+        }]
         : (course.modules || []).map(m => ({
-            id: m.id,
-            title: m.title,
-            description: m.description,
-            activities: (m.activities || []).map(stripRuntimeFields)
-          }))
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          activities: (m.activities || []).map(stripRuntimeFields)
+        }))
   };
 
   const base = activity?.title || module?.title || course.code || course.name;

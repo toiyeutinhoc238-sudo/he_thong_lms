@@ -45,6 +45,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
   const { 
     activeCourse: contextActiveCourse, 
     activeModuleId,
+    setActiveModuleId,
+    activeCourseTab,
+    setActiveCourseTab,
     isEmbedMode,
     courses,
     setCurrentView, 
@@ -64,7 +67,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     courses[0] || 
     defaultGrade6Course;
 
-  const [activeTab, setActiveTab] = useState<CourseNavTab>('modules');
+  const activeTab = (activeCourseTab as CourseNavTab) || 'modules';
+  const setActiveTab = (tab: CourseNavTab) => {
+    // Khi bấm "Trang chủ" hoặc "Nội dung học tập" ở menu trái, thoát chế độ lọc 1 bài lẻ để xem toàn bộ khóa học (8 bài)
+    if (tab === 'home' || tab === 'modules') {
+      setActiveModuleId(null);
+    }
+    setActiveCourseTab(tab);
+  };
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newTopicContent, setNewTopicContent] = useState('');
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
