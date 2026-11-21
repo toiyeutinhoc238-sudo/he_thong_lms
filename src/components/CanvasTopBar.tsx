@@ -13,7 +13,10 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
   onOpenAIAssistant,
   activeCourseTab = 'Nội dung học tập'
 }) => {
-  const { activeCourse, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
+  const { activeCourse, activeModuleId, setActiveModuleId, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
+  const activeModule = activeCourse && activeModuleId
+    ? (activeCourse.modules || []).find(m => m.id === activeModuleId)
+    : null;
 
   return (
     <header className="h-14 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between z-20 shrink-0">
@@ -48,13 +51,18 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
           {(currentView === 'course-detail' || currentView === 'activity') && (
             <>
               <button 
-                onClick={() => setCurrentView('course-detail')}
-                className="text-[#0374b5] hover:underline font-bold truncate max-w-[160px] sm:max-w-[280px]"
+                onClick={() => {
+                  setActiveModuleId(null);
+                  setCurrentView('course-detail');
+                }}
+                className="text-[#0374b5] hover:underline font-bold truncate max-w-[160px] sm:max-w-[240px]"
               >
                 {activeCourse ? (activeCourse.code || activeCourse.name) : 'Khóa học'}
               </button>
               <span className="text-slate-400 font-normal">›</span>
-              <span className="text-slate-700 font-medium truncate">{activeCourseTab}</span>
+              <span className="text-slate-700 font-medium truncate max-w-[180px] sm:max-w-[340px]">
+                {activeModule ? activeModule.title : activeCourseTab}
+              </span>
             </>
           )}
         </nav>

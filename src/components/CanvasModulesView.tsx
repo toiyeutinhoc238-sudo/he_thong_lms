@@ -27,7 +27,8 @@ import {
   Paperclip,
   Loader2,
   Users,
-  BarChart3
+  BarChart3,
+  ArrowLeft
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion } from '../types';
 
@@ -39,6 +40,9 @@ interface CanvasModulesViewProps {
 export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectActivity, onOpenGradebook }) => {
   const { 
     activeCourse, 
+    activeModuleId,
+    setActiveModuleId,
+    setCurrentView,
     addCourseModule, 
     updateCourseModule, 
     deleteCourseModule,
@@ -133,6 +137,8 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   }
 
   const modules = activeCourse.modules || [];
+  const focusedModule = activeModuleId ? modules.find(m => m.id === activeModuleId) || null : null;
+  const displayedModules = focusedModule ? [focusedModule] : modules;
 
   const toggleModule = (id: string) => {
     setCollapsedModules(prev => ({ ...prev, [id]: !prev[id] }));
@@ -251,27 +257,57 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   return (
     <div className="flex-1 min-w-0 py-5 px-4 sm:px-6 lg:px-8 space-y-4">
       {/* Top Action Bar */}
-      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200">
-        <div>
-          <h2 className="text-sm sm:text-base font-bold text-slate-900">
-            Nội dung học tập & Kho học liệu
-          </h2>
-          <p className="text-xs text-slate-500">
-            Quản lý các mô-đun, bài giảng video, bài tập, link tài liệu và bài kiểm tra
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
+        <div className="min-w-0">
+          {focusedModule ? (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('courses-list')}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Danh sách bài học</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveModuleId(null)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-xs font-bold transition-colors border border-sky-200"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Xem tất cả {modules.length} bài</span>
+                </button>
+              </div>
+              <h2 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-tight pt-1">
+                {focusedModule.title}
+              </h2>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                Nội dung học tập & Kho học liệu ({modules.length} bài học)
+              </h2>
+              <p className="text-xs text-slate-500">
+                Quản lý các mô-đun, bài giảng video, bài tập, link tài liệu và bài kiểm tra
+              </p>
+            </>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Nút Thu gọn / Mở rộng tất cả */}
-          <button
-            onClick={toggleAll}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-md text-xs font-semibold text-slate-800 transition-colors shadow-2xs"
-          >
-            {allCollapsed ? 'Mở Rộng Tất Cả' : 'Thu Gọn Tất Cả'}
-          </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Nút Thu gọn / Mở rộng tất cả (chỉ hiện khi đang xem nhiều bài) */}
+          {!focusedModule && (
+            <button
+              onClick={toggleAll}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-md text-xs font-semibold text-slate-800 transition-colors shadow-2xs"
+            >
+              {allCollapsed ? 'Mở Rộng Tất Cả' : 'Thu Gọn Tất Cả'}
+            </button>
+          )}
 
           {/* Nút + Thêm Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
-          {canManage && (
+          {canManage && !focusedModule && (
             <button
               onClick={() => setIsAddModuleOpen(true)}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-md text-xs font-bold transition-all shadow-xs"
@@ -283,8 +319,39 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       </div>
 
+      {/* Thanh chuyển nhanh giữa các bài học khi đang xem riêng 1 bài */}
+      {focusedModule && modules.length > 1 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {modules.map((m, i) => {
+            const isActive = m.id === focusedModule.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setActiveModuleId(m.id)}
+                title={m.title}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
+                  isActive
+                    ? 'bg-[#0374b5] text-white border-[#0374b5] shadow-xs'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-[#0374b5] hover:text-[#0374b5]'
+                }`}
+              >
+                Bài {i + 1}
+                {(m.activities || []).length > 0 && (
+                  <span className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {(m.activities || []).length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Modules List Container */}
-      {modules.length === 0 ? (
+      {displayedModules.length === 0 ? (
         <div className="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center space-y-3 bg-white my-6 shadow-2xs">
           <div className="w-14 h-14 rounded-2xl bg-sky-50 text-[#0374b5] flex items-center justify-center mx-auto">
             <Layers className="w-7 h-7" />
@@ -309,8 +376,8 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       ) : (
         <div className="space-y-4">
-          {modules.map((mod) => {
-            const isCollapsed = collapsedModules[mod.id] ?? false;
+          {displayedModules.map((mod) => {
+            const isCollapsed = focusedModule ? false : (collapsedModules[mod.id] ?? false);
             const activities = mod.activities || [];
 
             return (

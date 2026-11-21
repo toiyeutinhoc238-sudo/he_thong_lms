@@ -11,10 +11,12 @@ interface AppContextType {
   courses: Course[];
   setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   activeCourse: Course | null;
+  activeModuleId: string | null;
+  setActiveModuleId: (moduleId: string | null) => void;
   activeActivity: Activity | null;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
-  navigateToCourse: (courseId: string) => void;
+  navigateToCourse: (courseId: string, moduleId?: string | null) => void;
   navigateToActivity: (courseId: string, activityId: string) => void;
   trainingProgramFilter: TrainingType | 'all';
   setTrainingProgramFilter: (filter: TrainingType | 'all') => void;
@@ -100,6 +102,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<AppView>('courses-list');
   const [trainingProgramFilter, setTrainingProgramFilter] = useState<TrainingType | 'all'>('all');
@@ -271,7 +274,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }
   }, [currentUser?.email, currentUser?.role]);
 
-  const navigateToCourse = (courseId: string) => {
+  const navigateToCourse = (courseId: string, moduleId?: string | null) => {
     const target = courses.find(c => 
       c.id === courseId || 
       c.code === courseId || 
@@ -279,6 +282,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     ) || courses[0] || defaultGrade6Course;
 
     setActiveCourseId(target.id);
+    setActiveModuleId(moduleId ?? null);
     setActiveActivityId(null);
     setCurrentView('course-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -734,6 +738,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         courses,
         setCourses,
         activeCourse,
+        activeModuleId,
+        setActiveModuleId,
         activeActivity,
         currentView,
         setCurrentView,

@@ -323,7 +323,7 @@ export const CanvasCoursesList: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => navigateToCourse(mainCourse.id)}
+                  onClick={() => navigateToCourse(mainCourse.id, null)}
                   className="px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#0374b5] rounded-xl text-xs font-bold transition-all border border-sky-200 flex items-center gap-1"
                 >
                   <BookOpen className="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ export const CanvasCoursesList: React.FC = () => {
                   return (
                     <div
                       key={mod.id}
-                      onClick={() => navigateToCourse(mainCourse.id)}
+                      onClick={() => navigateToCourse(mainCourse.id, mod.id)}
                       className="bg-white rounded-2xl border-2 border-slate-200 hover:border-[#0374b5] p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 min-h-[170px]"
                     >
                       <div className="space-y-2.5">
