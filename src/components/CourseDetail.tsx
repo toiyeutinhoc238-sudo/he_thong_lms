@@ -45,6 +45,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
   const { 
     activeCourse: contextActiveCourse, 
     activeModuleId,
+    isEmbedMode,
     courses,
     setCurrentView, 
     navigateToActivity, 
@@ -1014,8 +1015,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         )}
       </div>
 
-      {/* 3. Right Action Sidebar (Xem luồng khóa học, Xem lịch, Cần làm) */}
-      <CanvasRightSidebar onNavigateTab={setActiveTab} />
+      {/* 3. Right Action Sidebar (Xem luồng khóa học, Xem lịch, Cần làm) — ẩn khi đang nhúng iframe embed=1 */}
+      {!isEmbedMode && <CanvasRightSidebar onNavigateTab={setActiveTab} />}
     </div>
   );
 };

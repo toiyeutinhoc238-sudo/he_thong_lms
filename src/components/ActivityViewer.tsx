@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { QuizEngine } from './QuizEngine';
 import { AssignmentSubmitter } from './AssignmentSubmitter';
 import { VideoPlayerTracker } from './VideoPlayerTracker';
+import { ShareExportModal } from './ShareExportModal';
 import api, { StudentSubmission } from '../services/api';
 import { Activity, QuizQuestion } from '../types';
 import {
@@ -20,7 +21,9 @@ import {
   X,
   Play,
   HelpCircle,
-  Download
+  Download,
+  Share2,
+  Loader2
 } from 'lucide-react';
 
 function formatDurationCompact(secs?: number) {
@@ -325,12 +328,22 @@ export const ActivityViewer: React.FC = () => {
   const {
     activeCourse,
     activeActivity,
+    isEmbedMode,
+    isLoading,
     setCurrentView,
     markActivityCompleted,
     navigateToActivity,
     currentUser,
     activeRole
   } = useApp();
+
+  const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const isSingleActivityEmbed = Boolean(
+    isEmbedMode &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('activity')
+  );
 
   const canManage = Boolean(
     currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
@@ -375,18 +388,32 @@ export const ActivityViewer: React.FC = () => {
   }, [activeCourse?.id, activeActivity?.id, activeActivity?.type, currentUser?.id, canManage]);
 
   if (!activeCourse || !activeActivity) {
+    if (isLoading) {
+      return (
+        <div className="flex-1 w-full flex flex-col items-center justify-center py-24 gap-3 text-slate-500">
+          <Loader2 className="w-7 h-7 animate-spin text-[#0374b5]" />
+          <p className="text-xs font-semibold">Đang tải nội dung hoạt động học tập...</p>
+        </div>
+      );
+    }
     return (
       <div className="flex-1 w-full text-center py-20 space-y-4">
         <p className="text-slate-600">Không tìm thấy hoạt động học tập.</p>
-        <button
-          onClick={() => setCurrentView('course-detail')}
-          className="px-4 py-2 bg-[#0374b5] text-white rounded-lg text-xs font-bold"
-        >
-          Quay lại khóa học
-        </button>
+        {!isSingleActivityEmbed && (
+          <button
+            onClick={() => setCurrentView('course-detail')}
+            className="px-4 py-2 bg-[#0374b5] text-white rounded-lg text-xs font-bold"
+          >
+            Quay lại khóa học
+          </button>
+        )}
       </div>
     );
   }
+
+  const parentModule = (activeCourse.modules || []).find(m =>
+    m.id === activeActivity.moduleId || (m.activities || []).some(a => a.id === activeActivity.id)
+  ) || null;
 
   // Tìm bài học tiếp theo trong khóa học
   let nextAct: { courseId: string; activityId: string; title: string } | null = null;
@@ -415,15 +442,33 @@ export const ActivityViewer: React.FC = () => {
     <div className="flex-1 min-w-0 w-full p-6 max-w-5xl mx-auto space-y-6">
       {/* Navigation Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <button
-          onClick={() => setCurrentView('course-detail')}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#0374b5] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Trở về: {activeCourse.name}</span>
-        </button>
+        {!isSingleActivityEmbed ? (
+          <button
+            onClick={() => setCurrentView('course-detail')}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#0374b5] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Trở về: {activeCourse.name}</span>
+          </button>
+        ) : (
+          <div className="text-xs font-bold text-slate-500">
+            {activeCourse.code} • {activeActivity.title}
+          </div>
+        )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {canManage && !isEmbedMode && (
+            <button
+              type="button"
+              onClick={() => setIsShareOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors"
+              title="Lấy link trực tiếp, mã nhúng iframe hoặc xuất gói SCORM / Quiz / JSON"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Chia sẻ / Xuất</span>
+            </button>
+          )}
+
           {activeActivity.type !== 'quiz' && (
             activeActivity.isCompleted ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
@@ -441,7 +486,7 @@ export const ActivityViewer: React.FC = () => {
             )
           )}
 
-          {nextAct && (
+          {nextAct && !isSingleActivityEmbed && (
             <button
               onClick={() => navigateToActivity(nextAct!.courseId, nextAct!.activityId)}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-xs font-bold transition-all"
@@ -599,8 +644,18 @@ export const ActivityViewer: React.FC = () => {
       )}
 
       {/* GIÁO VIÊN: BẢNG GIÁM SÁT TIẾN ĐỘ HỌC SINH NGAY TRONG HOẠT ĐỘNG (Video, Quiz, Document, Forum) */}
-      {canManage && activeActivity.type !== 'assignment' && (
+      {canManage && !isEmbedMode && activeActivity.type !== 'assignment' && (
         <TeacherActivityMonitor courseId={activeCourse.id} activity={activeActivity} />
+      )}
+
+      {/* MODAL CHIA SẺ LINK / NHÚNG IFRAME / XUẤT GÓI SCORM-QUIZ-JSON */}
+      {isShareOpen && (
+        <ShareExportModal
+          course={activeCourse}
+          module={parentModule}
+          activity={activeActivity}
+          onClose={() => setIsShareOpen(false)}
+        />
       )}
     </div>
   );

@@ -28,10 +28,13 @@ import {
   Loader2,
   Users,
   BarChart3,
-  ArrowLeft
+  ArrowLeft,
+  Share2,
+  FolderInput
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion, VideoCheckpoint } from '../types';
 import { VideoCheckpointEditor } from './VideoCheckpointEditor';
+import { ShareExportModal } from './ShareExportModal';
 
 interface CanvasModulesViewProps {
   onSelectActivity: (activityId: string) => void;
@@ -52,11 +55,15 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     deleteCourseActivity,
     currentUser,
     activeRole,
-    uploadCourseFile
+    uploadCourseFile,
+    importCoursePackage,
+    isEmbedMode
   } = useApp();
 
   const [isUploadingActFile, setIsUploadingActFile] = useState(false);
   const [uploadedActFileName, setUploadedActFileName] = useState('');
+  const [shareTarget, setShareTarget] = useState<{ module?: CourseModule | null; activity?: Activity | null } | null>(null);
+  const [isImportingPkg, setIsImportingPkg] = useState(false);
 
   // Phân quyền: Học viên tuyệt đối KHÔNG được thêm/sửa/xóa học liệu hoặc mô-đun
   // Chỉ Quản trị viên (phanphiphu04@gmail.com / admin) hoặc Giáo viên mới có quyền toàn quyền thêm/xóa/sửa
@@ -279,6 +286,41 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     setEditingActivity(null);
   };
 
+  // 5. Nhập gói học liệu (.json) đã xuất từ khóa học / LMS khác
+  const handleImportJsonPackage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !activeCourse) return;
+
+    setIsImportingPkg(true);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const pkgModules = Array.isArray(parsed?.modules)
+        ? parsed.modules
+        : Array.isArray(parsed?.activities)
+          ? [{ title: parsed.title || 'Học liệu nhập vào', description: parsed.description || '', activities: parsed.activities }]
+          : null;
+
+      if (!pkgModules || pkgModules.length === 0) {
+        alert('Tệp JSON không đúng định dạng gói học liệu LMS (không tìm thấy danh sách mô-đun/hoạt động).');
+        return;
+      }
+
+      const res = await importCoursePackage(activeCourse.id, {
+        modules: pkgModules,
+        targetModuleId: focusedModule?.id || null
+      });
+      if (res) {
+        alert(`✅ Nhập học liệu thành công!\n• Mô-đun mới: ${res.addedModules}\n• Hoạt động/Học liệu đã thêm: ${res.addedActivities}`);
+      }
+    } catch (err: any) {
+      alert('Không thể đọc tệp JSON học liệu: ' + (err?.message || 'Lỗi định dạng'));
+    } finally {
+      setIsImportingPkg(false);
+    }
+  };
+
   return (
     <div className="flex-1 min-w-0 py-5 px-4 sm:px-6 lg:px-8 space-y-4">
       {/* Top Action Bar */}
@@ -286,24 +328,26 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         <div className="min-w-0">
           {focusedModule ? (
             <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('courses-list')}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Danh sách bài học</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveModuleId(null)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-xs font-bold transition-colors border border-sky-200"
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Xem tất cả {modules.length} bài</span>
-                </button>
-              </div>
+              {!isEmbedMode && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentView('courses-list')}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Danh sách bài học</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModuleId(null)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-xs font-bold transition-colors border border-sky-200"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Xem tất cả {modules.length} bài</span>
+                  </button>
+                </div>
+              )}
               <h2 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-tight pt-1">
                 {focusedModule.title}
               </h2>
@@ -320,7 +364,37 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
           )}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Nút Chia sẻ Link & Xuất sang LMS khác */}
+          {canManage && !isEmbedMode && (
+            <button
+              type="button"
+              onClick={() => setShareTarget({ module: focusedModule || null, activity: null })}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-md text-xs font-bold transition-colors shadow-2xs"
+              title="Lấy link trực tiếp, mã nhúng iframe hoặc xuất SCORM/IMSCC/Quiz/JSON sang LMS khác"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Chia sẻ / Xuất LMS</span>
+            </button>
+          )}
+
+          {/* Nút Nhập gói học liệu (.json) */}
+          {canManage && !isEmbedMode && (
+            <label
+              className={`flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-xs font-bold transition-colors shadow-2xs cursor-pointer ${isImportingPkg ? 'opacity-60 pointer-events-none' : ''}`}
+              title={focusedModule ? `Nhập học liệu JSON vào thẳng "${focusedModule.title}"` : 'Nhập gói mô-đun & học liệu (.json) vào khóa học'}
+            >
+              {isImportingPkg ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FolderInput className="w-3.5 h-3.5 text-[#0374b5]" />}
+              <span>{isImportingPkg ? 'Đang nhập...' : 'Nhập gói (.json)'}</span>
+              <input
+                type="file"
+                accept=".json,application/json"
+                onChange={handleImportJsonPackage}
+                className="hidden"
+              />
+            </label>
+          )}
+
           {/* Nút Thu gọn / Mở rộng tất cả (chỉ hiện khi đang xem nhiều bài) */}
           {!focusedModule && (
             <button
@@ -332,7 +406,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
           )}
 
           {/* Nút + Thêm Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
-          {canManage && !focusedModule && (
+          {canManage && !focusedModule && !isEmbedMode && (
             <button
               onClick={() => setIsAddModuleOpen(true)}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-md text-xs font-bold transition-all shadow-xs"
@@ -470,8 +544,21 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     <Lock className="w-4 h-4 text-slate-600" />
 
                     {/* Hành động quản trị Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
-                    {canManage && (
+                    {canManage && !isEmbedMode && (
                       <>
+                        {/* Chia sẻ Link & Xuất Mô-đun sang LMS khác */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShareTarget({ module: mod, activity: null });
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                          title="Chia sẻ link & Xuất mô-đun này sang LMS khác (SCORM/IMSCC/JSON)"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+
                         {/* Sửa Mô-đun */}
                         <button
                           type="button"
@@ -633,10 +720,20 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                               </div>
                             </div>
 
-                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Sửa / Xóa) */}
+                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Chia sẻ / Sửa / Xóa) */}
                             <div className="flex items-center gap-2 shrink-0 pl-3">
-                              {canManage && (
+                              {canManage && !isEmbedMode && (
                                 <>
+                                  {/* Share / Export Activity Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => setShareTarget({ module: mod, activity: act })}
+                                    className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors opacity-75 group-hover:opacity-100"
+                                    title="Chia sẻ link, mã nhúng iframe hoặc xuất SCORM/Quiz sang LMS khác"
+                                  >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                  </button>
+
                                   {/* Edit Activity Button */}
                                   <button
                                     onClick={() => setEditingActivity(act)}
@@ -1608,6 +1705,16 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       )}
         </>
+      )}
+
+      {/* MODAL CHIA SẺ LINK / MÃ NHÚNG IFRAME / XUẤT GÓI SCORM-IMSCC-QUIZ-JSON */}
+      {shareTarget && (
+        <ShareExportModal
+          course={activeCourse}
+          module={shareTarget.module}
+          activity={shareTarget.activity}
+          onClose={() => setShareTarget(null)}
+        />
       )}
     </div>
   );

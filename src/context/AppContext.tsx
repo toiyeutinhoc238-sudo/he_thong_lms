@@ -14,10 +14,12 @@ interface AppContextType {
   activeModuleId: string | null;
   setActiveModuleId: (moduleId: string | null) => void;
   activeActivity: Activity | null;
+  isEmbedMode: boolean;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
   navigateToCourse: (courseId: string, moduleId?: string | null) => void;
   navigateToActivity: (courseId: string, activityId: string) => void;
+  importCoursePackage: (courseId: string, pkg: { modules: any[]; targetModuleId?: string | null }) => Promise<{ addedModules: number; addedActivities: number } | null>;
   trainingProgramFilter: TrainingType | 'all';
   setTrainingProgramFilter: (filter: TrainingType | 'all') => void;
   searchQuery: string;
@@ -101,10 +103,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [defaultGrade6Course];
   });
 
-  const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
-  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
-  const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>('courses-list');
+  const [isEmbedMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('embed') === '1';
+  });
+
+  const [activeCourseId, setActiveCourseId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get('course');
+  });
+  const [activeModuleId, setActiveModuleId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get('module');
+  });
+  const [activeActivityId, setActiveActivityId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return new URLSearchParams(window.location.search).get('activity');
+  });
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    if (typeof window === 'undefined') return 'courses-list';
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get('activity')) return 'activity';
+    if (sp.get('course')) return 'course-detail';
+    return 'courses-list';
+  });
   const [trainingProgramFilter, setTrainingProgramFilter] = useState<TrainingType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
@@ -273,6 +295,24 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       }));
     }
   }, [currentUser?.email, currentUser?.role]);
+
+  // Đồng bộ URL trình duyệt theo khóa học / bài học / hoạt động đang mở (hỗ trợ chia sẻ Deep Link)
+  useEffect(() => {
+    if (typeof window === 'undefined' || isEmbedMode) return;
+    const qs = new URLSearchParams();
+    if (currentView === 'course-detail' && activeCourseId) {
+      qs.set('course', activeCourseId);
+      if (activeModuleId) qs.set('module', activeModuleId);
+    } else if (currentView === 'activity' && activeCourseId && activeActivityId) {
+      qs.set('course', activeCourseId);
+      if (activeModuleId) qs.set('module', activeModuleId);
+      qs.set('activity', activeActivityId);
+    }
+    const nextUrl = qs.toString() ? `${window.location.pathname}?${qs.toString()}` : window.location.pathname;
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      window.history.replaceState(null, '', nextUrl);
+    }
+  }, [currentView, activeCourseId, activeModuleId, activeActivityId, isEmbedMode]);
 
   const navigateToCourse = (courseId: string, moduleId?: string | null) => {
     const target = courses.find(c => 
@@ -529,6 +569,21 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     api.modules.delete(courseId, moduleId).catch(err => reportSyncFailure('Xóa mô-đun', err));
   };
 
+  const importCoursePackage = async (courseId: string, pkg: { modules: any[]; targetModuleId?: string | null }) => {
+    try {
+      const res = await api.courses.importPackage(courseId, pkg);
+      if (res?.course) {
+        setCourses(prev => prev.map(c => c.id === courseId ? res.course : c));
+      } else {
+        await refreshData();
+      }
+      return { addedModules: res?.addedModules || 0, addedActivities: res?.addedActivities || 0 };
+    } catch (err) {
+      reportSyncFailure('Nhập gói học liệu', err);
+      return null;
+    }
+  };
+
   const updateCourseActivity = (courseId: string, activityId: string, data: Partial<Activity>) => {
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
@@ -741,10 +796,12 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         activeModuleId,
         setActiveModuleId,
         activeActivity,
+        isEmbedMode,
         currentView,
         setCurrentView,
         navigateToCourse,
         navigateToActivity,
+        importCoursePackage,
         trainingProgramFilter,
         setTrainingProgramFilter,
         searchQuery,

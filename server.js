@@ -100,9 +100,12 @@ app.use('/uploads', express.static(uploadsDir, {
 }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  // Cho phép nhúng giao diện học liệu bằng <iframe> vào các LMS khác (Moodle, Canvas, Google Sites...)
+  if (req.path.startsWith('/api/')) {
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Cache-Control', 'no-store');
+  }
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  if (req.path.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
   next();
 });
 
@@ -111,7 +114,7 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
-  version: '2.3-quiz-timer-video-checkpoints',
+  version: '2.4-share-export-scorm',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   uptime: process.uptime(),
   timestamp: new Date().toISOString()
@@ -2338,6 +2341,101 @@ app.delete('/api/courses/:id/students/:studentId', requireStaff, async (req, res
     }
   }
   res.json({ success: true, studentId: targetId });
+});
+
+// 9.035 Nhập gói học liệu / mô-đun từ file JSON đã xuất (chuyển giữa các khóa học hoặc LMS)
+app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+
+  const incomingModules = Array.isArray(req.body?.modules) ? req.body.modules : [];
+  if (incomingModules.length === 0) {
+    return res.status(400).json({ message: 'Tệp gói học liệu không chứa mô-đun hoặc hoạt động nào.' });
+  }
+
+  const targetModuleId = req.body.targetModuleId || null;
+  let addedModules = 0;
+  let addedActivities = 0;
+
+  const normalizeActivity = (a, modId, idx) => ({
+    ...a,
+    id: `act-${Date.now()}-${Math.floor(Math.random() * 10000)}-${idx}`,
+    moduleId: modId,
+    isCompleted: false
+  });
+
+  if (isMongoConnected) {
+    const doc = await getCourseDoc(course.id);
+    if (!doc) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+    doc.modules = doc.modules || [];
+
+    if (targetModuleId) {
+      const targetMod = doc.modules.find(m => m.id === targetModuleId);
+      if (targetMod) {
+        targetMod.activities = targetMod.activities || [];
+        incomingModules.forEach(im => {
+          (im.activities || []).forEach((a, idx) => {
+            targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
+            addedActivities++;
+          });
+        });
+      }
+    } else {
+      incomingModules.forEach((im, mIdx) => {
+        const newModId = `mod-${Date.now()}-${mIdx}-${Math.floor(Math.random() * 1000)}`;
+        const acts = (im.activities || []).map((a, idx) => normalizeActivity(a, newModId, idx));
+        addedActivities += acts.length;
+        addedModules++;
+        doc.modules.push({
+          id: newModId,
+          courseId: doc.id,
+          order: doc.modules.length + 1,
+          title: im.title || `Mô-đun nhập #${doc.modules.length + 1}`,
+          description: im.description || '',
+          activities: acts
+        });
+      });
+    }
+    doc.totalActivities = doc.modules.reduce((s, m) => s + (m.activities || []).length, 0);
+    doc.markModified('modules');
+    await doc.save();
+    return res.json({ success: true, addedModules, addedActivities, course: await viewCourseFor(doc.toObject(), req.user) });
+  } else {
+    const db = readDb();
+    const c = (db.courses || []).find(x => x.id === course.id || x.code === course.id);
+    if (!c) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+    c.modules = c.modules || [];
+    if (targetModuleId) {
+      const targetMod = c.modules.find(m => m.id === targetModuleId);
+      if (targetMod) {
+        targetMod.activities = targetMod.activities || [];
+        incomingModules.forEach(im => {
+          (im.activities || []).forEach((a, idx) => {
+            targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
+            addedActivities++;
+          });
+        });
+      }
+    } else {
+      incomingModules.forEach((im, mIdx) => {
+        const newModId = `mod-${Date.now()}-${mIdx}-${Math.floor(Math.random() * 1000)}`;
+        const acts = (im.activities || []).map((a, idx) => normalizeActivity(a, newModId, idx));
+        addedActivities += acts.length;
+        addedModules++;
+        c.modules.push({
+          id: newModId,
+          courseId: c.id,
+          order: c.modules.length + 1,
+          title: im.title || `Mô-đun nhập #${c.modules.length + 1}`,
+          description: im.description || '',
+          activities: acts
+        });
+      });
+    }
+    c.totalActivities = c.modules.reduce((s, m) => s + (m.activities || []).length, 0);
+    writeDb(db);
+    return res.json({ success: true, addedModules, addedActivities, course: await viewCourseFor(c, req.user) });
+  }
 });
 
 // 9.04 API Bảng điểm cá nhân (fix lỗi 404 cho Gradebook.tsx)

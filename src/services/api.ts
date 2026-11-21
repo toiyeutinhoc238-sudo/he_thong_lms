@@ -116,6 +116,11 @@ class ApiClient {
       this.request<{ success: boolean }>(`/courses/${courseId}/students/${studentId}`, {
         method: 'DELETE'
       }),
+    importPackage: (courseId: string, data: { modules: any[]; targetModuleId?: string | null }) =>
+      this.request<{ success: boolean; addedModules: number; addedActivities: number; course: Course }>(`/courses/${courseId}/import-package`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
     getGradebook: (courseId: string) =>
       this.request<{
         courseId: string;

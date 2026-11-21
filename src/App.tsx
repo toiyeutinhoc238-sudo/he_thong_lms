@@ -30,22 +30,24 @@ const ViewLoader: React.FC = () => (
 );
 
 const MainLayout: React.FC = () => {
-  const { currentView } = useApp();
-  const [isCourseNavOpen, setIsCourseNavOpen] = useState(true);
+  const { currentView, isEmbedMode } = useApp();
+  const [isCourseNavOpen, setIsCourseNavOpen] = useState(!isEmbedMode);
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex bg-white text-slate-800 antialiased font-sans overflow-hidden">
-      {/* 1. Leftmost Canvas Global Nav (Fixed width ~78px) */}
-      <CanvasGlobalNav />
+      {/* 1. Leftmost Canvas Global Nav (Ẩn khi đang nhúng iframe embed=1 vào LMS khác) */}
+      {!isEmbedMode && <CanvasGlobalNav />}
 
       {/* 2. Main Canvas Body Container */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Breadcrumb Bar */}
-        <CanvasTopBar
-          onToggleCourseNav={() => setIsCourseNavOpen(!isCourseNavOpen)}
-          onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
-        />
+        {/* Top Breadcrumb Bar (Ẩn khi đang nhúng iframe embed=1) */}
+        {!isEmbedMode && (
+          <CanvasTopBar
+            onToggleCourseNav={() => setIsCourseNavOpen(!isCourseNavOpen)}
+            onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+          />
+        )}
 
         {/* Dynamic Workspace */}
         <main className="flex-1 flex min-w-0 overflow-y-auto bg-white">
@@ -56,7 +58,7 @@ const MainLayout: React.FC = () => {
             {currentView === 'inbox' && <CanvasInbox />}
             {currentView === 'history' && <CanvasHistory />}
             {currentView === 'help' && <CanvasHelp />}
-            {currentView === 'course-detail' && <CourseDetail isCourseNavOpen={isCourseNavOpen} />}
+            {currentView === 'course-detail' && <CourseDetail isCourseNavOpen={isEmbedMode ? false : isCourseNavOpen} />}
             {currentView === 'activity' && <ActivityViewer />}
             {currentView === 'gradebook' && <Gradebook />}
             {currentView === 'certificates' && <CertificatesView />}
