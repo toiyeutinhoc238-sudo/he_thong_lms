@@ -137,7 +137,11 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   }
 
   const modules = activeCourse.modules || [];
-  const focusedModule = activeModuleId ? modules.find(m => m.id === activeModuleId) || null : null;
+  const focusedModule = activeModuleId
+    ? (modules.find(m => m.id === activeModuleId)
+      || modules.find((m, idx) => `module-lesson-${idx + 1}` === activeModuleId || String(m.order) === activeModuleId)
+      || null)
+    : null;
   const displayedModules = focusedModule ? [focusedModule] : modules;
 
   const toggleModule = (id: string) => {
@@ -411,6 +415,19 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    {!focusedModule && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveModuleId(mod.id);
+                        }}
+                        className="px-2.5 py-0.5 rounded-full border border-sky-200 bg-white hover:bg-sky-50 text-[11px] font-bold text-[#0374b5] shadow-2xs transition-colors"
+                        title="Chỉ mở riêng bài học này"
+                      >
+                        Mở riêng
+                      </button>
+                    )}
                     {canManage && moduleStatsMap[mod.id] && activities.length > 0 ? (
                       <button
                         type="button"

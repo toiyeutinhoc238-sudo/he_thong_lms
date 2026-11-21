@@ -111,6 +111,7 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
+  version: '2.2-lesson-focus',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   uptime: process.uptime(),
   timestamp: new Date().toISOString()
@@ -284,6 +285,9 @@ if (MONGODB_URI && process.env.DISABLE_MONGO !== '1') {
           ]
         });
         console.log('🧹 Đã hoàn tất kiểm tra và làm sạch tài khoản trong MongoDB.');
+        // Đảm bảo khóa học 6AIAB01 luôn sạch dữ liệu ảo (xóa sạch act-*-1..4 cũ và học sinh ảo mẫu)
+        await ensureDefaultCourse();
+        console.log('🧹 Đã đồng bộ & dọn sạch dữ liệu ảo trong khóa học 6AIAB01.');
       } catch (cleanErr) {
         console.warn('Thông báo dọn dẹp dữ liệu cũ:', cleanErr.message);
       }
@@ -2902,7 +2906,7 @@ if (fs.existsSync(distPath)) {
       if (filePath.includes(`${path.sep}assets${path.sep}`)) {
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       } else {
-        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
       }
     }
   }));
@@ -2910,7 +2914,7 @@ if (fs.existsSync(distPath)) {
   // SPA Fallback cho Express 5 (không dùng app.get('*') để tránh lỗi PathError trong Express 5)
   app.use((req, res, next) => {
     if (req.method === 'GET' && !req.path.startsWith('/api/') && !req.path.startsWith('/uploads/')) {
-      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
       return res.sendFile(path.join(distPath, 'index.html'));
     }
     if (req.path.startsWith('/api/')) {

@@ -44,6 +44,7 @@ interface CourseDetailProps {
 export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = true }) => {
   const { 
     activeCourse: contextActiveCourse, 
+    activeModuleId,
     courses,
     setCurrentView, 
     navigateToActivity, 
@@ -262,8 +263,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         </div>
 
-        {/* Thông báo lớp học do giáo viên đăng */}
-        {(activeTab === 'modules' || activeTab === 'home') && (activeCourse.announcements || []).length > 0 && (
+        {/* Thông báo lớp học do giáo viên đăng (chỉ hiện khi xem tổng quan cả khóa, ẩn khi đang tập trung 1 bài học cụ thể) */}
+        {(activeTab === 'modules' || activeTab === 'home') && !activeModuleId && (activeCourse.announcements || []).length > 0 && (
           <div className="mx-4 sm:mx-8 mt-4 space-y-2">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
             {(activeCourse.announcements || []).slice(0, 3).map(anc => (
