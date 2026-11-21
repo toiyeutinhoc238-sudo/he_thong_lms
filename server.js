@@ -1610,14 +1610,33 @@ async function courseProgressOf(course, userId) {
   return ids.size > 0 ? Math.round((completed / ids.size) * 100) : 0;
 }
 
-// 6. Activities: Mark Completed (ghi nhận cho đúng học sinh đang đăng nhập)
+// 6. Activities: Mark Completed (ghi nhận cho đúng học sinh đang đăng nhập; chống bỏ qua neo chặn video)
 app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
   const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
   const now = nowVN();
   // Bài trắc nghiệm chỉ được tính hoàn thành khi nộp bài và đạt điểm (xử lý ở quiz-submit)
-  if (ctx.activity.type !== 'quiz') {
+  if (ctx.activity.type === 'quiz') {
+    return res.status(400).json({ message: 'Bài trắc nghiệm chỉ được tính hoàn thành khi nộp bài và đạt điểm sàn.' });
+  }
+  // Chống học sinh bỏ qua neo chặn / chống tua của video bằng cách bấm hoàn thành thủ công
+  if (ctx.activity.type === 'video' && !isStaff(req.user)) {
+    const cps = Array.isArray(ctx.activity.videoCheckpoints) ? ctx.activity.videoCheckpoints : [];
+    const prevVp = existing?.videoProgress || {};
+    const passed = cps.filter(cp => {
+      const r = prevVp.checkpointResults?.[cp.id];
+      if (!r) return false;
+      return cp.requireCorrect !== false ? !!r.isCorrect : true;
+    }).length;
+    if (cps.length > 0 && passed < cps.length) {
+      return res.status(400).json({ message: `Bạn cần vượt qua đủ ${cps.length} neo chặn trong video trước khi hoàn thành (hiện tại ${passed}/${cps.length}).` });
+    }
+    if (ctx.activity.preventVideoSkip && (prevVp.progressPercent || 0) < 80) {
+      return res.status(400).json({ message: 'Giáo viên đã bật chống tua nhanh — bạn cần xem ít nhất 80% thời lượng video để hoàn thành.' });
+    }
+  }
+  {
     const patch = {
       isCompleted: true,
       completedAt: existing?.completedAt || now,
@@ -2357,12 +2376,22 @@ app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
   let addedModules = 0;
   let addedActivities = 0;
 
-  const normalizeActivity = (a, modId, idx) => ({
-    ...a,
-    id: `act-${Date.now()}-${Math.floor(Math.random() * 10000)}-${idx}`,
-    moduleId: modId,
-    isCompleted: false
-  });
+  const normalizeActivity = (a, modId, idx) => {
+    const clean = { ...(a || {}) };
+    for (const k of STUDENT_STATE_FIELDS) delete clean[k];
+    if (Array.isArray(clean.quizQuestions)) {
+      clean.quizQuestions = clean.quizQuestions.map((q, qi) => ({ ...q, id: q.id || `q-${Date.now()}-${idx}-${qi}` }));
+    }
+    if (Array.isArray(clean.videoCheckpoints)) {
+      clean.videoCheckpoints = clean.videoCheckpoints.map((cp, ci) => ({ ...cp, id: cp.id || `cp-${Date.now()}-${idx}-${ci}` }));
+    }
+    return {
+      ...clean,
+      id: `act-${Date.now()}-${Math.floor(Math.random() * 10000)}-${idx}`,
+      moduleId: modId,
+      isCompleted: false
+    };
+  };
 
   if (isMongoConnected) {
     const doc = await getCourseDoc(course.id);
@@ -2371,15 +2400,16 @@ app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
 
     if (targetModuleId) {
       const targetMod = doc.modules.find(m => m.id === targetModuleId);
-      if (targetMod) {
-        targetMod.activities = targetMod.activities || [];
-        incomingModules.forEach(im => {
-          (im.activities || []).forEach((a, idx) => {
-            targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
-            addedActivities++;
-          });
-        });
+      if (!targetMod) {
+        return res.status(404).json({ message: 'Không tìm thấy mô-đun đích để nhập học liệu.' });
       }
+      targetMod.activities = targetMod.activities || [];
+      incomingModules.forEach(im => {
+        (im.activities || []).forEach((a, idx) => {
+          targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
+          addedActivities++;
+        });
+      });
     } else {
       incomingModules.forEach((im, mIdx) => {
         const newModId = `mod-${Date.now()}-${mIdx}-${Math.floor(Math.random() * 1000)}`;
@@ -2407,15 +2437,16 @@ app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
     c.modules = c.modules || [];
     if (targetModuleId) {
       const targetMod = c.modules.find(m => m.id === targetModuleId);
-      if (targetMod) {
-        targetMod.activities = targetMod.activities || [];
-        incomingModules.forEach(im => {
-          (im.activities || []).forEach((a, idx) => {
-            targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
-            addedActivities++;
-          });
-        });
+      if (!targetMod) {
+        return res.status(404).json({ message: 'Không tìm thấy mô-đun đích để nhập học liệu.' });
       }
+      targetMod.activities = targetMod.activities || [];
+      incomingModules.forEach(im => {
+        (im.activities || []).forEach((a, idx) => {
+          targetMod.activities.push(normalizeActivity(a, targetMod.id, idx));
+          addedActivities++;
+        });
+      });
     } else {
       incomingModules.forEach((im, mIdx) => {
         const newModId = `mod-${Date.now()}-${mIdx}-${Math.floor(Math.random() * 1000)}`;

@@ -9,7 +9,7 @@ import {
 import api from '../services/api';
 
 export const LoginModal: React.FC = () => {
-  const { isLoginModalOpen, setIsLoginModalOpen, switchRole, setCurrentUser, refreshData } = useApp();
+  const { isLoginModalOpen, setIsLoginModalOpen, switchRole, setCurrentUser, refreshData, currentView, isEmbedMode } = useApp();
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -28,7 +28,8 @@ export const LoginModal: React.FC = () => {
       if (res && res.user) {
         localStorage.setItem('lms2_user', JSON.stringify(res.user));
         setCurrentUser(res.user);
-        switchRole(res.user.role || 'student');
+        const keepCurrentPage = isEmbedMode || currentView === 'activity' || currentView === 'course-detail';
+        switchRole(res.user.role || 'student', keepCurrentPage);
       }
       await refreshData();
       setIsLoginModalOpen(false);

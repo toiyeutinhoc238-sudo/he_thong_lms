@@ -7,7 +7,7 @@ interface AppContextType {
   currentUser: User;
   setCurrentUser: (user: User) => void;
   activeRole: Role;
-  switchRole: (role: Role) => void;
+  switchRole: (role: Role, preserveView?: boolean) => void;
   courses: Course[];
   setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   activeCourse: Course | null;
@@ -226,6 +226,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Thao tác học tập không lưu được lên máy chủ: báo rõ cho người dùng và đồng bộ lại dữ liệu thật
   const reportSyncFailure = useCallback((action: string, err: any) => {
     console.warn(`[LMS] ${action} thất bại:`, err);
+    if (err?.status === 401) {
+      setIsLoginModalOpen(true);
+    }
     window.alert(`${action} CHƯA được lưu lên hệ thống.
 ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     refreshData();
@@ -270,7 +273,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     return immediateUser;
   }, [currentUser]);
 
-  const switchRole = (role: Role) => {
+  const switchRole = (role: Role, preserveView = false) => {
     setActiveRole(role);
     setCurrentUser(prev => {
       if (!prev.id) return prev;
@@ -281,8 +284,10 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       };
     });
 
-    // Sau khi đăng nhập, chuyển tới danh sách khóa học
-    setCurrentView('courses-list');
+    // Giữ nguyên trang bài học/hoạt động nếu người dùng đang mở từ link chia sẻ trực tiếp hoặc iframe nhúng
+    if (!preserveView) {
+      setCurrentView('courses-list');
+    }
   };
 
   // Đảm bảo tài khoản phanphiphu04@gmail.com luôn có vai trò admin toàn quyền

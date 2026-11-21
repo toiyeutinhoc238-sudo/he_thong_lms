@@ -39,9 +39,13 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState(timeLimitSeconds);
+  const timeLeftRef = useRef(timeLeft);
+  timeLeftRef.current = timeLeft;
   const [isSubmitted, setIsSubmitted] = useState(!!activity.quizResult);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [quizResult, setQuizResult] = useState(activity.quizResult || null);
+
+  const handleSubmitRef = useRef<() => void>(() => {});
 
   // Countdown timer
   useEffect(() => {
@@ -51,7 +55,8 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmitQuiz();
+          timeLeftRef.current = 0;
+          handleSubmitRef.current();
           return 0;
         }
         return prev - 1;
@@ -82,7 +87,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
     setIsSubmitting(true);
     setShowConfirmModal(false);
 
-    const elapsedSeconds = Math.max(1, timeLimitSeconds - timeLeft);
+    const elapsedSeconds = Math.max(1, timeLimitSeconds - timeLeftRef.current);
 
     // Điểm do máy chủ chấm theo đáp án
     const res = await submitQuiz(courseId, activity.id, answersRef.current, elapsedSeconds);
@@ -102,6 +107,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
     }
     if (onFinish) onFinish();
   };
+  handleSubmitRef.current = handleSubmitQuiz;
 
   const handleRetakeQuiz = () => {
     setSelectedAnswers({});

@@ -334,7 +334,8 @@ export const ActivityViewer: React.FC = () => {
     markActivityCompleted,
     navigateToActivity,
     currentUser,
-    activeRole
+    activeRole,
+    setIsLoginModalOpen
   } = useApp();
 
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -438,8 +439,47 @@ export const ActivityViewer: React.FC = () => {
   const isPdfUrl = fileUrlLower.endsWith('.pdf');
   const isImageUrl = /\.(png|jpg|jpeg|gif|webp|svg)$/.test(fileUrlLower);
 
+  const directNonEmbedUrl = typeof window !== 'undefined'
+    ? (() => {
+        const qs = new URLSearchParams(window.location.search);
+        qs.delete('embed');
+        qs.set('course', activeCourse.id);
+        qs.set('activity', activeActivity.id);
+        return `${window.location.origin}/?${qs.toString()}`;
+      })()
+    : '#';
+
   return (
     <div className="flex-1 min-w-0 w-full p-6 max-w-5xl mx-auto space-y-6">
+      {/* Banner nhắc đăng nhập cho khách mở từ Link chia sẻ / iframe nhúng */}
+      {!currentUser?.id && (
+        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="text-amber-900 font-semibold">
+            Bạn đang xem ở chế độ khách — hãy <strong>Đăng nhập Google</strong> để lưu tiến độ xem video, nộp bài và ghi điểm về Sổ điểm giáo viên.
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsLoginModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-[#0374b5] hover:bg-[#025a8c] text-white font-bold shadow-xs"
+            >
+              Đăng nhập Google
+            </button>
+            {isEmbedMode && (
+              <a
+                href={directNonEmbedUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold inline-flex items-center gap-1"
+              >
+                <span>Mở trang đầy đủ</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Navigation Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {!isSingleActivityEmbed ? (
@@ -475,7 +515,7 @@ export const ActivityViewer: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Đã hoàn thành hoạt động</span>
               </span>
-            ) : (
+            ) : (activeActivity.type !== 'video' || canManage) ? (
               <button
                 onClick={handleMarkDone}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold transition-all shadow-xs"
@@ -483,7 +523,7 @@ export const ActivityViewer: React.FC = () => {
                 <Check className="w-4 h-4" />
                 <span>Đánh dấu hoàn thành</span>
               </button>
-            )
+            ) : null
           )}
 
           {nextAct && !isSingleActivityEmbed && (
@@ -501,6 +541,7 @@ export const ActivityViewer: React.FC = () => {
       {/* 1. QUIZ TYPE */}
       {activeActivity.type === 'quiz' && (
         <QuizEngine
+          key={activeActivity.id}
           activity={activeActivity}
           courseId={activeCourse.id}
         />
@@ -509,6 +550,7 @@ export const ActivityViewer: React.FC = () => {
       {/* 2. ASSIGNMENT TYPE */}
       {activeActivity.type === 'assignment' && (
         <AssignmentSubmitter
+          key={activeActivity.id}
           activity={activeActivity}
           courseId={activeCourse.id}
         />
@@ -517,6 +559,7 @@ export const ActivityViewer: React.FC = () => {
       {/* 3. VIDEO TYPE */}
       {activeActivity.type === 'video' && (
         <VideoPlayerTracker
+          key={activeActivity.id}
           activity={activeActivity}
           courseId={activeCourse.id}
         />

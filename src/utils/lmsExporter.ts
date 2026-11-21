@@ -122,6 +122,8 @@ function escapeHtml(str: string): string {
 
 function safeSlug(name: string): string {
   return String(name || 'hoc-lieu')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, '_')
@@ -448,7 +450,7 @@ function renderVideo(act, stage){
     (cp.options||[]).forEach((opt, oi)=>{
       const b = document.createElement('button');
       b.className = 'btn-opt';
-      b.textContent = ['A','B','C','D'][oi]+'. '+opt;
+      b.textContent = String.fromCharCode(65 + oi) + '. ' + opt;
       b.onclick = function(){
         const ok = oi === cp.correctAnswer;
         b.className = 'btn-opt '+(ok?'correct':'wrong');
@@ -540,7 +542,7 @@ function renderQuiz(act, stage){
           if(oi === q.correctAnswer) cls += ' correct';
           else if(ans[q.id] === oi) cls += ' wrong';
         }
-        html += '<button class="'+cls+'" '+(done?'disabled':'')+' onclick="pickQ(\\''+act.id+'\\',\\''+q.id+'\\','+oi+')">'+['A','B','C','D'][oi]+'. '+esc(opt)+'</button>';
+        html += '<button class="'+cls+'" '+(done?'disabled':'')+' onclick="pickQ(\\''+act.id+'\\',\\''+q.id+'\\','+oi+')">'+String.fromCharCode(65+oi)+'. '+esc(opt)+'</button>';
       });
       html += '</div>';
     });
@@ -660,6 +662,7 @@ export function exportImsccPackage(course: Course, module?: CourseModule | null)
     (mod.activities || []).forEach((act, aIdx) => {
       const resId = `RES_${mIdx + 1}_${aIdx + 1}`;
       const fileName = `resources/lesson_${mIdx + 1}_act_${aIdx + 1}.html`;
+      const directLink = buildShareLink({ courseId: course.id, moduleId: mod.id, activityId: act.id, embed: false });
       const deepLink = buildShareLink({ courseId: course.id, moduleId: mod.id, activityId: act.id, embed: true });
       const fileHref = act.fileUrl?.startsWith('/') ? `${origin}${act.fileUrl}` : act.fileUrl;
       const vidHref = act.videoUrl?.startsWith('/') ? `${origin}${act.videoUrl}` : act.videoUrl;
@@ -670,6 +673,7 @@ export function exportImsccPackage(course: Course, module?: CourseModule | null)
 ${act.assignmentPrompt ? `<div style="padding:12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px"><strong>Đề bài:</strong><p>${escapeHtml(act.assignmentPrompt)}</p></div>` : ''}
 ${vidHref ? `<p><strong>Video gốc:</strong> <a href="${escapeHtml(vidHref)}" target="_blank">${escapeHtml(vidHref)}</a></p>` : ''}
 ${fileHref ? `<p><strong>Tài liệu đính kèm:</strong> <a href="${escapeHtml(fileHref)}" target="_blank">${escapeHtml(fileHref)}</a></p>` : ''}
+<p style="margin:12px 0"><a href="${escapeHtml(directLink)}" target="_blank" style="display:inline-block;padding:8px 14px;background:#0374b5;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:13px">Mở trực tiếp trên LMS Nhóm 2 ↗</a></p>
 <div style="margin-top:16px">${buildEmbedIframeCode(deepLink, act.title, 620)}</div>
 </body></html>`;
 

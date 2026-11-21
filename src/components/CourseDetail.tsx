@@ -163,8 +163,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
 
       {/* 2. Center Content Area */}
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
-        {/* Banner Đăng Ký Khóa Học (Dành riêng cho học viên chưa ghi danh) */}
-        {!isEnrolled && (
+        {/* Banner Đăng Ký Khóa Học (Dành riêng cho học viên chưa ghi danh, ẩn khi nhúng iframe) */}
+        {!isEnrolled && !isEmbedMode && (
           <div className="mx-4 sm:mx-8 mt-4 p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-indigo-500/10 border-2 border-[#0374b5]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-[#0374b5] text-white flex items-center justify-center shrink-0 shadow-md">
@@ -190,7 +190,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Thanh Thông Tin Người Tạo Khóa Học & Lớp Học */}
+        {/* Thanh Thông Tin Người Tạo Khóa Học & Lớp Học (ẩn khi nhúng iframe embed=1) */}
+        {!isEmbedMode && (
         <div className="mx-4 sm:mx-8 mt-4 p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative shrink-0">
@@ -263,6 +264,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             )}
           </div>
         </div>
+        )}
 
         {/* Thông báo lớp học do giáo viên đăng (chỉ hiện khi xem tổng quan cả khóa, ẩn khi đang tập trung 1 bài học cụ thể) */}
         {(activeTab === 'modules' || activeTab === 'home') && !activeModuleId && (activeCourse.announcements || []).length > 0 && (

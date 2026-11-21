@@ -294,13 +294,23 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     }
   }, [courseId, activity.id, currentUser?.id, checkpoints, isCheckpointCleared, onCompleted, updateLocalVideoProgress]);
 
+  // Giữ ref cho các hàm callback để YouTube Player KHÔNG bị hủy & tạo lại giữa chừng khi state cập nhật
+  const checkCpRef = useRef(checkCheckpointsAndAntiSkip);
+  checkCpRef.current = checkCheckpointsAndAntiSkip;
+  const syncProgressRef = useRef(syncProgressToServer);
+  syncProgressRef.current = syncProgressToServer;
+  const checkpointsListRef = useRef(checkpoints);
+  checkpointsListRef.current = checkpoints;
+  const isCpClearedRef = useRef(isCheckpointCleared);
+  isCpClearedRef.current = isCheckpointCleared;
+
   useEffect(() => {
     return () => {
       if (unsyncedDeltaRef.current > 0 || latestPosRef.current > 0) {
-        syncProgressToServer(latestPosRef.current, latestDurRef.current, maxPctRef.current, true);
+        syncProgressRef.current(latestPosRef.current, latestDurRef.current, maxPctRef.current, true);
       }
     };
-  }, [syncProgressToServer]);
+  }, [activity.id]);
 
   // YouTube IFrame Player API thật (đo % + tạm dừng & chặn tua tại neo chặn)
   useEffect(() => {
@@ -340,6 +350,11 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             const dur = Math.floor(ev.target.getDuration?.() || latestDurRef.current || 0);
             if (dur > 0) setDuration(dur);
 
+            if (state === YT.PlayerState.BUFFERING) {
+              checkCpRef.current(cur);
+              return;
+            }
+
             if (state === YT.PlayerState.PLAYING) {
               if (activeCpRef.current) {
                 ev.target.pauseVideo?.();
@@ -355,26 +370,26 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                 const d = Math.floor(p.getDuration() || latestDurRef.current || 0);
 
                 // Kiểm tra neo chặn & chống tua trước khi cập nhật maxWatched!
-                if (checkCheckpointsAndAntiSkip(c)) return;
+                if (checkCpRef.current(c)) return;
 
                 if (d > 0) {
                   const currentPct = Math.min(100, Math.round((c / d) * 100));
                   const nextHighPct = Math.max(maxPctRef.current, currentPct);
                   const nextHighSecs = Math.max(maxWatchedRef.current, c);
-                  unsyncedDeltaRef.current += 1;
+                  unsyncedDeltaRef.current += 0.8;
 
                   setCurrentTime(c);
                   setDuration(d);
                   setMaxWatchedSeconds(nextHighSecs);
                   setProgressPercent(nextHighPct);
 
-                  const passedAll = checkpoints.every(cp => isCheckpointCleared(cp, cpResultsRef.current));
+                  const passedAll = checkpointsListRef.current.every(cp => isCpClearedRef.current(cp, cpResultsRef.current));
                   const crossed80 = nextHighPct >= 80 && passedAll && !isCompletedRef.current;
                   if (crossed80) {
                     setIsCompleted(true);
-                    syncProgressToServer(c, d, nextHighPct, true);
+                    syncProgressRef.current(c, d, nextHighPct, true);
                   } else {
-                    syncProgressToServer(c, d, nextHighPct, false);
+                    syncProgressRef.current(c, d, nextHighPct, false);
                   }
                 }
               }, 800);
@@ -386,18 +401,19 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
               }
               if (state === YT.PlayerState.ENDED) {
                 const finalDur = dur || latestDurRef.current || 1;
-                if (checkCheckpointsAndAntiSkip(finalDur)) return;
+                if (checkCpRef.current(finalDur)) return;
                 setCurrentTime(finalDur);
                 setMaxWatchedSeconds(finalDur);
                 setProgressPercent(100);
-                const passedAll = checkpoints.every(cp => isCheckpointCleared(cp, cpResultsRef.current));
+                const passedAll = checkpointsListRef.current.every(cp => isCpClearedRef.current(cp, cpResultsRef.current));
                 if (passedAll) setIsCompleted(true);
-                syncProgressToServer(finalDur, finalDur, 100, true);
+                syncProgressRef.current(finalDur, finalDur, 100, true);
               } else if (state === YT.PlayerState.PAUSED && dur > 0) {
+                if (checkCpRef.current(cur)) return;
                 const pct = Math.max(maxPctRef.current, Math.min(100, Math.round((cur / dur) * 100)));
                 setCurrentTime(cur);
                 setProgressPercent(pct);
-                syncProgressToServer(cur, dur, pct, true);
+                syncProgressRef.current(cur, dur, pct, true);
               }
             }
           }
@@ -411,7 +427,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       try { ytPlayerRef.current?.destroy?.(); } catch {}
       ytPlayerRef.current = null;
     };
-  }, [ytVideoId, checkCheckpointsAndAntiSkip, checkpoints, isCheckpointCleared, syncProgressToServer]);
+  }, [ytVideoId]);
 
   // Xử lý sự kiện video HTML5 (MP4 / WebM)
   const lastHtml5TickRef = useRef<number>(0);
@@ -739,14 +755,14 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                 </span>
               )}
 
-              {!isCompleted && (
+              {!isCompleted && (canManage || (!preventSkip && checkpoints.length === 0)) && (
                 <button
                   type="button"
                   onClick={handleMarkCompleteNow}
                   className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  <span>{checkpoints.length > 0 && checkpointsPassedCount < checkpoints.length && !canManage ? 'Làm neo chặn tiếp' : 'Đánh dấu xem xong'}</span>
+                  <span>Đánh dấu xem xong</span>
                 </button>
               )}
             </div>
