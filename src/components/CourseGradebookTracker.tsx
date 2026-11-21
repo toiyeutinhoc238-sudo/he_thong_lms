@@ -984,6 +984,11 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                                       </div>
                                       <p className="text-[10px] text-slate-400 font-mono">
                                         {vp?.watchedSeconds ? `${formatClock(vp.watchedSeconds)}${vp.totalSeconds ? '/' + formatClock(vp.totalSeconds) : ''}` : 'Hoàn thành'}
+                                        {(act.videoCheckpointsCount > 0 || (vp?.checkpointsTotal || 0) > 0) && (
+                                          <span className="ml-1 text-indigo-600 font-bold">
+                                            • Neo {vp?.checkpointsPassed || 0}/{vp?.checkpointsTotal || act.videoCheckpointsCount}
+                                          </span>
+                                        )}
                                       </p>
                                     </div>
                                   ) : actProg.viewCount > 0 ? (

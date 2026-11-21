@@ -64,12 +64,32 @@ export interface EnrolledStudent {
   status?: string;
 }
 
+export interface VideoCheckpoint {
+  id: string;
+  timeSeconds: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
+  requireCorrect?: boolean;
+}
+
+export interface VideoCheckpointResult {
+  selectedAnswer: number;
+  isCorrect: boolean;
+  attempts: number;
+  answeredAt: string;
+}
+
 export interface VideoProgressInfo {
   watchedSeconds: number;
   lastPositionSeconds?: number;
   totalSeconds: number;
   progressPercent: number;
   lastWatchedAt?: string;
+  checkpointResults?: Record<string, VideoCheckpointResult>;
+  checkpointsPassed?: number;
+  checkpointsTotal?: number;
 }
 
 export interface Activity {
@@ -93,6 +113,8 @@ export interface Activity {
   videoDuration?: number; // seconds
   watchedSeconds?: number;
   videoProgress?: VideoProgressInfo;
+  videoCheckpoints?: VideoCheckpoint[];
+  preventVideoSkip?: boolean;
   videoNotes?: { id: string; timestamp: number; note: string; createdAt: string }[];
   // Document specific
   fileUrl?: string;

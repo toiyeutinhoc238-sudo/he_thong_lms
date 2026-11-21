@@ -171,7 +171,7 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(data)
       }),
-    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number; deltaSeconds?: number }) =>
+    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number; deltaSeconds?: number; checkpointResults?: Record<string, any> }) =>
       this.request<{ success: boolean; isCompleted: boolean; videoProgress: any; overallCourseProgress?: number }>(`/courses/${courseId}/activities/${activityId}/video-progress`, {
         method: 'POST',
         body: JSON.stringify(data)

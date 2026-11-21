@@ -30,7 +30,8 @@ import {
   BarChart3,
   ArrowLeft
 } from 'lucide-react';
-import { CourseModule, Activity, QuizQuestion } from '../types';
+import { CourseModule, Activity, QuizQuestion, VideoCheckpoint } from '../types';
+import { VideoCheckpointEditor } from './VideoCheckpointEditor';
 
 interface CanvasModulesViewProps {
   onSelectActivity: (activityId: string) => void;
@@ -90,6 +91,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   const [actFileUrl, setActFileUrl] = useState('');
   const [actDueDate, setActDueDate] = useState('');
   const [actMaxScore, setActMaxScore] = useState(10);
+  const [actTimeLimit, setActTimeLimit] = useState(15);
+  const [actPassScore, setActPassScore] = useState(5);
+  const [actVideoCheckpoints, setActVideoCheckpoints] = useState<VideoCheckpoint[]>([]);
+  const [actPreventVideoSkip, setActPreventVideoSkip] = useState(true);
   const [actPrompt, setActPrompt] = useState('');
   const [actStarterCode, setActStarterCode] = useState('');
   const [actProgLang, setActProgLang] = useState('Python');
@@ -213,15 +218,21 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         'Kiểm tra trắc nghiệm'
       ),
       videoUrl: actVideoUrl.trim(),
+      videoCheckpoints: actType === 'video'
+        ? [...actVideoCheckpoints].sort((a, b) => (a.timeSeconds || 0) - (b.timeSeconds || 0))
+        : undefined,
+      preventVideoSkip: actType === 'video' ? actPreventVideoSkip : undefined,
       fileUrl: actFileUrl.trim(),
       dueDate: actDueDate.trim(),
       maxScore: Number(actMaxScore) || 10,
+      timeLimitMinutes: actType === 'quiz' ? Math.max(1, Number(actTimeLimit) || 15) : undefined,
+      passScore: actType === 'quiz' ? Math.min(10, Math.max(0, Number(actPassScore) || 5)) : undefined,
       assignmentPrompt: actPrompt.trim(),
       starterCode: actStarterCode.trim() || undefined,
       programmingLanguage: actType === 'assignment' ? actProgLang : undefined,
       quizQuestions: actType === 'quiz' ? quizQuestions : undefined,
       isRequired: true,
-      durationMinutes: 15
+      durationMinutes: actType === 'quiz' ? Math.max(1, Number(actTimeLimit) || 15) : 15
     };
 
     addCourseActivity(activeCourse.id, targetModuleId, newActivityData);
@@ -230,6 +241,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     setActTitle('');
     setActDesc('');
     setActVideoUrl('');
+    setActVideoCheckpoints([]);
+    setActPreventVideoSkip(true);
+    setActTimeLimit(15);
+    setActPassScore(5);
     setActFileUrl('');
     setActDueDate('');
     setActPrompt('');
@@ -246,9 +261,15 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
       title: editingActivity.title,
       description: editingActivity.description,
       videoUrl: editingActivity.videoUrl,
+      videoCheckpoints: editingActivity.type === 'video'
+        ? [...(editingActivity.videoCheckpoints || [])].sort((a, b) => (a.timeSeconds || 0) - (b.timeSeconds || 0))
+        : editingActivity.videoCheckpoints,
+      preventVideoSkip: editingActivity.preventVideoSkip,
       fileUrl: editingActivity.fileUrl,
       dueDate: editingActivity.dueDate,
       maxScore: editingActivity.maxScore,
+      timeLimitMinutes: editingActivity.type === 'quiz' ? Math.max(1, Number(editingActivity.timeLimitMinutes) || 15) : editingActivity.timeLimitMinutes,
+      passScore: editingActivity.type === 'quiz' ? Math.min(10, Math.max(0, Number(editingActivity.passScore) || 5)) : editingActivity.passScore,
       assignmentPrompt: editingActivity.assignmentPrompt,
       starterCode: editingActivity.starterCode,
       programmingLanguage: editingActivity.programmingLanguage,
@@ -546,15 +567,25 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                                       Video
                                     </span>
                                   )}
+                                  {act.type === 'video' && (act.videoCheckpoints?.length || 0) > 0 && (
+                                    <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-800 text-[10px] font-bold rounded">
+                                      {act.videoCheckpoints?.length} neo chặn
+                                    </span>
+                                  )}
                                   {act.type === 'assignment' && (
                                     <span className="px-1.5 py-0.2 bg-purple-100 text-purple-800 text-[10px] font-bold rounded">
                                       Bài tập
                                     </span>
                                   )}
                                   {act.type === 'quiz' && (
-                                    <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">
-                                      Trắc nghiệm
-                                    </span>
+                                    <>
+                                      <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">
+                                        Trắc nghiệm
+                                      </span>
+                                      <span className="px-1.5 py-0.2 bg-slate-100 text-slate-700 text-[10px] font-bold rounded">
+                                        {act.timeLimitMinutes || 15} phút
+                                      </span>
+                                    </>
                                   )}
                                 </div>
                                 <p className="text-[11px] text-slate-400 mt-0.5 truncate flex items-center gap-2">
@@ -769,7 +800,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
       {/* MODAL 3: THÊM HỌC LIỆU / HOẠT ĐỘNG (ĐẦY ĐỦ TÍNH NĂNG LMS NHÓM 2) */}
       {isAddActivityOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
               <Plus className="w-5 h-5 text-[#0374b5]" />
               <span>Thêm Học Liệu Mới Vào Mô-đun (LMS Nhóm 2)</span>
@@ -879,23 +910,33 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 />
               </div>
 
-              {/* Trường riêng cho VIDEO */}
+              {/* Trường riêng cho VIDEO + Neo chặn tương tác */}
               {actType === 'video' && (
-                <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200/60 space-y-2">
-                  <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                    <Video className="w-4 h-4 text-blue-600" />
-                    <span>Đường dẫn Video (YouTube URL hoặc Direct MP4 Link) *</span>
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
-                    value={actVideoUrl}
-                    onChange={(e) => setActVideoUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200/60 space-y-2">
+                    <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <Video className="w-4 h-4 text-blue-600" />
+                      <span>Đường dẫn Video (YouTube URL hoặc Direct MP4 Link) *</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
+                      value={actVideoUrl}
+                      onChange={(e) => setActVideoUrl(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Hỗ trợ nhúng trực tiếp video YouTube hoặc file MP4, tự động đo % xem và tạm dừng tại các neo chặn bên dưới.
+                    </p>
+                  </div>
+
+                  <VideoCheckpointEditor
+                    checkpoints={actVideoCheckpoints}
+                    onChange={setActVideoCheckpoints}
+                    preventSkip={actPreventVideoSkip}
+                    onPreventSkipChange={setActPreventVideoSkip}
+                    idPrefix="add"
                   />
-                  <p className="text-[11px] text-slate-500">
-                    Hỗ trợ nhúng trực tiếp video YouTube hoặc file MP4 trên cloud.
-                  </p>
                 </div>
               )}
 
@@ -1049,9 +1090,55 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </div>
               )}
 
-              {/* Trường riêng cho TRẮC NGHIỆM */}
+              {/* Trường riêng cho TRẮC NGHIỆM (kèm cài thời gian làm bài & điểm đạt) */}
               {actType === 'quiz' && (
                 <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3 max-h-96 overflow-y-auto">
+                  {/* Cài đặt thời gian, điểm đạt & hạn nộp */}
+                  <div className="grid grid-cols-3 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Thời gian (phút) *
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={180}
+                        value={actTimeLimit}
+                        onChange={(e) => setActTimeLimit(Math.max(1, Number(e.target.value) || 1))}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Điểm đạt (0-10)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min={0}
+                        max={10}
+                        value={actPassScore}
+                        onChange={(e) => setActPassScore(Math.min(10, Math.max(0, Number(e.target.value) || 0)))}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Hạn làm bài
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="VD: 30/11 23:59"
+                        value={actDueDate}
+                        onChange={(e) => setActDueDate(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
+                    <p className="col-span-3 text-[10px] text-amber-800">
+                      Đồng hồ đếm ngược sẽ tự động chạy khi học sinh mở bài và tự nộp ngay khi hết thời gian.
+                    </p>
+                  </div>
+
                   <div className="flex items-center justify-between sticky top-0 bg-amber-50/90 py-1 backdrop-blur-xs z-10">
                     <span className="text-xs font-bold text-amber-900">
                       Soạn câu hỏi trắc nghiệm ({quizQuestions.length} câu)
@@ -1172,7 +1259,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
       {/* MODAL 4: SỬA HỌC LIỆU / HOẠT ĐỘNG */}
       {editingActivity && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
               <Pencil className="w-4 h-4 text-[#0374b5]" />
               <span>Chỉnh sửa học liệu: {editingActivity.title}</span>
@@ -1204,18 +1291,27 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 />
               </div>
 
-              {/* Sửa Video URL */}
+              {/* Sửa Video URL & Neo chặn */}
               {editingActivity.type === 'video' && (
-                <div>
-                  <label className="block text-xs font-bold text-blue-900 mb-1">
-                    Link Video (YouTube hoặc MP4)
-                  </label>
-                  <input
-                    type="url"
-                    value={editingActivity.videoUrl || ''}
-                    onChange={(e) => setEditingActivity({ ...editingActivity, videoUrl: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                    placeholder="https://www.youtube.com/watch?v=..."
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-blue-900 mb-1">
+                      Link Video (YouTube hoặc MP4)
+                    </label>
+                    <input
+                      type="url"
+                      value={editingActivity.videoUrl || ''}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, videoUrl: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+                  <VideoCheckpointEditor
+                    checkpoints={editingActivity.videoCheckpoints || []}
+                    onChange={(next) => setEditingActivity({ ...editingActivity, videoCheckpoints: next })}
+                    preventSkip={editingActivity.preventVideoSkip ?? true}
+                    onPreventSkipChange={(val) => setEditingActivity({ ...editingActivity, preventVideoSkip: val })}
+                    idPrefix="edit"
                   />
                 </div>
               )}
@@ -1334,9 +1430,51 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </div>
               )}
 
-              {/* Sửa TRẮC NGHIỆM */}
+              {/* Sửa TRẮC NGHIỆM (kèm cài thời gian làm bài & điểm đạt) */}
               {editingActivity.type === 'quiz' && (
                 <div className="space-y-3 p-3 bg-amber-50/50 rounded-xl border border-amber-200 max-h-96 overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Thời gian (phút) *
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={180}
+                        value={editingActivity.timeLimitMinutes || 15}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, timeLimitMinutes: Math.max(1, Number(e.target.value) || 1) })}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Điểm đạt (0-10)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min={0}
+                        max={10}
+                        value={editingActivity.passScore ?? 5}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, passScore: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Hạn làm bài
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="VD: 30/11 23:59"
+                        value={editingActivity.dueDate || ''}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between sticky top-0 bg-amber-50/95 py-1 z-10">
                     <span className="text-xs font-bold text-amber-900">
                       Soạn câu hỏi trắc nghiệm ({(editingActivity.quizQuestions || []).length} câu)

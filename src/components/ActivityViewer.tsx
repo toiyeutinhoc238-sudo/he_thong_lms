@@ -210,6 +210,11 @@ const TeacherActivityMonitor: React.FC<{ courseId: string; activity: Activity }>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                           <div className={`h-full ${pct >= 80 ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: `${pct}%` }} />
                         </div>
+                        {(activity.videoCheckpoints?.length || 0) > 0 && (
+                          <p className="text-[10px] text-indigo-700 font-bold mt-1">
+                            Neo chặn: {vp?.checkpointsPassed || 0}/{activity.videoCheckpoints?.length} vượt qua
+                          </p>
+                        )}
                       </td>
                     )}
 

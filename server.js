@@ -111,7 +111,7 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
-  version: '2.2-lesson-focus',
+  version: '2.3-quiz-timer-video-checkpoints',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   uptime: process.uptime(),
   timestamp: new Date().toISOString()
@@ -1683,10 +1683,22 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
     incomingPercent = Math.min(100, Math.round((currentPos / totalSeconds) * 100));
   }
 
+  // Gộp kết quả trả lời các neo chặn video (Video Checkpoints)
+  const checkpoints = Array.isArray(ctx.activity.videoCheckpoints) ? ctx.activity.videoCheckpoints : [];
+  const incomingCpResults = (req.body.checkpointResults && typeof req.body.checkpointResults === 'object') ? req.body.checkpointResults : {};
+  const mergedCpResults = { ...(prevVp.checkpointResults || {}), ...incomingCpResults };
+  const checkpointsTotal = checkpoints.length;
+  const checkpointsPassed = checkpoints.filter(cp => {
+    const r = mergedCpResults[cp.id];
+    if (!r) return false;
+    return cp.requireCorrect !== false ? !!r.isCorrect : true;
+  }).length;
+
   // Bảo toàn mốc tiến độ cao nhất (high-water mark) để học sinh tua lại xem không bị mất % đã đạt
   const maxWatchedSeconds = Math.max(prevVp.watchedSeconds || 0, currentPos);
   const maxProgressPercent = Math.min(100, Math.max(prevVp.progressPercent || 0, incomingPercent));
-  const isCompleted = !!existing?.isCompleted || maxProgressPercent >= 80;
+  const allCheckpointsCleared = checkpointsTotal === 0 || checkpointsPassed >= checkpointsTotal;
+  const isCompleted = !!existing?.isCompleted || (maxProgressPercent >= 80 && allCheckpointsCleared);
   const now = nowVN();
 
   const videoProgress = {
@@ -1694,7 +1706,10 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
     lastPositionSeconds: currentPos,
     totalSeconds,
     progressPercent: maxProgressPercent,
-    lastWatchedAt: now
+    lastWatchedAt: now,
+    checkpointResults: mergedCpResults,
+    checkpointsPassed,
+    checkpointsTotal
   };
 
   const patch = {
@@ -1703,7 +1718,9 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
     timeSpentSeconds: (existing?.timeSpentSeconds || 0) + deltaSeconds,
     firstAccessedAt: existing?.firstAccessedAt || now,
     lastAccessedAt: now,
-    lastAction: `Xem video (${maxProgressPercent}%)`
+    lastAction: checkpointsTotal > 0
+      ? `Xem video (${maxProgressPercent}% • Neo ${checkpointsPassed}/${checkpointsTotal})`
+      : `Xem video (${maxProgressPercent}%)`
   };
   if (isCompleted) {
     patch.isCompleted = true;
@@ -1982,6 +1999,7 @@ app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
     maxScore: a.maxScore || 10,
     dueDate: a.dueDate || '',
     videoDuration: a.videoDuration || 0,
+    videoCheckpointsCount: Array.isArray(a.videoCheckpoints) ? a.videoCheckpoints.length : 0,
     passScore: a.passScore || 5,
     quizQuestions: isStaff(req.user) ? (a.quizQuestions || []) : (a.quizQuestions || [])
   }));
