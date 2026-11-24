@@ -309,9 +309,8 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
               </div>
             </div>
 
-            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-relaxed">
-              <strong>Lưu ý:</strong> hệ thống hiện chỉ ghi nhận <strong>tên tệp</strong>, chưa lưu nội dung tệp.
-              Hãy tải tệp lên Google Drive rồi dán đường dẫn chia sẻ vào ô ghi chú bên dưới, hoặc dùng thẻ "Soạn thảo / Nhập code trực tiếp".
+            <p className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 leading-relaxed">
+              <strong>Lưu trữ an toàn:</strong> Tệp bài làm (≤ 12 MB) được tải lên và <strong>lưu trữ bền vững trên MongoDB Atlas</strong> (không bị mất khi máy chủ khởi động lại). Nếu nộp lại bài, hệ thống vẫn tự động giữ đầy đủ lịch sử các lần nộp trước để giáo viên đối chiếu.
             </p>
 
             {selectedFile && (

@@ -69,6 +69,22 @@ const cleanDummyActivities = (courseList: Course[]): Course[] => {
   }));
 };
 
+const safeStorageGet = (key: string): string | null => {
+  try {
+    return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+  } catch {
+    return null;
+  }
+};
+
+const safeStorageSet = (key: string, value: string): void => {
+  try {
+    if (typeof window !== 'undefined') window.localStorage.setItem(key, value);
+  } catch {
+    // Bỏ qua lỗi QuotaExceededError hoặc SecurityError khi nhúng iframe cross-origin
+  }
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -79,7 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try { localStorage.removeItem(k); } catch (e) {}
       });
     }
-    const saved = localStorage.getItem('lms2_user');
+    const saved = safeStorageGet('lms2_user');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -93,7 +109,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [courses, setCourses] = useState<Course[]>(() => {
     try {
-      const saved = localStorage.getItem('lms2_courses');
+      const saved = safeStorageGet('lms2_courses');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -134,13 +150,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem('lms2_notifs');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = safeStorageGet('lms2_notifs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [certificates, setCertificates] = useState<Certificate[]>(() => {
-    const saved = localStorage.getItem('lms2_certs');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = safeStorageGet('lms2_certs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [activeCertificate, setActiveCertificate] = useState<Certificate | null>(null);
@@ -148,21 +172,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Sync state to local storage cache
+  // Sync state to local storage cache (bọc try/catch an toàn cho iframe & giới hạn dung lượng)
   useEffect(() => {
-    localStorage.setItem('lms2_courses', JSON.stringify(courses));
+    safeStorageSet('lms2_courses', JSON.stringify(courses));
   }, [courses]);
 
   useEffect(() => {
-    localStorage.setItem('lms2_certs', JSON.stringify(certificates));
+    safeStorageSet('lms2_certs', JSON.stringify(certificates));
   }, [certificates]);
 
   useEffect(() => {
-    localStorage.setItem('lms2_notifs', JSON.stringify(notifications));
+    safeStorageSet('lms2_notifs', JSON.stringify(notifications));
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem('lms2_user', JSON.stringify(currentUser));
+    safeStorageSet('lms2_user', JSON.stringify(currentUser));
   }, [currentUser]);
 
   // Fetch initial data from Backend API

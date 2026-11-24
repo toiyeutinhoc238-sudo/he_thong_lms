@@ -27,7 +27,9 @@ import {
   Timer,
   Trash2,
   ChevronRight,
-  Layers
+  Layers,
+  DatabaseBackup,
+  History
 } from 'lucide-react';
 
 interface CourseGradebookTrackerProps {
@@ -76,12 +78,14 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
     student: any;
     activity: any;
     quizResult: any;
+    quizHistory?: any[];
     questions: QuizQuestion[];
   } | null>(null);
   const [assignmentGradeModal, setAssignmentGradeModal] = useState<{
     student: any;
     activity: any;
     submission: any;
+    submissionHistory?: any[];
   } | null>(null);
 
   // Enroll Modal (có cả chọn nhanh từ tài khoản hệ thống)
@@ -315,6 +319,39 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  // Sao lưu toàn bộ dữ liệu học sinh, sổ điểm, lịch sử bài làm & nhận xét ra tệp JSON chuẩn lưu trữ
+  const handleBackupClassJson = () => {
+    if (!gradebook) {
+      alert('Chưa có dữ liệu sổ điểm để sao lưu.');
+      return;
+    }
+    const backupPayload = {
+      format: 'lms-nhom2-gradebook-backup',
+      version: '1.0',
+      backedUpAt: new Date().toISOString(),
+      course: {
+        id: course.id,
+        code: course.code,
+        name: course.name,
+        gradeLevel: course.gradeLevel,
+        category: course.category
+      },
+      summary: gradebook.summary,
+      modules: gradebook.modules,
+      activities: gradebook.activities,
+      students: gradebook.students
+    };
+    const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Sao_luu_Du_lieu_Lop_${course.code || 'LMS'}_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // ====================== CHẾ ĐỘ HỌC SINH (BẢNG TIẾN ĐỘ & ĐIỂM CÁ NHÂN GỌN ĐẸP) ======================
   if (!canManage) {
     const myRow = allStudents[0] || null;
@@ -454,6 +491,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                               student: myRow.student,
                               activity: { title: ap.title, maxScore: ap.maxScore },
                               quizResult: ap.quizResult,
+                              quizHistory: ap.quizHistory || [ap.quizResult],
                               questions: ap.quizQuestions || []
                             })}
                             className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] font-bold inline-flex items-center gap-1"
@@ -519,6 +557,16 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
             <span>Xuất CSV (Excel)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleBackupClassJson}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition-all shadow-2xs"
+            title="Tải tệp sao lưu JSON đầy đủ toàn bộ điểm số, bài nộp, lịch sử làm bài và nhận xét của cả lớp"
+          >
+            <DatabaseBackup className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Sao lưu dữ liệu (.json)</span>
           </button>
 
           <button
@@ -1031,6 +1079,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                                           student: s,
                                           activity: act,
                                           quizResult: qr || { score, maxScore: 10, passed: isPassed, answers: {} },
+                                          quizHistory: actProg?.quizHistory || (qr ? [qr] : []),
                                           questions: act.quizQuestions || []
                                         })}
                                         className="w-full px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-[10px] font-bold flex items-center justify-center gap-1"
@@ -1059,22 +1108,22 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                                 <td key={act.id} className="py-2.5 px-3 border-r border-slate-100 last:border-r-0">
                                   {isSubmitted ? (
                                     <div className="space-y-1">
-                                      {isGraded ? (
+                                      {sub?.status === 'graded' ? (
                                         <span className="font-mono font-black text-xs text-indigo-600 block">
                                           {score}/{act.maxScore || 10}đ
                                         </span>
                                       ) : (
                                         <span className="inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold animate-pulse">
-                                          Đã nộp • Chờ chấm
+                                          {score !== null && score !== undefined ? `Nộp lại (${score}đ) • Chờ chấm` : 'Đã nộp • Chờ chấm'}
                                         </span>
                                       )}
                                       <button
                                         type="button"
-                                        onClick={() => setAssignmentGradeModal({ student: s, activity: act, submission: sub })}
+                                        onClick={() => setAssignmentGradeModal({ student: s, activity: act, submission: sub, submissionHistory: actProg?.submissionHistory || [] })}
                                         className="w-full px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold flex items-center justify-center gap-1"
                                       >
                                         <Edit3 className="w-3 h-3" />
-                                        <span>{isGraded ? 'Xem / Sửa điểm' : 'Chấm điểm'}</span>
+                                        <span>{sub?.status === 'graded' ? 'Xem / Sửa điểm' : 'Chấm điểm'}</span>
                                       </button>
                                     </div>
                                   ) : (
@@ -1232,6 +1281,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                                 student: selectedStudentRow.student,
                                 activity: fullAct,
                                 quizResult: ap.quizResult,
+                                quizHistory: ap.quizHistory || [ap.quizResult],
                                 questions: fullAct.quizQuestions || ap.quizQuestions || []
                               })}
                               className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#0374b5] text-[10px] font-bold"
@@ -1245,7 +1295,8 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                               onClick={() => setAssignmentGradeModal({
                                 student: selectedStudentRow.student,
                                 activity: fullAct,
-                                submission: ap.submission
+                                submission: ap.submission,
+                                submissionHistory: ap.submissionHistory || []
                               })}
                               className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold"
                             >
@@ -1433,12 +1484,16 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
   );
 };
 
-// Component con: Modal xem chi tiết đúng/sai trắc nghiệm
+// Component con: Modal xem chi tiết đúng/sai trắc nghiệm (có chọn xem đầy đủ từng lần làm bài trong lịch sử)
 const QuizReviewDetailModal: React.FC<{
-  data: { student: any; activity: any; quizResult: any; questions: QuizQuestion[] };
+  data: { student: any; activity: any; quizResult: any; quizHistory?: any[]; questions: QuizQuestion[] };
   onClose: () => void;
 }> = ({ data, onClose }) => {
-  const { student, activity, quizResult, questions } = data;
+  const { student, activity, quizResult: defaultResult, quizHistory, questions } = data;
+  const attemptsList = Array.isArray(quizHistory) && quizHistory.length > 0 ? quizHistory : [defaultResult];
+  const [selectedAttemptIdx, setSelectedAttemptIdx] = useState<number>(attemptsList.length - 1);
+  const quizResult = attemptsList[selectedAttemptIdx] || defaultResult;
+  const bestScore = attemptsList.reduce((m, a) => Math.max(m, Number(a?.score) || 0), 0);
   const correctCount = questions.length > 0
     ? questions.filter(q => quizResult.answers?.[q.id] === q.correctAnswer).length
     : (quizResult.correctCount || 0);
@@ -1449,11 +1504,12 @@ const QuizReviewDetailModal: React.FC<{
         <div className="flex items-start justify-between border-b border-slate-100 pb-3">
           <div>
             <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">
-              Chi tiết bài làm trắc nghiệm
+              Chi tiết bài làm trắc nghiệm {attemptsList.length > 1 ? `(${attemptsList.length} lần làm)` : ''}
             </span>
             <h3 className="text-base font-extrabold text-slate-900 mt-1">{activity.title}</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Học sinh: <strong>{student?.name}</strong> • {student?.className || 'Học viên'}
+              {attemptsList.length > 1 && <span className="ml-2 text-emerald-700 font-bold">• Điểm cao nhất: {bestScore}/10</span>}
             </p>
           </div>
           <button
@@ -1464,6 +1520,37 @@ const QuizReviewDetailModal: React.FC<{
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Bộ chuyển đổi lịch sử các lần làm bài nếu học sinh làm nhiều hơn 1 lần */}
+        {attemptsList.length > 1 && (
+          <div className="space-y-1.5">
+            <div className="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+              <History className="w-3.5 h-3.5 text-[#0374b5]" />
+              <span>Chọn lần làm bài để đối chiếu chi tiết:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {attemptsList.map((att, idx) => {
+                const isBest = Number(att.score) === bestScore;
+                const isSel = idx === selectedAttemptIdx;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedAttemptIdx(idx)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                      isSel
+                        ? 'bg-[#0374b5] text-white border-[#0374b5] shadow-xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-[#0374b5]'
+                    }`}
+                  >
+                    <span>Lần {att.attempt || idx + 1}: {att.score}/10</span>
+                    {isBest && <span className={`px-1.5 py-0.2 rounded text-[9px] font-black ${isSel ? 'bg-amber-300 text-slate-900' : 'bg-emerald-100 text-emerald-800'}`}>Cao nhất</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
           <div>
@@ -1552,17 +1639,17 @@ const QuizReviewDetailModal: React.FC<{
   );
 };
 
-// Component con: Chấm điểm bài nộp Assignment
+// Component con: Chấm điểm bài nộp Assignment (kèm xem đầy đủ lịch sử các lần nộp trước)
 const AssignmentGradingInlineModal: React.FC<{
   courseId: string;
-  data: { student: any; activity: any; submission: any };
+  data: { student: any; activity: any; submission: any; submissionHistory?: any[] };
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ courseId, data, onClose, onSuccess }) => {
-  const { student, activity, submission } = data;
+  const { student, activity, submission, submissionHistory = [] } = data;
   const maxScore = activity.maxScore || 10;
-  const [grade, setGrade] = useState<string>(submission?.grade !== undefined ? String(submission.grade) : '');
-  const [feedback, setFeedback] = useState<string>(submission?.feedback || '');
+  const [grade, setGrade] = useState<string>(submission?.grade !== undefined ? String(submission.grade) : (submission?.previousGrade !== null && submission?.previousGrade !== undefined ? String(submission.previousGrade) : ''));
+  const [feedback, setFeedback] = useState<string>(submission?.feedback || submission?.previousFeedback || '');
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1631,8 +1718,47 @@ const AssignmentGradingInlineModal: React.FC<{
               {submission.textSubmission}
             </div>
           )}
-          <p className="text-[10px] text-slate-400 pt-1">Thời gian nộp: {submission?.submittedAt || 'Mới nộp'}</p>
+          <p className="text-[10px] text-slate-400 pt-1">
+            Thời gian nộp: {submission?.submittedAt || 'Mới nộp'}
+            {submission?.version && submission.version > 1 ? ` • Phiên bản lần ${submission.version}` : ''}
+          </p>
         </div>
+
+        {/* Lịch sử các lần nộp trước (nếu học sinh có cập nhật/nộp lại) */}
+        {submissionHistory.length > 0 && (
+          <details className="p-3.5 bg-amber-50/50 rounded-2xl border border-amber-200/80 text-xs">
+            <summary className="font-bold text-amber-900 cursor-pointer flex items-center gap-1.5 select-none">
+              <History className="w-3.5 h-3.5" />
+              <span>Lịch sử {submissionHistory.length} lần nộp trước (bấm để xem)</span>
+            </summary>
+            <div className="mt-2.5 space-y-2 max-h-40 overflow-y-auto">
+              {[...submissionHistory].reverse().map((oldSub: any, idx: number) => (
+                <div key={idx} className="p-2.5 bg-white rounded-xl border border-amber-200/70 space-y-1">
+                  <div className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="font-bold text-slate-700">Lần {oldSub.version || submissionHistory.length - idx} • {oldSub.submittedAt || '—'}</span>
+                    {oldSub.grade !== undefined && oldSub.grade !== null && (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-black">Điểm cũ: {oldSub.grade}/{maxScore}</span>
+                    )}
+                  </div>
+                  {oldSub.fileName && (
+                    <div className="flex items-center justify-between text-[11px] text-slate-600">
+                      <span className="truncate">📎 {oldSub.fileName}</span>
+                      {oldSub.fileUrl && (
+                        <a href={oldSub.fileUrl} target="_blank" rel="noreferrer" className="text-[#0374b5] font-bold hover:underline shrink-0 ml-2">
+                          Mở tệp cũ
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {oldSub.textSubmission && (
+                    <pre className="p-2 bg-slate-50 rounded-lg text-[10px] text-slate-700 whitespace-pre-wrap max-h-24 overflow-y-auto">{oldSub.textSubmission}</pre>
+                  )}
+                  {oldSub.feedback && <p className="text-[10px] text-emerald-700 italic">Nhận xét cũ: "{oldSub.feedback}"</p>}
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>

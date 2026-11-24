@@ -305,12 +305,46 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   isCpClearedRef.current = isCheckpointCleared;
 
   useEffect(() => {
+    const flushOnLeave = () => {
+      if (!currentUser?.id) return;
+      if (unsyncedDeltaRef.current <= 0 && latestPosRef.current <= 0) return;
+      const delta = Math.round(unsyncedDeltaRef.current);
+      unsyncedDeltaRef.current = 0;
+      let token = '';
+      try { token = localStorage.getItem('lms2_token') || ''; } catch {}
+      if (!token) return;
+      // Dùng fetch keepalive để đảm bảo trình duyệt vẫn gửi xong tiến độ ngay cả khi học sinh đóng tab đột ngột
+      fetch(`/api/courses/${encodeURIComponent(courseId)}/activities/${encodeURIComponent(activity.id)}/video-progress`, {
+        method: 'POST',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          watchedSeconds: Math.floor(latestPosRef.current),
+          totalSeconds: Math.floor(latestDurRef.current),
+          progressPercent: maxPctRef.current,
+          deltaSeconds: delta,
+          checkpointResults: cpResultsRef.current
+        })
+      }).catch(() => {});
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flushOnLeave();
+    };
+    window.addEventListener('pagehide', flushOnLeave);
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
+      window.removeEventListener('pagehide', flushOnLeave);
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (unsyncedDeltaRef.current > 0 || latestPosRef.current > 0) {
         syncProgressRef.current(latestPosRef.current, latestDurRef.current, maxPctRef.current, true);
       }
     };
-  }, [activity.id]);
+  }, [activity.id, courseId, currentUser?.id]);
 
   // YouTube IFrame Player API thật (đo % + tạm dừng & chặn tua tại neo chặn)
   useEffect(() => {

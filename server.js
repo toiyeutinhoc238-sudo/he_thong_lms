@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import multer from 'multer';
+import zlib from 'zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,12 +93,37 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Phục vụ tệp tĩnh trong uploads trực tiếp
+// Phục vụ tệp tĩnh trong uploads trực tiếp (tự động khôi phục từ MongoDB nếu Render restart/redeploy xóa đĩa tạm)
 app.use('/uploads', express.static(uploadsDir, {
+  maxAge: '7d',
   setHeaders(res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
 }));
+
+// Nén HTTP Gzip tự động cho các phản hồi JSON lớn (>= 1KB) giúp tiết kiệm ~75-85% băng thông
+app.use((req, res, next) => {
+  const acceptEnc = String(req.headers['accept-encoding'] || '');
+  if (!acceptEnc.includes('gzip')) return next();
+  const origJson = res.json.bind(res);
+  res.json = (body) => {
+    if (res.headersSent) return origJson(body);
+    try {
+      const raw = Buffer.from(JSON.stringify(body), 'utf8');
+      if (raw.length < 1024) return origJson(body);
+      const gz = zlib.gzipSync(raw, { level: 6 });
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Vary', 'Accept-Encoding');
+      res.setHeader('Content-Length', String(gz.length));
+      return res.end(gz);
+    } catch {
+      return origJson(body);
+    }
+  };
+  next();
+});
+
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   // Cho phép nhúng giao diện học liệu bằng <iframe> vào các LMS khác (Moodle, Canvas, Google Sites...)
@@ -114,8 +140,9 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
-  version: '2.4-share-export-scorm',
+  version: '2.5-persistent-storage-history',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
+  persistentFileStorage: isMongoConnected ? 'MongoDB Atlas (<=12MB) + Disk Cache' : 'Local Disk',
   uptime: process.uptime(),
   timestamp: new Date().toISOString()
 }));
@@ -213,12 +240,26 @@ const forumSchema = new mongoose.Schema({
 userSchema.index({ id: 1 });
 userSchema.index({ email: 1 });
 courseSchema.index({ id: 1 });
+courseSchema.index({ code: 1 });
 forumSchema.index({ courseId: 1 });
 const UserModel = mongoose.model('User', userSchema);
 const CourseModel = mongoose.model('Course', courseSchema);
 const NotifModel = mongoose.model('Notification', notifSchema);
 const CertModel = mongoose.model('Certificate', certSchema);
 const ForumModel = mongoose.model('ForumTopic', forumSchema);
+
+// Lưu trữ nhị phân tệp bài làm học sinh & tài liệu khóa học bền vững trên MongoDB Atlas (không bị mất khi Render restart/redeploy)
+const MAX_MONGO_FILE_BYTES = 12 * 1024 * 1024; // 12 MB (an toàn trong giới hạn 16 MB BSON của MongoDB)
+const uploadedFileSchema = new mongoose.Schema({
+  filename: { type: String, required: true, unique: true },
+  originalName: String,
+  mimetype: String,
+  sizeBytes: Number,
+  data: Buffer,
+  uploadedBy: Object,
+  uploadedAt: String
+});
+const UploadedFileModel = mongoose.model('UploadedFile', uploadedFileSchema);
 
 // Tiến độ học tập lưu RIÊNG cho từng học sinh (mỗi bản ghi = 1 học sinh x 1 hoạt động)
 const progressSchema = new mongoose.Schema({
@@ -231,7 +272,9 @@ const progressSchema = new mongoose.Schema({
   score: Number,
   maxScore: Number,
   submission: Object,
+  submissionHistory: { type: Array, default: [] },
   quizResult: Object,
+  quizHistory: { type: Array, default: [] },
   videoProgress: Object,
   viewCount: { type: Number, default: 0 },
   timeSpentSeconds: { type: Number, default: 0 },
@@ -242,8 +285,71 @@ const progressSchema = new mongoose.Schema({
 }, { strict: false });
 progressSchema.index({ courseId: 1, userId: 1, activityId: 1 }, { unique: true });
 progressSchema.index({ userId: 1 });
+progressSchema.index({ userEmail: 1 });
 progressSchema.index({ courseId: 1, userEmail: 1 });
 const ProgressModel = mongoose.model('Progress', progressSchema);
+
+// Helper: Lưu tệp vừa upload vào MongoDB Atlas để tồn tại vĩnh viễn qua các lần Render restart/redeploy
+async function persistUploadedFileToDb(reqFile, originalName, uploader) {
+  if (!isMongoConnected || !reqFile || !reqFile.path) return false;
+  if (reqFile.size > MAX_MONGO_FILE_BYTES) return false;
+  try {
+    const data = fs.readFileSync(reqFile.path);
+    await UploadedFileModel.findOneAndUpdate(
+      { filename: reqFile.filename },
+      {
+        $set: {
+          filename: reqFile.filename,
+          originalName,
+          mimetype: reqFile.mimetype || 'application/octet-stream',
+          sizeBytes: reqFile.size,
+          data,
+          uploadedBy: uploader || null,
+          uploadedAt: new Date().toISOString()
+        }
+      },
+      { upsert: true }
+    );
+    return true;
+  } catch (err) {
+    console.warn('Không thể sao lưu tệp vào MongoDB:', err.message);
+    return false;
+  }
+}
+
+async function deletePersistedFile(filename) {
+  if (!filename) return;
+  const diskPath = path.join(uploadsDir, path.basename(filename));
+  if (fs.existsSync(diskPath)) {
+    try { fs.unlinkSync(diskPath); } catch (e) { }
+  }
+  if (isMongoConnected) {
+    try { await UploadedFileModel.deleteOne({ filename: path.basename(filename) }); } catch (e) { }
+  }
+}
+
+// Khôi phục & phục vụ tệp từ MongoDB nếu ổ đĩa tạm của Render đã bị xóa sau khi restart
+app.get('/uploads/:filename', async (req, res, next) => {
+  const safeName = path.basename(req.params.filename || '');
+  if (!safeName) return next();
+  const diskPath = path.join(uploadsDir, safeName);
+  if (fs.existsSync(diskPath)) return res.sendFile(diskPath);
+  try {
+    await mongoReady;
+    if (isMongoConnected) {
+      const doc = await UploadedFileModel.findOne({ filename: safeName }).lean();
+      if (doc && doc.data) {
+        const buf = Buffer.isBuffer(doc.data) ? doc.data : Buffer.from(doc.data.buffer || doc.data);
+        try { fs.writeFileSync(diskPath, buf); } catch (e) { }
+        res.setHeader('Content-Type', doc.mimetype || 'application/octet-stream');
+        res.setHeader('Cache-Control', 'public, max-age=604800');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        return res.send(buf);
+      }
+    }
+  } catch (e) { }
+  return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
+});
 
 // Helper tìm document khóa học an toàn (hỗ trợ cả id string và MongoDB _id)
 async function getCourseDoc(id) {
@@ -580,6 +686,22 @@ async function listProgress(filter) {
   return (readDb().progress || []).filter(p => Object.entries(filter).every(([k, v]) => p[k] === v));
 }
 
+// Truy vấn tiến độ của một học sinh khớp theo CẢ userId và email (không bao giờ mất tiến độ khi đổi phiên đăng nhập)
+async function listProgressForUser(user, courseId = null) {
+  if (!user) return [];
+  const normEmail = String(user.email || '').toLowerCase().trim();
+  if (isMongoConnected) {
+    const orClauses = [{ userId: user.id }];
+    if (normEmail) orClauses.push({ userEmail: normEmail });
+    const q = courseId ? { courseId, $or: orClauses } : { $or: orClauses };
+    return ProgressModel.find(q).lean();
+  }
+  return (readDb().progress || []).filter(p => {
+    if (courseId && p.courseId !== courseId) return false;
+    return p.userId === user.id || (normEmail && String(p.userEmail || '').toLowerCase().trim() === normEmail);
+  });
+}
+
 async function getOneProgress(courseId, userId, activityId) {
   if (isMongoConnected) return ProgressModel.findOne({ courseId, userId, activityId }).lean();
   return (readDb().progress || []).find(p => p.courseId === courseId && p.userId === userId && p.activityId === activityId) || null;
@@ -638,7 +760,7 @@ const isEnrolled = (course, user) => !!user && (course.enrolledStudents || []).s
 );
 
 // Dữ liệu của học sinh không được nằm trong tài liệu khóa học dùng chung
-const STUDENT_STATE_FIELDS = ['submission', 'quizResult', 'score', 'watchedSeconds', 'videoProgress', 'videoNotes', 'viewCount', 'timeSpentSeconds', 'firstAccessedAt', 'lastAccessedAt'];
+const STUDENT_STATE_FIELDS = ['submission', 'submissionHistory', 'quizResult', 'quizHistory', 'score', 'watchedSeconds', 'videoProgress', 'videoNotes', 'viewCount', 'timeSpentSeconds', 'firstAccessedAt', 'lastAccessedAt'];
 function stripStudentState(modules) {
   return (modules || []).map(m => ({
     ...m,
@@ -652,7 +774,13 @@ function stripStudentState(modules) {
 
 // Trả về khóa học theo góc nhìn của người đang đăng nhập: chỉ gắn tiến độ CỦA CHÍNH HỌ
 function viewCourse(courseObj, user, progressRecords) {
-  const byActivity = new Map((progressRecords || []).map(p => [p.activityId, p]));
+  const byActivity = new Map();
+  (progressRecords || []).forEach(p => {
+    const ex = byActivity.get(p.activityId);
+    if (!ex || (p.updatedAt || '') > (ex.updatedAt || '')) {
+      byActivity.set(p.activityId, p);
+    }
+  });
   const hideAnswers = !isStaff(user);
   let total = 0;
   let completed = 0;
@@ -699,7 +827,7 @@ function viewCourse(courseObj, user, progressRecords) {
 
 async function viewCourseFor(courseObj, user) {
   const enriched = await resolveInstructorAvatar(courseObj);
-  const records = user ? await listProgress({ courseId: enriched.id, userId: user.id }) : [];
+  const records = user ? await listProgressForUser(user, enriched.id) : [];
   return viewCourse(enriched, user, records);
 }
 
@@ -911,6 +1039,9 @@ const OFFICIAL_AI_GRADE6_LESSONS = [
   'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO'
 ];
 
+// Bộ nhớ đệm 60 giây cho thông tin giáo viên tránh truy vấn lặp lại MongoDB ở GET /api/courses
+const instructorCache = new Map();
+
 // Helper: Lấy thông tin & Avatar thật từ tài khoản Google của giáo viên/người tạo
 async function resolveInstructorAvatar(course) {
   if (!course) return course;
@@ -918,12 +1049,16 @@ async function resolveInstructorAvatar(course) {
   const targetEmail = (courseObj.instructor?.email || courseObj.creator?.email || 'phanphiphu04@gmail.com').toLowerCase().trim();
 
   let user = null;
-  if (isMongoConnected) {
+  const cached = instructorCache.get(targetEmail);
+  if (cached && Date.now() - cached.at < 60000) {
+    user = cached.user;
+  } else if (isMongoConnected) {
     try {
-      user = await UserModel.findOne({ email: targetEmail });
+      user = await UserModel.findOne({ email: targetEmail }).lean();
       if (!user && targetEmail !== 'phanphiphu04@gmail.com') {
-        user = await UserModel.findOne({ email: 'phanphiphu04@gmail.com' });
+        user = await UserModel.findOne({ email: 'phanphiphu04@gmail.com' }).lean();
       }
+      instructorCache.set(targetEmail, { user, at: Date.now() });
     } catch (e) { }
   } else {
     const db = readDb();
@@ -1162,7 +1297,7 @@ app.get('/api/courses', async (req, res) => {
     }
   }
 
-  const records = req.user ? await listProgress({ userId: req.user.id }) : [];
+  const records = req.user ? await listProgressForUser(req.user) : [];
   const result = await Promise.all(list.map(async (c) => {
     const enriched = await resolveInstructorAvatar(c);
     return viewCourse(enriched, req.user, records.filter(p => p.courseId === enriched.id));
@@ -1760,7 +1895,7 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
   });
 });
 
-// 7. Activities: Submit Assignment (mỗi học sinh một bài nộp riêng)
+// 7. Activities: Submit Assignment (mỗi học sinh một bài nộp riêng, giữ đầy đủ lịch sử các lần nộp & điểm cũ)
 app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, res) => {
   const ctx = await learningContext(req, res);
   if (!ctx) return;
@@ -1773,25 +1908,42 @@ app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, r
 
   const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
   const now = nowVN();
+
+  // Lưu lại lịch sử các phiên bản bài nộp trước (không bao giờ mất tệp cũ, điểm cũ hay nhận xét cũ của giáo viên)
+  const prevHistory = Array.isArray(existing?.submissionHistory) ? [...existing.submissionHistory] : [];
+  if (existing?.submission) {
+    prevHistory.push({
+      ...existing.submission,
+      version: existing.submission.version || prevHistory.length + 1,
+      previousScore: existing.score ?? existing.submission.grade ?? null,
+      archivedAt: now
+    });
+  }
+  const submissionHistory = prevHistory.slice(-10);
+
   const subData = {
     status: 'submitted',
+    version: submissionHistory.length + 1,
     fileName,
     fileSize: String(req.body.fileSize || '').slice(0, 30),
     fileUrl: String(req.body.fileUrl || '').slice(0, 500),
     submittedAt: now,
-    textSubmission
+    textSubmission,
+    previousGrade: existing?.submission?.grade ?? existing?.score ?? null,
+    previousFeedback: existing?.submission?.feedback || ''
   };
   await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
     isCompleted: true,
     completedAt: existing?.completedAt || now,
     submission: subData,
-    score: null,
+    submissionHistory,
+    score: existing?.score ?? null,
     viewCount: Math.max(1, existing?.viewCount || 0),
     firstAccessedAt: existing?.firstAccessedAt || now,
     lastAccessedAt: now,
-    lastAction: 'Đã nộp bài tập'
+    lastAction: submissionHistory.length > 0 ? `Nộp lại bài tập (lần ${subData.version})` : 'Đã nộp bài tập'
   }, req.user.email);
-  res.json({ success: true, submission: subData });
+  res.json({ success: true, submission: subData, submissionHistory });
 });
 
 // Helper: gom danh sách học sinh thực tế + khớp tiến độ theo cả userId và email (chống mất dữ liệu khi đăng nhập Google)
@@ -1899,7 +2051,9 @@ app.get('/api/courses/:id/activities/:actId/submissions', requireStaff, async (r
       completedAt: p?.completedAt || '',
       score: p?.score ?? null,
       submission: p?.submission || null,
+      submissionHistory: p?.submissionHistory || [],
       quizResult: p?.quizResult || null,
+      quizHistory: p?.quizHistory || (p?.quizResult ? [p.quizResult] : []),
       videoProgress: p?.videoProgress || null,
       timeSpentSeconds: p?.timeSpentSeconds || 0,
       viewCount: p?.viewCount || 0,
@@ -1972,9 +2126,15 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
 
   const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
   const now = nowVN();
-  const attemptCount = (existing?.quizResult?.attemptCount || 0) + 1;
+  const prevHistory = Array.isArray(existing?.quizHistory) && existing.quizHistory.length > 0
+    ? [...existing.quizHistory]
+    : (existing?.quizResult ? [{ ...existing.quizResult, attempt: existing.quizResult.attempt || existing.quizResult.attemptCount || 1 }] : []);
+  const attemptCount = Math.max(prevHistory.length, existing?.quizResult?.attemptCount || 0) + 1;
+  const bestScore = existing?.score !== undefined && existing?.score !== null ? Math.max(existing.score, score) : score;
   const quizResult = {
+    attempt: attemptCount,
     score,
+    bestScore,
     maxScore,
     passed,
     submittedAt: now,
@@ -1984,8 +2144,8 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
     attemptCount,
     durationSeconds
   };
+  const quizHistory = [...prevHistory, quizResult].slice(-20);
   const isCompleted = !!existing?.isCompleted || passed;
-  const bestScore = existing?.score !== undefined && existing?.score !== null ? Math.max(existing.score, score) : score;
 
   await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, {
     isCompleted,
@@ -1993,13 +2153,14 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
     score: bestScore,
     maxScore,
     quizResult,
+    quizHistory,
     viewCount: Math.max(1, existing?.viewCount || 0),
     timeSpentSeconds: (existing?.timeSpentSeconds || 0) + durationSeconds,
     firstAccessedAt: existing?.firstAccessedAt || now,
     lastAccessedAt: now,
-    lastAction: `Nộp trắc nghiệm (${score}/10)`
+    lastAction: `Nộp trắc nghiệm lần ${attemptCount} (${score}/10)`
   }, req.user.email);
-  res.json({ success: true, passed, score, result: quizResult, questions });
+  res.json({ success: true, passed, score, bestScore, result: quizResult, quizHistory, questions });
 });
 
 // 9.01 Sổ điểm & Bảng theo dõi tiến độ toàn diện của cả lớp (kèm phân tích mô-đun, câu hỏi trắc nghiệm & cảnh báo học sinh)
@@ -2086,7 +2247,9 @@ app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
         score,
         videoProgress: vp,
         submission: p?.submission || null,
+        submissionHistory: p?.submissionHistory || [],
         quizResult: p?.quizResult || null,
+        quizHistory: p?.quizHistory || (p?.quizResult ? [p.quizResult] : []),
         quizQuestions: questionsForRow,
         timeSpentSeconds,
         viewCount,
@@ -2632,9 +2795,9 @@ app.post('/api/forum/:topicId/replies', requireAuth, async (req, res) => {
   res.status(201).json(reply);
 });
 
-// ====================== 9.3 TẬP TIN HỌC LIỆU & TẢI TỆP TÙY Ý (FILE UPLOAD ENGINE) ======================
-// 1. Upload tệp tùy ý (hỗ trợ bất kỳ định dạng nào: PDF, Word, Excel, PowerPoint, Ảnh, Video, Code, ZIP...)
-app.post('/api/upload', (req, res, next) => {
+// ====================== 9.3 TẬP TIN HỌC LIỆU & TẢI TỆP TÙY Ý (FILE UPLOAD ENGINE + MONGODB PERSISTENCE) ======================
+// 1. Upload tệp tùy ý (yêu cầu đăng nhập; lưu bền vững trên MongoDB Atlas <=12MB để không mất khi Render restart)
+app.post('/api/upload', requireAuth, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
@@ -2644,7 +2807,7 @@ app.post('/api/upload', (req, res, next) => {
     }
     next();
   });
-}, (req, res) => {
+}, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'Vui lòng chọn một tệp để tải lên.' });
   }
@@ -2661,6 +2824,14 @@ app.post('/api/upload', (req, res, next) => {
 
   const fileUrl = `/uploads/${req.file.filename}`;
   const fileType = getFileTypeCategory(originalName, req.file.mimetype);
+  const uploader = req.user ? {
+    id: req.user.id,
+    name: req.user.name,
+    email: req.user.email,
+    avatar: req.user.avatar
+  } : { name: 'Thành viên', email: '' };
+
+  const persistedInDb = await persistUploadedFileToDb(req.file, originalName, uploader);
 
   const fileData = {
     id: `file-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
@@ -2671,15 +2842,8 @@ app.post('/api/upload', (req, res, next) => {
     sizeBytes: fileBytes,
     mimetype: req.file.mimetype,
     fileType,
-    uploadedBy: req.user ? {
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
-      avatar: req.user.avatar
-    } : {
-      name: 'Thành viên',
-      email: ''
-    },
+    persistedInDb,
+    uploadedBy: uploader,
     uploadedAt: nowVN()
   };
 
@@ -2693,8 +2857,8 @@ app.get('/api/courses/:id/files', async (req, res) => {
   res.json(course.files || []);
 });
 
-// 3. Thêm tập tin vào khóa học (Hỗ trợ upload trực tiếp hoặc gửi thông tin tệp đã upload)
-app.post('/api/courses/:id/files', (req, res, next) => {
+// 3. Thêm tập tin vào khóa học (Chỉ giáo viên / quản trị viên; lưu bền vững trên MongoDB Atlas)
+app.post('/api/courses/:id/files', requireStaff, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
@@ -2722,6 +2886,13 @@ app.post('/api/courses/:id/files', (req, res, next) => {
 
     const fileUrl = `/uploads/${req.file.filename}`;
     const fileType = getFileTypeCategory(originalName, req.file.mimetype);
+    const uploader = {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      avatar: req.user.avatar
+    };
+    const persistedInDb = await persistUploadedFileToDb(req.file, originalName, uploader);
 
     fileItem = {
       id: `file-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
@@ -2732,16 +2903,9 @@ app.post('/api/courses/:id/files', (req, res, next) => {
       sizeBytes: fileBytes,
       mimetype: req.file.mimetype,
       fileType,
+      persistedInDb,
       description: req.body.description || '',
-      uploadedBy: req.user ? {
-        id: req.user.id,
-        name: req.user.name,
-        email: req.user.email,
-        avatar: req.user.avatar
-      } : {
-        name: req.body.authorName || 'Thành viên',
-        email: req.body.authorEmail || ''
-      },
+      uploadedBy: uploader,
       uploadedAt: nowVN()
     };
   } else if (req.body.url && req.body.name) {
@@ -2755,12 +2919,12 @@ app.post('/api/courses/:id/files', (req, res, next) => {
       mimetype: req.body.mimetype || 'application/octet-stream',
       fileType: req.body.fileType || getFileTypeCategory(req.body.name, req.body.mimetype),
       description: req.body.description || '',
-      uploadedBy: req.user ? {
+      uploadedBy: {
         id: req.user.id,
         name: req.user.name,
         email: req.user.email,
         avatar: req.user.avatar
-      } : (req.body.uploadedBy || { name: 'Thành viên', email: '' }),
+      },
       uploadedAt: nowVN()
     };
   } else {
@@ -2784,20 +2948,16 @@ app.post('/api/courses/:id/files', (req, res, next) => {
   res.status(201).json(fileItem);
 });
 
-// 4. Xóa tập tin khỏi khóa học
-app.delete('/api/courses/:id/files/:fileId', async (req, res) => {
+// 4. Xóa tập tin khỏi khóa học (Chỉ giáo viên / quản trị viên; xóa đồng bộ cả ổ đĩa & MongoDB)
+app.delete('/api/courses/:id/files/:fileId', requireStaff, async (req, res) => {
   const course = await loadCourseObj(req.params.id);
   if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học' });
 
   const fileId = req.params.fileId;
   const fileToDelete = (course.files || []).find(f => f.id === fileId);
 
-  // Xóa tệp vật lý trên ổ đĩa nếu nằm trong thư mục uploads
   if (fileToDelete && fileToDelete.filename) {
-    const diskPath = path.join(uploadsDir, fileToDelete.filename);
-    if (fs.existsSync(diskPath)) {
-      try { fs.unlinkSync(diskPath); } catch (e) { }
-    }
+    await deletePersistedFile(fileToDelete.filename);
   }
 
   if (isMongoConnected) {
@@ -2817,14 +2977,28 @@ app.delete('/api/courses/:id/files/:fileId', async (req, res) => {
   res.json({ success: true, fileId });
 });
 
-// 5. Tải tệp xuống trực tiếp với tên gốc UTF-8
-app.get('/api/files/download/:filename', (req, res) => {
-  const filePath = path.join(uploadsDir, req.params.filename);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
+// 5. Tải tệp xuống trực tiếp với tên gốc UTF-8 (tự phục hồi từ MongoDB nếu ổ đĩa Render bị xóa)
+app.get('/api/files/download/:filename', async (req, res) => {
+  const safeName = path.basename(req.params.filename || '');
+  const filePath = path.join(uploadsDir, safeName);
+  const downloadName = String(req.query.name || safeName);
+  if (fs.existsSync(filePath)) {
+    return res.download(filePath, downloadName);
   }
-  const downloadName = req.query.name || req.params.filename;
-  res.download(filePath, downloadName);
+  if (isMongoConnected) {
+    try {
+      const doc = await UploadedFileModel.findOne({ filename: safeName }).lean();
+      if (doc && doc.data) {
+        const buf = Buffer.isBuffer(doc.data) ? doc.data : Buffer.from(doc.data.buffer || doc.data);
+        try { fs.writeFileSync(filePath, buf); } catch (e) { }
+        const finalName = req.query.name ? String(req.query.name) : (doc.originalName || safeName);
+        res.setHeader('Content-Type', doc.mimetype || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(finalName)}`);
+        return res.send(buf);
+      }
+    } catch (e) { }
+  }
+  return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
 });
 
 // 10. Certificates
