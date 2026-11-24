@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+uploads
+db.json
+*.log
+README.md
+postman_collection.json
+docker-compose.yml

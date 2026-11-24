@@ -544,6 +544,8 @@ const isStaff = (user) => !!user && (
 // Gắn req.user từ token (vai trò luôn lấy từ cơ sở dữ liệu, không tin dữ liệu client gửi lên)
 app.use(async (req, res, next) => {
   req.user = null;
+  // Chỉ chờ MongoDB & xác thực token cho API routes, giúp trang chủ & health check phản hồi tức thì
+  if (!req.path.startsWith('/api/')) return next();
   await mongoReady;
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
