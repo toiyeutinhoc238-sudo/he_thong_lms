@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import api from '../services/api';
 import { 
   X, 
   Sparkles, 
   Send, 
   Bot, 
-  User, 
-  BookOpen, 
-  Lightbulb, 
-  HelpCircle,
-  CheckCircle2
+  User
 } from 'lucide-react';
 
 interface AIAssistantModalProps {
@@ -21,15 +18,16 @@ interface Message {
   sender: 'ai' | 'user';
   text: string;
   time: string;
+  engine?: string;
 }
 
 export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onClose }) => {
-  const { activeCourse, currentUser } = useApp();
+  const { activeCourse, activeModuleId, activeActivity, currentUser } = useApp();
 
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'ai',
-      text: `Xin chào ${currentUser.name}! Tôi là Trợ lý AI của LMS Nhóm 2. Tôi có thể giúp bạn tóm tắt bài học, giải thích các khái niệm trong khóa học "${activeCourse?.name || 'Khóa học'}", hoặc hướng dẫn bạn làm bài tập. Bạn cần hỗ trợ gì?`,
+      text: `Xin chào ${currentUser.name || 'bạn'}! Tôi là Trợ lý AI của LMS Nhóm 2. Tôi đã kết nối trực tiếp với khóa học "${activeCourse?.name || 'Khóa học'}" để xem tiến độ, hạn nộp bài và tóm tắt bài học cho bạn. Bạn cần hỗ trợ gì?`,
       time: 'Vừa xong'
     }
   ]);
@@ -39,15 +37,15 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   const quickPrompts = [
+    'Kiểm tra tiến độ & điểm của tôi',
+    'Kiểm tra hạn nộp bài tập sắp tới',
     'Tóm tắt nội dung bài học này',
-    'Giải thích khái niệm cốt lõi',
-    'Tạo 3 câu hỏi trắc nghiệm ôn tập',
-    'Kiểm tra hạn nộp bài tập sắp tới'
+    'Tạo 3 câu hỏi trắc nghiệm ôn tập'
   ];
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputText;
-    if (!text.trim()) return;
+    if (!text.trim() || isThinking) return;
 
     const userMsg: Message = {
       sender: 'user',
@@ -59,29 +57,34 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
     setInputText('');
     setIsThinking(true);
 
-    setTimeout(() => {
-      let reply = '';
-      const lower = text.toLowerCase();
-      if (lower.includes('tóm tắt')) {
-        reply = `📖 **Tóm tắt bài học**: Nội dung tập trung vào nguồn gốc phát triển của Trí tuệ Nhân tạo (AI), các bước ngoặt lịch sử từ máy tính Turing đến mô hình học máy hiện đại, và quyền quyết định của con người trong việc ứng dụng công nghệ an toàn.`;
-      } else if (lower.includes('trắc nghiệm') || lower.includes('câu hỏi')) {
-        reply = `🎯 **3 Câu hỏi ôn tập nhanh:**\n1. AI truyền thống khác với Generative AI ở điểm mấu chốt nào?\n2. Ai là người đầu tiên đặt ra phép thử Turing Test vào năm 1950?\n3. Ba nguyên tắc đạo đức cốt lõi khi ứng dụng AI trong giáo dục là gì?`;
-      } else if (lower.includes('hạn nộp') || lower.includes('bài tập')) {
-        reply = `⏰ **Lịch trình cần làm:** Bạn có bài kiểm tra nhận thức và video tương tác trong mô-đun. Hãy hoàn thành trước hạn chót để hệ thống ghi nhận điểm tích lũy!`;
-      } else {
-        reply = `💡 Cảm ơn câu hỏi của bạn về "${text}". Đối với nội dung này trong chương trình học Canvas LMS, bạn nên xem kỹ các tài liệu bài giảng và tham gia thảo luận với các bạn cùng lớp để nắm vững kiến thức nhé!`;
-      }
-
+    try {
+      const res = await api.ai.chat({
+        message: text.trim(),
+        courseId: activeCourse?.id || null,
+        moduleId: activeModuleId || null,
+        activityId: activeActivity?.id || null
+      });
       setMessages(prev => [
         ...prev,
         {
           sender: 'ai',
-          text: reply,
+          text: res?.reply || 'Mình chưa nhận được phản hồi, bạn vui lòng thử lại nhé.',
+          engine: res?.engine,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
+    } catch {
+      setMessages(prev => [
+        ...prev,
+        {
+          sender: 'ai',
+          text: 'Hiện kết nối máy chủ AI đang bận. Bạn hãy thử hỏi lại sau giây lát nhé!',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
       setIsThinking(false);
-    }, 800);
+    }
   };
 
   return (

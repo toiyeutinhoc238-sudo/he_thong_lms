@@ -211,16 +211,27 @@ export const TeacherDashboard: React.FC = () => {
                 </div>
 
                 {selectedCourse.modules && selectedCourse.modules.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setTargetModuleId(selectedCourse.modules[0]?.id || '');
-                      setIsAddActivityOpen(true);
-                    }}
-                    className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Thêm hoạt động mới</span>
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigateToCourse(selectedCourse.id, null, 'modules')}
+                      className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Mở trình soạn đầy đủ (Video neo chặn / Quiz / Bài tập)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTargetModuleId(selectedCourse.modules[0]?.id || '');
+                        setIsAddActivityOpen(true);
+                      }}
+                      className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Thêm nhanh</span>
+                    </button>
+                  </div>
                 )}
               </div>
 

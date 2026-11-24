@@ -30,11 +30,24 @@ import {
   BarChart3,
   ArrowLeft,
   Share2,
-  FolderInput
+  FolderInput,
+  Eye,
+  EyeOff,
+  ArrowUp,
+  ArrowDown,
+  Shuffle
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion, VideoCheckpoint } from '../types';
 import { VideoCheckpointEditor } from './VideoCheckpointEditor';
 import { ShareExportModal } from './ShareExportModal';
+import { parseBulkQuizText } from '../utils/aikenParser';
+
+function formatDueDateFromIso(iso: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
 interface CanvasModulesViewProps {
   onSelectActivity: (activityId: string) => void;
@@ -50,6 +63,8 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     addCourseModule, 
     updateCourseModule, 
     deleteCourseModule,
+    reorderCourseModules,
+    reorderModuleActivities,
     addCourseActivity, 
     updateCourseActivity, 
     deleteCourseActivity,
@@ -97,9 +112,16 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   const [actVideoUrl, setActVideoUrl] = useState('');
   const [actFileUrl, setActFileUrl] = useState('');
   const [actDueDate, setActDueDate] = useState('');
+  const [actDueDateIso, setActDueDateIso] = useState('');
   const [actMaxScore, setActMaxScore] = useState(10);
   const [actTimeLimit, setActTimeLimit] = useState(15);
   const [actPassScore, setActPassScore] = useState(5);
+  const [actShuffleQuestions, setActShuffleQuestions] = useState(false);
+  const [actMaxAttempts, setActMaxAttempts] = useState(0);
+  const [isBulkQuizOpen, setIsBulkQuizOpen] = useState(false);
+  const [bulkQuizText, setBulkQuizText] = useState('');
+  const [isEditBulkQuizOpen, setIsEditBulkQuizOpen] = useState(false);
+  const [editBulkQuizText, setEditBulkQuizText] = useState('');
   const [actVideoCheckpoints, setActVideoCheckpoints] = useState<VideoCheckpoint[]>([]);
   const [actPreventVideoSkip, setActPreventVideoSkip] = useState(true);
   const [actPrompt, setActPrompt] = useState('');
@@ -230,10 +252,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         : undefined,
       preventVideoSkip: actType === 'video' ? actPreventVideoSkip : undefined,
       fileUrl: actFileUrl.trim(),
-      dueDate: actDueDate.trim(),
+      dueDate: actDueDate.trim() || (actDueDateIso ? formatDueDateFromIso(actDueDateIso) : ''),
+      dueDateIso: actDueDateIso || undefined,
       maxScore: Number(actMaxScore) || 10,
       timeLimitMinutes: actType === 'quiz' ? Math.max(1, Number(actTimeLimit) || 15) : undefined,
       passScore: actType === 'quiz' ? Math.min(10, Math.max(0, Number(actPassScore) || 5)) : undefined,
+      shuffleQuestions: actType === 'quiz' ? actShuffleQuestions : undefined,
+      maxAttempts: actType === 'quiz' ? Math.max(0, Number(actMaxAttempts) || 0) : undefined,
       assignmentPrompt: actPrompt.trim(),
       starterCode: actStarterCode.trim() || undefined,
       programmingLanguage: actType === 'assignment' ? actProgLang : undefined,
@@ -252,8 +277,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     setActPreventVideoSkip(true);
     setActTimeLimit(15);
     setActPassScore(5);
+    setActShuffleQuestions(false);
+    setActMaxAttempts(0);
+    setIsBulkQuizOpen(false);
+    setBulkQuizText('');
     setActFileUrl('');
     setActDueDate('');
+    setActDueDateIso('');
     setActPrompt('');
     setActStarterCode('');
     setIsAddActivityOpen(false);
@@ -273,10 +303,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         : editingActivity.videoCheckpoints,
       preventVideoSkip: editingActivity.preventVideoSkip,
       fileUrl: editingActivity.fileUrl,
-      dueDate: editingActivity.dueDate,
+      dueDate: editingActivity.dueDate || (editingActivity.dueDateIso ? formatDueDateFromIso(editingActivity.dueDateIso) : ''),
+      dueDateIso: editingActivity.dueDateIso,
       maxScore: editingActivity.maxScore,
       timeLimitMinutes: editingActivity.type === 'quiz' ? Math.max(1, Number(editingActivity.timeLimitMinutes) || 15) : editingActivity.timeLimitMinutes,
       passScore: editingActivity.type === 'quiz' ? Math.min(10, Math.max(0, Number(editingActivity.passScore) || 5)) : editingActivity.passScore,
+      shuffleQuestions: editingActivity.type === 'quiz' ? Boolean(editingActivity.shuffleQuestions) : editingActivity.shuffleQuestions,
+      maxAttempts: editingActivity.type === 'quiz' ? Math.max(0, Number(editingActivity.maxAttempts) || 0) : editingActivity.maxAttempts,
       assignmentPrompt: editingActivity.assignmentPrompt,
       starterCode: editingActivity.starterCode,
       programmingLanguage: editingActivity.programmingLanguage,
@@ -475,14 +508,30 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       ) : (
         <div className="space-y-4">
-          {displayedModules.map((mod) => {
+          {displayedModules.map((mod, modIdx) => {
             const isCollapsed = focusedModule ? false : (collapsedModules[mod.id] ?? false);
             const activities = mod.activities || [];
+            const moveModule = (delta: number) => {
+              const ids = modules.map(m => m.id);
+              const idx = ids.indexOf(mod.id);
+              const target = idx + delta;
+              if (idx < 0 || target < 0 || target >= ids.length) return;
+              [ids[idx], ids[target]] = [ids[target], ids[idx]];
+              reorderCourseModules(activeCourse.id, ids);
+            };
+            const moveActivity = (actId: string, delta: number) => {
+              const ids = activities.map(a => a.id);
+              const idx = ids.indexOf(actId);
+              const target = idx + delta;
+              if (idx < 0 || target < 0 || target >= ids.length) return;
+              [ids[idx], ids[target]] = [ids[target], ids[idx]];
+              reorderModuleActivities(activeCourse.id, mod.id, ids);
+            };
 
             return (
               <div 
                 key={mod.id} 
-                className="border border-slate-300 rounded-md overflow-hidden bg-white shadow-2xs"
+                className={`border rounded-md overflow-hidden bg-white shadow-2xs ${mod.isHidden ? 'border-amber-300 opacity-85' : 'border-slate-300'}`}
               >
                 {/* Module Header Bar */}
                 <div 
@@ -498,9 +547,16 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                       )}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight truncate">
-                        {mod.title}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight truncate">
+                          {mod.title}
+                        </h3>
+                        {mod.isHidden && (
+                          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black shrink-0">
+                            Đang ẩn (Nháp)
+                          </span>
+                        )}
+                      </div>
                       {mod.description && (
                         <p className="text-[11px] text-slate-500 italic mt-0.5 font-normal">
                           {mod.description}
@@ -546,6 +602,43 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     {/* Hành động quản trị Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
                     {canManage && !isEmbedMode && (
                       <>
+                        {/* Đảo thứ tự mô-đun lên / xuống khi xem tất cả */}
+                        {!focusedModule && modules.length > 1 && (
+                          <div className="hidden sm:flex items-center">
+                            <button
+                              type="button"
+                              disabled={modIdx === 0}
+                              onClick={(e) => { e.stopPropagation(); moveModule(-1); }}
+                              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-300/80 disabled:opacity-30"
+                              title="Chuyển bài học lên trên"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={modIdx === displayedModules.length - 1}
+                              onClick={(e) => { e.stopPropagation(); moveModule(1); }}
+                              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-300/80 disabled:opacity-30"
+                              title="Chuyển bài học xuống dưới"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Ẩn / Hiện Mô-đun với học sinh (Nháp / Công bố) */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCourseModule(activeCourse.id, mod.id, { isHidden: !mod.isHidden });
+                          }}
+                          className={`p-1 rounded transition-colors ${mod.isHidden ? 'text-amber-700 bg-amber-100 hover:bg-amber-200' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-300/80'}`}
+                          title={mod.isHidden ? 'Đang ẩn với học sinh — Bấm để Công bố' : 'Đang hiển thị với học sinh — Bấm để Ẩn (Nháp)'}
+                        >
+                          {mod.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+
                         {/* Chia sẻ Link & Xuất Mô-đun sang LMS khác */}
                         <button
                           type="button"
@@ -630,11 +723,11 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                         )}
                       </div>
                     ) : (
-                      activities.map((act) => {
+                      activities.map((act, actIdx) => {
                         return (
                           <div
                             key={act.id}
-                            className="px-4 py-3 flex items-center justify-between border-b border-slate-200 last:border-b-0 hover:bg-slate-50/80 transition-colors group select-none"
+                            className={`px-4 py-3 flex items-center justify-between border-b border-slate-200 last:border-b-0 hover:bg-slate-50/80 transition-colors group select-none ${act.isHidden ? 'bg-amber-50/40' : ''}`}
                           >
                             {/* Left: Icon & Info (Click to view activity) */}
                             <div 
@@ -645,10 +738,15 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                                 {getActivityIcon(act.type)}
                               </span>
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <p className="text-xs sm:text-sm font-medium text-slate-800 group-hover:text-[#0374b5] group-hover:underline truncate">
                                     {act.title}
                                   </p>
+                                  {act.isHidden && (
+                                    <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black rounded">
+                                      Đang ẩn (Nháp)
+                                    </span>
+                                  )}
                                   {act.type === 'video' && act.videoUrl && (
                                     <span className="px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[10px] font-bold rounded">
                                       Video
@@ -720,10 +818,43 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                               </div>
                             </div>
 
-                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Chia sẻ / Sửa / Xóa) */}
-                            <div className="flex items-center gap-2 shrink-0 pl-3">
+                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Sắp xếp / Ẩn-Hiện / Chia sẻ / Sửa / Xóa) */}
+                            <div className="flex items-center gap-1.5 shrink-0 pl-3">
                               {canManage && !isEmbedMode && (
                                 <>
+                                  {activities.length > 1 && (
+                                    <div className="hidden sm:flex items-center">
+                                      <button
+                                        type="button"
+                                        disabled={actIdx === 0}
+                                        onClick={() => moveActivity(act.id, -1)}
+                                        className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-25 opacity-70 group-hover:opacity-100"
+                                        title="Di chuyển lên trên"
+                                      >
+                                        <ArrowUp className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={actIdx === activities.length - 1}
+                                        onClick={() => moveActivity(act.id, 1)}
+                                        className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-25 opacity-70 group-hover:opacity-100"
+                                        title="Di chuyển xuống dưới"
+                                      >
+                                        <ArrowDown className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {/* Hide / Publish Activity Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCourseActivity(activeCourse.id, act.id, { isHidden: !act.isHidden })}
+                                    className={`p-1 rounded transition-colors ${act.isHidden ? 'text-amber-700 bg-amber-100 hover:bg-amber-200' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-200 opacity-70 group-hover:opacity-100'}`}
+                                    title={act.isHidden ? 'Đang ẩn với học sinh — Bấm để Công bố' : 'Đang hiện với học sinh — Bấm để Ẩn (Nháp)'}
+                                  >
+                                    {act.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+
                                   {/* Share / Export Activity Button */}
                                   <button
                                     type="button"
@@ -1174,24 +1305,35 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
                   <div>
                     <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Hạn nộp (Deadline)
+                      Hạn nộp bài (Deadline — tự động gắn nhãn "Nộp trễ" nếu quá hạn)
                     </label>
-                    <input
-                      type="text"
-                      placeholder="Ví dụ: 30/11 lúc 23:59"
-                      value={actDueDate}
-                      onChange={(e) => setActDueDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="datetime-local"
+                        value={actDueDateIso}
+                        onChange={(e) => {
+                          setActDueDateIso(e.target.value);
+                          if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Hoặc ghi chú hạn nộp (VD: 30/11 23:59)"
+                        value={actDueDate}
+                        onChange={(e) => setActDueDate(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Trường riêng cho TRẮC NGHIỆM (kèm cài thời gian làm bài & điểm đạt) */}
+              {/* Trường riêng cho TRẮC NGHIỆM (kèm cài thời gian, điểm đạt, xáo trộn, giới hạn lần làm & nhập nhanh Aiken) */}
               {actType === 'quiz' && (
                 <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3 max-h-96 overflow-y-auto">
-                  {/* Cài đặt thời gian, điểm đạt & hạn nộp */}
-                  <div className="grid grid-cols-3 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                  {/* Cài đặt thời gian, điểm đạt, số lần làm & hạn nộp */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
                     <div>
                       <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
                         Thời gian (phút) *
@@ -1220,42 +1362,123 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                       />
                     </div>
                     <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1" title="0 = Không giới hạn số lượt làm lại">
+                        Số lượt tối đa
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        value={actMaxAttempts}
+                        onChange={(e) => setActMaxAttempts(Math.max(0, Number(e.target.value) || 0))}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                        placeholder="0 = không giới hạn"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
                         Hạn làm bài
                       </label>
                       <input
-                        type="text"
-                        placeholder="VD: 30/11 23:59"
-                        value={actDueDate}
-                        onChange={(e) => setActDueDate(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                        type="datetime-local"
+                        value={actDueDateIso}
+                        onChange={(e) => {
+                          setActDueDateIso(e.target.value);
+                          if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
+                        }}
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900 focus:outline-none focus:border-[#0374b5]"
                       />
                     </div>
-                    <p className="col-span-3 text-[10px] text-amber-800">
-                      Đồng hồ đếm ngược sẽ tự động chạy khi học sinh mở bài và tự nộp ngay khi hết thời gian.
-                    </p>
+                    <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
+                      <input
+                        type="checkbox"
+                        checked={actShuffleQuestions}
+                        onChange={(e) => setActShuffleQuestions(e.target.checked)}
+                        className="accent-amber-600 w-3.5 h-3.5"
+                      />
+                      <Shuffle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh (chống nhìn bài nhau) • Số lượt = 0 là không giới hạn</span>
+                    </label>
                   </div>
 
-                  <div className="flex items-center justify-between sticky top-0 bg-amber-50/90 py-1 backdrop-blur-xs z-10">
+                  <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 backdrop-blur-xs z-10">
                     <span className="text-xs font-bold text-amber-900">
                       Soạn câu hỏi trắc nghiệm ({quizQuestions.length} câu)
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setQuizQuestions(prev => [
-                        ...prev, 
-                        {
-                          id: `q${Date.now()}`,
-                          question: `Câu hỏi ${prev.length + 1}?`,
-                          options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
-                          correctAnswer: 0
-                        }
-                      ])}
-                      className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
-                    >
-                      + Thêm câu hỏi
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsBulkQuizOpen(v => !v)}
+                        className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
+                      >
+                        ⚡ Nhập nhanh (Aiken / Dán đề)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setQuizQuestions(prev => [
+                          ...prev, 
+                          {
+                            id: `q${Date.now()}`,
+                            question: `Câu hỏi ${prev.length + 1}?`,
+                            options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+                            correctAnswer: 0
+                          }
+                        ])}
+                        className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
+                      >
+                        + Thêm câu hỏi
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Khung dán nhanh hàng loạt câu hỏi chuẩn Aiken / Word */}
+                  {isBulkQuizOpen && (
+                    <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-amber-950">Dán hàng loạt câu hỏi hoặc chọn file Aiken (.txt):</span>
+                        <label className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold cursor-pointer">
+                          📂 Chọn file .txt
+                          <input
+                            type="file"
+                            accept=".txt,text/plain"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const f = e.target.files?.[0];
+                              e.target.value = '';
+                              if (f) setBulkQuizText(await f.text());
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <textarea
+                        rows={5}
+                        value={bulkQuizText}
+                        onChange={(e) => setBulkQuizText(e.target.value)}
+                        placeholder={"Câu 1: AI học từ yếu tố nào?\nA. Dữ liệu huấn luyện\nB. Màn hình\nC. Bàn phím\nD. Chuột\nANSWER: A\n\nCâu 2: Đâu là ứng dụng AI?\n*A. Dịch ngôn ngữ tự động\nB. Quạt máy cơ"}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setIsBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">Đóng</button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const parsed = parseBulkQuizText(bulkQuizText);
+                            if (parsed.length === 0) {
+                              alert('Không nhận diện được câu hỏi nào. Hãy đảm bảo mỗi câu có các phương án A. B. C. D. và dòng ANSWER: A (hoặc Đáp án: A hoặc *A.).');
+                              return;
+                            }
+                            setQuizQuestions(prev => [...prev, ...parsed]);
+                            setBulkQuizText('');
+                            setIsBulkQuizOpen(false);
+                            alert(`✅ Đã nhập nhanh thành công ${parsed.length} câu hỏi!`);
+                          }}
+                          className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                        >
+                          Phân tích & Thêm vào đề
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {quizQuestions.map((q, qIdx) => (
                     <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
@@ -1515,22 +1738,34 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
                   <div>
                     <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Hạn nộp
+                      Hạn nộp (Deadline)
                     </label>
-                    <input
-                      type="text"
-                      value={editingActivity.dueDate || ''}
-                      onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="datetime-local"
+                        value={editingActivity.dueDateIso || ''}
+                        onChange={(e) => setEditingActivity({
+                          ...editingActivity,
+                          dueDateIso: e.target.value,
+                          dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
+                        })}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      />
+                      <input
+                        type="text"
+                        value={editingActivity.dueDate || ''}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Sửa TRẮC NGHIỆM (kèm cài thời gian làm bài & điểm đạt) */}
+              {/* Sửa TRẮC NGHIỆM (kèm cài thời gian, điểm đạt, xáo trộn, giới hạn lần làm & nhập nhanh Aiken) */}
               {editingActivity.type === 'quiz' && (
                 <div className="space-y-3 p-3 bg-amber-50/50 rounded-xl border border-amber-200 max-h-96 overflow-y-auto">
-                  <div className="grid grid-cols-3 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
                     <div>
                       <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
                         Thời gian (phút) *
@@ -1560,44 +1795,113 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                        Số lượt tối đa
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        value={editingActivity.maxAttempts ?? 0}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, maxAttempts: Math.max(0, Number(e.target.value) || 0) })}
+                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
                         Hạn làm bài
                       </label>
                       <input
-                        type="text"
-                        placeholder="VD: 30/11 23:59"
-                        value={editingActivity.dueDate || ''}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900"
+                        type="datetime-local"
+                        value={editingActivity.dueDateIso || ''}
+                        onChange={(e) => setEditingActivity({
+                          ...editingActivity,
+                          dueDateIso: e.target.value,
+                          dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
+                        })}
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900"
                       />
                     </div>
+                    <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(editingActivity.shuffleQuestions)}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, shuffleQuestions: e.target.checked })}
+                        className="accent-amber-600 w-3.5 h-3.5"
+                      />
+                      <Shuffle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh</span>
+                    </label>
                   </div>
 
-                  <div className="flex items-center justify-between sticky top-0 bg-amber-50/95 py-1 z-10">
+                  <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 z-10">
                     <span className="text-xs font-bold text-amber-900">
                       Soạn câu hỏi trắc nghiệm ({(editingActivity.quizQuestions || []).length} câu)
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const current = editingActivity.quizQuestions || [];
-                        setEditingActivity({
-                          ...editingActivity,
-                          quizQuestions: [
-                            ...current,
-                            {
-                              id: `q${Date.now()}`,
-                              question: `Câu hỏi ${current.length + 1}?`,
-                              options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
-                              correctAnswer: 0
-                            }
-                          ]
-                        });
-                      }}
-                      className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
-                    >
-                      + Thêm câu hỏi
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditBulkQuizOpen(v => !v)}
+                        className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
+                      >
+                        ⚡ Nhập nhanh Aiken
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = editingActivity.quizQuestions || [];
+                          setEditingActivity({
+                            ...editingActivity,
+                            quizQuestions: [
+                              ...current,
+                              {
+                                id: `q${Date.now()}`,
+                                question: `Câu hỏi ${current.length + 1}?`,
+                                options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+                                correctAnswer: 0
+                              }
+                            ]
+                          });
+                        }}
+                        className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
+                      >
+                        + Thêm câu hỏi
+                      </button>
+                    </div>
                   </div>
+
+                  {isEditBulkQuizOpen && (
+                    <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
+                      <textarea
+                        rows={4}
+                        value={editBulkQuizText}
+                        onChange={(e) => setEditBulkQuizText(e.target.value)}
+                        placeholder={"Dán câu hỏi chuẩn Aiken / Word...\nCâu 1: ...\nA. ...\nB. ...\nANSWER: A"}
+                        className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setIsEditBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100">Đóng</button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const parsed = parseBulkQuizText(editBulkQuizText);
+                            if (parsed.length === 0) {
+                              alert('Không nhận diện được câu hỏi nào từ văn bản đã dán.');
+                              return;
+                            }
+                            setEditingActivity({
+                              ...editingActivity,
+                              quizQuestions: [...(editingActivity.quizQuestions || []), ...parsed]
+                            });
+                            setEditBulkQuizText('');
+                            setIsEditBulkQuizOpen(false);
+                          }}
+                          className="px-3 py-1 rounded-lg bg-amber-600 text-white font-bold"
+                        >
+                          Thêm {parseBulkQuizText(editBulkQuizText).length || ''} câu vào đề
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {(editingActivity.quizQuestions || []).map((q, qIdx) => (
                     <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">

@@ -42,6 +42,8 @@ interface AppContextType {
   addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
   updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
   deleteCourseModule: (courseId: string, moduleId: string) => Promise<void>;
+  reorderCourseModules: (courseId: string, moduleIds: string[]) => Promise<void>;
+  reorderModuleActivities: (courseId: string, moduleId: string, activityIds: string[]) => Promise<void>;
   addCourseActivity: (courseId: string, moduleId: string, newAct: Partial<Activity>) => void;
   updateCourseActivity: (courseId: string, activityId: string, data: Partial<Activity>) => void;
   deleteCourseActivity: (courseId: string, activityId: string) => void;
@@ -602,6 +604,34 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     api.modules.delete(courseId, moduleId).catch(err => reportSyncFailure('Xóa mô-đun', err));
   };
 
+  const reorderCourseModules = async (courseId: string, moduleIds: string[]) => {
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      const map = new Map((c.modules || []).map(m => [m.id, m]));
+      const ordered: CourseModule[] = [];
+      moduleIds.forEach(mid => { const m = map.get(mid); if (m) { ordered.push(m); map.delete(mid); } });
+      map.forEach(m => ordered.push(m));
+      return { ...c, modules: ordered.map((m, idx) => ({ ...m, order: idx + 1 })) };
+    }));
+    api.courses.reorderModules(courseId, moduleIds).catch(err => reportSyncFailure('Sắp xếp bài học', err));
+  };
+
+  const reorderModuleActivities = async (courseId: string, moduleId: string, activityIds: string[]) => {
+    setCourses(prev => prev.map(c => {
+      if (c.id !== courseId) return c;
+      const modules = (c.modules || []).map(m => {
+        if (m.id !== moduleId) return m;
+        const map = new Map((m.activities || []).map(a => [a.id, a]));
+        const ordered: Activity[] = [];
+        activityIds.forEach(aid => { const a = map.get(aid); if (a) { ordered.push(a); map.delete(aid); } });
+        map.forEach(a => ordered.push(a));
+        return { ...m, activities: ordered };
+      });
+      return { ...c, modules };
+    }));
+    api.modules.reorderActivities(courseId, moduleId, activityIds).catch(err => reportSyncFailure('Sắp xếp học liệu', err));
+  };
+
   const importCoursePackage = async (courseId: string, pkg: { modules: any[]; targetModuleId?: string | null }) => {
     try {
       const res = await api.courses.importPackage(courseId, pkg);
@@ -857,6 +887,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         addCourseModule,
         updateCourseModule,
         deleteCourseModule,
+        reorderCourseModules,
+        reorderModuleActivities,
         addCourseActivity,
         updateCourseActivity,
         deleteCourseActivity,

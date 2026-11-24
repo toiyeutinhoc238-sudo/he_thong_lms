@@ -4,6 +4,7 @@ import { CanvasCourseNav, CourseNavTab } from './CanvasCourseNav';
 import { CanvasModulesView } from './CanvasModulesView';
 import { CanvasRightSidebar } from './CanvasRightSidebar';
 import { CourseGradebookTracker } from './CourseGradebookTracker';
+import { AIVirtualLab } from './AIVirtualLab';
 import { defaultGrade6Course } from '../data/mockData';
 import { 
   Users, 
@@ -173,6 +174,35 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
 
       {/* 2. Center Content Area */}
       <div className="flex-1 min-w-0 flex flex-col overflow-y-auto">
+        {/* Thanh chuyển Tab cho màn hình điện thoại / tablet (vì cột menu trái ẩn trên mobile) */}
+        {!isEmbedMode && (
+          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto px-4 py-2.5 border-b border-slate-200 bg-slate-50/80 shrink-0">
+            {([
+              { id: 'home', label: 'Trang chủ' },
+              { id: 'modules', label: 'Nội dung học tập' },
+              { id: 'grades', label: 'Tiến độ & Điểm' },
+              { id: 'people', label: 'Thành viên' },
+              { id: 'discussions', label: 'Thảo luận' },
+              { id: 'files', label: 'Tập tin' },
+              { id: 'syllabus', label: 'Lịch trình' },
+              { id: 'resources3d', label: 'AI Lab' }
+            ] as { id: CourseNavTab; label: string }[]).map(item => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
+                  activeTab === item.id
+                    ? 'bg-[#0374b5] text-white border-[#0374b5] shadow-2xs'
+                    : 'bg-white text-slate-600 border-slate-200'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Banner Đăng Ký Khóa Học (Dành riêng cho học viên chưa ghi danh, ẩn khi nhúng iframe) */}
         {!isEnrolled && !isEmbedMode && (
           <div className="mx-4 sm:mx-8 mt-4 p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-indigo-500/10 border-2 border-[#0374b5]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
@@ -992,39 +1022,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Tab 7: Kho học liệu số & Mô phỏng 3D */}
-        {activeTab === 'resources3d' && (
-          <div className="p-6 max-w-4xl space-y-4">
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-              <Box className="w-5 h-5 text-indigo-600" />
-              <h2 className="text-lg font-bold text-slate-900">
-                Kho học liệu số & Mô phỏng tương tác 3D
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 border border-indigo-100 bg-gradient-to-br from-indigo-50/60 to-purple-50/60 rounded-2xl space-y-2">
-                <h4 className="text-sm font-bold text-indigo-950">Mô phỏng 3D: Mạng nơ-ron nhân tạo</h4>
-                <p className="text-xs text-slate-600">Khám phá trực quan cơ chế truyền lan xuôi và lan truyền ngược trong mô hình AI.</p>
-                <button 
-                  onClick={() => alert('Đang mở mô hình 3D tương tác...')}
-                  className="mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs"
-                >
-                  Mở Trải Nghiệm 3D
-                </button>
-              </div>
-              <div className="p-5 border border-sky-100 bg-gradient-to-br from-sky-50/60 to-blue-50/60 rounded-2xl space-y-2">
-                <h4 className="text-sm font-bold text-sky-950">Phòng thí nghiệm ảo AI Lab</h4>
-                <p className="text-xs text-slate-600">Thực hành huấn luyện và tinh chỉnh tham số máy học trực tiếp trên trình duyệt.</p>
-                <button 
-                  onClick={() => alert('Đang kết nối Cloud Virtual Lab...')}
-                  className="mt-2 px-3 py-1.5 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-lg text-xs font-bold shadow-xs"
-                >
-                  Khởi Chạy Virtual Lab
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Tab 7: Kho học liệu số & Phòng thí nghiệm Tương tác AI */}
+        {activeTab === 'resources3d' && <AIVirtualLab />}
       </div>
 
       {/* 3. Right Action Sidebar (Xem luồng khóa học, Xem lịch, Cần làm) — ẩn khi đang nhúng iframe embed=1 */}

@@ -21,12 +21,36 @@ interface QuizEngineProps {
 }
 
 export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFinish }) => {
-  const { submitQuiz } = useApp();
+  const { submitQuiz, currentUser, activeRole } = useApp();
+
+  const canManage = Boolean(
+    currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+    currentUser?.role === 'admin' ||
+    currentUser?.role === 'lecturer' ||
+    activeRole === 'admin' ||
+    activeRole === 'lecturer'
+  );
 
   // Sau khi nộp bài, máy chủ trả về bộ câu hỏi kèm đáp án để xem lại
   const [reviewQuestions, setReviewQuestions] = useState<QuizQuestion[] | null>(null);
-  const questions: QuizQuestion[] = reviewQuestions || activity.quizQuestions || [];
+  // Xáo trộn thứ tự câu hỏi nếu giáo viên bật shuffleQuestions (khi chưa nộp bài)
+  const [shuffledOrder] = useState<string[]>(() => {
+    const base = (activity.quizQuestions || []).map(q => q.id);
+    if (!activity.shuffleQuestions || activity.quizResult) return base;
+    const arr = [...base];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  });
+
+  const rawQuestions: QuizQuestion[] = reviewQuestions || activity.quizQuestions || [];
+  const questions: QuizQuestion[] = activity.shuffleQuestions && shuffledOrder.length === rawQuestions.length
+    ? shuffledOrder.map(id => rawQuestions.find(q => q.id === id)).filter(Boolean) as QuizQuestion[]
+    : rawQuestions;
   const timeLimitSeconds = (activity.timeLimitMinutes || 15) * 60;
+  const maxAttempts = Number(activity.maxAttempts) || 0;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>(
@@ -145,6 +169,8 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
           </h2>
           <p className="text-xs text-slate-500">
             Tổng cộng: {questions.length} câu • Điểm tối thiểu đạt: {activity.passScore || 5.0}/10
+            {activity.shuffleQuestions ? ' • Đã xáo trộn đề' : ''}
+            {maxAttempts > 0 ? ` • Tối đa ${maxAttempts} lượt làm` : ''}
           </p>
         </div>
 
@@ -193,19 +219,26 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
               </p>
               <p className="text-xs opacity-75">
                 Nộp bài lúc: {quizResult.submittedAt}
-                {quizResult.attemptCount && quizResult.attemptCount > 1 ? ` • Lần làm thứ ${quizResult.attemptCount}` : ''}
+                {quizResult.attemptCount ? ` • Lần làm thứ ${quizResult.attemptCount}${maxAttempts > 0 ? `/${maxAttempts}` : ''}` : ''}
+                {quizResult.isLate && <span className="ml-2 px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-black">Nộp trễ hạn</span>}
               </p>
               {!quizResult.passed && (
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={handleRetakeQuiz}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-all"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Làm lại bài kiểm tra để đạt chuẩn</span>
-                  </button>
-                </div>
+                maxAttempts > 0 && !canManage && (quizResult.attemptCount || 1) >= maxAttempts ? (
+                  <p className="pt-2 text-xs font-bold text-rose-700">
+                    Bạn đã sử dụng hết {maxAttempts}/{maxAttempts} lượt làm bài cho đề kiểm tra này.
+                  </p>
+                ) : (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleRetakeQuiz}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-all"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Làm lại bài kiểm tra để đạt chuẩn</span>
+                    </button>
+                  </div>
+                )
               )}
             </div>
           )}

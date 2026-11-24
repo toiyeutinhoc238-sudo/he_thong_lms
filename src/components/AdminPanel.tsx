@@ -49,6 +49,50 @@ export const AdminPanel: React.FC = () => {
   const [userModalError, setUserModalError] = useState<string | null>(null);
   const [userModalSuccess, setUserModalSuccess] = useState<string | null>(null);
 
+  // Cài đặt hệ thống lưu bền vững lên MongoDB / Local JSON
+  const [sysSettings, setSysSettings] = useState<Record<string, any>>({
+    allowCustomFileUploads: true,
+    allowAssignmentResubmit: true,
+    autoGradeQuiz: true,
+    showQuizReviewAfterSubmit: true,
+    lockQuizAnswersBeforeSubmit: true,
+    allowStudentForum: true,
+    enableAIAssistant: true,
+    autoUpdateProgress: true,
+    autoIssueCertificate: true
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSavedMsg, setSettingsSavedMsg] = useState(false);
+
+  useEffect(() => {
+    api.settings.get().then(s => { if (s) setSysSettings(prev => ({ ...prev, ...s })); }).catch(() => {});
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const res = await api.settings.save(sysSettings);
+      if (res?.settings) setSysSettings(res.settings);
+      setSettingsSavedMsg(true);
+      setTimeout(() => setSettingsSavedMsg(false), 3000);
+    } catch (err: any) {
+      alert(err?.message || 'Không thể lưu cấu hình hệ thống.');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleChangeUserRole = async (userId: string, nextRole: 'student' | 'lecturer') => {
+    try {
+      const res = await api.users.updateRole(userId, nextRole);
+      if (res?.user) {
+        setUsersList(prev => prev.map(u => u.id === userId ? { ...u, role: res.user.role, classOrPosition: res.user.classOrPosition } : u));
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Không thể đổi vai trò người dùng.');
+    }
+  };
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName.trim() || !newUserEmail.trim()) {
@@ -542,15 +586,25 @@ export const AdminPanel: React.FC = () => {
                         {u.school || u.department || 'Chưa cập nhật'}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-0.5 rounded-full font-black text-[10px] uppercase tracking-wider ${
-                          u.role === 'admin'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                            : u.role === 'lecturer'
-                              ? 'bg-purple-100 text-purple-800 border border-purple-300'
-                              : 'bg-blue-100 text-[#0374b5] border border-blue-200'
-                        }`}>
-                          {u.role === 'admin' ? 'Quản trị viên' : u.role === 'lecturer' ? 'Giáo viên' : 'Học viên'}
-                        </span>
+                        {u.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' || u.role === 'admin' ? (
+                          <span className="px-2.5 py-0.5 rounded-full font-black text-[10px] uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                            Quản trị viên
+                          </span>
+                        ) : (
+                          <select
+                            value={u.role === 'lecturer' ? 'lecturer' : 'student'}
+                            onChange={(e) => handleChangeUserRole(u.id, e.target.value as 'student' | 'lecturer')}
+                            className={`px-2 py-1 rounded-lg font-bold text-[11px] border cursor-pointer focus:outline-none ${
+                              u.role === 'lecturer'
+                                ? 'bg-purple-50 text-purple-800 border-purple-300'
+                                : 'bg-blue-50 text-[#0374b5] border-blue-200'
+                            }`}
+                            title="Đổi vai trò giữa Học viên và Giáo viên"
+                          >
+                            <option value="student">Học viên</option>
+                            <option value="lecturer">Giáo viên</option>
+                          </select>
+                        )}
                       </td>
                       <td className="py-3 px-4 text-right">
                         {u.email?.toLowerCase().trim() !== 'phanphiphu04@gmail.com' && (
@@ -586,10 +640,21 @@ export const AdminPanel: React.FC = () => {
                   Cấu hình Hoạt Động Đào Tạo & Kiểm Tra Trực Tuyến
                 </h2>
               </div>
-              <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5 self-start sm:self-auto">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Đang áp dụng toàn hệ thống
-              </span>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                {settingsSavedMsg && (
+                  <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Đã lưu vào máy chủ
+                  </span>
+                )}
+                <button
+                  type="button"
+                  disabled={savingSettings}
+                  onClick={handleSaveSettings}
+                  className="px-4 py-1.5 rounded-xl bg-[#0374b5] hover:bg-[#025a8c] disabled:opacity-50 text-white text-xs font-bold shadow-xs"
+                >
+                  {savingSettings ? 'Đang lưu...' : 'Lưu cấu hình'}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -608,16 +673,12 @@ export const AdminPanel: React.FC = () => {
                 </div>
                 <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
-                    <span>Cho phép tải lên tệp tùy ý (PDF, Word, Excel, PowerPoint, Ảnh, Video, ZIP, Mã nguồn...)</span>
+                    <input type="checkbox" checked={Boolean(sysSettings.allowCustomFileUploads)} onChange={e => setSysSettings({ ...sysSettings, allowCustomFileUploads: e.target.checked })} className="rounded accent-[#0374b5] w-4 h-4" />
+                    <span>Cho phép tải lên tệp tùy ý & lưu bền vững trên MongoDB Atlas (≤ 12 MB)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
-                    <span>Dung lượng tối đa mỗi tệp: <strong>100 MB</strong> (Động cơ Multer Streaming)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-[#0374b5] w-4 h-4" />
-                    <span>Cho phép học sinh nộp lại bài trước thời hạn chót của giáo viên</span>
+                    <input type="checkbox" checked={Boolean(sysSettings.allowAssignmentResubmit)} onChange={e => setSysSettings({ ...sysSettings, allowAssignmentResubmit: e.target.checked })} className="rounded accent-[#0374b5] w-4 h-4" />
+                    <span>Cho phép học sinh nộp lại bài và tự động lưu lịch sử phiên bản cũ</span>
                   </label>
                 </div>
               </div>
@@ -637,15 +698,15 @@ export const AdminPanel: React.FC = () => {
                 </div>
                 <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
-                    <span>Tự động chấm điểm trắc nghiệm tức thì ngay khi học sinh bấm nộp bài</span>
+                    <input type="checkbox" checked={Boolean(sysSettings.autoGradeQuiz)} onChange={e => setSysSettings({ ...sysSettings, autoGradeQuiz: e.target.checked })} className="rounded accent-emerald-600 w-4 h-4" />
+                    <span>Tự động chấm điểm trắc nghiệm tức thì & lưu đầy đủ lịch sử các lần làm</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.showQuizReviewAfterSubmit)} onChange={e => setSysSettings({ ...sysSettings, showQuizReviewAfterSubmit: e.target.checked })} className="rounded accent-emerald-600 w-4 h-4" />
                     <span>Hiển thị đáp án chính xác và phần giải thích chi tiết sau khi nộp</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-emerald-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.lockQuizAnswersBeforeSubmit)} onChange={e => setSysSettings({ ...sysSettings, lockQuizAnswersBeforeSubmit: e.target.checked })} className="rounded accent-emerald-600 w-4 h-4" />
                     <span>Tự động khóa đáp án đối với học sinh chưa hoàn thành bài làm</span>
                   </label>
                 </div>
@@ -666,11 +727,11 @@ export const AdminPanel: React.FC = () => {
                 </div>
                 <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-amber-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.allowStudentForum)} onChange={e => setSysSettings({ ...sysSettings, allowStudentForum: e.target.checked })} className="rounded accent-amber-600 w-4 h-4" />
                     <span>Cho phép học sinh đặt câu hỏi và bình luận thảo luận trong từng bài học</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-amber-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.enableAIAssistant)} onChange={e => setSysSettings({ ...sysSettings, enableAIAssistant: e.target.checked })} className="rounded accent-amber-600 w-4 h-4" />
                     <span>Kích hoạt Trợ lý Trí tuệ Nhân tạo AI LMS hỗ trợ học tập trực tuyến 24/7</span>
                   </label>
                 </div>
@@ -691,11 +752,11 @@ export const AdminPanel: React.FC = () => {
                 </div>
                 <div className="space-y-2 text-xs border-t border-slate-200/80 pt-2.5 text-slate-700">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-indigo-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.autoUpdateProgress)} onChange={e => setSysSettings({ ...sysSettings, autoUpdateProgress: e.target.checked })} className="rounded accent-indigo-600 w-4 h-4" />
                     <span>Tự động cập nhật thanh tiến độ % học tập cho học sinh sau mỗi bài nộp</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="rounded accent-indigo-600 w-4 h-4" />
+                    <input type="checkbox" checked={Boolean(sysSettings.autoIssueCertificate)} onChange={e => setSysSettings({ ...sysSettings, autoIssueCertificate: e.target.checked })} className="rounded accent-indigo-600 w-4 h-4" />
                     <span>Tự động cấp Giấy chứng nhận số khi học sinh đạt 100% tiến độ bài học</span>
                   </label>
                 </div>
@@ -727,12 +788,12 @@ export const AdminPanel: React.FC = () => {
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                 <span className="text-slate-400 font-bold block">Cơ sở dữ liệu Đám mây</span>
-                <strong className="text-slate-800 text-sm">MongoDB Atlas Cloud Cluster (vjKs2Siuwi5Kpcfx)</strong>
+                <strong className="text-slate-800 text-sm">MongoDB Atlas Cloud (Mã hóa TLS & Lưu tệp bền vững)</strong>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <span className="text-slate-400 font-bold block">Động cơ Tải Tệp Lên</span>
-                <strong className="text-slate-800 text-sm">Multer 100MB Multi-format Engine</strong>
+                <span className="text-slate-400 font-bold block">Động cơ Tải Tệp & Nén dữ liệu</span>
+                <strong className="text-slate-800 text-sm">Multer Multi-format + HTTP Gzip Compression</strong>
               </div>
             </div>
           </div>

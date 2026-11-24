@@ -140,9 +140,10 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
-  version: '2.5-persistent-storage-history',
+  version: '2.6-full-lms-suite',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   persistentFileStorage: isMongoConnected ? 'MongoDB Atlas (<=12MB) + Disk Cache' : 'Local Disk',
+  geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
   uptime: process.uptime(),
   timestamp: new Date().toISOString()
 }));
@@ -260,6 +261,27 @@ const uploadedFileSchema = new mongoose.Schema({
   uploadedAt: String
 });
 const UploadedFileModel = mongoose.model('UploadedFile', uploadedFileSchema);
+
+// Cài đặt hệ thống lưu bền vững (Admin Settings)
+const settingSchema = new mongoose.Schema({
+  key: { type: String, unique: true },
+  value: Object,
+  updatedAt: String
+});
+const SettingModel = mongoose.model('Setting', settingSchema);
+
+const DEFAULT_SYSTEM_SETTINGS = {
+  allowCustomFileUploads: true,
+  maxUploadSizeMB: 100,
+  allowAssignmentResubmit: true,
+  autoGradeQuiz: true,
+  showQuizReviewAfterSubmit: true,
+  lockQuizAnswersBeforeSubmit: true,
+  allowStudentForum: true,
+  enableAIAssistant: true,
+  autoUpdateProgress: true,
+  autoIssueCertificate: true
+};
 
 // Tiến độ học tập lưu RIÊNG cho từng học sinh (mỗi bản ghi = 1 học sinh x 1 hoạt động)
 const progressSchema = new mongoose.Schema({
@@ -772,7 +794,7 @@ function stripStudentState(modules) {
   }));
 }
 
-// Trả về khóa học theo góc nhìn của người đang đăng nhập: chỉ gắn tiến độ CỦA CHÍNH HỌ
+// Trả về khóa học theo góc nhìn của người đang đăng nhập: chỉ gắn tiến độ CỦA CHÍNH HỌ (ẩn mô-đun/hoạt động nháp với học sinh)
 function viewCourse(courseObj, user, progressRecords) {
   const byActivity = new Map();
   (progressRecords || []).forEach(p => {
@@ -784,33 +806,38 @@ function viewCourse(courseObj, user, progressRecords) {
   const hideAnswers = !isStaff(user);
   let total = 0;
   let completed = 0;
-  const modules = stripStudentState(courseObj.modules).map(m => ({
+  const rawModules = stripStudentState(courseObj.modules).filter(m => !hideAnswers || !m.isHidden);
+  const modules = rawModules.map(m => ({
     ...m,
-    activities: m.activities.map(original => {
-      total++;
-      const p = byActivity.get(original.id);
-      let a = original;
-      // Học sinh chỉ nhận đáp án & lời giải SAU KHI đã nộp bài trắc nghiệm
-      if (hideAnswers && Array.isArray(a.quizQuestions) && !p?.quizResult) {
-        a = { ...a, quizQuestions: a.quizQuestions.map(({ correctAnswer, explanation, ...q }) => q) };
-      }
-      if (!p) return a;
-      const out = { ...a, isCompleted: !!p.isCompleted };
-      if (p.submission) out.submission = p.submission;
-      if (p.quizResult) out.quizResult = p.quizResult;
-      if (p.score !== undefined && p.score !== null) out.score = p.score;
-      if (p.videoProgress) {
-        out.videoProgress = p.videoProgress;
-        out.watchedSeconds = p.videoProgress.watchedSeconds || 0;
-        if (p.videoProgress.totalSeconds) out.videoDuration = p.videoProgress.totalSeconds;
-      }
-      if (p.viewCount) out.viewCount = p.viewCount;
-      if (p.timeSpentSeconds) out.timeSpentSeconds = p.timeSpentSeconds;
-      if (p.firstAccessedAt) out.firstAccessedAt = p.firstAccessedAt;
-      if (p.lastAccessedAt) out.lastAccessedAt = p.lastAccessedAt;
-      if (out.isCompleted) completed++;
-      return out;
-    })
+    activities: m.activities
+      .filter(a => !hideAnswers || !a.isHidden)
+      .map(original => {
+        total++;
+        const p = byActivity.get(original.id);
+        let a = original;
+        // Học sinh chỉ nhận đáp án & lời giải SAU KHI đã nộp bài trắc nghiệm
+        if (hideAnswers && Array.isArray(a.quizQuestions) && !p?.quizResult) {
+          a = { ...a, quizQuestions: a.quizQuestions.map(({ correctAnswer, explanation, ...q }) => q) };
+        }
+        if (!p) return a;
+        const out = { ...a, isCompleted: !!p.isCompleted };
+        if (p.submission) out.submission = p.submission;
+        if (p.submissionHistory) out.submissionHistory = p.submissionHistory;
+        if (p.quizResult) out.quizResult = p.quizResult;
+        if (p.quizHistory) out.quizHistory = p.quizHistory;
+        if (p.score !== undefined && p.score !== null) out.score = p.score;
+        if (p.videoProgress) {
+          out.videoProgress = p.videoProgress;
+          out.watchedSeconds = p.videoProgress.watchedSeconds || 0;
+          if (p.videoProgress.totalSeconds) out.videoDuration = p.videoProgress.totalSeconds;
+        }
+        if (p.viewCount) out.viewCount = p.viewCount;
+        if (p.timeSpentSeconds) out.timeSpentSeconds = p.timeSpentSeconds;
+        if (p.firstAccessedAt) out.firstAccessedAt = p.firstAccessedAt;
+        if (p.lastAccessedAt) out.lastAccessedAt = p.lastAccessedAt;
+        if (out.isCompleted) completed++;
+        return out;
+      })
   }));
   const students = courseObj.enrolledStudents || [];
   return {
@@ -1741,10 +1768,77 @@ app.post('/api/courses/:id/enroll', requireAuth, async (req, res) => {
 });
 
 async function courseProgressOf(course, userId) {
-  const ids = new Set(allActivities(course).map(a => a.id));
+  const visibleActs = (course.modules || [])
+    .filter(m => !m.isHidden)
+    .flatMap(m => (m.activities || []).filter(a => !a.isHidden));
+  const ids = new Set(visibleActs.map(a => a.id));
   const records = await listProgress({ courseId: course.id, userId });
   const completed = records.filter(p => p.isCompleted && ids.has(p.activityId)).length;
   return ids.size > 0 ? Math.round((completed / ids.size) * 100) : 0;
+}
+
+// Tự động cấp Chứng chỉ số khi học sinh hoàn thành 100% hoạt động công bố của khóa học
+async function maybeIssueCertificate(course, user) {
+  if (!course || !user || isStaff(user) || course.certificateEligible === false) return null;
+  const visibleActs = (course.modules || [])
+    .filter(m => !m.isHidden)
+    .flatMap(m => (m.activities || []).filter(a => !a.isHidden));
+  if (visibleActs.length === 0) return null;
+
+  const records = await listProgressForUser(user, course.id);
+  const byAct = new Map();
+  records.forEach(p => {
+    const ex = byAct.get(p.activityId);
+    if (!ex || (p.updatedAt || '') > (ex.updatedAt || '')) byAct.set(p.activityId, p);
+  });
+  const doneCount = visibleActs.filter(a => byAct.get(a.id)?.isCompleted).length;
+  if (doneCount < visibleActs.length) return null;
+
+  // Tính điểm trung bình của học sinh trong khóa học
+  const scores = [...byAct.values()]
+    .map(p => p.score)
+    .filter(s => s !== null && s !== undefined && Number.isFinite(Number(s)))
+    .map(Number);
+  const avg = scores.length > 0 ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)) : 10;
+  const gradeClassification = avg >= 8.5 ? 'Xuất sắc' : avg >= 7.5 ? 'Giỏi' : avg >= 6.0 ? 'Khá' : 'Đạt';
+
+  const existingCert = isMongoConnected
+    ? await CertModel.findOne({ courseId: course.id, studentId: user.id }).lean()
+    : (readDb().certificates || []).find(c => c.courseId === course.id && c.studentId === user.id);
+
+  if (existingCert) return existingCert;
+
+  const certNumber = `LMS2-${course.code || 'CERT'}-${new Date().getFullYear()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+  const cert = {
+    id: `cert-${Date.now()}-${crypto.randomBytes(2).toString('hex')}`,
+    certificateNumber: certNumber,
+    courseId: course.id,
+    courseName: course.name,
+    studentId: user.id,
+    studentName: user.name || 'Học viên',
+    studentCode: user.code || (user.email ? user.email.split('@')[0].toUpperCase() : 'HV'),
+    issueDate: new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+    scoreAverage: avg,
+    gradeClassification,
+    qrVerificationUrl: `/api/certificates/verify/${certNumber}`,
+    signatureName: course.instructor?.name || 'Phan Phi Phú',
+    signatureTitle: 'Giáo viên phụ trách • LMS Nhóm 2'
+  };
+
+  if (isMongoConnected) {
+    await CertModel.create(cert);
+  } else {
+    const db = readDb();
+    db.certificates = [cert, ...(db.certificates || [])];
+    writeDb(db);
+  }
+  return cert;
+}
+
+function isPastDeadline(activity) {
+  if (!activity?.dueDateIso) return false;
+  const ts = Date.parse(activity.dueDateIso);
+  return Number.isFinite(ts) && Date.now() > ts;
 }
 
 // 6. Activities: Mark Completed (ghi nhận cho đúng học sinh đang đăng nhập; chống bỏ qua neo chặn video)
@@ -1795,7 +1889,8 @@ app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req,
     }
     await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
   }
-  res.json({ success: true, progress: await courseProgressOf(ctx.course, req.user.id) });
+  const cert = await maybeIssueCertificate(ctx.course, req.user);
+  res.json({ success: true, progress: await courseProgressOf(ctx.course, req.user.id), certificateIssued: !!cert });
 });
 
 // 6.05 Activities: Telemetry Tracking (ghi nhận lượt truy cập & thời gian học tập thực tế cho mọi hoạt động)
@@ -1887,11 +1982,13 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
   }
 
   await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
+  const cert = isCompleted ? await maybeIssueCertificate(ctx.course, req.user) : null;
   res.json({
     success: true,
     isCompleted,
     videoProgress,
-    overallCourseProgress: await courseProgressOf(ctx.course, req.user.id)
+    overallCourseProgress: await courseProgressOf(ctx.course, req.user.id),
+    certificateIssued: !!cert
   });
 });
 
@@ -1928,6 +2025,7 @@ app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, r
     fileSize: String(req.body.fileSize || '').slice(0, 30),
     fileUrl: String(req.body.fileUrl || '').slice(0, 500),
     submittedAt: now,
+    isLate: isPastDeadline(ctx.activity),
     textSubmission,
     previousGrade: existing?.submission?.grade ?? existing?.score ?? null,
     previousFeedback: existing?.submission?.feedback || ''
@@ -1941,9 +2039,10 @@ app.post('/api/courses/:id/activities/:actId/submit', requireAuth, async (req, r
     viewCount: Math.max(1, existing?.viewCount || 0),
     firstAccessedAt: existing?.firstAccessedAt || now,
     lastAccessedAt: now,
-    lastAction: submissionHistory.length > 0 ? `Nộp lại bài tập (lần ${subData.version})` : 'Đã nộp bài tập'
+    lastAction: submissionHistory.length > 0 ? `Nộp lại bài tập (lần ${subData.version})` : (subData.isLate ? 'Nộp bài tập (trễ hạn)' : 'Đã nộp bài tập')
   }, req.user.email);
-  res.json({ success: true, submission: subData, submissionHistory });
+  const cert = await maybeIssueCertificate(ctx.course, req.user);
+  res.json({ success: true, submission: subData, submissionHistory, certificateIssued: !!cert });
 });
 
 // Helper: gom danh sách học sinh thực tế + khớp tiến độ theo cả userId và email (chống mất dữ liệu khi đăng nhập Google)
@@ -2129,14 +2228,22 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
   const prevHistory = Array.isArray(existing?.quizHistory) && existing.quizHistory.length > 0
     ? [...existing.quizHistory]
     : (existing?.quizResult ? [{ ...existing.quizResult, attempt: existing.quizResult.attempt || existing.quizResult.attemptCount || 1 }] : []);
+
+  const maxAttempts = Number(ctx.activity.maxAttempts) || 0;
+  if (maxAttempts > 0 && !isStaff(req.user) && prevHistory.length >= maxAttempts) {
+    return res.status(400).json({ message: `Bạn đã dùng hết ${maxAttempts}/${maxAttempts} lượt làm bài kiểm tra này.` });
+  }
+
   const attemptCount = Math.max(prevHistory.length, existing?.quizResult?.attemptCount || 0) + 1;
   const bestScore = existing?.score !== undefined && existing?.score !== null ? Math.max(existing.score, score) : score;
+  const late = isPastDeadline(ctx.activity);
   const quizResult = {
     attempt: attemptCount,
     score,
     bestScore,
     maxScore,
     passed,
+    isLate: late,
     submittedAt: now,
     answers,
     correctCount,
@@ -2158,9 +2265,10 @@ app.post('/api/courses/:id/activities/:actId/quiz-submit', requireAuth, async (r
     timeSpentSeconds: (existing?.timeSpentSeconds || 0) + durationSeconds,
     firstAccessedAt: existing?.firstAccessedAt || now,
     lastAccessedAt: now,
-    lastAction: `Nộp trắc nghiệm lần ${attemptCount} (${score}/10)`
+    lastAction: `Nộp trắc nghiệm lần ${attemptCount} (${score}/10)${late ? ' • Trễ hạn' : ''}`
   }, req.user.email);
-  res.json({ success: true, passed, score, bestScore, result: quizResult, quizHistory, questions });
+  const cert = isCompleted ? await maybeIssueCertificate(ctx.course, req.user) : null;
+  res.json({ success: true, passed, score, bestScore, result: quizResult, quizHistory, questions, certificateIssued: !!cert });
 });
 
 // 9.01 Sổ điểm & Bảng theo dõi tiến độ toàn diện của cả lớp (kèm phân tích mô-đun, câu hỏi trắc nghiệm & cảnh báo học sinh)
@@ -2499,6 +2607,123 @@ app.post('/api/courses/:id/enroll-student', requireStaff, async (req, res) => {
   }
 
   res.json({ success: true, student: studentObj });
+});
+
+// 9.025 Giáo viên ghi danh hàng loạt học sinh theo danh sách CSV / Email
+app.post('/api/courses/:id/enroll-bulk', requireStaff, async (req, res) => {
+  const course = await loadCourseObj(req.params.id);
+  if (!course) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+  const list = Array.isArray(req.body?.students) ? req.body.students : [];
+  if (list.length === 0) return res.status(400).json({ message: 'Danh sách học sinh đang trống.' });
+
+  const existingEmails = new Set((course.enrolledStudents || []).map(s => String(s.email || '').toLowerCase().trim()).filter(Boolean));
+  const incomingEmails = list.map(s => String(s.email || '').toLowerCase().trim()).filter(Boolean);
+  const matchedUsers = await findUsersByEmails(incomingEmails);
+  const userByEmail = new Map(matchedUsers.map(u => [String(u.email || '').toLowerCase().trim(), u]));
+
+  const toAdd = [];
+  let skippedCount = 0;
+  for (let i = 0; i < list.length; i++) {
+    const raw = list[i];
+    const email = String(raw.email || '').toLowerCase().trim();
+    const name = String(raw.name || email.split('@')[0] || '').trim();
+    if (!email || !email.includes('@') || existingEmails.has(email)) {
+      skippedCount++;
+      continue;
+    }
+    existingEmails.add(email);
+    const mu = userByEmail.get(email);
+    toAdd.push({
+      id: mu?.id || `student-${Date.now()}-${i}`,
+      name: mu?.name || name || 'Học sinh',
+      email,
+      className: mu?.className || String(raw.className || 'Lớp 6A').trim(),
+      code: mu?.code || String(raw.code || '').trim() || `HS${Math.floor(100 + Math.random() * 900)}`,
+      school: mu?.school || 'THCS',
+      avatar: mu?.avatar || '',
+      enrolledAt: nowVN(),
+      status: 'Đang học'
+    });
+  }
+
+  if (toAdd.length > 0) {
+    if (isMongoConnected) {
+      await CourseModel.updateOne(
+        { $or: [{ id: course.id }, { code: course.id }] },
+        { $push: { enrolledStudents: { $each: toAdd } }, $inc: { enrolledStudentsCount: toAdd.length } }
+      );
+      const matchedIds = toAdd.filter(s => userByEmail.has(s.email)).map(s => s.id);
+      if (matchedIds.length > 0) {
+        await UserModel.updateMany({ id: { $in: matchedIds } }, { $addToSet: { enrolledCourses: course.id } });
+      }
+    } else {
+      const db = readDb();
+      const c = db.courses?.find(x => x.id === course.id || x.code === course.id);
+      if (c) {
+        c.enrolledStudents = [...(c.enrolledStudents || []), ...toAdd];
+        c.enrolledStudentsCount = c.enrolledStudents.length;
+      }
+      writeDb(db);
+    }
+  }
+
+  res.json({ success: true, addedCount: toAdd.length, skippedCount, students: toAdd });
+});
+
+// 9.026 Sắp xếp lại thứ tự các mô-đun & các hoạt động trong mô-đun
+app.put('/api/courses/:id/reorder-modules', requireStaff, async (req, res) => {
+  const orderIds = Array.isArray(req.body?.moduleIds) ? req.body.moduleIds : [];
+  if (orderIds.length === 0) return res.status(400).json({ message: 'Thiếu danh sách thứ tự mô-đun.' });
+  const reorder = (mods) => {
+    const map = new Map((mods || []).map(m => [m.id, m]));
+    const ordered = [];
+    orderIds.forEach(mid => { if (map.has(mid)) { ordered.push(map.get(mid)); map.delete(mid); } });
+    map.forEach(m => ordered.push(m));
+    return ordered.map((m, idx) => ({ ...m, order: idx + 1 }));
+  };
+  if (isMongoConnected) {
+    const doc = await getCourseDoc(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+    doc.modules = reorder(doc.modules);
+    doc.markModified('modules');
+    await doc.save();
+    return res.json({ success: true });
+  }
+  const db = readDb();
+  const c = (db.courses || []).find(x => x.id === req.params.id || x.code === req.params.id);
+  if (!c) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+  c.modules = reorder(c.modules);
+  writeDb(db);
+  res.json({ success: true });
+});
+
+app.put('/api/courses/:id/modules/:modId/reorder-activities', requireStaff, async (req, res) => {
+  const orderIds = Array.isArray(req.body?.activityIds) ? req.body.activityIds : [];
+  if (orderIds.length === 0) return res.status(400).json({ message: 'Thiếu danh sách thứ tự hoạt động.' });
+  const reorder = (acts) => {
+    const map = new Map((acts || []).map(a => [a.id, a]));
+    const ordered = [];
+    orderIds.forEach(aid => { if (map.has(aid)) { ordered.push(map.get(aid)); map.delete(aid); } });
+    map.forEach(a => ordered.push(a));
+    return ordered;
+  };
+  if (isMongoConnected) {
+    const doc = await getCourseDoc(req.params.id);
+    if (!doc) return res.status(404).json({ message: 'Không tìm thấy khóa học.' });
+    const mod = (doc.modules || []).find(m => m.id === req.params.modId);
+    if (!mod) return res.status(404).json({ message: 'Không tìm thấy mô-đun.' });
+    mod.activities = reorder(mod.activities);
+    doc.markModified('modules');
+    await doc.save();
+    return res.json({ success: true });
+  }
+  const db = readDb();
+  const c = (db.courses || []).find(x => x.id === req.params.id || x.code === req.params.id);
+  const mod = c?.modules?.find(m => m.id === req.params.modId);
+  if (!mod) return res.status(404).json({ message: 'Không tìm thấy mô-đun.' });
+  mod.activities = reorder(mod.activities);
+  writeDb(db);
+  res.json({ success: true });
 });
 
 // 9.03 Giáo viên gỡ học viên khỏi danh sách lớp
@@ -3001,18 +3226,136 @@ app.get('/api/files/download/:filename', async (req, res) => {
   return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
 });
 
-// 10. Certificates
+// 10. Certificates (Học sinh xem chứng chỉ của chính mình; giáo viên xem tất cả + xác thực công khai theo mã)
 app.get('/api/certificates', async (req, res) => {
+  let certs = [];
   if (isMongoConnected) {
     try {
-      const certs = await CertModel.find();
-      return res.json(certs || []);
+      certs = await CertModel.find().lean();
     } catch (err) {
-      return res.json([]);
+      certs = [];
     }
+  } else {
+    certs = readDb().certificates || [];
+  }
+  if (req.user && !isStaff(req.user)) {
+    certs = certs.filter(c => c.studentId === req.user.id);
+  }
+  res.json(certs || []);
+});
+
+app.get('/api/certificates/verify/:certNumber', async (req, res) => {
+  const certNumber = String(req.params.certNumber || '').trim();
+  const cert = isMongoConnected
+    ? await CertModel.findOne({ certificateNumber: certNumber }).lean()
+    : (readDb().certificates || []).find(c => c.certificateNumber === certNumber);
+  if (!cert) return res.status(404).json({ message: 'Không tìm thấy chứng chỉ hợp lệ với mã này.' });
+  res.json(cert);
+});
+
+// 10.5 System Settings (Admin lưu cấu hình hệ thống thật vào MongoDB / Local JSON)
+app.get('/api/settings', async (req, res) => {
+  if (isMongoConnected) {
+    try {
+      const doc = await SettingModel.findOne({ key: 'global' }).lean();
+      return res.json({ ...DEFAULT_SYSTEM_SETTINGS, ...(doc?.value || {}) });
+    } catch { }
   }
   const db = readDb();
-  res.json(db.certificates || []);
+  res.json({ ...DEFAULT_SYSTEM_SETTINGS, ...(db.settings || {}) });
+});
+
+app.put('/api/settings', requireStaff, async (req, res) => {
+  const merged = { ...DEFAULT_SYSTEM_SETTINGS, ...(req.body || {}) };
+  if (isMongoConnected) {
+    await SettingModel.findOneAndUpdate(
+      { key: 'global' },
+      { $set: { key: 'global', value: merged, updatedAt: new Date().toISOString() } },
+      { upsert: true }
+    );
+  } else {
+    const db = readDb();
+    db.settings = merged;
+    writeDb(db);
+  }
+  res.json({ success: true, settings: merged });
+});
+
+// 10.6 Trợ lý AI đọc ngữ cảnh thật của khóa học/tiến độ & tự kết nối Gemini API nếu có GEMINI_API_KEY
+app.post('/api/ai/chat', async (req, res) => {
+  const message = String(req.body?.message || '').trim().slice(0, 2000);
+  if (!message) return res.status(400).json({ message: 'Vui lòng nhập câu hỏi.' });
+
+  const courseId = req.body?.courseId || '6AIAB01';
+  const course = await loadCourseObj(courseId);
+  const view = course ? await viewCourseFor(course, req.user) : null;
+  const activeMod = view && req.body?.moduleId ? (view.modules || []).find(m => m.id === req.body.moduleId) : null;
+  const allActs = (view?.modules || []).flatMap(m => (m.activities || []).map(a => ({ ...a, moduleTitle: m.title })));
+  const activeAct = req.body?.activityId ? allActs.find(a => a.id === req.body.activityId) : null;
+  const pendingActs = allActs.filter(a => !a.isCompleted);
+  const upcomingDeadlines = allActs.filter(a => a.dueDate || a.dueDateIso);
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    try {
+      const sysPrompt = `Bạn là Trợ lý Học tập AI thân thiện của Hệ thống LMS Nhóm 2 (Tin học & Chuyên đề AI Lớp 6).
+Ngữ cảnh thực tế hiện tại:
+- Khóa học: ${view?.name || 'Chuyên đề AI Lớp 6'} (${view?.progress || 0}% hoàn thành, ${view?.completedActivities || 0}/${view?.totalActivities || 0} mục).
+- Bài đang mở: ${activeMod?.title || 'Tổng quan toàn khóa'}.
+- Hoạt động đang mở: ${activeAct ? `${activeAct.title} (${activeAct.type}) - ${activeAct.description || ''}` : 'Chưa chọn hoạt động cụ thể'}.
+- Danh sách 8 bài học: ${(view?.modules || []).map(m => m.title).join('; ')}.
+- Các mục chưa hoàn thành: ${pendingActs.slice(0, 6).map(a => a.title).join(', ') || 'Đã xong hết'}.
+- Hạn nộp: ${upcomingDeadlines.slice(0, 5).map(a => `${a.title} (${a.dueDate || a.dueDateIso})`).join(', ') || 'Chưa có hạn nộp cụ thể'}.
+Hãy trả lời ngắn gọn, dễ hiểu bằng tiếng Việt, đúng trọng tâm câu hỏi của người học.`;
+
+      const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: `${sysPrompt}\n\nCâu hỏi: ${message}` }] }]
+        })
+      });
+      if (gRes.ok) {
+        const gJson = await gRes.json();
+        const reply = gJson?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) return res.json({ reply: reply.trim(), engine: 'gemini' });
+      }
+    } catch (e) {
+      console.warn('Gemini fallback sang bộ trợ lý ngữ cảnh nội bộ:', e.message);
+    }
+  }
+
+  // Bộ trợ lý ngữ cảnh thực tế (đọc đúng bài học, tiến độ, hoạt động & hạn nộp thật trên LMS)
+  const lower = message.toLowerCase();
+  let reply = '';
+  if (lower.includes('hạn nộp') || lower.includes('deadline') || lower.includes('cần làm') || lower.includes('chưa xong')) {
+    if (pendingActs.length === 0 && allActs.length > 0) {
+      reply = `🎉 Tuyệt vời! Bạn đã hoàn thành toàn bộ ${allActs.length}/${allActs.length} học liệu trong khóa "${view?.name || 'khóa học này'}" rồi!`;
+    } else if (pendingActs.length > 0) {
+      const lines = pendingActs.slice(0, 6).map((a, i) => `${i + 1}. [${a.type.toUpperCase()}] ${a.title}${a.dueDate ? ` — Hạn: ${a.dueDate}` : ''}`);
+      reply = `⏰ Bạn còn **${pendingActs.length} mục chưa hoàn thành** trong "${view?.name}":\n${lines.join('\n')}\n\nTiến độ hiện tại của bạn: **${view?.progress || 0}%**.`;
+    } else {
+      reply = `Hiện tại khóa "${view?.name || '6AIAB01'}" chưa có học liệu có hạn nộp. Khi giáo viên thêm bài tập hoặc bài kiểm tra, mình sẽ tự động nhắc lịch cho bạn nhé!`;
+    }
+  } else if (lower.includes('tiến độ') || lower.includes('điểm')) {
+    const scored = allActs.filter(a => a.score !== undefined && a.score !== null);
+    const avg = scored.length > 0 ? (scored.reduce((s, a) => s + Number(a.score), 0) / scored.length).toFixed(1) : null;
+    reply = `📊 **Tiến độ thực tế của bạn trong "${view?.name}":**\n• Hoàn thành: **${view?.completedActivities || 0}/${view?.totalActivities || 0} học liệu (${view?.progress || 0}%)**\n• Điểm trung bình hiện tại: **${avg ? `${avg}/10` : 'Chưa có bài chấm điểm'}**\n• Bạn có thể mở mục **Tiến độ & Sổ điểm** để xem chi tiết từng bài video và câu đúng/sai trắc nghiệm.`;
+  } else if (lower.includes('tóm tắt')) {
+    if (activeAct) {
+      reply = `📖 **Tóm tắt hoạt động đang mở: ${activeAct.title}**\n• Loại: ${activeAct.type}\n• Mô tả: ${activeAct.description || activeAct.assignmentPrompt || 'Nội dung trọng tâm của bài học.'}\n${activeAct.type === 'video' ? `• Lưu ý: Cần xem tối thiểu 80% thời lượng${(activeAct.videoCheckpoints?.length || 0) > 0 ? ` và vượt qua ${activeAct.videoCheckpoints.length} neo chặn câu hỏi` : ''}.` : ''}`;
+    } else if (activeMod) {
+      reply = `📖 **Tóm tắt ${activeMod.title}:**\n• ${activeMod.description || 'Chuyên đề trọng tâm trong chương trình AI Lớp 6.'}\n• Hiện có **${(activeMod.activities || []).length} học liệu**: ${(activeMod.activities || []).map(a => a.title).join(', ') || 'Giáo viên đang cập nhật thêm.'}`;
+    } else {
+      reply = `📖 **Tổng quan khóa học ${view?.name || 'Chuyên đề AI Lớp 6'}:**\nGồm **${(view?.modules || []).length} bài học** xuyên suốt Chủ đề A & B:\n${(view?.modules || []).slice(0, 8).map((m, i) => `${i + 1}. ${m.title}`).join('\n')}`;
+    }
+  } else if (lower.includes('trắc nghiệm') || lower.includes('ôn tập') || lower.includes('câu hỏi')) {
+    const focus = activeMod?.title || activeAct?.title || 'Trí tuệ Nhân tạo Lớp 6';
+    reply = `🎯 **3 câu hỏi ôn tập nhanh cho "${focus}":**\n1. AI học hỏi và đưa ra dự đoán dựa trên yếu tố nào là quan trọng nhất?\n2. Vì sao con người vẫn giữ vai trò quyết định cuối cùng thay vì tin tuyệt đối vào kết quả của AI?\n3. Khi sử dụng công cụ AI, những dữ liệu cá nhân nào tuyệt đối không nên chia sẻ?\n\n*(Gợi ý: Bạn có thể trả lời thử ngay tại đây để mình nhận xét nhé!)*`;
+  } else {
+    reply = `💡 Mình đã ghi nhận câu hỏi "${message}" trong ngữ cảnh **${activeAct?.title || activeMod?.title || view?.name || 'LMS Nhóm 2'}**.\n• Gợi ý nhanh: Bạn có thể hỏi mình về **"tiến độ của tôi"**, **"hạn nộp bài tập"**, **"tóm tắt bài học này"**, hoặc **"tạo câu hỏi ôn tập"**.`;
+  }
+  res.json({ reply, engine: 'lms-context' });
 });
 
 // 11. Notifications
@@ -3125,6 +3468,33 @@ app.post('/api/users', requireStaff, async (req, res) => {
     writeDb(db);
     return res.status(201).json(newUser);
   }
+});
+
+// 13.15 Đổi vai trò người dùng (Học viên <-> Giáo viên, bảo vệ tài khoản Quản trị viên gốc)
+app.put('/api/users/:userId/role', requireStaff, async (req, res) => {
+  const userId = req.params.userId;
+  const nextRole = req.body?.role === 'lecturer' ? 'lecturer' : 'student';
+  if (isMongoConnected) {
+    const target = await UserModel.findOne({ id: userId });
+    if (!target) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+    if (target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com') {
+      return res.status(403).json({ message: 'Không thể thay đổi vai trò của Quản trị viên gốc.' });
+    }
+    target.role = nextRole;
+    target.classOrPosition = nextRole === 'lecturer' ? 'Giáo viên' : (target.className || 'Học viên');
+    await target.save();
+    return res.json({ success: true, user: safeUser(target.toObject()) });
+  }
+  const db = readDb();
+  const target = (db.users || []).find(u => u.id === userId);
+  if (!target) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+  if (target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com') {
+    return res.status(403).json({ message: 'Không thể thay đổi vai trò của Quản trị viên gốc.' });
+  }
+  target.role = nextRole;
+  target.classOrPosition = nextRole === 'lecturer' ? 'Giáo viên' : (target.className || 'Học viên');
+  writeDb(db);
+  res.json({ success: true, user: safeUser(target) });
 });
 
 // 13.2 Xóa người dùng (Quyền Quản trị viên)

@@ -100,6 +100,7 @@ export interface Activity {
   durationMinutes: number;
   isCompleted: boolean;
   isRequired: boolean;
+  isHidden?: boolean;
   score?: number;
   maxScore?: number;
   description?: string;
@@ -122,6 +123,7 @@ export interface Activity {
   totalPages?: number;
   // Assignment specific
   dueDate?: string;
+  dueDateIso?: string;
   assignmentPrompt?: string;
   starterCode?: string;
   programmingLanguage?: string;
@@ -137,14 +139,23 @@ export interface Activity {
     feedback?: string;
     gradedAt?: string;
     gradedBy?: string;
+    version?: number;
+    isLate?: boolean;
+    previousGrade?: number | null;
+    previousFeedback?: string;
     status: 'not_submitted' | 'submitted' | 'graded';
   };
+  submissionHistory?: any[];
   // Quiz specific
   quizQuestions?: QuizQuestion[];
   timeLimitMinutes?: number;
   passScore?: number;
+  shuffleQuestions?: boolean;
+  maxAttempts?: number; // 0 = không giới hạn
   quizResult?: {
+    attempt?: number;
     score: number;
+    bestScore?: number;
     maxScore: number;
     passed: boolean;
     submittedAt: string;
@@ -153,7 +164,9 @@ export interface Activity {
     totalQuestions?: number;
     attemptCount?: number;
     durationSeconds?: number;
+    isLate?: boolean;
   };
+  quizHistory?: any[];
   // Forum specific
   discussionsCount?: number;
 }
@@ -172,6 +185,7 @@ export interface CourseModule {
   title: string;
   order: number;
   description: string;
+  isHidden?: boolean;
   activities: Activity[];
 }
 

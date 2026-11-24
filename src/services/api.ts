@@ -112,6 +112,16 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(studentData)
       }),
+    enrollBulk: (courseId: string, students: Array<{ name: string; email: string; className?: string; code?: string }>) =>
+      this.request<{ success: boolean; addedCount: number; skippedCount: number; students: any[] }>(`/courses/${courseId}/enroll-bulk`, {
+        method: 'POST',
+        body: JSON.stringify({ students })
+      }),
+    reorderModules: (courseId: string, moduleIds: string[]) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/reorder-modules`, {
+        method: 'PUT',
+        body: JSON.stringify({ moduleIds })
+      }),
     removeStudent: (courseId: string, studentId: string) =>
       this.request<{ success: boolean }>(`/courses/${courseId}/students/${studentId}`, {
         method: 'DELETE'
@@ -148,6 +158,11 @@ class ApiClient {
     delete: (courseId: string, modId: string) =>
       this.request<{ success: boolean }>(`/courses/${courseId}/modules/${modId}`, {
         method: 'DELETE'
+      }),
+    reorderActivities: (courseId: string, modId: string, activityIds: string[]) =>
+      this.request<{ success: boolean }>(`/courses/${courseId}/modules/${modId}/reorder-activities`, {
+        method: 'PUT',
+        body: JSON.stringify({ activityIds })
       })
   };
 
@@ -249,9 +264,32 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data)
     }),
+    updateRole: (userId: string, role: 'student' | 'lecturer') =>
+      this.request<{ success: boolean; user: User }>(`/users/${userId}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role })
+      }),
     delete: (userId: string) => this.request<{ success: boolean; userId: string }>(`/users/${userId}`, {
       method: 'DELETE'
     })
+  };
+
+  // System Settings (Admin)
+  settings = {
+    get: () => this.request<Record<string, any>>('/settings'),
+    save: (data: Record<string, any>) => this.request<{ success: boolean; settings: Record<string, any> }>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  };
+
+  // AI Assistant
+  ai = {
+    chat: (data: { message: string; courseId?: string | null; moduleId?: string | null; activityId?: string | null }) =>
+      this.request<{ reply: string; engine: 'gemini' | 'lms-context' }>('/ai/chat', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
   };
 
   // Files / Tập tin học liệu (Hỗ trợ upload mọi loại tệp tùy ý)
