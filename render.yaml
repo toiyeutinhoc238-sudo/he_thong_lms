@@ -41,9 +41,6 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: he-thong-lms-api
-          property: host
+        value: https://he-thong-lms-api.onrender.com/api
       - key: VITE_GOOGLE_CLIENT_ID
         value: 976502172307-q6lsed0gssm2udppc8cda0ai8u5e4alg.apps.googleusercontent.com

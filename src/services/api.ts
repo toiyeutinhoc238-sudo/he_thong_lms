@@ -21,9 +21,16 @@ function normalizeApiBase(raw?: string): string {
   const trimmed = String(raw || '').trim().replace(/\/+$/, '');
   if (!trimmed) return '/api';
   if (trimmed.startsWith('/')) return trimmed;
-  // Hỗ trợ cả URL đầy đủ lẫn bare host từ Render Blueprint (fromService.property: host)
-  const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  return withProto.endsWith('/api') ? withProto : `${withProto}/api`;
+  // Hỗ trợ cả URL đầy đủ, domain .onrender.com lẫn tên service nội bộ (Render fromService.property: host)
+  let normalized = trimmed;
+  if (!/^https?:\/\//i.test(normalized)) {
+    const bareHost = normalized.split('/')[0];
+    if (!bareHost.includes('.') && !bareHost.includes(':') && bareHost !== 'localhost') {
+      normalized = `${bareHost}.onrender.com${normalized.slice(bareHost.length)}`;
+    }
+    normalized = `https://${normalized}`;
+  }
+  return normalized.endsWith('/api') ? normalized : `${normalized}/api`;
 }
 
 export const API_BASE_URL = normalizeApiBase((import.meta as any).env?.VITE_API_BASE_URL);
@@ -70,9 +77,10 @@ class ApiClient {
         },
       });
 
-      // Tự động thử lại nhẹ 1 lần cho request GET khi Backend Render gói Free vừa thức dậy (502/503/504)
-      if (!response.ok && method === 'GET' && [502, 503, 504].includes(response.status) && retryCount < 1) {
-        await new Promise(r => setTimeout(r, 2500));
+      // Tự động thử lại nhẹ 1 lần cho request GET hoặc /auth/google khi Backend Render gói Free vừa thức dậy (502/503/504)
+      const isRetryable = method === 'GET' || endpoint === '/auth/google';
+      if (!response.ok && isRetryable && [502, 503, 504].includes(response.status) && retryCount < 1) {
+        await new Promise(r => setTimeout(r, 3000));
         return this.request<T>(endpoint, options, retryCount + 1);
       }
 
@@ -85,8 +93,9 @@ class ApiClient {
 
       return await response.json();
     } catch (error: any) {
-      if (method === 'GET' && !error?.status && retryCount < 1) {
-        await new Promise(r => setTimeout(r, 2500));
+      const isRetryable = method === 'GET' || endpoint === '/auth/google';
+      if (isRetryable && !error?.status && retryCount < 1) {
+        await new Promise(r => setTimeout(r, 3000));
         return this.request<T>(endpoint, options, retryCount + 1);
       }
       console.warn(`[API Client] Yêu cầu tới ${endpoint} thất bại:`, error.message);
@@ -96,7 +105,7 @@ class ApiClient {
 
   // Auth & Profile
   auth = {
-    login: (credentials: { username: string; password: string; program?: string }) => 
+    login: (credentials: { username: string; password: string; program?: string }) =>
       this.request<{ token: string; user: User }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials)
@@ -118,7 +127,7 @@ class ApiClient {
         localStorage.removeItem('lms2_user');
         localStorage.removeItem('hcmue_vle_token');
         localStorage.removeItem('hcmue_vle_user');
-      } catch {}
+      } catch { }
       return Promise.resolve();
     }
   };
@@ -225,7 +234,7 @@ class ApiClient {
       this.request<{ success: boolean }>(`/courses/${courseId}/activities/${actId}`, {
         method: 'DELETE'
       }),
-    markCompleted: (courseId: string, activityId: string) => 
+    markCompleted: (courseId: string, activityId: string) =>
       this.request<{ success: boolean; progress: number }>(`/courses/${courseId}/activities/${activityId}/complete`, {
         method: 'POST'
       }),
@@ -252,12 +261,12 @@ class ApiClient {
     // Giáo viên: bài nộp / kết quả của từng học sinh cho một hoạt động
     getSubmissions: (courseId: string, activityId: string) =>
       this.request<StudentSubmission[]>(`/courses/${courseId}/activities/${activityId}/submissions`),
-    submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number; durationSeconds?: number }) => 
+    submitQuiz: (courseId: string, activityId: string, data: { answers: Record<string, number | number[]>; score: number; maxScore: number; durationSeconds?: number }) =>
       this.request<{ success: boolean; passed: boolean; score: number; result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] }>(`/courses/${courseId}/activities/${activityId}/quiz-submit`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
-    addActivity: (courseId: string, moduleId: string, data: Partial<Activity>) => 
+    addActivity: (courseId: string, moduleId: string, data: Partial<Activity>) =>
       this.request<Activity>(`/courses/${courseId}/modules/${moduleId}/activities`, {
         method: 'POST',
         body: JSON.stringify(data)
@@ -287,12 +296,12 @@ class ApiClient {
   // Forum
   forum = {
     getByCourse: (courseId: string) => this.request<ForumTopic[]>(`/courses/${courseId}/forum`),
-    createTopic: (courseId: string, data: { title: string; content: string }) => 
+    createTopic: (courseId: string, data: { title: string; content: string }) =>
       this.request<ForumTopic>(`/courses/${courseId}/forum`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
-    postReply: (topicId: string, data: { content: string }) => 
+    postReply: (topicId: string, data: { content: string }) =>
       this.request<any>(`/forum/${topicId}/replies`, {
         method: 'POST',
         body: JSON.stringify(data)
