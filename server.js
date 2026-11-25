@@ -140,18 +140,30 @@ app.use((req, res, next) => {
   next();
 });
 
+function getValidGeminiKey() {
+  const raw = String(process.env.GEMINI_API_KEY || '').trim();
+  if (!raw || ['none', 'disabled', 'false', 'null', 'undefined'].includes(raw.toLowerCase())) {
+    return null;
+  }
+  return raw;
+}
+
 // Health check endpoint for Render & monitoring
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
-app.get('/api/health', (req, res) => res.json({
-  status: 'ok',
-  service: 'LMS Nhóm 2 API',
-  version: '2.7-split-static-node-public',
-  database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
-  persistentFileStorage: isMongoConnected ? 'MongoDB Atlas (<=12MB) + Disk Cache' : 'Local Disk',
-  geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
-  uptime: process.uptime(),
-  timestamp: new Date().toISOString()
-}));
+app.get('/api/health', (req, res) => {
+  const geminiKey = getValidGeminiKey();
+  res.json({
+    status: 'ok',
+    service: 'LMS Nhóm 2 API',
+    version: '2.7-split-static-node-public',
+    database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
+    persistentFileStorage: isMongoConnected ? 'MongoDB Atlas (<=12MB) + Disk Cache' : 'Local Disk',
+    geminiConfigured: Boolean(geminiKey),
+    geminiMode: !geminiKey ? 'none' : (geminiKey.startsWith('AQ.') ? 'gemini-api+vertex-fallback' : 'gemini-api'),
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // ====================== MONGODB ATLAS INTEGRATION ======================
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
@@ -3300,10 +3312,9 @@ app.post('/api/ai/chat', async (req, res) => {
   const pendingActs = allActs.filter(a => !a.isCompleted);
   const upcomingDeadlines = allActs.filter(a => a.dueDate || a.dueDateIso);
 
-  const geminiKey = process.env.GEMINI_API_KEY;
+  const geminiKey = getValidGeminiKey();
   if (geminiKey) {
-    try {
-      const sysPrompt = `Bạn là Trợ lý Học tập AI thân thiện của Hệ thống LMS Nhóm 2 (Tin học & Chuyên đề AI Lớp 6).
+    const sysPrompt = `Bạn là Trợ lý Học tập AI thân thiện của Hệ thống LMS Nhóm 2 (Tin học & Chuyên đề AI Lớp 6).
 Ngữ cảnh thực tế hiện tại:
 - Khóa học: ${view?.name || 'Chuyên đề AI Lớp 6'} (${view?.progress || 0}% hoàn thành, ${view?.completedActivities || 0}/${view?.totalActivities || 0} mục).
 - Bài đang mở: ${activeMod?.title || 'Tổng quan toàn khóa'}.
@@ -3313,21 +3324,61 @@ Ngữ cảnh thực tế hiện tại:
 - Hạn nộp: ${upcomingDeadlines.slice(0, 5).map(a => `${a.title} (${a.dueDate || a.dueDateIso})`).join(', ') || 'Chưa có hạn nộp cụ thể'}.
 Hãy trả lời ngắn gọn, dễ hiểu bằng tiếng Việt, đúng trọng tâm câu hỏi của người học.`;
 
-      const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiKey)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: `${sysPrompt}\n\nCâu hỏi: ${message}` }] }]
-        })
-      });
-      if (gRes.ok) {
-        const gJson = await gRes.json();
-        const reply = gJson?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (reply) return res.json({ reply: reply.trim(), engine: 'gemini' });
+    const isAQKey = geminiKey.startsWith('AQ.');
+    const candidates = [
+      { model: 'gemini-2.5-flash', url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', disableThinking: true },
+      { model: 'gemini-2.5-flash-lite', url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', disableThinking: true },
+      ...(isAQKey
+        ? [
+            { model: 'vertex-gemini-2.5-flash', url: 'https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent', disableThinking: true },
+            { model: 'vertex-gemini-2.5-flash-lite', url: 'https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash-lite:generateContent', disableThinking: true }
+          ]
+        : [])
+    ];
+
+    for (const candidate of candidates) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      const generationConfig = {
+        temperature: 0.7,
+        maxOutputTokens: 2048,
+        ...(candidate.disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+      };
+      try {
+        const gRes = await fetch(candidate.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiKey
+          },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: `${sysPrompt}\n\nCâu hỏi: ${message}` }] }],
+            generationConfig
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (gRes.ok) {
+          const gJson = await gRes.json();
+          const parts = gJson?.candidates?.[0]?.content?.parts || [];
+          const reply = parts
+            .filter(p => typeof p?.text === 'string' && !p?.thought)
+            .map(p => p.text)
+            .join('')
+            .trim();
+          if (reply) {
+            return res.json({ reply, engine: 'gemini', model: candidate.model });
+          }
+        } else {
+          const errText = await gRes.text().catch(() => '');
+          console.warn(`Gemini (${candidate.model}) HTTP ${gRes.status}:`, errText.slice(0, 200));
+        }
+      } catch (e) {
+        clearTimeout(timer);
+        console.warn(`Gemini (${candidate.model}) lỗi kết nối:`, e.message);
       }
-    } catch (e) {
-      console.warn('Gemini fallback sang bộ trợ lý ngữ cảnh nội bộ:', e.message);
     }
+    console.warn('Tất cả endpoint Gemini đều không phản hồi, fallback sang bộ trợ lý ngữ cảnh nội bộ.');
   }
 
   // Bộ trợ lý ngữ cảnh thực tế (đọc đúng bài học, tiến độ, hoạt động & hạn nộp thật trên LMS)
