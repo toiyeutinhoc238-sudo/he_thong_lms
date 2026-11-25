@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Activity, VideoCheckpoint, VideoCheckpointResult } from '../types';
 import { useApp } from '../context/AppContext';
-import api from '../services/api';
+import api, { API_BASE_URL, resolveBackendUrl } from '../services/api';
 import {
   Play,
   CheckCircle2,
@@ -314,7 +314,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       try { token = localStorage.getItem('lms2_token') || ''; } catch {}
       if (!token) return;
       // Dùng fetch keepalive để đảm bảo trình duyệt vẫn gửi xong tiến độ ngay cả khi học sinh đóng tab đột ngột
-      fetch(`/api/courses/${encodeURIComponent(courseId)}/activities/${encodeURIComponent(activity.id)}/video-progress`, {
+      fetch(`${API_BASE_URL}/courses/${encodeURIComponent(courseId)}/activities/${encodeURIComponent(activity.id)}/video-progress`, {
         method: 'POST',
         keepalive: true,
         headers: {
@@ -609,7 +609,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             <video
               ref={videoRef}
               controls
-              src={activity.videoUrl}
+              src={resolveBackendUrl(activity.videoUrl)}
               className="w-full h-full object-contain"
               onLoadedMetadata={() => {
                 if (videoRef.current && Number.isFinite(videoRef.current.duration)) {

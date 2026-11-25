@@ -1,4 +1,5 @@
 import { Activity, Course, CourseModule } from '../types';
+import { BACKEND_ORIGIN } from '../services/api';
 
 // ====================== PURE-JS STANDARDS-COMPLIANT PKZIP BUILDER ======================
 // Không cần thư viện ngoài, hỗ trợ đầy đủ UTF-8 tiếng Việt (flag 0x0800) & chuẩn CRC-32
@@ -609,7 +610,7 @@ export function exportScorm12Zip(course: Course, module?: CourseModule | null, a
   }
 
   const pkgTitle = activity?.title || module?.title || course.name;
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://he-thong-lms.onrender.com';
+  const assetOrigin = BACKEND_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : 'https://he-thong-lms.onrender.com');
   const manifestId = `LMS2_${safeSlug(pkgTitle)}_${Date.now()}`;
 
   const manifestXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -637,7 +638,7 @@ export function exportScorm12Zip(course: Course, module?: CourseModule | null, a
   </resources>
 </manifest>`;
 
-  const html = buildScormPlayerHtml(pkgTitle, course.name, items, origin);
+  const html = buildScormPlayerHtml(pkgTitle, course.name, items, assetOrigin);
   const blob = createZipBlob([
     { name: 'imsmanifest.xml', content: manifestXml },
     { name: 'scorm_api.js', content: SCORM_API_JS },
@@ -650,7 +651,7 @@ export function exportScorm12Zip(course: Course, module?: CourseModule | null, a
 // ====================== 5. IMS COMMON CARTRIDGE (.imscc) EXPORTER (CANVAS / MOODLE) ======================
 export function exportImsccPackage(course: Course, module?: CourseModule | null) {
   const targetModules = module ? [module] : (course.modules || []);
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://he-thong-lms.onrender.com';
+  const assetOrigin = BACKEND_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : 'https://he-thong-lms.onrender.com');
   const pkgTitle = module ? `${course.code} - ${module.title}` : course.name;
 
   const entries: ZipEntry[] = [];
@@ -664,8 +665,8 @@ export function exportImsccPackage(course: Course, module?: CourseModule | null)
       const fileName = `resources/lesson_${mIdx + 1}_act_${aIdx + 1}.html`;
       const directLink = buildShareLink({ courseId: course.id, moduleId: mod.id, activityId: act.id, embed: false });
       const deepLink = buildShareLink({ courseId: course.id, moduleId: mod.id, activityId: act.id, embed: true });
-      const fileHref = act.fileUrl?.startsWith('/') ? `${origin}${act.fileUrl}` : act.fileUrl;
-      const vidHref = act.videoUrl?.startsWith('/') ? `${origin}${act.videoUrl}` : act.videoUrl;
+      const fileHref = act.fileUrl?.startsWith('/') ? `${assetOrigin}${act.fileUrl}` : act.fileUrl;
+      const vidHref = act.videoUrl?.startsWith('/') ? `${assetOrigin}${act.videoUrl}` : act.videoUrl;
 
       const pageHtml = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>${escapeHtml(act.title)}</title></head><body style="font-family:system-ui,sans-serif;max-width:860px;margin:24px auto;padding:0 16px;color:#0f172a">
 <h2>${escapeHtml(act.title)}</h2>

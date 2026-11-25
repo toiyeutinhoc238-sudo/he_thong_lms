@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Activity } from '../types';
 import { useApp } from '../context/AppContext';
-import api, { StudentSubmission } from '../services/api';
+import api, { StudentSubmission, resolveBackendUrl } from '../services/api';
 import { 
   UploadCloud, 
   FileCheck, 
@@ -206,7 +206,7 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
                   <td className="py-3 px-4">
                     {submission.fileUrl ? (
                       <a 
-                        href={submission.fileUrl}
+                        href={resolveBackendUrl(submission.fileUrl)}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-[#0374b5] font-bold hover:underline"
@@ -517,7 +517,7 @@ const SubmissionRow: React.FC<{
                 <span>Tên tệp: </span>
                 {sub.fileUrl ? (
                   <a
-                    href={sub.fileUrl}
+                    href={resolveBackendUrl(sub.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-bold text-[#0374b5] hover:underline"

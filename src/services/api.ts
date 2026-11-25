@@ -17,19 +17,50 @@ export interface StudentSubmission {
   lastAccessedAt?: string;
 }
 
-const API_BASE_URL =import.meta.env.VITE_API_BASE_URL || '/api';
+function normalizeApiBase(raw?: string): string {
+  const trimmed = String(raw || '').trim().replace(/\/+$/, '');
+  if (!trimmed) return '/api';
+  if (trimmed.startsWith('/')) return trimmed;
+  // Hỗ trợ cả URL đầy đủ lẫn bare host từ Render Blueprint (fromService.property: host)
+  const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  return withProto.endsWith('/api') ? withProto : `${withProto}/api`;
+}
+
+export const API_BASE_URL = normalizeApiBase((import.meta as any).env?.VITE_API_BASE_URL);
+
+// Origin của máy chủ Node Backend (ví dụ: https://he-thong-lms.onrender.com) khi tách Frontend Static Site riêng
+export const BACKEND_ORIGIN = /^https?:\/\//i.test(API_BASE_URL)
+  ? API_BASE_URL.replace(/\/api$/i, '')
+  : '';
+
+// Chuyển mọi đường dẫn tệp tương đối (/uploads/..., /api/...) sang đúng máy chủ Backend khi chạy 2 dịch vụ tách biệt
+export function resolveBackendUrl(url?: string | null): string {
+  if (!url) return '';
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  if (url.startsWith('/') && BACKEND_ORIGIN) return `${BACKEND_ORIGIN}${url}`;
+  return url;
+}
+
+function safeReadToken(): string | null {
+  try {
+    return localStorage.getItem('lms2_token') || localStorage.getItem('hcmue_vle_token');
+  } catch {
+    return null;
+  }
+}
 
 class ApiClient {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('lms2_token') || localStorage.getItem('hcmue_vle_token');
+    const token = safeReadToken();
     return {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     };
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}, retryCount = 0): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
+    const method = (options.method || 'GET').toUpperCase();
     try {
       const response = await fetch(url, {
         ...options,
@@ -38,6 +69,12 @@ class ApiClient {
           ...options.headers,
         },
       });
+
+      // Tự động thử lại nhẹ 1 lần cho request GET khi Backend Render gói Free vừa thức dậy (502/503/504)
+      if (!response.ok && method === 'GET' && [502, 503, 504].includes(response.status) && retryCount < 1) {
+        await new Promise(r => setTimeout(r, 2500));
+        return this.request<T>(endpoint, options, retryCount + 1);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -48,6 +85,10 @@ class ApiClient {
 
       return await response.json();
     } catch (error: any) {
+      if (method === 'GET' && !error?.status && retryCount < 1) {
+        await new Promise(r => setTimeout(r, 2500));
+        return this.request<T>(endpoint, options, retryCount + 1);
+      }
       console.warn(`[API Client] Yêu cầu tới ${endpoint} thất bại:`, error.message);
       throw error;
     }
@@ -72,10 +113,12 @@ class ApiClient {
         body: JSON.stringify(data)
       }),
     logout: () => {
-      localStorage.removeItem('lms2_token');
-      localStorage.removeItem('lms2_user');
-      localStorage.removeItem('hcmue_vle_token');
-      localStorage.removeItem('hcmue_vle_user');
+      try {
+        localStorage.removeItem('lms2_token');
+        localStorage.removeItem('lms2_user');
+        localStorage.removeItem('hcmue_vle_token');
+        localStorage.removeItem('hcmue_vle_user');
+      } catch {}
       return Promise.resolve();
     }
   };
@@ -297,7 +340,7 @@ class ApiClient {
     upload: async (file: File): Promise<CourseFile> => {
       const formData = new FormData();
       formData.append('file', file);
-      const token = localStorage.getItem('lms2_token') || localStorage.getItem('hcmue_vle_token');
+      const token = safeReadToken();
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         headers: {

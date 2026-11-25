@@ -1,12 +1,49 @@
+# Render Blueprint — Kiến trúc 2 dịch vụ công khai tốc độ cao:
+# 1) Backend API chạy Runtime Node (nhanh, gọn, không bị treo Docker)
+# 2) Frontend Web chạy Runtime Static (Global CDN, KHÔNG BAO GIỜ NGỦ, mở trang tức thì)
+
 services:
+  # 1. Backend API (Node Web Service)
   - type: web
-    name: he-thong-lms
-    env: node
+    name: he-thong-lms-api
+    runtime: node
     plan: free
-    region: singapore
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    region: oregon
+    buildCommand: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+    startCommand: node server.js
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
 
+  # 2. Frontend Public Website (Static Site - Global CDN, mở ngay không chờ Render thức giấc)
+  - type: web
+    name: he-thong-lms-web
+    runtime: static
+    buildCommand: npm ci --no-audit --no-fund && NODE_OPTIONS="--max-old-space-size=400" npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: he-thong-lms-api
+          property: host
+      - key: VITE_GOOGLE_CLIENT_ID
+        value: 976502172307-q6lsed0gssm2udppc8cda0ai8u5e4alg.apps.googleusercontent.com

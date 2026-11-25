@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Course, QuizQuestion, User } from '../types';
-import api from '../services/api';
+import api, { resolveBackendUrl } from '../services/api';
 import {
   Award,
   CheckCircle2,
@@ -1781,7 +1781,7 @@ const AssignmentGradingInlineModal: React.FC<{
               </div>
               {submission.fileUrl && (
                 <a
-                  href={submission.fileUrl}
+                  href={resolveBackendUrl(submission.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg flex items-center gap-1 shrink-0"
@@ -1822,7 +1822,7 @@ const AssignmentGradingInlineModal: React.FC<{
                     <div className="flex items-center justify-between text-[11px] text-slate-600">
                       <span className="truncate">📎 {oldSub.fileName}</span>
                       {oldSub.fileUrl && (
-                        <a href={oldSub.fileUrl} target="_blank" rel="noreferrer" className="text-[#0374b5] font-bold hover:underline shrink-0 ml-2">
+                        <a href={resolveBackendUrl(oldSub.fileUrl)} target="_blank" rel="noreferrer" className="text-[#0374b5] font-bold hover:underline shrink-0 ml-2">
                           Mở tệp cũ
                         </a>
                       )}

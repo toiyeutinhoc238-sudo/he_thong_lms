@@ -6,6 +6,7 @@ import { CanvasRightSidebar } from './CanvasRightSidebar';
 import { CourseGradebookTracker } from './CourseGradebookTracker';
 import { AIVirtualLab } from './AIVirtualLab';
 import { defaultGrade6Course } from '../data/mockData';
+import { API_BASE_URL, resolveBackendUrl } from '../services/api';
 import { 
   Users, 
   MessageSquare, 
@@ -892,9 +893,10 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                             badgeBg = 'bg-teal-50 text-teal-700 border-teal-200';
                           }
 
+                          const resolvedFileUrl = resolveBackendUrl(file.url);
                           const downloadUrl = file.filename
-                            ? `/api/files/download/${encodeURIComponent(file.filename)}?name=${encodeURIComponent(file.name)}`
-                            : file.url;
+                            ? `${API_BASE_URL}/files/download/${encodeURIComponent(file.filename)}?name=${encodeURIComponent(file.name)}`
+                            : resolvedFileUrl;
 
                           return (
                             <tr key={file.id} className="hover:bg-slate-50/70 transition-colors">
@@ -906,7 +908,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-2">
                                       <a
-                                        href={file.url}
+                                        href={resolvedFileUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="font-bold text-slate-900 hover:text-[#0374b5] transition-colors truncate block max-w-xs sm:max-w-md"

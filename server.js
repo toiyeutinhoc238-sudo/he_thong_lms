@@ -89,7 +89,12 @@ const DB_FILE = path.join(__dirname, 'db.json');
 
 const app = express();
 app.disable('x-powered-by');
-app.use(cors());
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Disposition']
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -140,7 +145,7 @@ app.get('/healthz', (req, res) => res.status(200).send('OK'));
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
   service: 'LMS Nhóm 2 API',
-  version: '2.6-full-lms-suite',
+  version: '2.7-split-static-node-public',
   database: isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB',
   persistentFileStorage: isMongoConnected ? 'MongoDB Atlas (<=12MB) + Disk Cache' : 'Local Disk',
   geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
@@ -3617,6 +3622,19 @@ if (fs.existsSync(distPath)) {
       return res.status(404).json({ message: `Tệp không tồn tại hoặc đã bị xóa.` });
     }
     next();
+  });
+} else {
+  // Chế độ tách riêng Backend Node API (Frontend chạy trên Render Static Site Global CDN)
+  app.get('/', (req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'LMS Nhóm 2 Backend API (Node Runtime)',
+      version: '2.7-split-static-node-public',
+      health: '/api/health'
+    });
+  });
+  app.use((req, res) => {
+    res.status(404).json({ message: `Route ${req.method} ${req.path} không tồn tại.` });
   });
 }
 

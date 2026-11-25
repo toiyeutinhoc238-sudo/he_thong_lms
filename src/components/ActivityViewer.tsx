@@ -4,7 +4,7 @@ import { QuizEngine } from './QuizEngine';
 import { AssignmentSubmitter } from './AssignmentSubmitter';
 import { VideoPlayerTracker } from './VideoPlayerTracker';
 import { ShareExportModal } from './ShareExportModal';
-import api, { StudentSubmission } from '../services/api';
+import api, { StudentSubmission, resolveBackendUrl } from '../services/api';
 import { Activity, QuizQuestion } from '../types';
 import {
   ArrowLeft,
@@ -435,7 +435,8 @@ export const ActivityViewer: React.FC = () => {
     markActivityCompleted(activeCourse.id, activeActivity.id);
   };
 
-  const fileUrlLower = (activeActivity.fileUrl || '').toLowerCase();
+  const resolvedDocUrl = resolveBackendUrl(activeActivity.fileUrl);
+  const fileUrlLower = (resolvedDocUrl || '').toLowerCase();
   const isPdfUrl = fileUrlLower.endsWith('.pdf');
   const isImageUrl = /\.(png|jpg|jpeg|gif|webp|svg)$/.test(fileUrlLower);
 
@@ -597,9 +598,9 @@ export const ActivityViewer: React.FC = () => {
                   <span>{activeActivity.isCompleted ? 'Đã hoàn thành đọc' : 'Đánh dấu đã đọc tài liệu'}</span>
                 </button>
 
-                {activeActivity.fileUrl && (
+                {resolvedDocUrl && (
                   <a
-                    href={activeActivity.fileUrl}
+                    href={resolvedDocUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
@@ -612,18 +613,18 @@ export const ActivityViewer: React.FC = () => {
             </div>
 
             {/* Trình xem trước trực tiếp PDF / Ảnh hoặc khung xác nhận đọc tài liệu */}
-            {activeActivity.fileUrl && isPdfUrl ? (
+            {resolvedDocUrl && isPdfUrl ? (
               <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
                 <iframe
-                  src={activeActivity.fileUrl}
+                  src={resolvedDocUrl}
                   title={activeActivity.title}
                   className="w-full h-[600px]"
                 />
               </div>
-            ) : activeActivity.fileUrl && isImageUrl ? (
+            ) : resolvedDocUrl && isImageUrl ? (
               <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 p-4 flex justify-center">
                 <img
-                  src={activeActivity.fileUrl}
+                  src={resolvedDocUrl}
                   alt={activeActivity.title}
                   className="max-h-[600px] object-contain rounded-xl shadow-xs"
                 />
@@ -638,15 +639,15 @@ export const ActivityViewer: React.FC = () => {
                     {activeActivity.title}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {activeActivity.fileUrl
+                    {resolvedDocUrl
                       ? 'Bấm "Mở / Tải tệp gốc" để xem hoặc tải toàn bộ tài liệu học tập về thiết bị.'
                       : 'Tài liệu hướng dẫn học tập trên Hệ thống LMS Nhóm 2.'}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-2.5">
-                  {activeActivity.fileUrl && (
+                  {resolvedDocUrl && (
                     <a
-                      href={activeActivity.fileUrl}
+                      href={resolvedDocUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs"
