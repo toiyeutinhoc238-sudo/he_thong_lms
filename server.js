@@ -1021,8 +1021,9 @@ app.post('/api/auth/google', async (req, res) => {
       } else {
         user.name = name || user.name;
         user.avatar = picture || user.avatar || '';
-        user.role = role; // Luôn đảm bảo chỉ phanphiphu04@gmail.com là admin, còn lại là student
-        if (isAdmin) {
+        // Giữ nguyên quyền 'lecturer' nếu Quản trị viên đã phân quyền cho thành viên/giảng viên; chỉ duy nhất email gốc là admin
+        user.role = isAdmin ? 'admin' : (user.role === 'lecturer' ? 'lecturer' : 'student');
+        if (isAdmin || user.role === 'lecturer') {
           user.isProfileCompleted = true;
         } else {
           user.isProfileCompleted = !!(user.isProfileCompleted && user.school && (user.className || user.classOrPosition));
@@ -1056,8 +1057,8 @@ app.post('/api/auth/google', async (req, res) => {
       } else {
         user.name = name || user.name;
         user.avatar = picture || user.avatar || '';
-        user.role = role;
-        if (isAdmin) {
+        user.role = isAdmin ? 'admin' : (user.role === 'lecturer' ? 'lecturer' : 'student');
+        if (isAdmin || user.role === 'lecturer') {
           user.isProfileCompleted = true;
         } else {
           user.isProfileCompleted = !!(user.isProfileCompleted && user.school && (user.className || user.classOrPosition));
@@ -1067,8 +1068,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
 
     const token = signToken(user.id);
-    const userObj = user.toObject ? user.toObject() : { ...user };
-    delete userObj.password;
+    const userObj = safeUser(user.toObject ? user.toObject() : { ...user });
 
     // Đồng bộ ID, avatar, họ tên thật của học sinh vào danh sách lớp và bản ghi tiến độ
     await syncStudentIdentityAcrossCourses(userObj);
@@ -2888,6 +2888,8 @@ app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
           order: doc.modules.length + 1,
           title: im.title || `Mô-đun nhập #${doc.modules.length + 1}`,
           description: im.description || '',
+          learningObjectives: im.learningObjectives || '',
+          ownerName: im.ownerName || '',
           activities: acts
         });
       });
@@ -2925,6 +2927,8 @@ app.post('/api/courses/:id/import-package', requireStaff, async (req, res) => {
           order: c.modules.length + 1,
           title: im.title || `Mô-đun nhập #${c.modules.length + 1}`,
           description: im.description || '',
+          learningObjectives: im.learningObjectives || '',
+          ownerName: im.ownerName || '',
           activities: acts
         });
       });

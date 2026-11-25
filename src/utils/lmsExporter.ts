@@ -253,6 +253,8 @@ export function exportJsonPackage(course: Course, module?: CourseModule | null, 
           id: m.id,
           title: m.title,
           description: m.description,
+          ...(m.learningObjectives ? { learningObjectives: m.learningObjectives } : {}),
+          ...(m.ownerName ? { ownerName: m.ownerName } : {}),
           activities: (m.activities || []).map(stripRuntimeFields)
         }))
   };
@@ -464,7 +466,7 @@ function renderVideo(act, stage){
             ov.className=''; ov.innerHTML=''; activeCp=null; resumeFn(cp.timeSeconds);
           };
         } else {
-          fb.innerHTML = '<span style="color:#dc2626">✗ Chưa đúng! Vui lòng chọn lại đáp án đúng để xem tiếp.</span>'+(cp.explanation?'<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0c4a6e;font-weight:500;font-size:12px"><strong>💡 Gợi ý / Giải thích:</strong> '+esc(cp.explanation)+'</div>':'');
+          fb.innerHTML = '<span style="color:#dc2626">✗ Chưa đúng! Vui lòng chọn lại đáp án đúng để xem tiếp.</span>';
         }
       };
       box.appendChild(b);

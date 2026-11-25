@@ -821,7 +821,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                       )}
                     </div>
 
-                    {activeCheckpoint.explanation && (
+                    {cpFeedback.canContinue && activeCheckpoint.explanation && (
                       <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-950 leading-relaxed">
                         <span className="font-extrabold text-[#0374b5]">💡 Giải thích / Phản hồi sư phạm: </span>
                         <span>{activeCheckpoint.explanation}</span>
@@ -998,7 +998,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           <div className="text-xs text-slate-500 flex items-center gap-2 pt-2 border-t border-slate-100">
             <span>Nguồn video:</span>
             <a
-              href={activity.videoUrl}
+              href={resolveBackendUrl(activity.videoUrl)}
               target="_blank"
               rel="noreferrer"
               className="text-[#0374b5] hover:underline font-mono truncate max-w-md flex items-center gap-1"
