@@ -19,9 +19,9 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
 }) => {
   const handleAdd = () => {
     const lastSec = checkpoints.length > 0
-      ? Math.max(...checkpoints.map(c => c.timeSeconds))
+      ? Math.max(...checkpoints.map(c => Number(c.timeSeconds) || 0))
       : 0;
-    const nextSec = lastSec + 60; // tự tăng thêm 1 phút so với neo trước
+    const nextSec = Math.round((lastSec + 60) * 1000) / 1000; // tự tăng thêm 1 phút so với neo trước (giữ mili giây)
     onChange([
       ...checkpoints,
       {
@@ -39,11 +39,52 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
     onChange(checkpoints.map((item, i) => (i === idx ? { ...item, ...patch } : item)));
   };
 
-  const formatMmSs = (sec: number) => {
-    const safe = Math.max(0, Math.floor(sec || 0));
-    const m = Math.floor(safe / 60);
-    const s = safe % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const toExactSeconds = (mins: number, secs: number, ms: number) => {
+    const safeM = Math.max(0, Math.floor(mins || 0));
+    const safeS = Math.min(59, Math.max(0, Math.floor(secs || 0)));
+    const safeMs = Math.min(999, Math.max(0, Math.floor(ms || 0)));
+    return (safeM * 60000 + safeS * 1000 + safeMs) / 1000;
+  };
+
+  const formatMmSsMs = (sec: number) => {
+    const totalMs = Math.max(0, Math.round((Number(sec) || 0) * 1000));
+    const h = Math.floor(totalMs / 3600000);
+    const m = Math.floor((totalMs % 3600000) / 60000);
+    const s = Math.floor((totalMs % 60000) / 1000);
+    const ms = totalMs % 1000;
+    const msStr = ms.toString().padStart(3, '0');
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msStr}`;
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msStr}`;
+  };
+
+  const parseTimestampInput = (raw: string): number | null => {
+    const cleaned = String(raw || '').trim().replace(',', '.');
+    if (!cleaned) return null;
+    if (cleaned.includes(':')) {
+      const parts = cleaned.split(':').map(p => p.trim());
+      if (parts.length === 2) {
+        const m = Number(parts[0]);
+        const s = Number(parts[1]);
+        if (Number.isFinite(m) && Number.isFinite(s) && m >= 0 && s >= 0) {
+          return Math.round((m * 60 + s) * 1000) / 1000;
+        }
+      } else if (parts.length === 3) {
+        const h = Number(parts[0]);
+        const m = Number(parts[1]);
+        const s = Number(parts[2]);
+        if (Number.isFinite(h) && Number.isFinite(m) && Number.isFinite(s) && h >= 0 && m >= 0 && s >= 0) {
+          return Math.round((h * 3600 + m * 60 + s) * 1000) / 1000;
+        }
+      }
+      return null;
+    }
+    const num = Number(cleaned);
+    if (Number.isFinite(num) && num >= 0) {
+      return Math.round(num * 1000) / 1000;
+    }
+    return null;
   };
 
   return (
@@ -79,20 +120,22 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
 
       {checkpoints.length === 0 ? (
         <p className="text-[11px] text-slate-500 italic">
-          Chưa có neo chặn nào. Bấm <strong>"+ Thêm neo chặn"</strong> để đặt câu hỏi dừng video ở bất kỳ phút/giây nào (ví dụ 00:45, 02:15...).
+          Chưa có neo chặn nào. Bấm <strong>"+ Thêm neo chặn"</strong> để đặt câu hỏi dừng video chính xác đến từng mili giây (ví dụ 00:45.500, 02:15.250...).
         </p>
       ) : (
         <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
           {checkpoints.map((cp, idx) => {
-            const mins = Math.floor((cp.timeSeconds || 0) / 60);
-            const secs = Math.floor((cp.timeSeconds || 0) % 60);
+            const totalMs = Math.max(0, Math.round((Number(cp.timeSeconds) || 0) * 1000));
+            const mins = Math.floor(totalMs / 60000);
+            const secs = Math.floor((totalMs % 60000) / 1000);
+            const ms = totalMs % 1000;
 
             return (
               <div key={cp.id || idx} className="p-3 bg-white rounded-xl border border-indigo-200 space-y-2.5 shadow-2xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 text-[10px] font-black">
-                      Neo #{idx + 1} • {formatMmSs(cp.timeSeconds)}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 text-[10px] font-black font-mono">
+                      Neo #{idx + 1} • {formatMmSsMs(cp.timeSeconds)}
                     </span>
 
                     <div className="flex items-center gap-1 text-[11px] text-slate-600">
@@ -104,9 +147,9 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
                         value={mins}
                         onChange={(e) => {
                           const newM = Math.max(0, parseInt(e.target.value || '0', 10) || 0);
-                          updateAt(idx, { timeSeconds: newM * 60 + secs });
+                          updateAt(idx, { timeSeconds: toExactSeconds(newM, secs, ms) });
                         }}
-                        className="w-12 px-1.5 py-0.5 border border-slate-300 rounded text-center font-mono font-bold text-slate-900"
+                        className="w-11 px-1 py-0.5 border border-slate-300 rounded text-center font-mono font-bold text-slate-900"
                         title="Phút"
                       />
                       <span className="font-bold">p</span>
@@ -117,13 +160,51 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
                         value={secs}
                         onChange={(e) => {
                           const newS = Math.min(59, Math.max(0, parseInt(e.target.value || '0', 10) || 0));
-                          updateAt(idx, { timeSeconds: mins * 60 + newS });
+                          updateAt(idx, { timeSeconds: toExactSeconds(mins, newS, ms) });
                         }}
-                        className="w-12 px-1.5 py-0.5 border border-slate-300 rounded text-center font-mono font-bold text-slate-900"
-                        title="Giây"
+                        className="w-11 px-1 py-0.5 border border-slate-300 rounded text-center font-mono font-bold text-slate-900"
+                        title="Giây (0-59)"
                       />
                       <span className="font-bold">s</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={999}
+                        step={1}
+                        value={ms}
+                        onChange={(e) => {
+                          const newMs = Math.min(999, Math.max(0, parseInt(e.target.value || '0', 10) || 0));
+                          updateAt(idx, { timeSeconds: toExactSeconds(mins, secs, newMs) });
+                        }}
+                        className="w-14 px-1 py-0.5 border border-indigo-300 bg-indigo-50/40 rounded text-center font-mono font-bold text-indigo-950"
+                        title="Mili giây (0-999 ms)"
+                      />
+                      <span className="font-bold text-indigo-700">ms</span>
                     </div>
+
+                    <input
+                      key={`${cp.id || idx}-${totalMs}`}
+                      type="text"
+                      defaultValue={formatMmSsMs(cp.timeSeconds)}
+                      onBlur={(e) => {
+                        const parsed = parseTimestampInput(e.target.value);
+                        if (parsed !== null) {
+                          updateAt(idx, { timeSeconds: parsed });
+                        } else {
+                          e.target.value = formatMmSsMs(cp.timeSeconds);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const parsed = parseTimestampInput((e.target as HTMLInputElement).value);
+                          if (parsed !== null) updateAt(idx, { timeSeconds: parsed });
+                        }
+                      }}
+                      className="w-24 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] font-mono text-slate-700 bg-slate-50 focus:bg-white focus:border-indigo-400 focus:outline-none"
+                      title="Nhập nhanh MM:SS.mmm (VD: 01:23.450) rồi nhấn Enter"
+                      placeholder="00:00.000"
+                    />
                   </div>
 
                   <button

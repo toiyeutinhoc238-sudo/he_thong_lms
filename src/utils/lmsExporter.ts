@@ -388,6 +388,7 @@ window.LMSBridge && window.LMSBridge.init();
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function fmt(sec){sec=Math.max(0,Math.floor(sec||0));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+function fmtMs(sec){var msT=Math.max(0,Math.round((Number(sec)||0)*1000));var m=Math.floor(msT/60000),s=Math.floor((msT%60000)/1000),ms=msT%1000;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(ms).padStart(3,'0')}
 function extractYT(u){if(!u)return null;var m=u.match(/(?:youtu\\.be\\/|youtube\\.com\\/(?:embed\\/|v\\/|shorts\\/|watch\\?v=|watch\\?.+&v=))([\\w-]{11})/);return m?m[1]:null}
 
 function syncScorm(){
@@ -446,7 +447,7 @@ function renderVideo(act, stage){
     pauseFn();
     const ov = document.getElementById('cpOverlay');
     ov.className = 'overlay';
-    ov.innerHTML = '<div class="modal"><div class="badge" style="margin-bottom:8px">Neo chặn tại '+fmt(cp.timeSeconds)+'</div><h3 style="margin:0 0 12px;font-size:15px">'+esc(cp.question)+'</h3><div id="cpOpts"></div><div id="cpFb" style="margin-top:10px;font-size:13px;font-weight:700"></div></div>';
+    ov.innerHTML = '<div class="modal"><div class="badge" style="margin-bottom:8px">Neo chặn tại '+fmtMs(cp.timeSeconds)+'</div><h3 style="margin:0 0 12px;font-size:15px">'+esc(cp.question)+'</h3><div id="cpOpts"></div><div id="cpFb" style="margin-top:10px;font-size:13px;font-weight:700"></div></div>';
     const box = document.getElementById('cpOpts');
     (cp.options||[]).forEach((opt, oi)=>{
       const b = document.createElement('button');
@@ -460,7 +461,7 @@ function renderVideo(act, stage){
           cpState[cp.id] = true;
           fb.innerHTML = '<span style="color:'+(ok?'#059669':'#dc2626')+'">'+(ok?'✓ Chính xác!':'✗ Chưa đúng, đã ghi nhận.')+'</span> <button class="btn btn-ok" style="margin-left:8px" id="cpGo">Tiếp tục xem ▶</button>';
           document.getElementById('cpGo').onclick = function(){
-            ov.className=''; ov.innerHTML=''; activeCp=null; resumeFn(cp.timeSeconds+1);
+            ov.className=''; ov.innerHTML=''; activeCp=null; resumeFn(cp.timeSeconds);
           };
         } else {
           fb.innerHTML = '<span style="color:#dc2626">✗ Chưa đúng! Vui lòng chọn lại đáp án đúng để xem tiếp.</span>';
@@ -472,14 +473,15 @@ function renderVideo(act, stage){
 
   function onTick(cur, dur, pauseFn, seekFn, resumeFn){
     if(activeCp){pauseFn();return;}
-    const block = cps.find(c=>!cpState[c.id] && (act.preventVideoSkip ? cur >= c.timeSeconds : (cur >= c.timeSeconds && cur <= c.timeSeconds + 3)));
+    const exactCur = Math.max(0, Math.round((Number(cur)||0)*1000)/1000);
+    const block = cps.find(c=>!cpState[c.id] && (act.preventVideoSkip ? exactCur >= c.timeSeconds : (exactCur >= c.timeSeconds && exactCur <= c.timeSeconds + 3)));
     if(block){
-      if(cur > block.timeSeconds + 2) seekFn(block.timeSeconds);
-      showCp(block, pauseFn, (t)=>{ maxWatched = Math.max(maxWatched, t); seekFn(t); resumeFn(); });
+      if(Math.abs(exactCur - block.timeSeconds) > 0.12) seekFn(block.timeSeconds);
+      showCp(block, pauseFn, (t)=>{ maxWatched = Math.max(maxWatched, t); resumeFn(); });
       return;
     }
-    if(act.preventVideoSkip && cur > maxWatched + 6){ seekFn(maxWatched); return; }
-    maxWatched = Math.max(maxWatched, cur);
+    if(act.preventVideoSkip && exactCur > maxWatched + 6){ seekFn(maxWatched); return; }
+    maxWatched = Math.max(maxWatched, exactCur);
     if(dur > 0){
       const pct = Math.min(100, Math.round((maxWatched/dur)*100));
       document.getElementById('vBar').style.width = pct+'%';
@@ -500,7 +502,7 @@ function renderVideo(act, stage){
               pollId = setInterval(function(){
                 if(!ytPlayer || !ytPlayer.getCurrentTime) return;
                 onTick(ytPlayer.getCurrentTime(), ytPlayer.getDuration(), ()=>ytPlayer.pauseVideo(), (t)=>ytPlayer.seekTo(t,true), ()=>ytPlayer.playVideo());
-              }, 800);
+              }, 50);
             } else if(ev.data === YT.PlayerState.ENDED){
               if(pollId) clearInterval(pollId);
               if(cps.every(c=>cpState[c.id])){ state.done[act.id]=true; document.getElementById('vBar').style.width='100%'; syncScorm(); }
@@ -517,8 +519,16 @@ function renderVideo(act, stage){
   } else {
     const v = document.getElementById('h5v');
     if(v){
-      v.ontimeupdate = ()=>onTick(v.currentTime, v.duration, ()=>v.pause(), (t)=>{v.currentTime=t}, ()=>v.play());
-      v.onended = ()=>{ if(cps.every(c=>cpState[c.id])){ state.done[act.id]=true; document.getElementById('vBar').style.width='100%'; syncScorm(); } };
+      const tickH5 = ()=>onTick(v.currentTime, v.duration, ()=>v.pause(), (t)=>{v.currentTime=t}, ()=>v.play());
+      v.ontimeupdate = tickH5;
+      v.onseeking = tickH5;
+      v.onseeked = tickH5;
+      v.onplay = ()=>{
+        if(pollId) clearInterval(pollId);
+        pollId = setInterval(()=>{ if(v.paused||v.ended){clearInterval(pollId);pollId=null;return;} tickH5(); }, 25);
+      };
+      v.onpause = ()=>{ if(pollId){clearInterval(pollId);pollId=null;} };
+      v.onended = ()=>{ if(pollId){clearInterval(pollId);pollId=null;} if(cps.every(c=>cpState[c.id])){ state.done[act.id]=true; document.getElementById('vBar').style.width='100%'; syncScorm(); } };
     }
   }
 }

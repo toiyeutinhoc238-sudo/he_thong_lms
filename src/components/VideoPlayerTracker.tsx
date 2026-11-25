@@ -177,6 +177,18 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const formatTimeMs = (secs: number) => {
+    if (!Number.isFinite(secs) || secs < 0) return '00:00.000';
+    const totalMs = Math.round(secs * 1000);
+    const h = Math.floor(totalMs / 3600000);
+    const m = Math.floor((totalMs % 3600000) / 60000);
+    const s = Math.floor((totalMs % 60000) / 1000);
+    const ms = totalMs % 1000;
+    const msStr = ms.toString().padStart(3, '0');
+    if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msStr}`;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${msStr}`;
+  };
+
   const pausePlayer = useCallback(() => {
     try { videoRef.current?.pause(); } catch {}
     try { ytPlayerRef.current?.pauseVideo?.(); } catch {}
@@ -188,7 +200,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   }, []);
 
   const seekPlayer = useCallback((sec: number) => {
-    const target = Math.max(0, Math.floor(sec));
+    // Giữ chính xác từng mili giây (0.001s) thay vì làm tròn xuống giây nguyên
+    const target = Math.max(0, Math.round((Number(sec) || 0) * 1000) / 1000);
     try {
       if (videoRef.current) videoRef.current.currentTime = target;
     } catch {}
@@ -197,7 +210,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     } catch {}
   }, []);
 
-  // Kiểm tra neo chặn & chống tua nhanh tại mốc thời gian `pos`
+  // Kiểm tra neo chặn & chống tua nhanh chính xác từng mili giây tại mốc `pos`
   const checkCheckpointsAndAntiSkip = useCallback((pos: number): boolean => {
     if (teacherBypassRef.current) return false;
     if (activeCpRef.current) {
@@ -205,21 +218,27 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       return true;
     }
 
-    // 1. Tìm neo chặn sớm nhất chưa vượt qua mà vị trí phát đã chạm hoặc vượt qua
+    const exactPos = Math.max(0, Math.round((Number(pos) || 0) * 1000) / 1000);
+
+    // 1. Tìm neo chặn sớm nhất chưa vượt qua mà vị trí phát đã chạm hoặc vượt qua (so sánh chính xác đến từng ms)
     const blockingCp = checkpoints.find(cp => {
       if (isCheckpointCleared(cp, cpResultsRef.current)) return false;
+      const cpTime = Math.max(0, Math.round((Number(cp.timeSeconds) || 0) * 1000) / 1000);
       if (preventSkip) {
-        return pos >= cp.timeSeconds;
+        return exactPos >= cpTime;
       }
-      return pos >= cp.timeSeconds && pos <= cp.timeSeconds + 3;
+      return exactPos >= cpTime && exactPos <= cpTime + 3;
     });
 
     if (blockingCp) {
+      const cpTime = Math.max(0, Math.round((Number(blockingCp.timeSeconds) || 0) * 1000) / 1000);
+      activeCpRef.current = blockingCp;
       pausePlayer();
-      if (pos > blockingCp.timeSeconds + 2) {
-        seekPlayer(blockingCp.timeSeconds);
-        setCurrentTime(blockingCp.timeSeconds);
+      if (Math.abs(exactPos - cpTime) > 0.12) {
+        seekPlayer(cpTime);
       }
+      latestPosRef.current = cpTime;
+      setCurrentTime(cpTime);
       setActiveCheckpoint(blockingCp);
       setPickedOption(null);
       setCpFeedback(null);
@@ -227,8 +246,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     }
 
     // 2. Chống tua nhanh vượt quá mốc đã xem (chỉ khi giáo viên bật preventVideoSkip)
-    if (preventSkip && pos > maxWatchedRef.current + 6) {
-      const snapTo = maxWatchedRef.current;
+    if (preventSkip && exactPos > maxWatchedRef.current + 6) {
+      const snapTo = Math.max(0, Math.round(maxWatchedRef.current * 1000) / 1000);
       seekPlayer(snapTo);
       setCurrentTime(snapTo);
       setSkipWarning('Giáo viên đã bật chống tua nhanh — vui lòng xem lần lượt video và vượt qua các neo chặn!');
@@ -279,8 +298,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       const passedCount = checkpoints.filter(cp => isCheckpointCleared(cp, resultsToSave)).length;
       const done = Boolean(res?.isCompleted || isCompletedRef.current || (highPct >= 80 && passedCount >= checkpoints.length));
 
-      setProgressPercent(serverVp.progressPercent);
-      setMaxWatchedSeconds(serverVp.watchedSeconds);
+      setProgressPercent(Math.max(maxPctRef.current, serverVp.progressPercent));
+      setMaxWatchedSeconds(Math.max(maxWatchedRef.current, serverVp.watchedSeconds));
       if (done && !isCompletedRef.current) {
         setIsCompleted(true);
         if (onCompleted) onCompleted();
@@ -346,11 +365,91 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     };
   }, [activity.id, courseId, currentUser?.id]);
 
-  // YouTube IFrame Player API thật (đo % + tạm dừng & chặn tua tại neo chặn)
+  // YouTube IFrame Player API thật (đo % + tạm dừng & chặn tua chính xác từng mili giây tại neo chặn)
   useEffect(() => {
     if (!ytVideoId || !ytContainerRef.current) return;
     let destroyed = false;
     let pollTimer: number | null = null;
+    let rafId: number | null = null;
+    let lastPerfMs = 0;
+    let lastUiUpdateMs = 0;
+
+    const stopYtLoops = () => {
+      if (pollTimer !== null) {
+        window.clearInterval(pollTimer);
+        pollTimer = null;
+      }
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      lastPerfMs = 0;
+    };
+
+    const sampleYouTube = () => {
+      if (destroyed) return;
+      const p = ytPlayerRef.current;
+      if (!p || typeof p.getCurrentTime !== 'function') return;
+      const rawCur = Number(p.getCurrentTime() || 0);
+      const exactCur = Math.max(0, Math.round(rawCur * 1000) / 1000);
+      const rawDur = Number(p.getDuration?.() || latestDurRef.current || 0);
+      const exactDur = Math.max(0, Math.round(rawDur * 1000) / 1000);
+
+      // Kiểm tra neo chặn & chống tua ngay lập tức trước khi cập nhật maxWatched!
+      if (checkCpRef.current(exactCur)) {
+        stopYtLoops();
+        return;
+      }
+
+      const nowPerf = performance.now();
+      if (lastPerfMs > 0) {
+        const dt = (nowPerf - lastPerfMs) / 1000;
+        if (dt > 0 && dt < 2) unsyncedDeltaRef.current += dt;
+      }
+      lastPerfMs = nowPerf;
+
+      if (exactDur > 0) {
+        const currentPct = Math.min(100, Math.round((exactCur / exactDur) * 100));
+        const nextHighPct = Math.max(maxPctRef.current, currentPct);
+        const nextHighSecs = Math.max(maxWatchedRef.current, exactCur);
+        maxWatchedRef.current = nextHighSecs;
+        latestPosRef.current = exactCur;
+        latestDurRef.current = exactDur;
+
+        // Cập nhật UI ~15fps (66ms) để mượt đồng hồ mili giây mà không gây giật
+        if (nowPerf - lastUiUpdateMs >= 66) {
+          lastUiUpdateMs = nowPerf;
+          setCurrentTime(exactCur);
+          setDuration(exactDur);
+          setMaxWatchedSeconds(nextHighSecs);
+          setProgressPercent(nextHighPct);
+        }
+
+        const passedAll = checkpointsListRef.current.every(cp => isCpClearedRef.current(cp, cpResultsRef.current));
+        const crossed80 = nextHighPct >= 80 && passedAll && !isCompletedRef.current;
+        if (crossed80) {
+          setIsCompleted(true);
+          syncProgressRef.current(exactCur, exactDur, nextHighPct, true);
+        } else {
+          syncProgressRef.current(exactCur, exactDur, nextHighPct, false);
+        }
+      }
+    };
+
+    const startYtLoops = () => {
+      stopYtLoops();
+      lastPerfMs = performance.now();
+      const rafStep = () => {
+        if (destroyed) return;
+        sampleYouTube();
+        if (pollTimer !== null) {
+          rafId = window.requestAnimationFrame(rafStep);
+        }
+      };
+      // Backup interval 50ms đảm bảo luôn kiểm tra sát mốc ms ngay cả khi trình duyệt giảm tốc rAF
+      pollTimer = window.setInterval(sampleYouTube, 50);
+      rafId = window.requestAnimationFrame(rafStep);
+    };
 
     loadYouTubeIframeAPI().then((YT) => {
       if (destroyed || !ytContainerRef.current || !YT?.Player) return;
@@ -374,14 +473,14 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           onReady: (ev: any) => {
             if (destroyed) return;
             setYtApiActive(true);
-            const dur = Math.floor(ev.target.getDuration?.() || 0);
+            const dur = Math.max(0, Math.round((Number(ev.target.getDuration?.() || 0)) * 1000) / 1000);
             if (dur > 0) setDuration(dur);
           },
           onStateChange: (ev: any) => {
             if (destroyed) return;
             const state = ev.data;
-            const cur = Math.floor(ev.target.getCurrentTime?.() || 0);
-            const dur = Math.floor(ev.target.getDuration?.() || latestDurRef.current || 0);
+            const cur = Math.max(0, Math.round((Number(ev.target.getCurrentTime?.() || 0)) * 1000) / 1000);
+            const dur = Math.max(0, Math.round((Number(ev.target.getDuration?.() || latestDurRef.current || 0)) * 1000) / 1000);
             if (dur > 0) setDuration(dur);
 
             if (state === YT.PlayerState.BUFFERING) {
@@ -396,43 +495,10 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
               }
               setIsPlaying(true);
               setShowResumeBanner(false);
-              if (pollTimer) window.clearInterval(pollTimer);
-              pollTimer = window.setInterval(() => {
-                const p = ytPlayerRef.current;
-                if (!p || typeof p.getCurrentTime !== 'function') return;
-                const c = Math.floor(p.getCurrentTime() || 0);
-                const d = Math.floor(p.getDuration() || latestDurRef.current || 0);
-
-                // Kiểm tra neo chặn & chống tua trước khi cập nhật maxWatched!
-                if (checkCpRef.current(c)) return;
-
-                if (d > 0) {
-                  const currentPct = Math.min(100, Math.round((c / d) * 100));
-                  const nextHighPct = Math.max(maxPctRef.current, currentPct);
-                  const nextHighSecs = Math.max(maxWatchedRef.current, c);
-                  unsyncedDeltaRef.current += 0.8;
-
-                  setCurrentTime(c);
-                  setDuration(d);
-                  setMaxWatchedSeconds(nextHighSecs);
-                  setProgressPercent(nextHighPct);
-
-                  const passedAll = checkpointsListRef.current.every(cp => isCpClearedRef.current(cp, cpResultsRef.current));
-                  const crossed80 = nextHighPct >= 80 && passedAll && !isCompletedRef.current;
-                  if (crossed80) {
-                    setIsCompleted(true);
-                    syncProgressRef.current(c, d, nextHighPct, true);
-                  } else {
-                    syncProgressRef.current(c, d, nextHighPct, false);
-                  }
-                }
-              }, 800);
+              startYtLoops();
             } else {
               setIsPlaying(false);
-              if (pollTimer) {
-                window.clearInterval(pollTimer);
-                pollTimer = null;
-              }
+              stopYtLoops();
               if (state === YT.PlayerState.ENDED) {
                 const finalDur = dur || latestDurRef.current || 1;
                 if (checkCpRef.current(finalDur)) return;
@@ -457,19 +523,41 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
     return () => {
       destroyed = true;
-      if (pollTimer) window.clearInterval(pollTimer);
+      stopYtLoops();
       try { ytPlayerRef.current?.destroy?.(); } catch {}
       ytPlayerRef.current = null;
     };
   }, [ytVideoId]);
+
+  // Theo dõi HTML5 <video> bằng requestAnimationFrame (~16ms/khung hình) để dừng chính xác từng mili giây tại neo chặn
+  useEffect(() => {
+    if (ytVideoId || !isPlaying) return;
+    let rafId = 0;
+    let lastUiMs = 0;
+    const tick = () => {
+      const el = videoRef.current;
+      if (!el || el.paused || el.ended) return;
+      const exactCur = Math.max(0, Math.round(el.currentTime * 1000) / 1000);
+      if (checkCpRef.current(exactCur)) return;
+
+      const nowPerf = performance.now();
+      if (nowPerf - lastUiMs >= 50) {
+        lastUiMs = nowPerf;
+        setCurrentTime(exactCur);
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [ytVideoId, isPlaying]);
 
   // Xử lý sự kiện video HTML5 (MP4 / WebM)
   const lastHtml5TickRef = useRef<number>(0);
   const handleHtml5TimeUpdate = () => {
     const el = videoRef.current;
     if (!el) return;
-    const cur = el.currentTime;
-    const dur = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : duration;
+    const cur = Math.max(0, Math.round(el.currentTime * 1000) / 1000);
+    const dur = Number.isFinite(el.duration) && el.duration > 0 ? Math.round(el.duration * 1000) / 1000 : duration;
     if (!dur) return;
 
     if (checkCheckpointsAndAntiSkip(cur)) return;
@@ -483,7 +571,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
     const currentPct = Math.min(100, Math.round((cur / dur) * 100));
     const nextHighPct = Math.max(maxPctRef.current, currentPct);
-    const nextHighSecs = Math.max(maxWatchedRef.current, Math.floor(cur));
+    const nextHighSecs = Math.max(maxWatchedRef.current, cur);
 
     setCurrentTime(cur);
     setDuration(dur);
@@ -529,17 +617,21 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
   const handleContinueAfterCheckpoint = () => {
     const cp = activeCheckpoint;
+    activeCpRef.current = null;
     setActiveCheckpoint(null);
     setPickedOption(null);
     setCpFeedback(null);
     if (cp) {
-      // Đẩy qua mốc neo 1 giây để không bị bật lại ngay
-      const nextSec = Math.max(latestPosRef.current, cp.timeSeconds + 1);
+      const cpTime = Math.max(0, Math.round((Number(cp.timeSeconds) || 0) * 1000) / 1000);
+      const nextSec = Math.max(latestPosRef.current, cpTime);
       if (nextSec > maxWatchedRef.current) {
         setMaxWatchedSeconds(nextSec);
         maxWatchedRef.current = nextSec;
       }
-      seekPlayer(nextSec);
+      // Chỉ seek nếu lệch xa mốc neo (> 250ms), còn không thì phát tiếp liền mạch từ đúng mili giây đã dừng
+      if (Math.abs(latestPosRef.current - cpTime) > 0.25) {
+        seekPlayer(cpTime);
+      }
     }
     playPlayer();
   };
@@ -552,14 +644,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
   const handleMarkCompleteNow = () => {
     if (checkpoints.length > 0 && checkpointsPassedCount < checkpoints.length && !canManage) {
-      const nextUnpassed = checkpoints.find(cp => !isCheckpointCleared(cp, checkpointResults));
-      if (nextUnpassed) {
-        setActiveCheckpoint(nextUnpassed);
-        setPickedOption(null);
-        setCpFeedback(null);
-        pausePlayer();
-        return;
-      }
+      return;
     }
     const finalDur = duration > 0 ? duration : (activity.durationMinutes || 5) * 60;
     setCurrentTime(finalDur);
@@ -631,12 +716,18 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                 syncProgressToServer(currentTime, duration, progressPercent, true);
               }}
               onTimeUpdate={handleHtml5TimeUpdate}
+              onSeeking={() => {
+                if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
+              }}
+              onSeeked={() => {
+                if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
+              }}
               onEnded={() => {
                 setIsPlaying(false);
                 const dur = videoRef.current?.duration || duration || 1;
                 if (checkCheckpointsAndAntiSkip(dur)) return;
                 setCurrentTime(dur);
-                setMaxWatchedSeconds(Math.floor(dur));
+                setMaxWatchedSeconds(dur);
                 setProgressPercent(100);
                 if (checkpoints.every(cp => isCheckpointCleared(cp, cpResultsRef.current))) {
                   setIsCompleted(true);
@@ -657,9 +748,9 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
               <div className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border-2 border-indigo-500 space-y-4 text-slate-900 animate-in fade-in zoom-in-95">
                 <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[11px] font-black flex items-center gap-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[11px] font-black font-mono flex items-center gap-1">
                       <ShieldAlert className="w-3.5 h-3.5" />
-                      Neo chặn {activeCpIndex + 1}/{checkpoints.length} • {formatTime(activeCheckpoint.timeSeconds)}
+                      Neo chặn {activeCpIndex + 1}/{checkpoints.length} • {formatTimeMs(activeCheckpoint.timeSeconds)}
                     </span>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase">
@@ -818,20 +909,12 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
               const leftPct = Math.min(98, Math.max(2, (cp.timeSeconds / duration) * 100));
               const cleared = isCheckpointCleared(cp, checkpointResults);
               return (
-                <button
+                <div
                   key={cp.id}
-                  type="button"
-                  onClick={() => {
-                    if (canManage || cleared) {
-                      setActiveCheckpoint(cp);
-                      setPickedOption(checkpointResults[cp.id]?.selectedAnswer ?? null);
-                      setCpFeedback(cleared ? { isCorrect: Boolean(checkpointResults[cp.id]?.isCorrect), canContinue: true } : null);
-                      pausePlayer();
-                    }
-                  }}
                   style={{ left: `${leftPct}%` }}
-                  title={`Neo chặn #${idx + 1} (${formatTime(cp.timeSeconds)}): ${cp.question}`}
-                  className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-slate-900 shadow-sm transition-transform hover:scale-125 ${
+                  aria-hidden="true"
+                  title={`Neo chặn #${idx + 1} (${formatTimeMs(cp.timeSeconds)}) — ${cleared ? 'Đã vượt qua' : 'Tự mở khi xem đến đúng mốc'}`}
+                  className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-slate-900 shadow-sm pointer-events-none select-none ${
                     cleared ? 'bg-emerald-400' : 'bg-amber-400'
                   }`}
                 />
@@ -839,33 +922,26 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             })}
           </div>
 
-          {/* Danh sách mốc Neo chặn */}
+          {/* Danh sách mốc Neo chặn (chỉ hiển thị trạng thái — không cho nhấp mở trước câu hỏi) */}
           {checkpoints.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-              <span className="text-[10px] text-slate-400 font-semibold mr-1">Các mốc neo chặn:</span>
+              <span className="text-[10px] text-slate-400 font-semibold mr-1">
+                Các mốc neo chặn (tự mở khi xem đến đúng mốc):
+              </span>
               {checkpoints.map((cp, idx) => {
                 const cleared = isCheckpointCleared(cp, checkpointResults);
                 return (
-                  <button
+                  <span
                     key={cp.id}
-                    type="button"
-                    onClick={() => {
-                      if (canManage || cleared) {
-                        setActiveCheckpoint(cp);
-                        setPickedOption(checkpointResults[cp.id]?.selectedAnswer ?? null);
-                        setCpFeedback(cleared ? { isCorrect: Boolean(checkpointResults[cp.id]?.isCorrect), canContinue: true } : null);
-                        pausePlayer();
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono border select-none cursor-default ${
                       cleared
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : 'bg-slate-800 text-amber-300 border-amber-500/40'
                     }`}
                   >
                     {cleared ? <CheckCircle2 className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                    <span>Neo {idx + 1} ({formatTime(cp.timeSeconds)})</span>
-                  </button>
+                    <span>Neo {idx + 1} ({formatTimeMs(cp.timeSeconds)})</span>
+                  </span>
                 );
               })}
             </div>
@@ -873,7 +949,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
             <span>
-              Vị trí đang phát: <strong className="text-slate-200 font-mono">{formatTime(currentTime)}</strong>
+              Vị trí đang phát: <strong className="text-slate-200 font-mono">{formatTimeMs(currentTime)}</strong>
               {preventSkip ? ' • Chống tua nhanh: Đang bật' : ''}
             </span>
             <div className="text-[10px]">
