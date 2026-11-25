@@ -117,6 +117,11 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
           </button>
         </div>
 
+        {/* Minh bạch ứng dụng AI (Chuẩn BT4: Công cụ, mục đích và nhắc kiểm chứng) */}
+        <div className="px-4 py-2 bg-amber-50/80 border-b border-amber-200/70 text-[10px] text-amber-900 leading-snug">
+          <strong>🤖 Minh bạch AI:</strong> Sử dụng <strong>Gemini 2.5 Flash</strong> để hỗ trợ giải đáp theo ngữ cảnh bài học & tiến độ LMS. Câu trả lời AI chỉ mang tính tham khảo — học sinh cần đối chiếu lại với giáo trình và giáo viên.
+        </div>
+
         {/* Quick prompt chips */}
         <div className="p-3 border-b border-slate-100 bg-slate-50/70 overflow-x-auto flex gap-1.5 scrollbar-none">
           {quickPrompts.map((p, idx) => (

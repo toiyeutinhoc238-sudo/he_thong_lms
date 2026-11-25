@@ -39,7 +39,7 @@ interface AppContextType {
   submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
   submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>, durationSeconds?: number) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
-  addCourseModule: (courseId: string, title: string, description?: string) => Promise<CourseModule | void>;
+  addCourseModule: (courseId: string, title: string, description?: string, extra?: { learningObjectives?: string; ownerName?: string }) => Promise<CourseModule | void>;
   updateCourseModule: (courseId: string, moduleId: string, data: Partial<CourseModule>) => Promise<void>;
   deleteCourseModule: (courseId: string, moduleId: string) => Promise<void>;
   reorderCourseModules: (courseId: string, moduleIds: string[]) => Promise<void>;
@@ -51,7 +51,7 @@ interface AppContextType {
   deleteCourse: (courseId: string) => void;
   enrollCourse: (courseId: string) => Promise<boolean>;
   addAnnouncement: (courseId: string, title: string, content: string, isImportant?: boolean) => Promise<boolean>;
-  uploadCourseFile: (courseId: string, file: File, description?: string) => Promise<CourseFile | null>;
+  uploadCourseFile: (courseId: string, file: File, description?: string, folder?: string, moduleId?: string) => Promise<CourseFile | null>;
   deleteCourseFile: (courseId: string, fileId: string) => Promise<boolean>;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
@@ -563,13 +563,20 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     api.activities.create(courseId, moduleId, completeAct).catch(err => reportSyncFailure('Thêm hoạt động', err));
   };
 
-  const addCourseModule = async (courseId: string, title: string, description?: string) => {
+  const addCourseModule = async (
+    courseId: string,
+    title: string,
+    description?: string,
+    extra?: { learningObjectives?: string; ownerName?: string }
+  ) => {
     const newMod: CourseModule = {
       id: `mod-${Date.now()}`,
       courseId,
       title,
       order: 1,
       description: description || '',
+      learningObjectives: extra?.learningObjectives || '',
+      ownerName: extra?.ownerName || '',
       activities: []
     };
 
@@ -752,7 +759,13 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }
   };
 
-  const uploadCourseFile = async (courseId: string, file: File, description?: string): Promise<CourseFile | null> => {
+  const uploadCourseFile = async (
+    courseId: string,
+    file: File,
+    description?: string,
+    folder?: string,
+    moduleId?: string
+  ): Promise<CourseFile | null> => {
     try {
       // 1. Upload file vật lý lên server
       const uploaded = await api.files.upload(file);
@@ -766,6 +779,8 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         sizeBytes: uploaded.sizeBytes,
         mimetype: uploaded.mimetype,
         fileType: uploaded.fileType,
+        folder: folder || '',
+        moduleId: moduleId || '',
         description: description || '',
         uploadedBy: {
           id: currentUser.id,

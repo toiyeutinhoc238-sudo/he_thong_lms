@@ -174,7 +174,7 @@ const userSchema = new mongoose.Schema({
   id: String,
   name: String,
   username: String,
-  password: { type: String, default: 'password123' },
+  passwordHash: { type: String, default: '' },
   email: String,
   role: { type: String, enum: ['student', 'lecturer', 'admin'], default: 'student' },
   code: String,
@@ -674,10 +674,30 @@ async function ensureStudentEnrolled(course, user) {
   return course;
 }
 
+function hashPassword(plain) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derived = crypto.scryptSync(String(plain), salt, 64).toString('hex');
+  return `scrypt$${salt}$${derived}`;
+}
+
+function verifyPassword(plain, storedHash) {
+  if (!storedHash || typeof storedHash !== 'string') return false;
+  const parts = storedHash.split('$');
+  if (parts.length !== 3 || parts[0] !== 'scrypt') return false;
+  try {
+    const derived = crypto.scryptSync(String(plain), parts[1], 64);
+    const expected = Buffer.from(parts[2], 'hex');
+    if (derived.length !== expected.length) return false;
+    return crypto.timingSafeEqual(derived, expected);
+  } catch {
+    return false;
+  }
+}
+
 const safeUser = (u) => {
   if (!u) return u;
-  const { password, ...rest } = u;
-  return rest;
+  const { password, passwordHash, ...rest } = u;
+  return { ...rest, hasPassword: Boolean(passwordHash) };
 };
 
 const isStaff = (user) => !!user && (
@@ -896,9 +916,45 @@ async function learningContext(req, res) {
 // ====================== API ROUTES ======================
 
 // 1. Auth: Đăng nhập bằng tên đăng nhập đã bị gỡ bỏ vì không kiểm tra mật khẩu
-// (ai cũng có thể đăng nhập thành người khác, kể cả quản trị viên). Chỉ còn đăng nhập Google.
-app.post('/api/auth/login', (req, res) => {
-  res.status(410).json({ message: 'Hình thức đăng nhập này đã ngừng hỗ trợ. Vui lòng đăng nhập bằng Google.' });
+// 1. Auth: Đăng nhập bằng Tài khoản & Mật khẩu (băm scrypt an toàn — phục vụ Giảng viên kiểm tra BT4 & tài khoản được cấp)
+app.post('/api/auth/login', async (req, res) => {
+  const identifier = String(req.body?.username || req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+  if (!identifier || !password) {
+    return res.status(400).json({ message: 'Vui lòng nhập đầy đủ Tên đăng nhập (hoặc Email) và Mật khẩu.' });
+  }
+
+  let userObj = null;
+  if (isMongoConnected) {
+    try {
+      const escaped = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(`^${escaped}$`, 'i');
+      const doc = await UserModel.findOne({
+        $or: [{ email: rx }, { username: rx }, { code: rx }]
+      });
+      if (doc) userObj = doc.toObject();
+    } catch {}
+  } else {
+    const db = readDb();
+    userObj = (db.users || []).find(u =>
+      String(u.email || '').trim().toLowerCase() === identifier ||
+      String(u.username || '').trim().toLowerCase() === identifier ||
+      String(u.code || '').trim().toLowerCase() === identifier
+    ) || null;
+  }
+
+  if (!userObj) {
+    return res.status(401).json({ message: 'Tài khoản không tồn tại trên hệ thống.' });
+  }
+  if (!userObj.passwordHash) {
+    return res.status(401).json({ message: 'Tài khoản này chưa được cấp mật khẩu. Vui lòng đăng nhập bằng Google hoặc nhờ Quản trị viên cấp mật khẩu.' });
+  }
+  if (!verifyPassword(password, userObj.passwordHash)) {
+    return res.status(401).json({ message: 'Mật khẩu không chính xác. Vui lòng kiểm tra lại.' });
+  }
+
+  const token = signToken(userObj.id);
+  return res.json({ token, user: safeUser(userObj) });
 });
 
 // 1.1 Auth: Đăng nhập bằng Google OAuth (Google Identity Services)
@@ -1491,6 +1547,9 @@ app.post('/api/courses/:id/modules', requireStaff, async (req, res) => {
     title: req.body.title || 'Mô-đun mới',
     order: req.body.order || 1,
     description: req.body.description || '',
+    learningObjectives: req.body.learningObjectives || '',
+    ownerName: req.body.ownerName || '',
+    isHidden: Boolean(req.body.isHidden),
     activities: req.body.activities || []
   };
 
@@ -3146,6 +3205,8 @@ app.post('/api/courses/:id/files', requireStaff, (req, res, next) => {
       mimetype: req.file.mimetype,
       fileType,
       persistedInDb,
+      folder: String(req.body.folder || '').trim(),
+      moduleId: String(req.body.moduleId || '').trim(),
       description: req.body.description || '',
       uploadedBy: uploader,
       uploadedAt: nowVN()
@@ -3160,6 +3221,8 @@ app.post('/api/courses/:id/files', requireStaff, (req, res, next) => {
       sizeBytes: req.body.sizeBytes || 0,
       mimetype: req.body.mimetype || 'application/octet-stream',
       fileType: req.body.fileType || getFileTypeCategory(req.body.name, req.body.mimetype),
+      folder: String(req.body.folder || '').trim(),
+      moduleId: String(req.body.moduleId || '').trim(),
       description: req.body.description || '',
       uploadedBy: {
         id: req.user.id,
@@ -3462,33 +3525,40 @@ app.get('/api/courses/:id/forum', async (req, res) => {
 app.get('/api/users', requireStaff, async (req, res) => {
   if (isMongoConnected) {
     try {
-      const users = await UserModel.find({}, { password: 0 });
-      return res.json(users || []);
+      const users = await UserModel.find({}).lean();
+      return res.json((users || []).map(safeUser));
     } catch (err) {
       return res.json([]);
     }
   }
   const db = readDb();
-  const safeUsers = (db.users || []).map(({ password, ...u }) => u);
+  const safeUsers = (db.users || []).map(safeUser);
   res.json(safeUsers || []);
 });
 
-// 13.1 Thêm người dùng mới (Quyền Quản trị viên - Đáp ứng chuẩn rubric quản trị)
+// 13.1 Thêm người dùng mới (Quyền Quản trị viên — hỗ trợ cấp Tài khoản + Mật khẩu băm scrypt cho GV chấm bài / HS)
 app.post('/api/users', requireStaff, async (req, res) => {
-  const { name, email, role, code, className, school, department } = req.body;
+  const { name, email, username, password, role, code, className, school, department } = req.body;
   if (!name || !email) {
     return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ Họ tên và Email.' });
   }
+  const rawPassword = String(password || '').trim();
+  if (rawPassword && rawPassword.length < 6) {
+    return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự.' });
+  }
 
   const normalizedEmail = email.toLowerCase().trim();
-  const userCode = (code || normalizedEmail.split('@')[0]).toUpperCase();
+  const normalizedUsername = String(username || normalizedEmail.split('@')[0]).toLowerCase().trim().replace(/\s+/g, '');
+  const userCode = (code || normalizedUsername).toUpperCase();
   const userRole = role === 'admin' && normalizedEmail !== 'phanphiphu04@gmail.com' ? 'student' : (role || 'student');
+  const passwordHash = rawPassword ? hashPassword(rawPassword) : '';
 
   const newUser = {
     id: `user-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
     name: name.trim(),
-    username: normalizedEmail.split('@')[0],
+    username: normalizedUsername,
     email: normalizedEmail,
+    passwordHash,
     role: userRole,
     code: userCode,
     className: className || '',
@@ -3503,27 +3573,68 @@ app.post('/api/users', requireStaff, async (req, res) => {
 
   if (isMongoConnected) {
     try {
-      const existing = await UserModel.findOne({ email: normalizedEmail });
+      const existing = await UserModel.findOne({
+        $or: [{ email: normalizedEmail }, { username: normalizedUsername }]
+      });
       if (existing) {
-        return res.status(409).json({ message: 'Email người dùng này đã tồn tại trong hệ thống.' });
+        return res.status(409).json({ message: 'Email hoặc Tên đăng nhập này đã tồn tại trong hệ thống.' });
       }
       const created = await UserModel.create(newUser);
       const obj = created.toObject ? created.toObject() : created;
-      delete obj.password;
-      return res.status(201).json(obj);
+      return res.status(201).json(safeUser(obj));
     } catch (err) {
       return res.status(500).json({ message: 'Lỗi khi lưu người dùng vào MongoDB.' });
     }
   } else {
     const db = readDb();
-    if ((db.users || []).some(u => u.email?.toLowerCase().trim() === normalizedEmail)) {
-      return res.status(409).json({ message: 'Email người dùng này đã tồn tại trong hệ thống.' });
+    if ((db.users || []).some(u =>
+      u.email?.toLowerCase().trim() === normalizedEmail ||
+      (u.username && u.username.toLowerCase().trim() === normalizedUsername)
+    )) {
+      return res.status(409).json({ message: 'Email hoặc Tên đăng nhập này đã tồn tại trong hệ thống.' });
     }
     db.users = db.users || [];
     db.users.push(newUser);
     writeDb(db);
-    return res.status(201).json(newUser);
+    return res.status(201).json(safeUser(newUser));
   }
+});
+
+// 13.12 Cấp / Đặt lại mật khẩu cho người dùng (băm scrypt an toàn, bảo vệ Quản trị viên gốc)
+app.put('/api/users/:userId/password', requireStaff, async (req, res) => {
+  const userId = req.params.userId;
+  const rawPassword = String(req.body?.password || '').trim();
+  if (rawPassword.length < 6) {
+    return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+  }
+  const hashed = hashPassword(rawPassword);
+
+  if (isMongoConnected) {
+    const target = await UserModel.findOne({ id: userId });
+    if (!target) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+    const isTargetRoot = target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
+    const isCallerRoot = req.user.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
+    if (isTargetRoot && !isCallerRoot) {
+      return res.status(403).json({ message: 'Không thể đổi mật khẩu của Quản trị viên gốc.' });
+    }
+    target.passwordHash = hashed;
+    target.set('password', undefined);
+    await target.save();
+    return res.json({ success: true, message: 'Đã cập nhật mật khẩu đăng nhập thành công.' });
+  }
+
+  const db = readDb();
+  const target = (db.users || []).find(u => u.id === userId);
+  if (!target) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+  const isTargetRoot = target.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
+  const isCallerRoot = req.user.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
+  if (isTargetRoot && !isCallerRoot) {
+    return res.status(403).json({ message: 'Không thể đổi mật khẩu của Quản trị viên gốc.' });
+  }
+  target.passwordHash = hashed;
+  delete target.password;
+  writeDb(db);
+  res.json({ success: true, message: 'Đã cập nhật mật khẩu đăng nhập thành công.' });
 });
 
 // 13.15 Đổi vai trò người dùng (Học viên <-> Giáo viên, bảo vệ tài khoản Quản trị viên gốc)

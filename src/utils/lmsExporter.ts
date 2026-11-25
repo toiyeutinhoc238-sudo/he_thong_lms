@@ -459,12 +459,12 @@ function renderVideo(act, stage){
         const fb = document.getElementById('cpFb');
         if(ok || cp.requireCorrect === false){
           cpState[cp.id] = true;
-          fb.innerHTML = '<span style="color:'+(ok?'#059669':'#dc2626')+'">'+(ok?'✓ Chính xác!':'✗ Chưa đúng, đã ghi nhận.')+'</span> <button class="btn btn-ok" style="margin-left:8px" id="cpGo">Tiếp tục xem ▶</button>';
+          fb.innerHTML = '<span style="color:'+(ok?'#059669':'#dc2626')+'">'+(ok?'✓ Chính xác!':'✗ Chưa đúng, đã ghi nhận.')+'</span> <button class="btn btn-ok" style="margin-left:8px" id="cpGo">Tiếp tục xem ▶</button>'+(cp.explanation?'<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0c4a6e;font-weight:500;font-size:12px"><strong>💡 Giải thích:</strong> '+esc(cp.explanation)+'</div>':'');
           document.getElementById('cpGo').onclick = function(){
             ov.className=''; ov.innerHTML=''; activeCp=null; resumeFn(cp.timeSeconds);
           };
         } else {
-          fb.innerHTML = '<span style="color:#dc2626">✗ Chưa đúng! Vui lòng chọn lại đáp án đúng để xem tiếp.</span>';
+          fb.innerHTML = '<span style="color:#dc2626">✗ Chưa đúng! Vui lòng chọn lại đáp án đúng để xem tiếp.</span>'+(cp.explanation?'<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0c4a6e;font-weight:500;font-size:12px"><strong>💡 Gợi ý / Giải thích:</strong> '+esc(cp.explanation)+'</div>':'');
         }
       };
       box.appendChild(b);

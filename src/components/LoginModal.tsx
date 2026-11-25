@@ -4,7 +4,12 @@ import {
   X, 
   GraduationCap, 
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  KeyRound,
+  User as UserIcon,
+  Eye,
+  EyeOff,
+  Loader2
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -13,8 +18,45 @@ export const LoginModal: React.FC = () => {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '976502172307-q6lsed0gssm2udppc8cda0ai8u5e4alg.apps.googleusercontent.com';
+
+  const completeSession = async (res: { token?: string; user?: any }) => {
+    if (res && res.token) {
+      try { localStorage.setItem('lms2_token', res.token); } catch {}
+    }
+    if (res && res.user) {
+      try { localStorage.setItem('lms2_user', JSON.stringify(res.user)); } catch {}
+      setCurrentUser(res.user);
+      const keepCurrentPage = isEmbedMode || currentView === 'activity' || currentView === 'course-detail';
+      switchRole(res.user.role || 'student', keepCurrentPage);
+    }
+    await refreshData();
+    setUsername('');
+    setPassword('');
+    setIsLoginModalOpen(false);
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim() || !password) {
+      setLoginError('Vui lòng nhập đầy đủ Tên đăng nhập (hoặc Email) và Mật khẩu.');
+      return;
+    }
+    setIsLoggingIn(true);
+    setLoginError(null);
+    try {
+      const res = await api.auth.login({ username: username.trim(), password });
+      await completeSession(res);
+    } catch (err: any) {
+      setLoginError(err?.message || 'Sai tên đăng nhập hoặc mật khẩu. Vui lòng thử lại.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const handleGoogleCallback = async (response: any) => {
     if (!response || !response.credential) return;
@@ -22,17 +64,7 @@ export const LoginModal: React.FC = () => {
     setLoginError(null);
     try {
       const res = await api.auth.googleLogin(response.credential);
-      if (res && res.token) {
-        localStorage.setItem('lms2_token', res.token);
-      }
-      if (res && res.user) {
-        localStorage.setItem('lms2_user', JSON.stringify(res.user));
-        setCurrentUser(res.user);
-        const keepCurrentPage = isEmbedMode || currentView === 'activity' || currentView === 'course-detail';
-        switchRole(res.user.role || 'student', keepCurrentPage);
-      }
-      await refreshData();
-      setIsLoginModalOpen(false);
+      await completeSession(res);
     } catch (err: any) {
       console.error('Lỗi đăng nhập Google:', err);
       setLoginError(err.message || 'Không thể xác thực với tài khoản Google. Vui lòng thử lại.');
@@ -150,9 +182,83 @@ export const LoginModal: React.FC = () => {
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="relative flex items-center py-0.5">
+          <div className="flex-grow border-t border-slate-200" />
+          <span className="shrink-0 mx-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Hoặc Tài khoản & Mật khẩu
+          </span>
+          <div className="flex-grow border-t border-slate-200" />
+        </div>
+
+        {/* Username / Email + Password Form (cho Giảng viên kiểm tra & Tài khoản được cấp) */}
+        <form onSubmit={handlePasswordLogin} className="space-y-3">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              Tên đăng nhập, Email hoặc Mã số
+            </label>
+            <div className="relative">
+              <UserIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="VD: giangvien hoặc gv@lms.edu.vn"
+                autoComplete="username"
+                disabled={isLoggingIn}
+                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Nhập mật khẩu được cấp..."
+                autoComplete="current-password"
+                disabled={isLoggingIn}
+                className="w-full pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoggingIn || !username.trim() || !password}
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0374b5] hover:bg-[#025a8c] disabled:opacity-50 text-white font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+          >
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang xác thực...</span>
+              </>
+            ) : (
+              <>
+                <KeyRound className="w-4 h-4" />
+                <span>Đăng nhập bằng Tài khoản & Mật khẩu</span>
+              </>
+            )}
+          </button>
+        </form>
+
         {/* Footer */}
         <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-          Hệ thống sẽ tự động đồng bộ họ tên, email và ảnh đại diện từ tài khoản Google của bạn.
+          Học sinh có thể đăng nhập nhanh bằng Google; Giảng viên kiểm tra & tài khoản do Quản trị viên cấp có thể đăng nhập bằng Tài khoản & Mật khẩu.
         </p>
       </div>
     </div>

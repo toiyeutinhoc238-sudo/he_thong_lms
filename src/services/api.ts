@@ -77,8 +77,8 @@ class ApiClient {
         },
       });
 
-      // Tự động thử lại nhẹ 1 lần cho request GET hoặc /auth/google khi Backend Render gói Free vừa thức dậy (502/503/504)
-      const isRetryable = method === 'GET' || endpoint === '/auth/google';
+      // Tự động thử lại nhẹ 1 lần cho request GET hoặc /auth/google hoặc /auth/login khi Backend Render gói Free vừa thức dậy (502/503/504)
+      const isRetryable = method === 'GET' || endpoint === '/auth/google' || endpoint === '/auth/login';
       if (!response.ok && isRetryable && [502, 503, 504].includes(response.status) && retryCount < 1) {
         await new Promise(r => setTimeout(r, 3000));
         return this.request<T>(endpoint, options, retryCount + 1);
@@ -93,7 +93,7 @@ class ApiClient {
 
       return await response.json();
     } catch (error: any) {
-      const isRetryable = method === 'GET' || endpoint === '/auth/google';
+      const isRetryable = method === 'GET' || endpoint === '/auth/google' || endpoint === '/auth/login';
       if (isRetryable && !error?.status && retryCount < 1) {
         await new Promise(r => setTimeout(r, 3000));
         return this.request<T>(endpoint, options, retryCount + 1);
@@ -310,9 +310,9 @@ class ApiClient {
 
   // Users (Admin)
   users = {
-    getAll: () => this.request<User[]>('/users'),
+    getAll: () => this.request<any[]>('/users'),
     getStudentsByCourse: (courseId: string) => this.request<any[]>(`/courses/${courseId}/students`),
-    create: (data: Partial<User>) => this.request<User>('/users', {
+    create: (data: Partial<User> & { password?: string; username?: string }) => this.request<any>('/users', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
@@ -320,6 +320,11 @@ class ApiClient {
       this.request<{ success: boolean; user: User }>(`/users/${userId}/role`, {
         method: 'PUT',
         body: JSON.stringify({ role })
+      }),
+    setPassword: (userId: string, password: string) =>
+      this.request<{ success: boolean; message: string }>(`/users/${userId}/password`, {
+        method: 'PUT',
+        body: JSON.stringify({ password })
       }),
     delete: (userId: string) => this.request<{ success: boolean; userId: string }>(`/users/${userId}`, {
       method: 'DELETE'

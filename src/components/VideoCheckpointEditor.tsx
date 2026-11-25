@@ -259,6 +259,14 @@ export const VideoCheckpointEditor: React.FC<VideoCheckpointEditorProps> = ({
                   ))}
                 </div>
 
+                <input
+                  type="text"
+                  placeholder="Giải thích / Phản hồi sư phạm hiện ra sau khi học sinh trả lời (tùy chọn)..."
+                  value={cp.explanation || ''}
+                  onChange={(e) => updateAt(idx, { explanation: e.target.value })}
+                  className="w-full px-2.5 py-1.5 bg-emerald-50/40 border border-emerald-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white"
+                />
+
                 <label className="flex items-center gap-1.5 text-[11px] text-slate-600 cursor-pointer pt-0.5">
                   <input
                     type="checkbox"

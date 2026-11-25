@@ -795,28 +795,37 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                 </div>
 
                 {cpFeedback && (
-                  <div className={`p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-3 ${
-                    cpFeedback.isCorrect
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border border-rose-200'
-                  }`}>
-                    <span>
-                      {cpFeedback.isCorrect
-                        ? '✓ Chính xác! Bạn đã vượt qua neo chặn này.'
-                        : cpFeedback.canContinue
-                          ? '✗ Chưa chính xác — hệ thống đã ghi nhận câu trả lời của bạn.'
-                          : '✗ Chưa đúng rồi! Hãy chọn lại đáp án chính xác để tiếp tục xem video.'}
-                    </span>
+                  <div className="space-y-2">
+                    <div className={`p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-3 ${
+                      cpFeedback.isCorrect
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    }`}>
+                      <span>
+                        {cpFeedback.isCorrect
+                          ? '✓ Chính xác! Bạn đã vượt qua neo chặn này.'
+                          : cpFeedback.canContinue
+                            ? '✗ Chưa chính xác — hệ thống đã ghi nhận câu trả lời của bạn.'
+                            : '✗ Chưa đúng rồi! Hãy chọn lại đáp án chính xác để tiếp tục xem video.'}
+                      </span>
 
-                    {cpFeedback.canContinue && (
-                      <button
-                        type="button"
-                        onClick={handleContinueAfterCheckpoint}
-                        className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm shrink-0 flex items-center gap-1"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        <span>Tiếp tục xem</span>
-                      </button>
+                      {cpFeedback.canContinue && (
+                        <button
+                          type="button"
+                          onClick={handleContinueAfterCheckpoint}
+                          className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-sm shrink-0 flex items-center gap-1"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <span>Tiếp tục xem</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {activeCheckpoint.explanation && (
+                      <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-950 leading-relaxed">
+                        <span className="font-extrabold text-[#0374b5]">💡 Giải thích / Phản hồi sư phạm: </span>
+                        <span>{activeCheckpoint.explanation}</span>
+                      </div>
                     )}
                   </div>
                 )}

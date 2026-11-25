@@ -23,7 +23,10 @@ import {
   Sliders,
   UploadCloud,
   FileCheck2,
-  MessageSquare
+  MessageSquare,
+  KeyRound,
+  Copy,
+  Check
 } from 'lucide-react';
 import api from '../services/api';
 import { EditCourseModal } from './EditCourseModal';
@@ -37,10 +40,12 @@ export const AdminPanel: React.FC = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [searchUser, setSearchUser] = useState('');
 
-  // Modal Thêm Người Dùng (Quyền Quản trị viên)
+  // Modal Thêm Người Dùng (Quyền Quản trị viên — hỗ trợ cấp Tài khoản + Mật khẩu cho Giảng viên chấm bài BT4)
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState<'student' | 'lecturer'>('student');
   const [newUserCode, setNewUserCode] = useState('');
   const [newUserClass, setNewUserClass] = useState('');
@@ -48,6 +53,71 @@ export const AdminPanel: React.FC = () => {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [userModalError, setUserModalError] = useState<string | null>(null);
   const [userModalSuccess, setUserModalSuccess] = useState<string | null>(null);
+  const [createdCreds, setCreatedCreds] = useState<{ name: string; username: string; email: string; password: string; role: string } | null>(null);
+  const [copiedCreds, setCopiedCreds] = useState(false);
+
+  // Modal Đặt / Đổi mật khẩu cho tài khoản hiện có
+  const [pwdTargetUser, setPwdTargetUser] = useState<any | null>(null);
+  const [resetPwdValue, setResetPwdValue] = useState('');
+  const [isSavingPwd, setIsSavingPwd] = useState(false);
+
+  const generateStrongPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$';
+    let out = 'LMS@';
+    for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+  };
+
+  const applyBT4Preset = (preset: 'lecturer' | 'student') => {
+    setCreatedCreds(null);
+    setUserModalError(null);
+    const pwd = generateStrongPassword();
+    if (preset === 'lecturer') {
+      setNewUserName('Giảng viên Kiểm tra BT4');
+      setNewUserUsername('giangvien_bt4');
+      setNewUserEmail('giangvien.bt4@lms-nhom2.edu.vn');
+      setNewUserRole('lecturer');
+      setNewUserCode('GV_BT4');
+      setNewUserClass('Hội đồng Đánh giá');
+      setNewUserSchool('Khoa CNTT / Sư phạm Tin học');
+      setNewUserPassword(pwd);
+    } else {
+      setNewUserName('Học sinh Kiểm thử BT4');
+      setNewUserUsername('hocsinh_bt4');
+      setNewUserEmail('hocsinh.bt4@lms-nhom2.edu.vn');
+      setNewUserRole('student');
+      setNewUserCode('HS_BT4');
+      setNewUserClass('Lớp 6A1');
+      setNewUserSchool('THCS LMS Nhóm 2');
+      setNewUserPassword(pwd);
+    }
+  };
+
+  const handleSaveResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pwdTargetUser || resetPwdValue.trim().length < 6) {
+      alert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      return;
+    }
+    setIsSavingPwd(true);
+    try {
+      await api.users.setPassword(pwdTargetUser.id, resetPwdValue.trim());
+      setUsersList(prev => prev.map(u => u.id === pwdTargetUser.id ? { ...u, hasPassword: true } : u));
+      setCreatedCreds({
+        name: pwdTargetUser.name,
+        username: pwdTargetUser.username || pwdTargetUser.email,
+        email: pwdTargetUser.email,
+        password: resetPwdValue.trim(),
+        role: pwdTargetUser.role === 'lecturer' ? 'Giáo viên' : 'Học viên'
+      });
+      setPwdTargetUser(null);
+      setResetPwdValue('');
+    } catch (err: any) {
+      alert(err?.message || 'Không thể đặt mật khẩu.');
+    } finally {
+      setIsSavingPwd(false);
+    }
+  };
 
   // Cài đặt hệ thống lưu bền vững lên MongoDB / Local JSON
   const [sysSettings, setSysSettings] = useState<Record<string, any>>({
@@ -99,12 +169,19 @@ export const AdminPanel: React.FC = () => {
       setUserModalError('Vui lòng nhập đầy đủ Họ tên và Email.');
       return;
     }
+    if (newUserPassword.trim() && newUserPassword.trim().length < 6) {
+      setUserModalError('Mật khẩu đăng nhập phải có ít nhất 6 ký tự.');
+      return;
+    }
     setIsCreatingUser(true);
     setUserModalError(null);
+    const plainPwd = newUserPassword.trim();
     try {
       const created = await api.users.create({
         name: newUserName.trim(),
         email: newUserEmail.trim(),
+        username: newUserUsername.trim() || undefined,
+        password: plainPwd || undefined,
         role: newUserRole,
         code: newUserCode.trim() || undefined,
         className: newUserClass.trim() || undefined,
@@ -112,15 +189,28 @@ export const AdminPanel: React.FC = () => {
       });
       setUsersList(prev => [created, ...prev]);
       setUserModalSuccess(`Đã thêm thành công người dùng "${created.name}"!`);
-      setTimeout(() => {
-        setIsAddUserModalOpen(false);
-        setUserModalSuccess(null);
-        setNewUserName('');
-        setNewUserEmail('');
-        setNewUserCode('');
-        setNewUserClass('');
-        setNewUserSchool('');
-      }, 1500);
+      if (plainPwd) {
+        setCreatedCreds({
+          name: created.name,
+          username: created.username || created.email,
+          email: created.email,
+          password: plainPwd,
+          role: created.role === 'lecturer' ? 'Giáo viên / Giảng viên kiểm tra' : 'Học viên'
+        });
+      }
+      setNewUserName('');
+      setNewUserEmail('');
+      setNewUserUsername('');
+      setNewUserPassword('');
+      setNewUserCode('');
+      setNewUserClass('');
+      setNewUserSchool('');
+      if (!plainPwd) {
+        setTimeout(() => {
+          setIsAddUserModalOpen(false);
+          setUserModalSuccess(null);
+        }, 1200);
+      }
     } catch (err: any) {
       setUserModalError(err.message || 'Lỗi khi thêm người dùng mới.');
     } finally {
@@ -577,7 +667,21 @@ export const AdminPanel: React.FC = () => {
                         {u.name}
                       </td>
                       <td className="py-3 px-4 font-mono text-slate-600">
-                        {u.email}
+                        <div>{u.email}</div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {u.username && (
+                            <span className="text-[10px] text-slate-400">@{u.username}</span>
+                          )}
+                          {u.hasPassword ? (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-sans font-bold">
+                              <KeyRound className="w-2.5 h-2.5" /> Có mật khẩu
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 text-[9px] font-sans font-semibold">
+                              Chỉ Google
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         {u.className || u.classOrPosition || 'Chưa cập nhật'}
@@ -608,13 +712,27 @@ export const AdminPanel: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-right">
                         {u.email?.toLowerCase().trim() !== 'phanphiphu04@gmail.com' && (
-                          <button
-                            onClick={() => handleDeleteUser(u.id, u.name)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Xóa người dùng khỏi hệ thống"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPwdTargetUser(u);
+                                setResetPwdValue(generateStrongPassword());
+                              }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                              title="Cấp / Đổi mật khẩu đăng nhập"
+                            >
+                              <KeyRound className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteUser(u.id, u.name)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              title="Xóa người dùng khỏi hệ thống"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -832,7 +950,58 @@ export const AdminPanel: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
+            {/* Nút điền nhanh tài khoản chấm bài BT4 */}
+            <div className="p-2.5 bg-sky-50/70 rounded-xl border border-sky-200/80 space-y-1.5 text-[11px]">
+              <span className="font-bold text-sky-900 block">Tạo nhanh tài khoản có mật khẩu nộp Giảng viên (BT4):</span>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => applyBT4Preset('lecturer')}
+                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-100 border border-sky-300 text-sky-800 font-bold transition-colors"
+                >
+                  👨‍🏫 Mẫu Giảng viên chấm bài
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyBT4Preset('student')}
+                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold transition-colors"
+                >
+                  🎓 Mẫu Học sinh kiểm thử
+                </button>
+              </div>
+            </div>
+
+            {createdCreds && (
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-extrabold text-emerald-900 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Thông tin đăng nhập sẵn sàng gửi lên Teams:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const txt = `Đường dẫn LMS: ${window.location.origin}\nVai trò: ${createdCreds.role}\nTài khoản: ${createdCreds.username}\nEmail: ${createdCreds.email}\nMật khẩu: ${createdCreds.password}`;
+                      navigator.clipboard?.writeText(txt).then(() => {
+                        setCopiedCreds(true);
+                        setTimeout(() => setCopiedCreds(false), 2500);
+                      }).catch(() => {});
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1"
+                  >
+                    {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedCreds ? 'Đã sao chép' : 'Sao chép gửi Teams'}</span>
+                  </button>
+                </div>
+                <div className="bg-white rounded-xl p-2.5 border border-emerald-200 font-mono text-[11px] text-slate-800 space-y-0.5">
+                  <div>Link: <strong>{window.location.origin}</strong></div>
+                  <div>Tài khoản: <strong>{createdCreds.username}</strong> ({createdCreds.role})</div>
+                  <div>Mật khẩu: <strong className="text-emerald-700">{createdCreds.password}</strong></div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateUser} className="space-y-3 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
                   Họ và tên <span className="text-rose-500">*</span>
@@ -847,17 +1016,53 @@ export const AdminPanel: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Địa chỉ Email <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="vanan@lms.edu.vn"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Tên đăng nhập (Username)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: giangvien_bt4"
+                    value={newUserUsername}
+                    onChange={(e) => setNewUserUsername(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Địa chỉ Email (Định danh đăng nhập) <span className="text-rose-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-slate-700">
+                    Mật khẩu đăng nhập (≥ 6 ký tự — bỏ trống nếu chỉ dùng Google)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setNewUserPassword(generateStrongPassword())}
+                    className="text-[11px] font-bold text-[#0374b5] hover:underline"
+                  >
+                    Tạo mật khẩu ngẫu nhiên
+                  </button>
+                </div>
                 <input
-                  type="email"
-                  placeholder="Ví dụ: vanan.nguyen@gmail.com"
-                  value={newUserEmail}
-                  onChange={(e) => setNewUserEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-[#0374b5] focus:bg-white"
-                  required
+                  type="text"
+                  placeholder="Nhập mật khẩu cấp cho Giảng viên / Học sinh..."
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5] focus:bg-white"
                 />
               </div>
 
@@ -961,6 +1166,94 @@ export const AdminPanel: React.FC = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+      {/* Modal Cấp / Đổi Mật Khẩu Người Dùng */}
+      {pwdTargetUser && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">Cấp / Đổi Mật Khẩu</h3>
+                  <p className="text-[11px] text-slate-500">{pwdTargetUser.name} ({pwdTargetUser.email})</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => setPwdTargetUser(null)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveResetPassword} className="space-y-3 text-xs">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-slate-700">Mật khẩu mới (≥ 6 ký tự)</label>
+                  <button
+                    type="button"
+                    onClick={() => setResetPwdValue(generateStrongPassword())}
+                    className="text-[11px] font-bold text-[#0374b5] hover:underline"
+                  >
+                    Tạo ngẫu nhiên
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={resetPwdValue}
+                  onChange={(e) => setResetPwdValue(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setPwdTargetUser(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingPwd}
+                  className="px-5 py-2 bg-[#0374b5] hover:bg-[#02629b] text-white rounded-xl font-bold flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSavingPwd ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
+                  <span>Lưu mật khẩu</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Banner hiện thông tin đăng nhập sau khi vừa đặt lại mật khẩu */}
+      {createdCreds && !isAddUserModalOpen && (
+        <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full bg-white rounded-2xl shadow-2xl border-2 border-emerald-500 p-4 text-xs space-y-2 animate-in slide-in-from-bottom-4">
+          <div className="flex items-center justify-between">
+            <span className="font-extrabold text-emerald-800 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Đã cấp mật khẩu mới
+            </span>
+            <button type="button" onClick={() => setCreatedCreds(null)} className="text-slate-400 hover:text-slate-700">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-2.5 bg-emerald-50/70 rounded-xl font-mono text-[11px] space-y-0.5 text-slate-800">
+            <div>Tài khoản: <strong>{createdCreds.username}</strong></div>
+            <div>Mật khẩu: <strong className="text-emerald-700">{createdCreds.password}</strong></div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const txt = `Đường dẫn LMS: ${window.location.origin}\nTài khoản: ${createdCreds.username}\nMật khẩu: ${createdCreds.password}`;
+              navigator.clipboard?.writeText(txt).then(() => {
+                setCopiedCreds(true);
+                setTimeout(() => setCopiedCreds(false), 2000);
+              }).catch(() => {});
+            }}
+            className="w-full py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center gap-1"
+          >
+            {copiedCreds ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedCreds ? 'Đã sao chép!' : 'Sao chép thông tin gửi Teams'}</span>
+          </button>
         </div>
       )}
     </div>

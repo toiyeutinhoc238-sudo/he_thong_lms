@@ -83,12 +83,14 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
   const [searchStudent, setSearchStudent] = useState('');
   const [isEnrolling, setIsEnrolling] = useState(false);
 
-  // File Manager States (Quản lý và tải lên tệp tùy ý)
+  // File Manager States (Quản lý và tải lên tệp theo Thư mục Bài học chuẩn M9)
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const [fileUploadSuccess, setFileUploadSuccess] = useState<string | null>(null);
   const [fileSearch, setFileSearch] = useState('');
   const [fileCategoryFilter, setFileCategoryFilter] = useState('all');
+  const [fileFolderFilter, setFileFolderFilter] = useState('all');
+  const [uploadTargetFolder, setUploadTargetFolder] = useState('');
   const [fileDescription, setFileDescription] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
@@ -639,7 +641,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               </div>
             </div>
 
-            {/* Khu vực Tải lên tệp tùy ý (Drag & Drop + Chọn tệp) */}
+            {/* Khu vực Tải lên tệp theo Thư mục Bài học (Chỉ GV / Quản trị viên) */}
+            {canManage && (
             <div className="space-y-3">
               <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -655,14 +658,15 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                       setFileUploadError(null);
                       setFileUploadSuccess(null);
                       try {
+                        const matchedMod = (activeCourse.modules || []).find(m => m.title === uploadTargetFolder);
                         let count = 0;
                         for (let i = 0; i < files.length; i++) {
                           const f = files[i];
                           if (f.size > 100 * 1024 * 1024) throw new Error(`Tệp "${f.name}" vượt quá 100MB.`);
-                          await uploadCourseFile(activeCourse.id, f, fileDescription);
+                          await uploadCourseFile(activeCourse.id, f, fileDescription, uploadTargetFolder, matchedMod?.id || '');
                           count++;
                         }
-                        setFileUploadSuccess(`Đã tải lên thành công ${count} tệp.`);
+                        setFileUploadSuccess(`Đã tải lên thành công ${count} tệp vào "${uploadTargetFolder || 'Tài liệu chung'}".`);
                         setFileDescription('');
                         setTimeout(() => setFileUploadSuccess(null), 4000);
                       } catch (err: any) {
@@ -693,14 +697,15 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                       setFileUploadError(null);
                       setFileUploadSuccess(null);
                       try {
+                        const matchedMod = (activeCourse.modules || []).find(m => m.title === uploadTargetFolder);
                         let count = 0;
                         for (let i = 0; i < files.length; i++) {
                           const f = files[i];
                           if (f.size > 100 * 1024 * 1024) throw new Error(`Tệp "${f.name}" vượt quá 100MB.`);
-                          await uploadCourseFile(activeCourse.id, f, fileDescription);
+                          await uploadCourseFile(activeCourse.id, f, fileDescription, uploadTargetFolder, matchedMod?.id || '');
                           count++;
                         }
-                        setFileUploadSuccess(`Đã tải lên thành công ${count} tệp.`);
+                        setFileUploadSuccess(`Đã tải lên thành công ${count} tệp vào "${uploadTargetFolder || 'Tài liệu chung'}".`);
                         setFileDescription('');
                         setTimeout(() => setFileUploadSuccess(null), 4000);
                       } catch (err: any) {
@@ -714,7 +719,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                   }}
                 />
 
-                <div className="max-w-md mx-auto space-y-3">
+                <div className="max-w-xl mx-auto space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-sky-100 text-[#0374b5] flex items-center justify-center mx-auto shadow-2xs">
                     {isUploadingFile ? (
                       <Loader2 className="w-6 h-6 animate-spin text-[#0374b5]" />
@@ -725,21 +730,35 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
 
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-800">
-                      {isUploadingFile ? 'Đang tải tệp lên hệ thống...' : 'Kéo thả tệp vào đây hoặc Bấm nút để tải lên'}
+                      {isUploadingFile ? 'Đang tải tệp lên hệ thống...' : 'Tải học liệu vào đúng Thư mục Bài học (Chuẩn tổ chức M9)'}
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">
-                      Hỗ trợ tải lên tùy ý <strong>bất kỳ loại tệp nào</strong>: PDF, Word, Excel, PowerPoint, Hình ảnh, Video, MP3, ZIP, RAR, Mã nguồn... (Tối đa 100MB/tệp).
+                      Chọn thư mục bài học bên dưới rồi kéo thả hoặc chọn tệp (PDF, Word, PowerPoint, Video, ZIP, Mã nguồn... tối đa 100MB).
                     </p>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
+                    <select
+                      value={uploadTargetFolder}
+                      onChange={(e) => setUploadTargetFolder(e.target.value)}
+                      disabled={isUploadingFile}
+                      className="px-3 py-1.5 bg-white border border-sky-300 rounded-xl text-xs font-bold text-slate-800 w-full sm:w-56 focus:outline-none focus:border-[#0374b5]"
+                      title="Chọn thư mục bài học chứa tệp"
+                    >
+                      <option value="">📁 Tài liệu chung khóa học</option>
+                      {(activeCourse.modules || []).map((m, i) => (
+                        <option key={m.id} value={m.title}>
+                          📂 Bài {i + 1}: {m.title.replace(/^BÀI\s*\d+\s*[:.\-]\s*/i, '').slice(0, 42)}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       type="text"
-                      placeholder="Ghi chú mô tả cho tệp (tùy chọn)..."
+                      placeholder="Ghi chú hoạt động / thứ tự sử dụng..."
                       value={fileDescription}
                       onChange={(e) => setFileDescription(e.target.value)}
                       disabled={isUploadingFile}
-                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 w-full sm:w-64 focus:outline-none focus:border-[#0374b5]"
+                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 w-full sm:w-56 focus:outline-none focus:border-[#0374b5]"
                     />
                     <label
                       htmlFor="course-file-upload-input"
@@ -748,7 +767,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                       }`}
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Chọn tệp từ máy tính</span>
+                      <span>Chọn tệp</span>
                     </label>
                   </div>
 
@@ -768,6 +787,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                 </div>
               </div>
             </div>
+            )}
 
             {/* Thanh Tìm kiếm & Lọc phân loại tệp */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
@@ -809,200 +829,270 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               </div>
             </div>
 
-            {/* Danh sách các tập tin đã tải lên */}
+            {/* Cây lọc & hiển thị tập tin theo từng Thư mục Bài học (Chuẩn tổ chức M9) */}
             {(() => {
               const allFiles = activeCourse.files || [];
+              const moduleFolders = (activeCourse.modules || []).map(m => m.title);
+              const extraFolders = Array.from(new Set(allFiles.map(f => (f.folder || '').trim()).filter(fn => fn && !moduleFolders.includes(fn))));
+              const orderedFolders = [...moduleFolders, ...extraFolders, 'Tài liệu chung'];
+              const getFileFolder = (f: any) => (f.folder && f.folder.trim()) ? f.folder.trim() : 'Tài liệu chung';
+
               const filtered = allFiles.filter(f => {
-                const matchSearch = !fileSearch || f.name.toLowerCase().includes(fileSearch.toLowerCase()) || (f.description || '').toLowerCase().includes(fileSearch.toLowerCase());
+                const folderName = getFileFolder(f);
+                if (fileFolderFilter !== 'all' && folderName !== fileFolderFilter) return false;
+                const matchSearch = !fileSearch || f.name.toLowerCase().includes(fileSearch.toLowerCase()) || (f.description || '').toLowerCase().includes(fileSearch.toLowerCase()) || folderName.toLowerCase().includes(fileSearch.toLowerCase());
                 if (!matchSearch) return false;
                 if (fileCategoryFilter === 'all') return true;
                 if (fileCategoryFilter === 'video') return f.fileType === 'video' || f.fileType === 'audio';
                 return f.fileType === fileCategoryFilter;
               });
 
-              if (filtered.length === 0) {
-                return (
-                  <div className="border border-slate-200 rounded-2xl p-10 text-center space-y-2 bg-white">
-                    <Folder className="w-12 h-12 text-slate-300 mx-auto" />
-                    <h3 className="text-sm font-bold text-slate-700">
-                      {allFiles.length === 0 ? 'Chưa có tập tin nào được tải lên khóa học' : 'Không tìm thấy tập tin phù hợp'}
-                    </h3>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                      {allFiles.length === 0 
-                        ? 'Kéo thả hoặc bấm nút "Chọn tệp từ máy tính" ở trên để đưa tài liệu học tập vào khóa học.'
-                        : 'Thử tìm với từ khóa khác hoặc chuyển sang danh mục "Tất cả".'}
-                    </p>
-                  </div>
-                );
-              }
+              const groupedFolders = orderedFolders
+                .map(folderName => ({
+                  folderName,
+                  files: filtered.filter(f => getFileFolder(f) === folderName)
+                }))
+                .filter(g => g.files.length > 0);
 
               return (
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase tracking-wider text-[11px]">
-                        <tr>
-                          <th className="py-3 px-4">Tên tệp & Mô tả</th>
-                          <th className="py-3 px-4">Dung lượng</th>
-                          <th className="py-3 px-4">Người tải lên</th>
-                          <th className="py-3 px-4">Thời gian</th>
-                          <th className="py-3 px-4 text-right">Thao tác</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {filtered.map(file => {
-                          const isStaffUser = Boolean(
-                            currentUser && (
-                              currentUser.role === 'admin' ||
-                              currentUser.role === 'lecturer' ||
-                              currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
-                              file.uploadedBy?.email === currentUser.email
-                            )
-                          );
-
-                          // Helper icon
-                          let typeIcon = <File className="w-5 h-5 text-slate-500" />;
-                          let badgeBg = 'bg-slate-100 text-slate-700';
-
-                          if (file.fileType === 'pdf') {
-                            typeIcon = <FileText className="w-5 h-5 text-rose-600" />;
-                            badgeBg = 'bg-rose-50 text-rose-700 border-rose-200';
-                          } else if (file.fileType === 'word') {
-                            typeIcon = <FileText className="w-5 h-5 text-blue-600" />;
-                            badgeBg = 'bg-blue-50 text-blue-700 border-blue-200';
-                          } else if (file.fileType === 'excel') {
-                            typeIcon = <FileText className="w-5 h-5 text-emerald-600" />;
-                            badgeBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                          } else if (file.fileType === 'powerpoint') {
-                            typeIcon = <FileText className="w-5 h-5 text-amber-600" />;
-                            badgeBg = 'bg-amber-50 text-amber-700 border-amber-200';
-                          } else if (file.fileType === 'image') {
-                            typeIcon = <ImageIcon className="w-5 h-5 text-purple-600" />;
-                            badgeBg = 'bg-purple-50 text-purple-700 border-purple-200';
-                          } else if (file.fileType === 'video') {
-                            typeIcon = <Film className="w-5 h-5 text-pink-600" />;
-                            badgeBg = 'bg-pink-50 text-pink-700 border-pink-200';
-                          } else if (file.fileType === 'audio') {
-                            typeIcon = <Music className="w-5 h-5 text-cyan-600" />;
-                            badgeBg = 'bg-cyan-50 text-cyan-700 border-cyan-200';
-                          } else if (file.fileType === 'archive') {
-                            typeIcon = <FileArchive className="w-5 h-5 text-orange-600" />;
-                            badgeBg = 'bg-orange-50 text-orange-700 border-orange-200';
-                          } else if (file.fileType === 'code') {
-                            typeIcon = <FileCode className="w-5 h-5 text-teal-600" />;
-                            badgeBg = 'bg-teal-50 text-teal-700 border-teal-200';
-                          }
-
-                          const resolvedFileUrl = resolveBackendUrl(file.url);
-                          const downloadUrl = file.filename
-                            ? `${API_BASE_URL}/files/download/${encodeURIComponent(file.filename)}?name=${encodeURIComponent(file.name)}`
-                            : resolvedFileUrl;
-
-                          return (
-                            <tr key={file.id} className="hover:bg-slate-50/70 transition-colors">
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
-                                    {typeIcon}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <a
-                                        href={resolvedFileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-bold text-slate-900 hover:text-[#0374b5] transition-colors truncate block max-w-xs sm:max-w-md"
-                                        title={file.name}
-                                      >
-                                        {file.name}
-                                      </a>
-                                      <span className={`px-2 py-0.2 rounded text-[9px] font-black uppercase tracking-wider border ${badgeBg}`}>
-                                        {file.fileType || 'tệp'}
-                                      </span>
-                                    </div>
-                                    {file.description && (
-                                      <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-sm">
-                                        {file.description}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="py-3 px-4 text-slate-600 font-bold whitespace-nowrap">
-                                {file.size}
-                              </td>
-                              <td className="py-3 px-4 whitespace-nowrap">
-                                <div className="flex items-center gap-2">
-                                  {file.uploadedBy?.avatar ? (
-                                    <img 
-                                      src={file.uploadedBy.avatar} 
-                                      alt="" 
-                                      referrerPolicy="no-referrer"
-                                      className="w-6 h-6 rounded-full object-cover border border-slate-200" 
-                                    />
-                                  ) : (
-                                    <div className="w-6 h-6 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-[10px]">
-                                      {(file.uploadedBy?.name || 'U').charAt(0).toUpperCase()}
-                                    </div>
-                                  )}
-                                  <span className="text-slate-700 font-semibold truncate max-w-[120px]">
-                                    {file.uploadedBy?.name || 'Thành viên'}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
-                                {file.uploadedAt || 'Gần đây'}
-                              </td>
-                              <td className="py-3 px-4 text-right whitespace-nowrap">
-                                <div className="inline-flex items-center gap-1.5">
-                                  <a
-                                    href={file.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#0374b5] hover:text-white text-slate-600 transition-colors"
-                                    title="Xem tệp trong tab mới"
-                                  >
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                  </a>
-                                  <a
-                                    href={downloadUrl}
-                                    download={file.name}
-                                    className="p-1.5 rounded-lg bg-sky-50 hover:bg-[#0374b5] hover:text-white text-[#0374b5] transition-colors"
-                                    title="Tải tệp xuống máy tính"
-                                  >
-                                    <Download className="w-3.5 h-3.5" />
-                                  </a>
-                                  {isStaffUser && (
-                                    <button
-                                      onClick={async () => {
-                                        if (window.confirm(`Bạn có chắc muốn xóa tệp "${file.name}" khỏi khóa học?`)) {
-                                          setDeletingFileId(file.id);
-                                          try {
-                                            await deleteCourseFile(activeCourse.id, file.id);
-                                          } finally {
-                                            setDeletingFileId(null);
-                                          }
-                                        }
-                                      }}
-                                      disabled={deletingFileId === file.id}
-                                      className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 transition-colors disabled:opacity-50"
-                                      title="Xóa tệp"
-                                    >
-                                      {deletingFileId === file.id ? (
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                      ) : (
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      )}
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                <div className="space-y-4">
+                  {/* Thanh chọn nhanh thư mục bài học */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                    <button
+                      type="button"
+                      onClick={() => setFileFolderFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border shrink-0 transition-all ${
+                        fileFolderFilter === 'all'
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-[#0374b5]'
+                      }`}
+                    >
+                      📁 Tất cả thư mục ({allFiles.length})
+                    </button>
+                    {orderedFolders.map((fn, idx) => {
+                      const cnt = allFiles.filter(f => getFileFolder(f) === fn).length;
+                      const isMod = idx < moduleFolders.length;
+                      const shortLabel = fn === 'Tài liệu chung'
+                        ? 'Tài liệu chung'
+                        : isMod
+                          ? `Bài ${idx + 1}`
+                          : fn.slice(0, 24);
+                      return (
+                        <button
+                          key={fn}
+                          type="button"
+                          onClick={() => setFileFolderFilter(fn)}
+                          title={fn}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border shrink-0 transition-all flex items-center gap-1.5 ${
+                            fileFolderFilter === fn
+                              ? 'bg-[#0374b5] text-white border-[#0374b5]'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-[#0374b5]'
+                          }`}
+                        >
+                          <span>📂 {shortLabel}</span>
+                          <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                            fileFolderFilter === fn ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                          }`}>{cnt}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {groupedFolders.length === 0 ? (
+                    <div className="border border-slate-200 rounded-2xl p-10 text-center space-y-2 bg-white">
+                      <Folder className="w-12 h-12 text-slate-300 mx-auto" />
+                      <h3 className="text-sm font-bold text-slate-700">
+                        {allFiles.length === 0 ? 'Chưa có tập tin nào được tải lên khóa học' : 'Không tìm thấy tập tin trong thư mục này'}
+                      </h3>
+                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        {allFiles.length === 0 
+                          ? 'Chọn thư mục bài học ở trên rồi kéo thả hoặc tải tệp lên để sắp xếp kho học liệu theo kịch bản sư phạm.'
+                          : 'Thử chọn "Tất cả thư mục" hoặc đổi từ khóa tìm kiếm.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {groupedFolders.map(({ folderName, files: folderFiles }) => (
+                        <div key={folderName} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                          <div className="px-4 py-2.5 bg-sky-50/70 border-b border-slate-200 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Folder className="w-4 h-4 text-[#0374b5] shrink-0" />
+                              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 truncate">
+                                {folderName}
+                              </h3>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full bg-white border border-sky-200 text-[10px] font-bold text-[#0374b5] shrink-0">
+                              {folderFiles.length} học liệu
+                            </span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase tracking-wider text-[11px]">
+                                <tr>
+                                  <th className="py-2.5 px-4">Tên tệp & Mô tả</th>
+                                  <th className="py-2.5 px-4">Dung lượng</th>
+                                  <th className="py-2.5 px-4">Người tải lên</th>
+                                  <th className="py-2.5 px-4">Thời gian</th>
+                                  <th className="py-2.5 px-4 text-right">Thao tác</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {folderFiles.map(file => {
+                                  const isStaffUser = Boolean(
+                                    currentUser && (
+                                      currentUser.role === 'admin' ||
+                                      currentUser.role === 'lecturer' ||
+                                      currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
+                                      file.uploadedBy?.email === currentUser.email
+                                    )
+                                  );
+
+                                  let typeIcon = <File className="w-5 h-5 text-slate-500" />;
+                                  let badgeBg = 'bg-slate-100 text-slate-700';
+
+                                  if (file.fileType === 'pdf') {
+                                    typeIcon = <FileText className="w-5 h-5 text-rose-600" />;
+                                    badgeBg = 'bg-rose-50 text-rose-700 border-rose-200';
+                                  } else if (file.fileType === 'word') {
+                                    typeIcon = <FileText className="w-5 h-5 text-blue-600" />;
+                                    badgeBg = 'bg-blue-50 text-blue-700 border-blue-200';
+                                  } else if (file.fileType === 'excel') {
+                                    typeIcon = <FileText className="w-5 h-5 text-emerald-600" />;
+                                    badgeBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                                  } else if (file.fileType === 'powerpoint') {
+                                    typeIcon = <FileText className="w-5 h-5 text-amber-600" />;
+                                    badgeBg = 'bg-amber-50 text-amber-700 border-amber-200';
+                                  } else if (file.fileType === 'image') {
+                                    typeIcon = <ImageIcon className="w-5 h-5 text-purple-600" />;
+                                    badgeBg = 'bg-purple-50 text-purple-700 border-purple-200';
+                                  } else if (file.fileType === 'video') {
+                                    typeIcon = <Film className="w-5 h-5 text-pink-600" />;
+                                    badgeBg = 'bg-pink-50 text-pink-700 border-pink-200';
+                                  } else if (file.fileType === 'audio') {
+                                    typeIcon = <Music className="w-5 h-5 text-cyan-600" />;
+                                    badgeBg = 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                                  } else if (file.fileType === 'archive') {
+                                    typeIcon = <FileArchive className="w-5 h-5 text-orange-600" />;
+                                    badgeBg = 'bg-orange-50 text-orange-700 border-orange-200';
+                                  } else if (file.fileType === 'code') {
+                                    typeIcon = <FileCode className="w-5 h-5 text-teal-600" />;
+                                    badgeBg = 'bg-teal-50 text-teal-700 border-teal-200';
+                                  }
+
+                                  const resolvedFileUrl = resolveBackendUrl(file.url);
+                                  const downloadUrl = file.filename
+                                    ? `${API_BASE_URL}/files/download/${encodeURIComponent(file.filename)}?name=${encodeURIComponent(file.name)}`
+                                    : resolvedFileUrl;
+
+                                  return (
+                                    <tr key={file.id} className="hover:bg-slate-50/70 transition-colors">
+                                      <td className="py-3 px-4">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+                                            {typeIcon}
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+                                              <a
+                                                href={resolvedFileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-bold text-slate-900 hover:text-[#0374b5] transition-colors truncate block max-w-xs sm:max-w-md"
+                                                title={file.name}
+                                              >
+                                                {file.name}
+                                              </a>
+                                              <span className={`px-2 py-0.2 rounded text-[9px] font-black uppercase tracking-wider border ${badgeBg}`}>
+                                                {file.fileType || 'tệp'}
+                                              </span>
+                                            </div>
+                                            {file.description && (
+                                              <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-sm">
+                                                {file.description}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="py-3 px-4 text-slate-600 font-bold whitespace-nowrap">
+                                        {file.size}
+                                      </td>
+                                      <td className="py-3 px-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                          {file.uploadedBy?.avatar ? (
+                                            <img 
+                                              src={file.uploadedBy.avatar} 
+                                              alt="" 
+                                              referrerPolicy="no-referrer"
+                                              className="w-6 h-6 rounded-full object-cover border border-slate-200" 
+                                            />
+                                          ) : (
+                                            <div className="w-6 h-6 rounded-full bg-[#0374b5] text-white flex items-center justify-center font-bold text-[10px]">
+                                              {(file.uploadedBy?.name || 'U').charAt(0).toUpperCase()}
+                                            </div>
+                                          )}
+                                          <span className="text-slate-700 font-semibold truncate max-w-[120px]">
+                                            {file.uploadedBy?.name || 'Thành viên'}
+                                          </span>
+                                        </div>
+                                      </td>
+                                      <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                                        {file.uploadedAt || 'Gần đây'}
+                                      </td>
+                                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                                        <div className="inline-flex items-center gap-1.5">
+                                          <a
+                                            href={resolvedFileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#0374b5] hover:text-white text-slate-600 transition-colors"
+                                            title="Xem tệp trong tab mới"
+                                          >
+                                            <ExternalLink className="w-3.5 h-3.5" />
+                                          </a>
+                                          <a
+                                            href={downloadUrl}
+                                            download={file.name}
+                                            className="p-1.5 rounded-lg bg-sky-50 hover:bg-[#0374b5] hover:text-white text-[#0374b5] transition-colors"
+                                            title="Tải tệp xuống máy tính"
+                                          >
+                                            <Download className="w-3.5 h-3.5" />
+                                          </a>
+                                          {isStaffUser && (
+                                            <button
+                                              onClick={async () => {
+                                                if (window.confirm(`Bạn có chắc muốn xóa tệp "${file.name}" khỏi khóa học?`)) {
+                                                  setDeletingFileId(file.id);
+                                                  try {
+                                                    await deleteCourseFile(activeCourse.id, file.id);
+                                                  } finally {
+                                                    setDeletingFileId(null);
+                                                  }
+                                                }
+                                              }}
+                                              disabled={deletingFileId === file.id}
+                                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 transition-colors disabled:opacity-50"
+                                              title="Xóa tệp"
+                                            >
+                                              {deletingFileId === file.id ? (
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                              ) : (
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                              )}
+                                            </button>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })()}

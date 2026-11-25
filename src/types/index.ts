@@ -185,6 +185,8 @@ export interface CourseModule {
   title: string;
   order: number;
   description: string;
+  learningObjectives?: string;
+  ownerName?: string;
   isHidden?: boolean;
   activities: Activity[];
 }
@@ -198,6 +200,8 @@ export interface CourseFile {
   sizeBytes?: number;
   mimetype?: string;
   fileType?: string;
+  folder?: string;
+  moduleId?: string;
   description?: string;
   uploadedBy?: {
     id?: string;
