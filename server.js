@@ -1390,26 +1390,8 @@ async function ensureDefaultCourse() {
 }
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
-// Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v8-gioi-thieu-tong-quan-8-bai';
-
-// Bộ câu hỏi trắc nghiệm của 8 học liệu HTML (content/ai6-hoclieu-quiz.json).
-// Máy chủ giữ đáp án để tự chấm bài khi học liệu gửi bài làm lên; học sinh không gửi được điểm tự đặt.
-function loadAi6HoclieuQuiz() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'content', 'ai6-hoclieu-quiz.json'), 'utf8'));
-  } catch (e) {
-    console.warn('Không đọc được content/ai6-hoclieu-quiz.json:', e.message);
-    return {};
-  }
-}
-
-function attachHoclieuQuiz(activity, bank) {
-  const m = /\/hoc-lieu\/6aiab01\/bai(\d+)\/3\.LMS\.html$/.exec(activity.fileUrl || '');
-  const entry = m && bank['bai' + m[1]];
-  if (!entry || !Array.isArray(entry.questions) || entry.questions.length === 0) return activity;
-  return { ...activity, quizQuestions: entry.questions, passScore: entry.passScore || 8, maxAttempts: 0 };
-}
+// Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx) — tuyệt đối KHÔNG chứa dữ liệu ảo
+const AI6_BAI12_REVISION = 'v11-bai1-video-neo-chan';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1445,15 +1427,56 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b1-act-3',
         moduleId: 'module-lesson-1',
-        title: 'Hoạt động 2.1 (Video bài giảng – Code.org): “AI là gì? Vì sao gọi là Trí tuệ Nhân tạo?”',
+        title: 'Hoạt động 2.1 (Video – Code.org): How AI Works – AI hoạt động như thế nào? (01:30 · 3 câu neo chặn)',
         type: 'video',
         durationMinutes: 4,
         isCompleted: false,
         isRequired: true,
         videoUrl: 'https://www.youtube.com/watch?v=Ok-xpKjKp2g',
+        videoDuration: 90,
         preventVideoSkip: false,
-        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.',
-        videoCheckpoints: []
+        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.\nVideo sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được.',
+        videoCheckpoints: [
+          {
+            id: 'b1-cp1',
+            timeSeconds: 18,
+            question: 'Theo video, AI đang có mặt ở đâu trong đời sống?',
+            options: [
+              'Chỉ có trong phim khoa học viễn tưởng.',
+              'Chỉ có trong phòng thí nghiệm, học sinh chưa từng dùng.',
+              'Trong y tế, giáo dục, lớp học, nhà ở – em đã và đang dùng nhiều ứng dụng AI hằng ngày.'
+            ],
+            correctAnswer: 2,
+            explanation: 'AI đã có mặt quanh em: gợi ý video, dịch ngôn ngữ, trợ lý ảo, mở khóa bằng khuôn mặt… Đó đều là công cụ do con người tạo ra.',
+            requireCorrect: true
+          },
+          {
+            id: 'b1-cp2',
+            timeSeconds: 42,
+            question: 'Theo video, nhờ đâu máy tính có thể học cách nhận ra đồ vật?',
+            options: [
+              'Con người dùng dữ liệu để huấn luyện máy tính và lập trình cách máy tính học.',
+              'Máy tính tự sinh ra trí thông minh mà không cần con người.',
+              'Máy tính chỉ cần được cắm điện là tự biết.'
+            ],
+            correctAnswer: 0,
+            explanation: 'AI không tự sinh ra: con người thu thập dữ liệu, thiết kế thuật toán để huấn luyện máy tính, rồi điều khiển nó (6.A1.1).',
+            requireCorrect: true
+          },
+          {
+            id: 'b1-cp3',
+            timeSeconds: 69,
+            question: 'Video nhắc chúng ta cần đặt ra câu hỏi khó nào khi dùng AI?',
+            options: [
+              'Máy tính có thể chạy nhanh đến mức nào?',
+              'Không chỉ máy tính làm được gì, mà máy tính NÊN làm gì.',
+              'Làm sao để AI tự quyết định thay con người?'
+            ],
+            correctAnswer: 1,
+            explanation: 'Con người quyết định AI nên được dùng vào việc gì, giám sát và chịu trách nhiệm về kết quả – AI chỉ là công cụ hỗ trợ (6.A1.2).',
+            requireCorrect: true
+          }
+        ]
       },
       {
         id: 'ai6-b1-act-4',
@@ -2390,6 +2413,61 @@ function buildAi6Bai12SeedData() {
         description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Video “Dấu chân kỹ thuật số”, Infographic & Module 3 tình huống pháp lí cùng bạn Minh (20p) → (3) Game “Bảo vệ Kho báu dữ liệu” đạt ≥ 8/10đ (10p) → (4) Xử lí tình huống “Lời mời hấp dẫn” & Cầu nối Bài 7 (10p).\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 6.1 SGK Bài 6): Bạn Khoa tìm thấy một trang web AI miễn phí chuyển ảnh chân dung thành tranh vẽ, nhưng trang web đòi lưu trữ hình ảnh khuôn mặt, giọng nói và địa chỉ trường học.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Trong tình huống của bạn Khoa, em sẽ chọn Đồng ý ngay, Từ chối cấp quyền không cần thiết hay Dừng lại hỏi ý kiến cha mẹ? Vì sao?\n2. Hãy kể tên 02 loại thông tin cá nhân của bản thân mà em cho rằng cần được giữ kín như tài sản riêng khi dùng Internet.'
       },
       {
+        id: 'ai6-b6-act-video',
+        moduleId: 'module-lesson-6',
+        title: 'Hoạt động 2.1 (Video): Dấu chân kỹ thuật số – Dữ liệu cá nhân là gì? (02:34 · 3 câu neo chặn)',
+        type: 'video',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        videoUrl: 'https://www.youtube.com/watch?v=RNac5ZDIN-g',
+        videoDuration: 154,
+        preventVideoSkip: true,
+        description: 'Em xem video “Dấu chân kỹ thuật số” để biết những dấu vết em để lại khi hoạt động trên mạng. Video sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được. Xem xong, em đọc Mục 1 SGK Bài 6 để phân biệt dữ liệu cá nhân cơ bản và dữ liệu cá nhân nhạy cảm.',
+        videoCheckpoints: [
+          {
+            id: 'b6-cp1',
+            timeSeconds: 55,
+            question: 'Dấu chân kỹ thuật số được hình thành từ những hoạt động nào của em trên mạng?',
+            options: [
+              'Từ toàn bộ hoạt động trực tuyến như xem video, tìm kiếm, thích, bình luận và chia sẻ.',
+              'Chỉ hình thành khi em nhập số căn cước công dân hoặc số tài khoản ngân hàng.',
+              'Là các tệp virus tự sinh ra khi tắt máy tính.',
+              'Chỉ xuất hiện khi em bị mất mật khẩu.'
+            ],
+            correctAnswer: 0,
+            explanation: 'Mọi hoạt động trên mạng đều để lại dấu vết. Lịch sử hoạt động trên không gian mạng là dữ liệu cá nhân cơ bản (Nghị định 13/2023/NĐ-CP).',
+            requireCorrect: true
+          },
+          {
+            id: 'b6-cp2',
+            timeSeconds: 105,
+            question: 'Các nền tảng số thu thập dấu vết hành vi của người dùng chủ yếu để làm gì?',
+            options: [
+              'Tự động xóa toàn bộ lịch sử người dùng sau mỗi 24 giờ.',
+              'Chỉ lưu trong bộ nhớ mà không bao giờ sử dụng.',
+              'Phân tích sở thích, huấn luyện thuật toán gợi ý nội dung và hiển thị quảng cáo nhắm đúng người dùng.'
+            ],
+            correctAnswer: 2,
+            explanation: 'Dữ liệu hành vi giúp nền tảng đoán sở thích của em để gợi ý nội dung và quảng cáo, vì vậy đó là tài sản cần được bảo vệ.',
+            requireCorrect: true
+          },
+          {
+            id: 'b6-cp3',
+            timeSeconds: 150,
+            question: 'Để bảo vệ dấu chân số và hạn chế rủi ro cho bản thân, em cần ghi nhớ điều gì?',
+            options: [
+              'Công khai số điện thoại, địa chỉ nhà trên các hội nhóm mạng xã hội.',
+              'Suy nghĩ kĩ trước khi đăng tải, cài đặt quyền riêng tư và chia sẻ thông tin có trách nhiệm.',
+              'Cho phép mọi ứng dụng lạ truy cập danh bạ và vị trí.'
+            ],
+            correctAnswer: 1,
+            explanation: 'Những gì đã đăng lên mạng rất khó xóa hết. Em cần nghĩ trước khi đăng, bật quyền riêng tư và chỉ chia sẻ thông tin cần thiết.',
+            requireCorrect: true
+          }
+        ]
+      },
+      {
         id: 'ai6-b6-act-3',
         moduleId: 'module-lesson-6',
         title: 'Hoạt động 2 (Kiến thức trọng tâm): Phân loại Dữ liệu cá nhân & 4 Quyền của chủ thể dữ liệu (Nghị định 13/2023/NĐ-CP)',
@@ -2903,20 +2981,6 @@ function buildAi6Bai12SeedData() {
       uploadedAt: '27/11/2026'
     },
     {
-      id: 'file-ai6-b1-lmshtml',
-      name: '3.LMS_Bai1_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai1/3.LMS.html',
-      size: '218 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
-      moduleId: 'module-lesson-1',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 1 (chạy trực tiếp trên LMS hoặc tải mở offline không cần Internet).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
       id: 'file-ai6-b2-sgk',
       name: '0.SGK_Bai2_LoiIch_CachSuDungAI.docx',
       filename: '0.SGK.docx',
@@ -2955,20 +3019,6 @@ function buildAi6Bai12SeedData() {
       folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
       moduleId: 'module-lesson-2',
       description: 'Bộ Học liệu số Bài 2 (Study Guide, Diễn đàn, Infographic Bí kíp Prompt, 3 mốc Video tương tác, Poster 4 KHÔNG & Trạm luyện Prompt).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
-      id: 'file-ai6-b2-lmshtml',
-      name: '3.LMS_Bai2_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai2/3.LMS.html',
-      size: '197 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
-      moduleId: 'module-lesson-2',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 2 (Video tương tác 06:27 có 3 mốc neo chặn + Trạm luyện viết câu lệnh AI Lớp 6).',
       uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
       uploadedAt: '27/11/2026'
     },
@@ -3015,20 +3065,6 @@ function buildAi6Bai12SeedData() {
       uploadedAt: '27/11/2026'
     },
     {
-      id: 'file-ai6-b3-lmshtml',
-      name: '3.LMS_Bai3_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai3/3.LMS.html',
-      size: '204 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 3: THỰC CHỨNG THÔNG TIN - LÀM CHỦ AI',
-      moduleId: 'module-lesson-3',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 3 (Slides, Infographic 3 kênh kiểm chứng, Game Phòng thí nghiệm thực chứng & Phiếu Bạch Đằng 938).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
       id: 'file-ai6-b4-sgk',
       name: '0.SGK_Bai4_MatTichCuc_TieuCuc_TinhNangAI.docx',
       filename: '0.SGK.docx',
@@ -3067,20 +3103,6 @@ function buildAi6Bai12SeedData() {
       folder: 'BÀI 4: KHÁM PHÁ MẶT TÍCH CỰC VÀ TIÊU CỰC CỦA MỘT SỐ TÍNH NĂNG AI',
       moduleId: 'module-lesson-4',
       description: 'Trọn bộ kịch bản Học liệu số Bài 4 (Mô phỏng Thuật toán gợi ý, Infographic Hai mặt AI, Game kéo – thả 10 thẻ & Rubric 10đ).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
-      id: 'file-ai6-b4-lmshtml',
-      name: '3.LMS_Bai4_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai4/3.LMS.html',
-      size: '159 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 4: KHÁM PHÁ MẶT TÍCH CỰC VÀ TIÊU CỰC CỦA MỘT SỐ TÍNH NĂNG AI',
-      moduleId: 'module-lesson-4',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 4 (Mô phỏng Đóng vai thuật toán gợi ý, Infographic Hai mặt AI & Game phân loại 10 thẻ).',
       uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
       uploadedAt: '27/11/2026'
     },
@@ -3127,20 +3149,6 @@ function buildAi6Bai12SeedData() {
       uploadedAt: '27/11/2026'
     },
     {
-      id: 'file-ai6-b5-lmshtml',
-      name: '3.LMS_Bai5_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai5/3.LMS.html',
-      size: '181 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO',
-      moduleId: 'module-lesson-5',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 5 (Mô phỏng Data Safety, Infographic 4 câu hỏi kiểm tra & Game Trạm kiểm định ứng dụng AI).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
       id: 'file-ai6-b6-sgk',
       name: '0.SGK_Bai6_DuLieuCaNhanLaTaiSan.docx',
       filename: '0.SGK.docx',
@@ -3179,20 +3187,6 @@ function buildAi6Bai12SeedData() {
       folder: 'BÀI 6: DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI',
       moduleId: 'module-lesson-6',
       description: 'Trọn bộ kịch bản Học liệu số Bài 6 (Video Dấu chân số, Infographic Hình 6.2 & 6.3, Module 3 tình huống bạn Minh & Game Kho báu dữ liệu).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
-      id: 'file-ai6-b6-lmshtml',
-      name: '3.LMS_Bai6_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai6/3.LMS.html',
-      size: '170 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 6: DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI',
-      moduleId: 'module-lesson-6',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 6 (Video Dấu chân số 3 câu neo chặn, Module Pháp lí cùng bạn Minh & Game Bảo vệ Kho báu dữ liệu).',
       uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
       uploadedAt: '27/11/2026'
     },
@@ -3239,20 +3233,6 @@ function buildAi6Bai12SeedData() {
       uploadedAt: '27/11/2026'
     },
     {
-      id: 'file-ai6-b7-lmshtml',
-      name: '3.LMS_Bai7_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai7/3.LMS.html',
-      size: '158 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
-      moduleId: 'module-lesson-7',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 7 (Infographic 1 & 2, Kéo – thả 6 thẻ tự vệ số & Trò chơi tình huống phân nhánh 3 màn).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    },
-    {
       id: 'file-ai6-b8-sgk',
       name: '0.SGK_Bai8_ConNguoiLamChuAI.docx',
       filename: '0.SGK.docx',
@@ -3294,20 +3274,6 @@ function buildAi6Bai12SeedData() {
       uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
       uploadedAt: '27/11/2026'
     },
-    {
-      id: 'file-ai6-b8-lmshtml',
-      name: '3.LMS_Bai8_BoHocLieuSoTuongTac.html',
-      filename: '3.LMS.html',
-      url: '/hoc-lieu/6aiab01/bai8/3.LMS.html',
-      size: '187 KB',
-      mimetype: 'text/html',
-      fileType: 'code',
-      folder: 'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO',
-      moduleId: 'module-lesson-8',
-      description: 'Bộ Học liệu số HTML5 tương tác Bài 8 (Slides, Infographic 3 bước, Game Ngã rẽ thông minh, 4 Thẻ tình huống & Phiếu tổng kết 8 bài).',
-      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
-      uploadedAt: '27/11/2026'
-    }
   ];
 
   const officialSyllabus = [
@@ -3330,8 +3296,6 @@ function buildAi6Bai12SeedData() {
 
 function mergeAi6Bai12IntoCourse(courseObj) {
   const { lessonModules, officialFiles, officialSyllabus } = buildAi6Bai12SeedData();
-  const quizBank = loadAi6HoclieuQuiz();
-  lessonModules.forEach(mod => { mod.activities = mod.activities.map(a => attachHoclieuQuiz(a, quizBank)); });
   courseObj.modules = Array.isArray(courseObj.modules) ? courseObj.modules : [];
   for (let i = 0; i < OFFICIAL_AI_GRADE6_LESSONS.length; i++) {
     if (!courseObj.modules[i]) {
@@ -3370,7 +3334,8 @@ function mergeAi6Bai12IntoCourse(courseObj) {
     courseObj.syllabus = officialSyllabus;
   }
 
-  const curFiles = Array.isArray(courseObj.files) ? courseObj.files : [];
+  // Học liệu 3.LMS.html đã bỏ khỏi khóa học: xóa cả các mục cũ còn lưu trong cơ sở dữ liệu
+  const curFiles = (Array.isArray(courseObj.files) ? courseObj.files : []).filter(f => !/^file-ai6-b\d+-lmshtml$/.test(f?.id || ''));
   const fileById = new Map(curFiles.map(f => [f.id, f]));
   const mergedFiles = [...curFiles];
   officialFiles.forEach(f => {

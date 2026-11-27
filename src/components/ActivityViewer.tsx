@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { QuizEngine } from './QuizEngine';
 import { AssignmentSubmitter } from './AssignmentSubmitter';
@@ -334,7 +334,6 @@ export const ActivityViewer: React.FC = () => {
     setActiveCourseTab,
     setActiveModuleId,
     markActivityCompleted,
-    submitQuiz,
     navigateToActivity,
     forumTopics,
     createForumTopic,
@@ -360,84 +359,6 @@ export const ActivityViewer: React.FC = () => {
     activeRole === 'admin' ||
     activeRole === 'lecturer'
   );
-
-  // Học liệu HTML có bài trắc nghiệm bên trong: chỉ hoàn thành khi nộp bài trong học liệu và đạt điểm sàn
-  const hasEmbeddedQuiz = Boolean(
-    activeActivity && activeActivity.type !== 'quiz' && (activeActivity.quizQuestions?.length || 0) > 0
-  );
-  const embeddedPassScore = Number(activeActivity?.passScore) || 8;
-  const htmlFrameRef = useRef<HTMLIFrameElement>(null);
-
-  // Cầu nối với học liệu HTML trong khung nhúng: nhận bài làm, gửi máy chủ chấm, trả kết quả về học liệu
-  useEffect(() => {
-    if (!activeCourse?.id || !activeActivity?.id) return;
-    const courseId = activeCourse.id;
-    const act = activeActivity;
-
-    const onMessage = async (event: MessageEvent) => {
-      const frameWin = htmlFrameRef.current?.contentWindow;
-      const data = event.data;
-      if (!frameWin || event.source !== frameWin || !data || data.source !== 'hoclieu-6ai') return;
-      const reply = (msg: Record<string, unknown>) =>
-        frameWin.postMessage({ source: 'lms-6ai', ...msg }, event.origin === 'null' ? '*' : event.origin);
-
-      if (data.type === 'ready') {
-        reply({
-          type: 'state',
-          loggedIn: !!currentUser,
-          attempts: Array.isArray(act.quizHistory) ? act.quizHistory.length : (act.quizResult ? 1 : 0),
-          bestScore: act.score ?? null,
-          passScore: embeddedPassScore
-        });
-        return;
-      }
-
-      if (data.type === 'quiz-submit') {
-        if (!currentUser) {
-          reply({ type: 'quiz-result', ok: false, message: 'em chưa đăng nhập LMS' });
-          setIsLoginModalOpen(true);
-          return;
-        }
-        if (!hasEmbeddedQuiz) {
-          reply({ type: 'quiz-result', ok: false, message: 'hoạt động này chưa được cấu hình chấm điểm' });
-          return;
-        }
-        const answers: Record<string, number> = {};
-        if (data.answers && typeof data.answers === 'object') {
-          Object.entries(data.answers as Record<string, unknown>).forEach(([k, v]) => {
-            if (typeof v === 'number' && Number.isInteger(v)) answers[k] = v;
-          });
-        }
-        const res = await submitQuiz(courseId, act.id, answers, Math.max(0, Math.floor(Number(data.durationSeconds) || 0)));
-        if (!res) {
-          reply({ type: 'quiz-result', ok: false, message: 'máy chủ không phản hồi' });
-          return;
-        }
-        reply({
-          type: 'quiz-result',
-          ok: true,
-          score: res.result.score,
-          bestScore: res.result.bestScore ?? res.result.score,
-          passed: res.result.passed,
-          attempt: res.result.attempt ?? res.result.attemptCount ?? 1
-        });
-        return;
-      }
-
-      if (data.type === 'game-finish' && currentUser && !canManage) {
-        const correct = Math.max(0, Math.floor(Number(data.correct) || 0));
-        const total = Math.max(0, Math.floor(Number(data.total) || 0));
-        api.activities.trackActivity(courseId, act.id, {
-          event: 'heartbeat',
-          deltaSeconds: 0,
-          action: `Chơi trò chơi trong học liệu: đúng ${correct}/${total} câu`
-        }).catch(() => {});
-      }
-    };
-
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, [activeCourse?.id, activeActivity, currentUser, canManage, hasEmbeddedQuiz, embeddedPassScore, submitQuiz, setIsLoginModalOpen]);
 
   // Tự động ghi nhận lượt truy cập & thời gian học thực tế (telemetry) khi học sinh mở hoạt động
   useEffect(() => {
@@ -602,10 +523,6 @@ export const ActivityViewer: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Đã hoàn thành hoạt động</span>
               </span>
-            ) : hasEmbeddedQuiz && !canManage ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
-                <span>Hoàn thành khi đạt {embeddedPassScore}/10 bài trắc nghiệm trong học liệu</span>
-              </span>
             ) : (activeActivity.type !== 'video' || canManage) ? (
               <button
                 onClick={handleMarkDone}
@@ -676,19 +593,6 @@ export const ActivityViewer: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {hasEmbeddedQuiz && !canManage ? (
-                  <span className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${
-                    activeActivity.isCompleted
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-amber-50 text-amber-800 border border-amber-200'
-                  }`}>
-                    {activeActivity.isCompleted
-                      ? `Đã hoàn thành • Điểm cao nhất ${activeActivity.score ?? 0}/10`
-                      : activeActivity.score !== undefined && activeActivity.score !== null
-                        ? `Điểm cao nhất ${activeActivity.score}/10 • Cần ${embeddedPassScore}/10 để hoàn thành`
-                        : `Làm bài trắc nghiệm trong học liệu (cần ${embeddedPassScore}/10)`}
-                  </span>
-                ) : (
                 <button
                   onClick={handleMarkDone}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -700,7 +604,6 @@ export const ActivityViewer: React.FC = () => {
                   <Check className="w-4 h-4" />
                   <span>{activeActivity.isCompleted ? 'Đã hoàn thành đọc' : 'Đánh dấu đã đọc tài liệu'}</span>
                 </button>
-                )}
 
                 {resolvedDocUrl && (
                   <a
@@ -744,7 +647,6 @@ export const ActivityViewer: React.FC = () => {
                   </div>
                 </div>
                 <iframe
-                  ref={htmlFrameRef}
                   src={resolvedDocUrl}
                   title={activeActivity.title}
                   className="w-full h-[840px] border-0 bg-white"
