@@ -366,11 +366,14 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       const passedCount = checkpoints.filter(cp => isCheckpointCleared(cp, resultsToSave)).length;
       const done = Boolean(res?.isCompleted || isCompletedRef.current || (highPct >= 80 && passedCount >= checkpoints.length));
 
-      // Không để tiến độ trên UI vượt mốc thực tế server đã chuẩn hóa
-      setProgressPercent(serverVp.progressPercent);
-      setMaxWatchedSeconds(serverVp.watchedSeconds);
-      maxPctRef.current = serverVp.progressPercent;
-      maxWatchedRef.current = serverVp.watchedSeconds;
+      // Giữ mốc cao nhất giữa máy học sinh và server. KHÔNG hạ mốc xuống theo phản hồi server,
+      // vì phản hồi về trễ 1–3 giây (lúc đó video đã chạy tiếp) — hạ mốc sẽ khiến bộ chống tua kéo video lùi lại.
+      const nextPct = Math.max(maxPctRef.current, Number(serverVp.progressPercent) || 0);
+      const nextWatched = Math.max(maxWatchedRef.current, Number(serverVp.watchedSeconds) || 0);
+      setProgressPercent(nextPct);
+      setMaxWatchedSeconds(nextWatched);
+      maxPctRef.current = nextPct;
+      maxWatchedRef.current = nextWatched;
       if (done && !isCompletedRef.current) {
         setIsCompleted(true);
         if (onCompleted) onCompleted();
@@ -654,6 +657,10 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       if (!el || el.paused || el.ended) return;
       const exactCur = Math.max(0, Math.round(el.currentTime * 1000) / 1000);
       if (checkCpRef.current(exactCur)) return;
+      // Video phát bình thường: nâng mốc đã xem ngay để bộ chống tua không hiểu nhầm là tua nhanh
+      if (!teacherBypassRef.current && exactCur > maxWatchedRef.current) {
+        maxWatchedRef.current = exactCur;
+      }
 
       const nowPerf = performance.now();
       if (nowPerf - lastUiMs >= 50) {
@@ -699,6 +706,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     const currentPct = Math.min(100, Math.round((cur / dur) * 100));
     const nextHighPct = Math.max(maxPctRef.current, currentPct);
     const nextHighSecs = Math.max(maxWatchedRef.current, cur);
+    maxWatchedRef.current = nextHighSecs;
+    maxPctRef.current = nextHighPct;
 
     setCurrentTime(cur);
     setDuration(dur);
