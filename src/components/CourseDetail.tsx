@@ -36,7 +36,11 @@ import {
   Image as ImageIcon,
   Music,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Target
 } from 'lucide-react';
 
 interface CourseDetailProps {
@@ -55,13 +59,15 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
     setCurrentView, 
     navigateToActivity, 
     forumTopics, 
-    createForumTopic, 
+    createForumTopic,
+    addForumReply,
     currentUser, 
     certificates, 
     activeRole,
     enrollCourse,
     uploadCourseFile,
-    deleteCourseFile
+    deleteCourseFile,
+    setIsLoginModalOpen
   } = useApp();
 
   const activeCourse = contextActiveCourse || 
@@ -71,15 +77,15 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
 
   const activeTab = (activeCourseTab as CourseNavTab) || 'modules';
   const setActiveTab = (tab: CourseNavTab) => {
-    // Khi bấm "Trang chủ" hoặc "Nội dung học tập" ở menu trái, thoát chế độ lọc 1 bài lẻ để xem toàn bộ khóa học (8 bài)
-    if (tab === 'home' || tab === 'modules') {
-      setActiveModuleId(null);
-    }
+    // Luôn thoát chế độ lọc 1 bài lẻ khi chuyển tab để Breadcrumb & nội dung luôn khớp chính xác 100%
+    setActiveModuleId(null);
     setActiveCourseTab(tab);
   };
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newTopicContent, setNewTopicContent] = useState('');
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [searchStudent, setSearchStudent] = useState('');
   const [isEnrolling, setIsEnrolling] = useState(false);
 
@@ -309,25 +315,82 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         </div>
         )}
 
-        {/* Thông báo lớp học do giáo viên đăng (chỉ hiện khi xem tổng quan cả khóa, ẩn khi đang tập trung 1 bài học cụ thể) */}
-        {(activeTab === 'modules' || activeTab === 'home') && !activeModuleId && (activeCourse.announcements || []).length > 0 && (
-          <div className="mx-4 sm:mx-8 mt-4 space-y-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
-            {(activeCourse.announcements || []).slice(0, 3).map(anc => (
-              <div
-                key={anc.id}
-                className={`p-3.5 rounded-2xl border text-xs ${anc.isImportant ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-200'}`}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  {anc.isImportant && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">QUAN TRỌNG</span>
-                  )}
-                  <h4 className="font-extrabold text-slate-900 text-sm">{anc.title}</h4>
+        {/* Trang chủ khóa học (home): Tổng quan mục tiêu, tiến độ & Thông báo lớp học */}
+        {activeTab === 'home' && !activeModuleId && !isEmbedMode && (
+          <div className="mx-4 sm:mx-8 mt-4 space-y-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0374b5]/10 via-sky-50 to-indigo-50/70 border border-sky-200/80 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0374b5] text-white text-[10px] font-black uppercase tracking-wider">
+                    <BookOpen className="w-3 h-3" /> Trang chủ khóa học
+                  </span>
+                  <h2 className="text-base sm:text-lg font-black text-slate-900">
+                    {activeCourse.name}
+                  </h2>
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                    {activeCourse.description || 'Khóa học trực tuyến tương tác theo lộ trình chuẩn trên LMS Nhóm 2.'}
+                  </p>
                 </div>
-                <p className="text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{anc.content}</p>
-                <p className="text-[11px] text-slate-400 mt-1.5">{anc.author} • {anc.createdAt}</p>
+                <div className="shrink-0 bg-white/90 px-4 py-2.5 rounded-xl border border-sky-200 text-center min-w-[130px]">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Tiến độ khóa học</div>
+                  <div className="text-xl font-black text-[#0374b5] font-mono">{activeCourse.progress || 0}%</div>
+                  <div className="text-[10px] text-slate-500">
+                    {activeCourse.completedActivities || 0}/{activeCourse.totalActivities || 0} mục xong
+                  </div>
+                </div>
               </div>
-            ))}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('modules')}
+                  className="px-3 py-1.5 rounded-lg bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold transition-colors"
+                >
+                  Vào Nội dung học tập ({(activeCourse.modules || []).length} bài)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('syllabus')}
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  Xem Lịch trình & Mục tiêu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('files')}
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  Thư mục Học liệu ({(activeCourse.files || []).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('resources3d')}
+                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold transition-colors"
+                >
+                  Phòng Lab AI tương tác
+                </button>
+              </div>
+            </div>
+
+            {(activeCourse.announcements || []).length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
+                {(activeCourse.announcements || []).slice(0, 3).map(anc => (
+                  <div
+                    key={anc.id}
+                    className={`p-3.5 rounded-2xl border text-xs ${anc.isImportant ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-200'}`}
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      {anc.isImportant && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">QUAN TRỌNG</span>
+                      )}
+                      <h4 className="font-extrabold text-slate-900 text-sm">{anc.title}</h4>
+                    </div>
+                    <p className="text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{anc.content}</p>
+                    <p className="text-[11px] text-slate-400 mt-1.5">{anc.author} • {anc.createdAt}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -411,20 +474,109 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               </p>
             ) : (
               <div className="space-y-3">
-                {courseTopics.map(topic => (
-                  <div key={topic.id} className="p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors shadow-2xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-bold text-slate-900">{topic.title}</h4>
-                      <span className="text-[11px] text-slate-400">{(topic.replies || []).length} phản hồi</span>
+                {courseTopics.map(topic => {
+                  const isOpen = expandedTopicId === topic.id;
+                  const replies = topic.replies || [];
+                  const draft = replyDrafts[topic.id] || '';
+                  return (
+                    <div key={topic.id} className="bg-white border border-slate-200 rounded-2xl hover:border-sky-300 transition-colors shadow-2xs overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedTopicId(isOpen ? null : topic.id)}
+                        className="w-full text-left p-4 space-y-2 hover:bg-slate-50/70 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-[#0374b5] shrink-0" />
+                            <span>{topic.title}</span>
+                          </h4>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="px-2 py-0.5 rounded-full bg-sky-50 text-[#0374b5] border border-sky-200 text-[11px] font-bold">
+                              {replies.length} phản hồi
+                            </span>
+                            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                          </div>
+                        </div>
+                        <p className={`text-xs text-slate-600 whitespace-pre-line leading-relaxed ${isOpen ? '' : 'line-clamp-2'}`}>
+                          {topic.content}
+                        </p>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                          <span>Đăng bởi: <strong className="text-slate-600">{topic.author?.name || 'Thành viên'}</strong></span>
+                          <span>•</span>
+                          <span>{topic.createdAt}</span>
+                          <span className="ml-auto text-[#0374b5] font-bold">
+                            {isOpen ? 'Thu gọn' : 'Mở xem & Trả lời →'}
+                          </span>
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-4 pb-4 pt-3 bg-slate-50/70 border-t border-slate-200 space-y-3">
+                          {replies.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic">Chưa có phản hồi nào cho chủ đề này.</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {replies.map((rep: any, rIdx: number) => (
+                                <div
+                                  key={rep.id || rIdx}
+                                  className={`p-3 rounded-xl border text-xs space-y-1 ${
+                                    rep.isInstructorAnswer
+                                      ? 'bg-sky-50 border-sky-200'
+                                      : 'bg-white border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <strong className="text-slate-900">{rep.author?.name || 'Thành viên'}</strong>
+                                      {rep.isInstructorAnswer && (
+                                        <span className="px-1.5 py-0.2 rounded bg-[#0374b5] text-white text-[9px] font-black">
+                                          GV / QTV
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] text-slate-400">{rep.createdAt}</span>
+                                  </div>
+                                  <p className="text-slate-700 whitespace-pre-line leading-relaxed">{rep.content}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Form gửi phản hồi trực tiếp */}
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              if (!draft.trim()) return;
+                              if (!currentUser?.id) {
+                                setIsLoginModalOpen(true);
+                                return;
+                              }
+                              addForumReply(topic.id, draft.trim());
+                              setReplyDrafts(prev => ({ ...prev, [topic.id]: '' }));
+                            }}
+                            className="flex items-center gap-2 pt-1"
+                          >
+                            <input
+                              type="text"
+                              value={draft}
+                              onChange={(e) => setReplyDrafts(prev => ({ ...prev, [topic.id]: e.target.value }))}
+                              placeholder="Viết câu trả lời hoặc bình luận của bạn..."
+                              className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-[#0374b5]"
+                            />
+                            <button
+                              type="submit"
+                              disabled={!draft.trim()}
+                              className="px-3.5 py-2 rounded-xl bg-[#0374b5] hover:bg-[#025a8c] disabled:opacity-40 text-white text-xs font-bold flex items-center gap-1 shrink-0"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              <span>Gửi</span>
+                            </button>
+                          </form>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-600 line-clamp-2">{topic.content}</p>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-                      <span>Đăng bởi: <strong>{topic.author?.name || 'Thành viên'}</strong></span>
-                      <span>•</span>
-                      <span>{topic.createdAt}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1099,20 +1251,141 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
           </div>
         )}
 
-        {/* Tab 6: Lịch trình khóa học (Syllabus) */}
-        {activeTab === 'syllabus' && (
-          <div className="p-6 max-w-4xl space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3">
-              Lịch trình khóa học (Syllabus)
-            </h2>
-            <div className="prose prose-sm max-w-none text-slate-700 space-y-3">
-              <p><strong>Mục tiêu:</strong> {activeCourse.description || 'Cung cấp kiến thức toàn diện về môn học.'}</p>
-              <p><strong>Khối lớp:</strong> {activeCourse.gradeLevel || 'Lớp 1 - 12'}</p>
-              <p><strong>Chuyên đề Tin học:</strong> {activeCourse.category || 'Tin học'}</p>
-              <p><strong>Học kỳ:</strong> {activeCourse.semester || 'Học kỳ 1'} ({activeCourse.academicYear || '2026-2027'})</p>
+        {/* Tab 6: Lịch trình khóa học & Đề cương (Syllabus chuẩn BT4) */}
+        {activeTab === 'syllabus' && (() => {
+          const courseMods = activeCourse.modules || [];
+          const deadlineActs = courseMods.flatMap(m =>
+            (m.activities || [])
+              .filter(a => a.dueDate || a.dueDateIso)
+              .map(a => ({ ...a, moduleTitle: m.title }))
+          );
+          return (
+            <div className="p-6 max-w-5xl space-y-6">
+              <div className="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[#0374b5]" />
+                    <span>Lịch trình & Đề cương khóa học (Syllabus)</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Tổng quan mục tiêu, phân công bài học, trình tự học tập và các mốc hạn nộp bài
+                  </p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-[#0374b5] text-xs font-bold self-start sm:self-auto">
+                  {activeCourse.semester || 'Học kỳ 1'} • {activeCourse.academicYear || '2026-2027'}
+                </span>
+              </div>
+
+              {/* Khung thông tin đề cương tổng quát */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <div className="space-y-1.5">
+                  <p><strong className="text-slate-900">Khóa học:</strong> {activeCourse.name} ({activeCourse.code})</p>
+                  <p><strong className="text-slate-900">Khối lớp:</strong> {activeCourse.gradeLevel || 'Lớp 6'}</p>
+                  <p><strong className="text-slate-900">Chuyên đề:</strong> {activeCourse.category || 'Chuyên đề AI'}</p>
+                </div>
+                <div className="space-y-1.5">
+                  <p><strong className="text-slate-900">Giáo viên phụ trách:</strong> {instructorName}</p>
+                  <p><strong className="text-slate-900">Mục tiêu tổng quát:</strong> {activeCourse.description || 'Cung cấp kiến thức và kỹ năng thực hành toàn diện về chuyên đề.'}</p>
+                </div>
+              </div>
+
+              {/* Lộ trình chi tiết từng Bài học */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-[#0374b5]" />
+                  <span>Lộ trình {courseMods.length} Bài học & Mục tiêu sư phạm</span>
+                </h3>
+                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+                  <div className="divide-y divide-slate-100">
+                    {courseMods.map((m, idx) => {
+                      const acts = m.activities || [];
+                      return (
+                        <div key={m.id} className="p-4 hover:bg-sky-50/40 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2 py-0.5 rounded bg-sky-100 text-[#0374b5] text-[10px] font-black">
+                                Bài {idx + 1}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveModuleId(m.id);
+                                  setActiveCourseTab('modules');
+                                }}
+                                className="text-sm font-extrabold text-slate-900 hover:text-[#0374b5] hover:underline text-left"
+                              >
+                                {m.title}
+                              </button>
+                              {m.ownerName && (
+                                <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-bold">
+                                  Phụ trách: {m.ownerName}
+                                </span>
+                              )}
+                            </div>
+                            {m.learningObjectives ? (
+                              <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed bg-sky-50/50 p-2.5 rounded-xl border border-sky-100">
+                                <strong className="text-[#0374b5]">🎯 Mục tiêu: </strong>{m.learningObjectives}
+                              </p>
+                            ) : m.description ? (
+                              <p className="text-xs text-slate-500 italic">{m.description}</p>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 self-start">
+                            <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-bold">
+                              {acts.length} học liệu
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveModuleId(m.id);
+                                setActiveCourseTab('modules');
+                              }}
+                              className="px-3 py-1 rounded-lg bg-[#0374b5] hover:bg-[#025a8c] text-white text-[11px] font-bold transition-colors"
+                            >
+                              Mở bài →
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lịch Hạn nộp bài tập & Kiểm tra */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  <span>Lịch Hạn nộp bài tập & Kiểm tra ({deadlineActs.length})</span>
+                </h3>
+                {deadlineActs.length === 0 ? (
+                  <div className="p-5 rounded-2xl bg-slate-50 border border-dashed border-slate-300 text-xs text-slate-500 text-center">
+                    Hiện chưa có bài tập hoặc bài kiểm tra nào đặt hạn nộp cụ thể.
+                  </div>
+                ) : (
+                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs divide-y divide-slate-100">
+                    {deadlineActs.map(act => (
+                      <button
+                        key={act.id}
+                        type="button"
+                        onClick={() => navigateToActivity(activeCourse.id, act.id)}
+                        className="w-full text-left p-3.5 hover:bg-amber-50/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                      >
+                        <div>
+                          <div className="font-bold text-slate-900">{act.title}</div>
+                          <div className="text-[11px] text-slate-400">{act.moduleTitle}</div>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[11px] self-start sm:self-auto shrink-0">
+                          ⏰ Hạn: {act.dueDate || act.dueDateIso}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Tab 7: Kho học liệu số & Phòng thí nghiệm Tương tác AI */}
         {activeTab === 'resources3d' && <AIVirtualLab />}

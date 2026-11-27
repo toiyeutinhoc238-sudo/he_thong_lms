@@ -260,21 +260,41 @@ export const CanvasDashboard: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    /* Canvas Bottom Action Icons */
+                    /* Canvas Bottom Action Icons — nhấp mở thẳng đúng tab */
                     <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-slate-400">
-                      <div className="flex items-center gap-3">
-                        <span title="Thông báo" className="hover:text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          title="Trang chủ & Thông báo"
+                          onClick={(e) => { e.stopPropagation(); navigateToCourse(course.id, null, 'home'); }}
+                          className="p-1 rounded hover:bg-sky-50 hover:text-[#0374b5] transition-colors"
+                        >
                           <Bell className="w-4 h-4" />
-                        </span>
-                        <span title="Thảo luận" className="hover:text-slate-700">
+                        </button>
+                        <button
+                          type="button"
+                          title="Thảo luận lớp học"
+                          onClick={(e) => { e.stopPropagation(); navigateToCourse(course.id, null, 'discussions'); }}
+                          className="p-1 rounded hover:bg-sky-50 hover:text-[#0374b5] transition-colors"
+                        >
                           <MessageSquare className="w-4 h-4" />
-                        </span>
-                        <span title="Bài tập" className="hover:text-slate-700">
+                        </button>
+                        <button
+                          type="button"
+                          title="Nội dung học tập & Bài tập"
+                          onClick={(e) => { e.stopPropagation(); navigateToCourse(course.id, null, 'modules'); }}
+                          className="p-1 rounded hover:bg-sky-50 hover:text-[#0374b5] transition-colors"
+                        >
                           <FileCheck className="w-4 h-4" />
-                        </span>
-                        <span title="Tập tin" className="hover:text-slate-700">
+                        </button>
+                        <button
+                          type="button"
+                          title="Thư mục tập tin học liệu"
+                          onClick={(e) => { e.stopPropagation(); navigateToCourse(course.id, null, 'files'); }}
+                          className="p-1 rounded hover:bg-sky-50 hover:text-[#0374b5] transition-colors"
+                        >
                           <Folder className="w-4 h-4" />
-                        </span>
+                        </button>
                       </div>
 
                       <span className="text-[11px] font-bold text-slate-500">

@@ -139,11 +139,15 @@ export const CanvasCoursesList: React.FC = () => {
         certificateEligible: true
       };
 
+      let targetId = courseId;
       try {
         const saved = await api.courses.create(newCourse);
-        setCourses(prev => [saved || newCourse, ...prev]);
-      } catch {
-        setCourses(prev => [newCourse, ...prev]);
+        const finalCourse = saved || newCourse;
+        targetId = finalCourse.id || courseId;
+        setCourses(prev => [finalCourse, ...prev]);
+      } catch (err: any) {
+        alert(err?.message || 'Không thể lưu khóa học lên máy chủ. Vui lòng thử lại.');
+        return;
       }
       setIsCreateModalOpen(false);
       setFormData({
@@ -156,6 +160,8 @@ export const CanvasCoursesList: React.FC = () => {
         description: '',
         thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'
       });
+      // Mở thẳng vào khóa học vừa tạo để giáo viên thêm bài học/học liệu ngay
+      navigateToCourse(targetId, null, 'home');
     } finally {
       setIsSubmitting(false);
     }
@@ -484,6 +490,75 @@ export const CanvasCoursesList: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Hiển thị đầy đủ các khóa học khác đã tạo trên hệ thống (không bị ẩn mất sau khi bấm "Tạo khóa học mới") */}
+            {(() => {
+              const otherCourses = filteredCourses.filter(c => c.id !== mainCourse.id);
+              if (otherCourses.length === 0) return null;
+              return (
+                <div className="space-y-3 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-[#0374b5]" />
+                      <span>Các khóa học khác trên hệ thống ({otherCourses.length})</span>
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {otherCourses.map(c => (
+                      <div
+                        key={c.id}
+                        onClick={() => navigateToCourse(c.id, null, 'home')}
+                        className="bg-white rounded-2xl border-2 border-slate-200 hover:border-[#0374b5] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="px-2.5 py-0.5 rounded-lg bg-sky-100 text-[#0374b5] text-[10px] font-black uppercase">
+                              {c.code}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+                              {c.gradeLevel || 'Phổ thông'}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-[#0374b5] transition-colors line-clamp-2">
+                            {c.name}
+                          </h3>
+                          <p className="text-xs text-slate-500 line-clamp-2">
+                            {c.description || 'Khóa học trực tuyến trên LMS Nhóm 2'}
+                          </p>
+                        </div>
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                          <span className="font-bold text-[#0374b5] group-hover:underline">
+                            Mở khóa học ({(c.modules || []).length} bài) →
+                          </span>
+                          {canManage && (
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCourse(c)}
+                                className="p-1 rounded text-slate-400 hover:text-[#0374b5] hover:bg-sky-50"
+                                title="Sửa khóa học"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Xác nhận xóa khóa học "${c.name}"?`)) deleteCourse(c.id);
+                                }}
+                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                                title="Xóa khóa học"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         );
       })()}

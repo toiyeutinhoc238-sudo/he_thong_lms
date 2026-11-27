@@ -15,11 +15,13 @@ import {
   X,
   AlertCircle,
   BookOpen,
-  School
+  School,
+  Award,
+  BarChart3
 } from 'lucide-react';
 
 export const ProfileModal: React.FC = () => {
-  const { currentUser, activeRole, setIsLoginModalOpen, logout, updateProfile } = useApp();
+  const { currentUser, activeRole, certificates, setCurrentView, setIsLoginModalOpen, logout, updateProfile } = useApp();
   
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,7 +49,7 @@ export const ProfileModal: React.FC = () => {
               Chưa đăng nhập tài khoản
             </h2>
             <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-              Hồ sơ cá nhân và quyền hạn trên hệ thống <strong>LMS Nhóm 2</strong> được thiết lập tự động trực tiếp từ tài khoản Google của bạn.
+              Đăng nhập vào hệ thống <strong>LMS Nhóm 2</strong> bằng tài khoản Google hoặc Tài khoản &amp; Mật khẩu được cấp để theo dõi tiến độ học tập, điểm số và chứng chỉ.
             </p>
           </div>
 
@@ -57,7 +59,7 @@ export const ProfileModal: React.FC = () => {
               className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-[#0374b5] hover:bg-[#02629b] text-white font-bold text-sm transition-all shadow-md active:scale-95"
             >
               <LogIn className="w-4 h-4" />
-              <span>Đăng nhập bằng tài khoản Google</span>
+              <span>Đăng nhập hệ thống (Google / Tài khoản)</span>
             </button>
           </div>
         </div>
@@ -96,9 +98,13 @@ export const ProfileModal: React.FC = () => {
     }
   };
 
-  const roleLabel = activeRole === 'admin' 
-    ? 'Quản trị viên Hệ thống' 
-    : 'Học viên';
+  const isRootAdmin = currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' || activeRole === 'admin' || currentUser.role === 'admin';
+  const isLecturer = !isRootAdmin && (activeRole === 'lecturer' || currentUser.role === 'lecturer');
+  const roleLabel = isRootAdmin
+    ? 'Quản trị viên Hệ thống'
+    : isLecturer
+      ? 'Giáo viên / Giảng viên'
+      : 'Học viên';
 
   const userSchool = currentUser.school || currentUser.department || '';
   const userClass = currentUser.className || currentUser.classOrPosition || '';
@@ -270,12 +276,41 @@ export const ProfileModal: React.FC = () => {
 
             <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/60 flex items-center justify-between">
               <div className="text-xs space-y-0.5">
-                <div className="font-bold text-slate-800">Google OAuth 2.0</div>
-                <div className="text-slate-500 text-[11px]">Đồng bộ dữ liệu tài khoản Google</div>
+                <div className="font-bold text-slate-800">
+                  {(currentUser as any).hasPassword ? 'Tài khoản & Mật khẩu (scrypt)' : 'Google OAuth 2.0'}
+                </div>
+                <div className="text-slate-500 text-[11px]">
+                  {(currentUser as any).hasPassword ? 'Xác thực mật mã an toàn + hỗ trợ Google' : 'Đồng bộ dữ liệu tài khoản Google'}
+                </div>
               </div>
               <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4" /> Đã kết nối
+                <CheckCircle2 className="w-4 h-4" /> Đã xác thực
               </span>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setCurrentView('gradebook')}
+                className="p-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-[#0374b5] text-xs font-bold flex items-center justify-between transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Bảng điểm cá nhân</span>
+                </span>
+                <span>→</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentView('certificates')}
+                className="p-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-between transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Award className="w-4 h-4" />
+                  <span>Chứng chỉ số ({certificates.length})</span>
+                </span>
+                <span>→</span>
+              </button>
             </div>
           </div>
         </div>

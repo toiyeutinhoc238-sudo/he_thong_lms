@@ -428,9 +428,9 @@ export const AdminPanel: React.FC = () => {
 
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-slate-500">Học viên Đã đăng ký</p>
+            <p className="text-xs font-semibold text-slate-500">Học viên & Giảng viên</p>
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{usersList.length}</h3>
-            <span className="text-[11px] text-emerald-600 font-bold">Tài khoản Google</span>
+            <span className="text-[11px] text-emerald-600 font-bold">Google & Mật khẩu</span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <Users className="w-6 h-6" />
@@ -611,7 +611,7 @@ export const AdminPanel: React.FC = () => {
                 Danh sách Tài khoản Học viên & Quản trị
               </h2>
               <p className="text-xs text-slate-500">
-                Dữ liệu được đồng bộ từ Google OAuth 2.0 và lưu trữ tại MongoDB Atlas
+                Hỗ trợ Google OAuth 2.0 và Tài khoản / Mật khẩu băm scrypt lưu trữ tại MongoDB Atlas
               </p>
             </div>
 

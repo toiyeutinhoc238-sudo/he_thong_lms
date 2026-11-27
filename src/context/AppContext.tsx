@@ -377,7 +377,12 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
       (c.code === '6AIAB01' && (courseId === 'course-6aiab01' || courseId === '6AIAB01' || courseId.includes('6AIAB01')))
     ) || courses[0] || defaultGrade6Course;
 
+    const parentMod = (target.modules || []).find(m =>
+      (m.activities || []).some(a => a.id === activityId)
+    );
+
     setActiveCourseId(target.id);
+    if (parentMod) setActiveModuleId(parentMod.id);
     setActiveActivityId(activityId);
     setCurrentView('activity');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -388,6 +393,18 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     c.code === activeCourseId ||
     (c.code === '6AIAB01' && (activeCourseId === 'course-6aiab01' || activeCourseId === '6AIAB01' || activeCourseId?.includes('6AIAB01')))
   ) || courses[0] || defaultGrade6Course;
+
+  // Tự động tải danh sách chủ đề Thảo luận mỗi khi mở khóa học (kể cả F5 tải lại trang hoặc Deep Link)
+  useEffect(() => {
+    if (!activeCourse?.id) return;
+    let cancelled = false;
+    api.forum.getByCourse(activeCourse.id)
+      .then(res => {
+        if (!cancelled && Array.isArray(res)) setForumTopics(res);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeCourse?.id]);
   
   let activeActivity: Activity | null = null;
   if (activeCourse && activeActivityId) {
@@ -826,16 +843,17 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
   };
 
   const addForumReply = (topicId: string, content: string) => {
+    const isTeacher = currentUser.role === 'lecturer' || currentUser.role === 'admin' || currentUser.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com';
     const newReply = {
       id: `reply-${Date.now()}`,
       author: {
-        name: currentUser.name,
+        name: currentUser.name || 'Thành viên',
         avatar: currentUser.avatar,
-        role: currentUser.role === 'lecturer' ? 'Giáo viên' : currentUser.role === 'admin' ? 'Quản trị viên' : 'Học sinh'
+        role: currentUser.role === 'admin' ? 'Quản trị viên' : currentUser.role === 'lecturer' ? 'Giáo viên' : 'Học sinh'
       },
       content,
       createdAt: 'Vừa xong',
-      isInstructorAnswer: currentUser.role === 'lecturer'
+      isInstructorAnswer: isTeacher
     };
 
     setForumTopics(prev => prev.map(t => {

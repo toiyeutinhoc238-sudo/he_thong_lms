@@ -331,14 +331,20 @@ export const ActivityViewer: React.FC = () => {
     isEmbedMode,
     isLoading,
     setCurrentView,
+    setActiveCourseTab,
+    setActiveModuleId,
     markActivityCompleted,
     navigateToActivity,
+    forumTopics,
+    createForumTopic,
     currentUser,
     activeRole,
     setIsLoginModalOpen
   } = useApp();
 
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [quickForumText, setQuickForumText] = useState('');
+  const [isPostingForum, setIsPostingForum] = useState(false);
 
   const isSingleActivityEmbed = Boolean(
     isEmbedMode &&
@@ -671,19 +677,102 @@ export const ActivityViewer: React.FC = () => {
 
       {/* 5. FORUM TYPE */}
       {activeActivity.type === 'forum' && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h2 className="text-lg font-bold text-slate-800">
-            {activeActivity.title}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            {activeActivity.description || 'Tham gia trao đổi cùng các bạn trong chuyên đề này.'}
-          </p>
-          <button
-            onClick={handleMarkDone}
-            className="px-4 py-2 bg-[#0374b5] hover:bg-[#025a8c] text-white rounded-lg text-xs font-bold"
+        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">{activeActivity.title}</h2>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                {activeActivity.description || 'Tham gia trao đổi, chia sẻ ý kiến cùng bạn học và giáo viên trong chủ đề này.'}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveModuleId(null);
+                  setActiveCourseTab('discussions');
+                  setCurrentView('course-detail');
+                }}
+                className="px-3.5 py-2 bg-sky-50 hover:bg-sky-100 text-[#0374b5] border border-sky-200 rounded-xl text-xs font-bold transition-colors"
+              >
+                Mở toàn bộ Diễn đàn lớp học →
+              </button>
+              <button
+                type="button"
+                onClick={handleMarkDone}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+                  activeActivity.isCompleted
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-[#0374b5] hover:bg-[#025a8c] text-white'
+                }`}
+              >
+                {activeActivity.isCompleted ? '✓ Đã hoàn thành thảo luận' : 'Đánh dấu hoàn thành'}
+              </button>
+            </div>
+          </div>
+
+          {/* Gửi ý kiến thảo luận trực tiếp từ hoạt động */}
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!quickForumText.trim()) return;
+              if (!currentUser?.id) {
+                setIsLoginModalOpen(true);
+                return;
+              }
+              setIsPostingForum(true);
+              try {
+                const ok = await createForumTopic(activeCourse.id, `[${activeActivity.title}] Ý kiến của ${currentUser.name || 'Học viên'}`, quickForumText.trim());
+                if (ok) {
+                  setQuickForumText('');
+                  if (!activeActivity.isCompleted) handleMarkDone();
+                }
+              } finally {
+                setIsPostingForum(false);
+              }
+            }}
+            className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5"
           >
-            {activeActivity.isCompleted ? '✓ Đã hoàn thành thảo luận' : 'Đánh dấu hoàn thành diễn đàn'}
-          </button>
+            <label className="block text-xs font-bold text-slate-700">
+              Đóng góp ý kiến / câu hỏi của bạn cho chủ đề này:
+            </label>
+            <textarea
+              rows={3}
+              value={quickForumText}
+              onChange={(e) => setQuickForumText(e.target.value)}
+              placeholder="Nhập chia sẻ, nhận xét hoặc câu hỏi thảo luận của bạn..."
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+              required
+            />
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isPostingForum || !quickForumText.trim()}
+                className="px-4 py-2 rounded-xl bg-[#0374b5] hover:bg-[#025a8c] disabled:opacity-50 text-white text-xs font-bold shadow-xs"
+              >
+                {isPostingForum ? 'Đang đăng...' : 'Đăng thảo luận & Hoàn thành'}
+              </button>
+            </div>
+          </form>
+
+          {/* Danh sách thảo luận gần đây của khóa học */}
+          {forumTopics.filter(t => t.courseId === activeCourse.id).length > 0 && (
+            <div className="space-y-2.5 pt-2">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                Các trao đổi gần đây trong lớp ({forumTopics.filter(t => t.courseId === activeCourse.id).length})
+              </h3>
+              {forumTopics.filter(t => t.courseId === activeCourse.id).slice(0, 5).map(topic => (
+                <div key={topic.id} className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-900">{topic.title}</span>
+                    <span className="text-[10px] text-slate-400">{(topic.replies || []).length} phản hồi</span>
+                  </div>
+                  <p className="text-xs text-slate-600 whitespace-pre-line">{topic.content}</p>
+                  <p className="text-[10px] text-slate-400">{topic.author?.name || 'Thành viên'} • {topic.createdAt}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

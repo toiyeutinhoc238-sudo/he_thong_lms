@@ -21,23 +21,24 @@ export const CanvasHelp: React.FC = () => {
     message: ''
   });
   const [isSent, setIsSent] = useState(false);
+  const [sentNotice, setSentNotice] = useState(false);
 
   const faqs = [
     {
       q: '1. Làm thế nào để tham gia và nộp bài tập trên hệ thống LMS Nhóm 2?',
-      a: 'Bạn vào mục "Khóa học" từ thanh menu bên trái, chọn khóa học bạn đang tham gia. Tại mỗi chương/bài học, nhấp vào bài tập để xem đề bài, sau đó tải file bài làm (PDF, Word, ZIP) hoặc nhập nội dung trực tuyến và nhấn nút "Nộp bài tập".'
+      a: 'Bạn vào mục "Khóa học" từ thanh menu bên trái, chọn khóa học hoặc bài học muốn học. Tại mỗi bài học, nhấp vào bài tập để xem đề bài, sau đó tải tệp bài làm (PDF, Word, ZIP...) hoặc nhập nội dung trực tuyến và nhấn nút "Nộp bài tập".'
     },
     {
-      q: '2. Cách làm bài kiểm tra trắc nghiệm và xem điểm số tự động?',
-      a: 'Khi đến bài kiểm tra trắc nghiệm, bấm "Bắt đầu làm bài". Sau khi chọn đáp án và bấm "Nộp bài thi", hệ thống sẽ chấm điểm tự động ngay lập tức, hiển thị điểm số, tỷ lệ đúng và lời giải chi tiết cho từng câu hỏi.'
+      q: '2. Cách xem video có neo chặn và làm bài kiểm tra trắc nghiệm tự động?',
+      a: 'Với video có neo chặn, hệ thống sẽ tự dừng chính xác đến từng mili giây để hiển thị câu hỏi tương tác và phản hồi sư phạm. Với bài trắc nghiệm, sau khi bấm "Nộp bài thi", hệ thống chấm điểm tự động, lưu lịch sử các lần làm và hiển thị lời giải thích chi tiết.'
     },
     {
-      q: '3. Quản trị viên thêm khóa học, bài giảng và tài liệu mới như thế nào?',
-      a: 'Tài khoản Quản trị viên (phanphiphu04@gmail.com) có toàn quyền tạo khóa học tại mục "Khóa học" hoặc "Bảng điều phối". Trong từng khóa học, bạn có thể bấm "+ Thêm mô-đun" hoặc "+ Thêm hoạt động" để nhúng video YouTube, chèn tài liệu PDF, tạo bài tập nộp file và tạo đề thi trắc nghiệm.'
+      q: '3. Giảng viên kiểm tra & Quản trị viên đăng nhập như thế nào?',
+      a: 'Hệ thống hỗ trợ đăng nhập song song: học sinh có thể đăng nhập nhanh bằng Google OAuth 2.0, còn Giảng viên kiểm tra và tài khoản được cấp có thể đăng nhập bằng Tên đăng nhập / Email và Mật khẩu (được mã hóa scrypt an toàn trên máy chủ).'
     },
     {
-      q: '4. Đăng nhập bằng Google gặp thông báo lỗi ủy quyền thì xử lý ra sao?',
-      a: 'Nếu gặp lỗi "no registered origin" (Lỗi 401), hãy đảm bảo bạn đã thêm đúng tên miền trang web (https://he-thong-lms.onrender.com) vào mục "Authorized JavaScript origins" trên Google Cloud Console theo hướng dẫn của hệ thống.'
+      q: '4. Đăng nhập bằng Google gặp thông báo lỗi ủy quyền (origin_mismatch) thì xử lý ra sao?',
+      a: 'Hãy đảm bảo Quản trị viên đã thêm chính xác tên miền trang web (https://he-thong-lms-web.onrender.com) vào mục "Authorized JavaScript origins" trong Google Cloud Console (APIs & Services → Credentials → OAuth 2.0 Client ID).'
     }
   ];
 
@@ -46,15 +47,17 @@ export const CanvasHelp: React.FC = () => {
     if (!supportMessage.title.trim() || !supportMessage.message.trim()) return;
 
     setIsSent(true);
+    setSentNotice(false);
     setTimeout(() => {
       setIsSent(false);
+      setSentNotice(true);
       setSupportMessage({
         title: '',
         category: 'Sử dụng bài học & nộp bài',
         message: ''
       });
-      alert('Yêu cầu trợ giúp của bạn đã được gửi thành công đến Ban Quản trị LMS Nhóm 2!');
-    }, 1200);
+      setTimeout(() => setSentNotice(false), 5000);
+    }, 600);
   };
 
   return (
@@ -166,7 +169,13 @@ export const CanvasHelp: React.FC = () => {
             />
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 space-y-3">
+            {sentNotice && (
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Yêu cầu trợ giúp của bạn đã được ghi nhận! Đội ngũ quản trị LMS Nhóm 2 sẽ phản hồi sớm nhất.</span>
+              </div>
+            )}
             <button
               type="submit"
               disabled={isSent}

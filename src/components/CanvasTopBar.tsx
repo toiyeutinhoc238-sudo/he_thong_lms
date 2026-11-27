@@ -12,7 +12,7 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
   onToggleCourseNav, 
   onOpenAIAssistant
 }) => {
-  const { activeCourse, activeModuleId, setActiveModuleId, activeCourseTab, setActiveCourseTab, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
+  const { activeCourse, activeModuleId, setActiveModuleId, activeActivity, activeCourseTab, setActiveCourseTab, currentView, setCurrentView, currentUser, setIsLoginModalOpen } = useApp();
   const activeModule = activeCourse && activeModuleId
     ? (activeCourse.modules || []).find(m => m.id === activeModuleId)
     : null;
@@ -25,30 +25,33 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
     discussions: 'Thảo luận',
     files: 'Các tập tin',
     syllabus: 'Lịch trình khóa học',
-    resources3d: 'Kho học liệu 3D'
+    resources3d: 'Kho học liệu 3D & AI Lab'
   };
   const resolvedTabLabel = tabLabels[activeCourseTab] || 'Nội dung học tập';
+  const isModuleScopedTab = activeCourseTab === 'home' || activeCourseTab === 'modules';
 
   return (
     <header className="h-14 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between z-20 shrink-0">
-      {/* Left: Hamburger & Breadcrumb */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onToggleCourseNav}
-          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-700 transition-colors"
-          title="Thu gọn / Mở rộng menu khóa học"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+      {/* Left: Hamburger (chỉ hiện ở trang khóa học nơi có menu phụ) & Breadcrumb */}
+      <div className="flex items-center gap-3 min-w-0">
+        {currentView === 'course-detail' && (
+          <button
+            onClick={onToggleCourseNav}
+            className="hidden md:inline-flex p-1.5 rounded-md hover:bg-slate-100 text-slate-700 transition-colors shrink-0"
+            title="Thu gọn / Mở rộng menu khóa học"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
 
-        <nav className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+        <nav className="flex items-center gap-2 text-sm font-semibold text-slate-800 min-w-0">
           <button 
-            onClick={() => setCurrentView('dashboard')}
-            className="text-slate-900 font-extrabold hover:text-[#0374b5] transition-colors"
+            onClick={() => setCurrentView('courses-list')}
+            className="text-slate-900 font-extrabold hover:text-[#0374b5] transition-colors shrink-0"
           >
             LMS Nhóm 2
           </button>
-          <span className="text-slate-400 font-normal">›</span>
+          <span className="text-slate-400 font-normal shrink-0">›</span>
 
           {currentView === 'dashboard' && <span className="text-slate-600 font-medium">Bảng điều khiển</span>}
           {currentView === 'admin-panel' && <span className="text-slate-600 font-medium">Quản trị Hệ thống</span>}
@@ -59,6 +62,8 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
           {currentView === 'history' && <span className="text-slate-600 font-medium">Lịch sử hoạt động</span>}
           {currentView === 'help' && <span className="text-slate-600 font-medium">Trợ giúp & Hướng dẫn</span>}
           {currentView === 'profile' && <span className="text-slate-600 font-medium">Hồ sơ cá nhân</span>}
+          {currentView === 'gradebook' && <span className="text-slate-600 font-medium">Bảng điểm cá nhân</span>}
+          {currentView === 'certificates' && <span className="text-slate-600 font-medium">Chứng chỉ số</span>}
           {(currentView === 'course-detail' || currentView === 'activity') && (
             <>
               <button 
@@ -67,15 +72,39 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
                   setActiveCourseTab('home');
                   setCurrentView('course-detail');
                 }}
-                className="text-[#0374b5] hover:underline font-bold truncate max-w-[160px] sm:max-w-[240px]"
+                className="text-[#0374b5] hover:underline font-bold truncate max-w-[140px] sm:max-w-[200px]"
                 title="Xem tổng quan toàn bộ khóa học (tất cả bài học)"
               >
                 {activeCourse ? (activeCourse.code || activeCourse.name) : 'Khóa học'}
               </button>
-              <span className="text-slate-400 font-normal">›</span>
-              <span className="text-slate-700 font-medium truncate max-w-[180px] sm:max-w-[340px]">
-                {activeModule ? activeModule.title : resolvedTabLabel}
-              </span>
+              <span className="text-slate-400 font-normal shrink-0">›</span>
+              {currentView === 'activity' ? (
+                <>
+                  {activeModule && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveCourseTab('modules');
+                          setCurrentView('course-detail');
+                        }}
+                        className="hidden sm:inline text-[#0374b5] hover:underline font-semibold truncate max-w-[180px]"
+                        title={activeModule.title}
+                      >
+                        {activeModule.title}
+                      </button>
+                      <span className="hidden sm:inline text-slate-400 font-normal shrink-0">›</span>
+                    </>
+                  )}
+                  <span className="text-slate-700 font-medium truncate max-w-[160px] sm:max-w-[260px]" title={activeActivity?.title}>
+                    {activeActivity?.title || 'Hoạt động học tập'}
+                  </span>
+                </>
+              ) : (
+                <span className="text-slate-700 font-medium truncate max-w-[180px] sm:max-w-[340px]">
+                  {isModuleScopedTab && activeModule ? activeModule.title : resolvedTabLabel}
+                </span>
+              )}
             </>
           )}
         </nav>
