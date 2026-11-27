@@ -1199,11 +1199,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                                                 {file.fileType || 'tệp'}
                                               </span>
                                             </div>
-                                            {file.description && (
-                                              <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-sm">
-                                                {file.description}
-                                              </p>
-                                            )}
                                           </div>
                                         </div>
                                       </td>
@@ -1368,8 +1363,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                                 <div className="font-extrabold text-[#0374b5] text-[11px] uppercase tracking-wider">Mục tiêu bài học</div>
                                 <p className="whitespace-pre-line">{m.learningObjectives}</p>
                               </div>
-                            ) : m.description ? (
-                              <p className="text-xs text-slate-500 italic">{m.description}</p>
                             ) : null}
                           </div>
                           <div className="flex items-center gap-2 shrink-0 self-start">

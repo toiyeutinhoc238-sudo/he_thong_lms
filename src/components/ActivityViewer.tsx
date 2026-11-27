@@ -587,11 +587,6 @@ export const ActivityViewer: React.FC = () => {
                   <h2 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">
                     {activeActivity.title}
                   </h2>
-                  <p className="text-xs sm:text-[13px] text-slate-500 mt-1 leading-relaxed">
-                    {!resolvedDocUrl && activeActivity.description && activeActivity.description.length > 120
-                      ? 'Tài liệu đọc & Kiến thức trọng tâm của bài học'
-                      : (activeActivity.description || 'Tài liệu học tập chính thức của khóa học')}
-                  </p>
                 </div>
               </div>
 

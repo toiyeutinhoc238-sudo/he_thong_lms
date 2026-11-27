@@ -606,11 +606,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           </span>
                         )}
                       </div>
-                      {mod.description && (
-                        <p className="text-[11px] text-slate-500 italic mt-0.5 font-normal">
-                          {mod.description}
-                        </p>
-                      )}
                     </div>
                   </div>
 
