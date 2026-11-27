@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Activity, VideoCheckpoint, VideoCheckpointResult } from '../types';
 import { useApp } from '../context/AppContext';
 import api, { API_BASE_URL, resolveBackendUrl } from '../services/api';
-import { FormattedContent } from './FormattedContent';
 import {
   Play,
   Pause,
@@ -1435,9 +1434,9 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
         </div>
       </div>
 
-      {/* Thông tin mô tả bài giảng */}
+      {/* Thông tin bài giảng */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-100 pb-3.5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-lg font-extrabold text-slate-900 leading-snug">{activity.title}</h2>
           <div className="flex items-center gap-2">
             {checkpoints.length > 0 && (
@@ -1450,11 +1449,6 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             </span>
           </div>
         </div>
-
-        <FormattedContent
-          text={activity.description}
-          fallback="Bài giảng video trực tuyến cung cấp kiến thức trọng tâm của bài học."
-        />
 
         {activity.videoUrl && (
           <div className="text-xs text-slate-500 flex items-center gap-2 pt-2 border-t border-slate-100">

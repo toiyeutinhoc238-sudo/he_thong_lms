@@ -129,25 +129,6 @@ export const ModulePreviewModals: React.FC<ModulePreviewModalsProps> = ({
               )}
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-[50vh] overflow-y-auto space-y-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
-                Mô tả chi tiết
-              </span>
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                {previewActivity.activity.description || 'Nhấn nút bên dưới để mở và bắt đầu thực hiện học liệu này.'}
-              </p>
-              {previewActivity.activity.assignmentPrompt && (
-                <div className="pt-2 mt-2 border-t border-slate-200">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 block mb-1">
-                    Yêu cầu bài tập
-                  </span>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                    {previewActivity.activity.assignmentPrompt}
-                  </p>
-                </div>
-              )}
-            </div>
-
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
