@@ -122,7 +122,7 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
               {activity.assignmentPrompt || 'Vui lòng thực hiện bài làm theo đúng yêu cầu của giáo viên và nộp tệp hoặc nhập bài làm trực tiếp.'}
             </p>
             <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-200/60 flex items-center gap-2 flex-wrap">
-              <span>Định dạng hỗ trợ: <strong>.py, .sb3 (Scratch), .ipynb, .pdf, .docx, .zip, .html</strong></span>
+              <span>Định dạng hỗ trợ: <strong>.html, .txt, .py, .sb3 (Scratch), .ipynb, .pdf, .docx, .zip</strong></span>
               <span>•</span>
               <span>Thang điểm: <strong>{activity.maxScore || 10} điểm</strong></span>
             </div>

@@ -443,8 +443,9 @@ export const ActivityViewer: React.FC = () => {
 
   const resolvedDocUrl = resolveBackendUrl(activeActivity.fileUrl);
   const fileUrlLower = (resolvedDocUrl || '').toLowerCase();
-  const isPdfUrl = fileUrlLower.endsWith('.pdf');
-  const isImageUrl = /\.(png|jpg|jpeg|gif|webp|svg)$/.test(fileUrlLower);
+  const isPdfUrl = /\.pdf(\?.*)?$/.test(fileUrlLower);
+  const isImageUrl = /\.(png|jpg|jpeg|gif|webp|svg)(\?.*)?$/.test(fileUrlLower);
+  const isHtmlLabUrl = /\.html?(\?.*)?$/.test(fileUrlLower);
 
   const directNonEmbedUrl = typeof window !== 'undefined'
     ? (() => {
@@ -618,8 +619,40 @@ export const ActivityViewer: React.FC = () => {
               </div>
             </div>
 
-            {/* Trình xem trước trực tiếp PDF / Ảnh hoặc khung xác nhận đọc tài liệu */}
-            {resolvedDocUrl && isPdfUrl ? (
+            {/* Trình xem trước trực tiếp Học liệu tương tác HTML5 / PDF / Ảnh hoặc văn bản tóm tắt */}
+            {resolvedDocUrl && isHtmlLabUrl ? (
+              <div className="rounded-2xl overflow-hidden border border-sky-200 bg-white shadow-xs">
+                <div className="px-4 py-2.5 bg-gradient-to-r from-[#0f2942] to-[#0374b5] text-white flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="font-bold flex items-center gap-2">
+                    <span>🔬 Học liệu tương tác HTML5 chạy trực tiếp trên trình duyệt (Không cần cài đặt)</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={resolvedDocUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white font-bold inline-flex items-center gap-1 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Mở toàn màn hình</span>
+                    </a>
+                    <a
+                      href={resolvedDocUrl}
+                      download
+                      className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold inline-flex items-center gap-1 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Tải bản offline (.html)</span>
+                    </a>
+                  </div>
+                </div>
+                <iframe
+                  src={resolvedDocUrl}
+                  title={activeActivity.title}
+                  className="w-full h-[840px] border-0 bg-white"
+                />
+              </div>
+            ) : resolvedDocUrl && isPdfUrl ? (
               <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
                 <iframe
                   src={resolvedDocUrl}
@@ -634,6 +667,18 @@ export const ActivityViewer: React.FC = () => {
                   alt={activeActivity.title}
                   className="max-h-[600px] object-contain rounded-xl shadow-xs"
                 />
+              </div>
+            ) : !resolvedDocUrl && activeActivity.description && activeActivity.description.length > 120 ? (
+              <div className="bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 space-y-4">
+                <div className="flex items-center gap-2.5 text-emerald-700 border-b border-slate-200 pb-3">
+                  <FileText className="w-5 h-5 shrink-0" />
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                    Nội dung bài đọc / Tóm tắt kiến thức trọng tâm
+                  </h3>
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
+                  {activeActivity.description}
+                </div>
               </div>
             ) : (
               <div className="bg-slate-50 rounded-2xl p-6 sm:p-10 border border-slate-200 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">

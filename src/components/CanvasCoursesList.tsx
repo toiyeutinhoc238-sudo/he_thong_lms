@@ -519,6 +519,11 @@ export const CanvasCoursesList: React.FC = () => {
                               {c.gradeLevel || 'Phổ thông'}
                             </span>
                           </div>
+                          {(c.modules || []).some(m => (m.activities || []).some(a => /\.html?(\?.*)?$/i.test(a.fileUrl || ''))) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                              🔬 Có học liệu tương tác HTML5
+                            </span>
+                          )}
                           <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-[#0374b5] transition-colors line-clamp-2">
                             {c.name}
                           </h3>

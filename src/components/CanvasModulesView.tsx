@@ -501,9 +501,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         const total = allActs.length;
         const videoCnt = allActs.filter(a => a.type === 'video').length;
         const videoCpCnt = allActs.filter(a => a.type === 'video' && (a.videoCheckpoints?.length || 0) > 0).length;
+        const htmlLabCnt = allActs.filter(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || '')).length;
         const quizCnt = allActs.filter(a => a.type === 'quiz').length;
         const forumCnt = allActs.filter(a => a.type === 'forum').length;
-        const interactiveTotal = videoCnt + quizCnt + forumCnt;
+        const interactiveTotal = videoCnt + htmlLabCnt + quizCnt + forumCnt;
         const ratio = total > 0 ? Math.round((interactiveTotal / total) * 100) : 0;
         const passed = total > 0 && ratio >= 30;
         return (
@@ -527,7 +528,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 </span>
               </div>
               <p className="text-[11px] text-slate-600">
-                Video bài giảng: <strong>{videoCnt}</strong> ({videoCpCnt} video có neo chặn) • Trắc nghiệm tương tác: <strong>{quizCnt}</strong> • Thảo luận: <strong>{forumCnt}</strong> • Tài liệu/Bài tập khác: <strong>{Math.max(0, total - interactiveTotal)}</strong>
+                Video bài giảng: <strong>{videoCnt}</strong> ({videoCpCnt} video có neo chặn) • Học liệu HTML5 tương tác: <strong>{htmlLabCnt}</strong> • Trắc nghiệm tương tác: <strong>{quizCnt}</strong> • Thảo luận: <strong>{forumCnt}</strong> • Tài liệu/Bài tập khác: <strong>{Math.max(0, total - interactiveTotal)}</strong>
               </p>
             </div>
             <div className="w-full sm:w-36 shrink-0">

@@ -40,11 +40,14 @@ export const BACKEND_ORIGIN = /^https?:\/\//i.test(API_BASE_URL)
   ? API_BASE_URL.replace(/\/api$/i, '')
   : '';
 
-// Chuyển mọi đường dẫn tệp tương đối (/uploads/..., /api/...) sang đúng máy chủ Backend khi chạy 2 dịch vụ tách biệt
+// Chuyển các đường dẫn tệp động phía Backend (/uploads/..., /api/...) sang đúng máy chủ Backend khi chạy 2 dịch vụ tách biệt.
+// Các học liệu tĩnh đặt trong thư mục public/ (ví dụ /a23-phong-thi-nghiem-bieu-mau.html) giữ nguyên origin của Static Site CDN.
 export function resolveBackendUrl(url?: string | null): string {
   if (!url) return '';
   if (/^(https?:|data:|blob:)/i.test(url)) return url;
-  if (url.startsWith('/') && BACKEND_ORIGIN) return `${BACKEND_ORIGIN}${url}`;
+  if ((url.startsWith('/uploads/') || url.startsWith('/api/')) && BACKEND_ORIGIN) {
+    return `${BACKEND_ORIGIN}${url}`;
+  }
   return url;
 }
 

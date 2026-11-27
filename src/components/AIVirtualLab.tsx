@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ShieldAlert, ShieldCheck, Cpu, Sliders, Plus, RotateCcw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Sparkles, ShieldAlert, ShieldCheck, Cpu, Sliders, Plus, RotateCcw, CheckCircle2, AlertTriangle, Code2, ExternalLink, Download } from 'lucide-react';
 
 interface TrainItem {
   id: string;
@@ -73,7 +73,7 @@ function predictNaiveBayes(input: string, dataset: TrainItem[]) {
 }
 
 export const AIVirtualLab: React.FC = () => {
-  const [labTab, setLabTab] = useState<'classifier' | 'neuron' | 'privacy'>('classifier');
+  const [labTab, setLabTab] = useState<'classifier' | 'neuron' | 'privacy' | 'form-lab'>('classifier');
 
   // Lab 1: Huấn luyện AI phân loại tin nhắn an toàn / lừa đảo
   const [dataset, setDataset] = useState<TrainItem[]>(DEFAULT_TRAINING);
@@ -157,6 +157,16 @@ export const AIVirtualLab: React.FC = () => {
         >
           <ShieldCheck className="w-4 h-4" />
           <span>3. Lá chắn Dữ liệu cá nhân (Bài 6 & 7)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setLabTab('form-lab')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+            labTab === 'form-lab' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:border-amber-500'
+          }`}
+        >
+          <Code2 className="w-4 h-4" />
+          <span>4. Phòng thí nghiệm Biểu mẫu HTML (Tin 12 – A2.3)</span>
         </button>
       </div>
 
@@ -353,6 +363,46 @@ export const AIVirtualLab: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* LAB 4: PHÒNG THÍ NGHIỆM BIỂU MẪU HTML (TIN 12 KNTT - BÀI 12 - A2.3) */}
+      {labTab === 'form-lab' && (
+        <div className="bg-white rounded-2xl border border-amber-200 overflow-hidden shadow-xs">
+          <div className="px-5 py-3.5 bg-gradient-to-r from-[#0f2942] to-[#0374b5] text-white flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-extrabold">
+                Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích (Bài A2.3 · Tin học 12 KNTT)
+              </h3>
+              <p className="text-[11px] text-sky-100 mt-0.5">
+                4 chặng tương tác (for–id, Bảng 12.1 type, radio name–value, sửa 3 lỗi mức Phân tích) + Xuất phiếu .txt không cần đăng nhập
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href="/a23-phong-thi-nghiem-bieu-mau.html"
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Mở toàn màn hình</span>
+              </a>
+              <a
+                href="/a23-phong-thi-nghiem-bieu-mau.html"
+                download
+                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold inline-flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Tải bản offline (.html)</span>
+              </a>
+            </div>
+          </div>
+          <iframe
+            src="/a23-phong-thi-nghiem-bieu-mau.html"
+            title="Phòng thí nghiệm Biểu mẫu HTML A2.3"
+            className="w-full h-[840px] border-0 bg-white"
+          />
         </div>
       )}
     </div>

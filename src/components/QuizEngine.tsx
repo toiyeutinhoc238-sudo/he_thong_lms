@@ -309,13 +309,39 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
               })}
             </div>
 
-            {/* Explanation box when submitted */}
-            {isSubmitted && currentQ.explanation && (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
-                <span className="font-bold text-hcmue-800">Giải thích chi tiết:</span>
-                <p className="leading-relaxed">{currentQ.explanation}</p>
-              </div>
-            )}
+            {/* Per-option pedagogical feedback & general explanation when submitted */}
+            {isSubmitted && (() => {
+              const pickedIdx = selectedAnswers[currentQ.id];
+              const pickedFb = typeof pickedIdx === 'number' && Array.isArray(currentQ.optionFeedback)
+                ? currentQ.optionFeedback[pickedIdx]
+                : undefined;
+              const isPickedCorrect = pickedIdx === currentQ.correctAnswer;
+              if (!pickedFb && !currentQ.explanation) return null;
+              return (
+                <div className="space-y-2.5">
+                  {pickedFb && (
+                    <div className={`p-4 rounded-xl border text-xs space-y-1 ${
+                      isPickedCorrect
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-amber-50 border-amber-200 text-amber-950'
+                    }`}>
+                      <span className="font-extrabold">
+                        {isPickedCorrect
+                          ? `✓ Phản hồi cho lựa chọn ${String.fromCharCode(65 + pickedIdx)}:`
+                          : `💡 Phản hồi riêng cho lựa chọn ${String.fromCharCode(65 + pickedIdx)} của bạn:`}
+                      </span>
+                      <p className="leading-relaxed">{pickedFb}</p>
+                    </div>
+                  )}
+                  {currentQ.explanation && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
+                      <span className="font-bold text-hcmue-800">Giải thích chi tiết (bám SGK):</span>
+                      <p className="leading-relaxed">{currentQ.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Navigation buttons */}
             <div className="flex items-center justify-between border-t border-slate-100 pt-4">

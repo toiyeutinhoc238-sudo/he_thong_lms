@@ -435,7 +435,9 @@ if (MONGODB_URI && process.env.DISABLE_MONGO !== '1') {
         console.log('🧹 Đã hoàn tất kiểm tra và làm sạch tài khoản trong MongoDB.');
         // Đảm bảo khóa học 6AIAB01 luôn sạch dữ liệu ảo (xóa sạch act-*-1..4 cũ và học sinh ảo mẫu)
         await ensureDefaultCourse();
-        console.log('🧹 Đã đồng bộ & dọn sạch dữ liệu ảo trong khóa học 6AIAB01.');
+        // Khởi tạo 1 lần khóa học thực tế Tin học 12 KNTT – Bài 12: Tạo biểu mẫu (kèm Học liệu tương tác A2.3) nếu chưa có
+        await ensureTin12B12Course();
+        console.log('🧹 Đã đồng bộ khóa học 6AIAB01 & Tin học 12 Bài 12 (A2.3).');
       } catch (cleanErr) {
         console.warn('Thông báo dọn dẹp dữ liệu cũ:', cleanErr.message);
       }
@@ -852,9 +854,9 @@ function viewCourse(courseObj, user, progressRecords) {
         total++;
         const p = byActivity.get(original.id);
         let a = original;
-        // Học sinh chỉ nhận đáp án & lời giải SAU KHI đã nộp bài trắc nghiệm
+        // Học sinh chỉ nhận đáp án, lời giải & phản hồi riêng từng lựa chọn SAU KHI đã nộp bài trắc nghiệm
         if (hideAnswers && Array.isArray(a.quizQuestions) && !p?.quizResult) {
-          a = { ...a, quizQuestions: a.quizQuestions.map(({ correctAnswer, explanation, ...q }) => q) };
+          a = { ...a, quizQuestions: a.quizQuestions.map(({ correctAnswer, explanation, optionFeedback, ...q }) => q) };
         }
         if (!p) return a;
         const out = { ...a, isCompleted: !!p.isCompleted };
@@ -1383,7 +1385,593 @@ async function ensureDefaultCourse() {
   }
 }
 
+// ====================== KHÓA HỌC THỰC TẾ TIN HỌC 12 KNTT – BÀI 12: TẠO BIỂU MẪU (+ HỌC LIỆU TƯƠNG TÁC A2.3) ======================
+// Xây dựng chuẩn theo 2 tài liệu:
+// 1) Ý tưởng học liệu tương tác A2.3 – Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích (Phan Phi Phú)
+// 2) Kế hoạch bài dạy (KHBD) Tin học 12 KNTT – Chủ đề 4 – Bài 12: Tạo biểu mẫu (2 tiết)
+function buildTin12B12Course() {
+  return {
+    id: 'TIN12-B12',
+    code: 'TIN12-B12',
+    name: 'Tin học 12 KNTT – Bài 12: Tạo biểu mẫu (2 tiết + Học liệu tương tác A2.3)',
+    category: 'Tin học ứng dụng',
+    gradeLevel: 'Lớp 12',
+    semester: 'Học kỳ 1',
+    academicYear: '2026-2027',
+    thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80',
+    description: 'Chủ đề 4 (Tin học 12 KNTT – Định hướng Tin học Ứng dụng): Biểu mẫu web <form>, các phần tử label, input (Bảng 12.1), radio, checkbox, select, textarea, fieldset, legend; Học liệu tương tác A2.3 “Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích”, trò chơi “Đấu trường Biểu mẫu” 12 câu, thực hành & kiểm duyệt mã AI theo Bảng kiểm 5 tiêu chí, và vận dụng nhúng <iframe> vào trang Bài 11.',
+    targetAudience: 'Học sinh Lớp 12 (Định hướng Tin học Ứng dụng – KNTT)',
+    instructor: {
+      id: 'admin',
+      name: 'Phan Phi Phú',
+      email: 'phanphiphu04@gmail.com',
+      avatar: '',
+      title: 'SV Sư phạm Tin học (49.01.103.064) · GVHD: Phạm Thị Bích Tuyền'
+    },
+    syllabus: [
+      'Tiết 1 – Hoạt động 1 & 2.1: Khởi động “Biểu mẫu quanh ta” (Đơn đặt hàng Hội chợ ẩm thực), Cấu trúc biểu mẫu web (<form>, action, mở rộng GET/POST, bảo vệ mật khẩu & quyền riêng tư).',
+      'Blended tại nhà sau Tiết 1 – Hoạt động 2.2 (Bài A2.3): Phòng thí nghiệm Biểu mẫu “Đoán – Chạy – Giải thích” (4 chặng chạy mã HTML trực tiếp + 6 câu dự đoán có phản hồi riêng từng lựa chọn + Phiếu phản tư .txt).',
+      'Tiết 2 – Hoạt động 3.1: Trò chơi “Đấu trường Biểu mẫu” (12 câu hỏi trắc nghiệm củng cố kiến thức & Câu 12 Ngôi sao hi vọng về an toàn CCCD khi dùng AI).',
+      'Tiết 2 – Hoạt động 3.2: Thực hành tạo nv1_monan.html (Hình 12.2), nv2_dangkithi.html (Hình 12.3) và Nhiệm vụ 3 Kiểm duyệt mã AI gợi ý (5 lỗi + Bảng kiểm 5 tiêu chí + Phiếu nhật kí sử dụng AI).',
+      'Hoạt động 4 (Vận dụng – SGK tr.70): Tạo biểu mẫu dangki_clb.html và nhúng vào trang web Bài 11 bằng liên kết target và khung nội tuyến <iframe>.'
+    ],
+    modules: [
+      {
+        id: 'tin12-mod-1',
+        courseId: 'TIN12-B12',
+        order: 1,
+        title: 'BÀI 12 – TIẾT 1: KHỞI ĐỘNG & BIỂU MẪU WEB (HOẠT ĐỘNG 1 & 2.1)',
+        description: 'Biểu mẫu quanh ta (Đơn đặt hàng Hội chợ ẩm thực), khái niệm 2 thành phần của biểu mẫu web, thẻ <form>, thuộc tính action, GET/POST & nguyên tắc an toàn thông tin.',
+        learningObjectives: '• Nêu được vai trò và 2 thành phần của biểu mẫu web (phần hiển thị HTML và các script xử lí dữ liệu).\n• Biết cấu trúc cặp thẻ <form>...</form>, thuộc tính action, mở rộng phương thức GET/POST và vai trò bảo vệ thông tin của type="password".\n• Chỉ thu thập thông tin thật sự cần thiết, không nhập số CCCD hay mật khẩu thật vào công cụ AI hoặc trang lạ (NLb, 4.2.NC1a).',
+        ownerName: 'Phan Phi Phú',
+        activities: [
+          {
+            id: 'tin12-act-1-1',
+            moduleId: 'tin12-mod-1',
+            title: 'Hoạt động 1 (Khởi động): Biểu mẫu quanh ta – Đơn đặt hàng Hội chợ ẩm thực & Đăng kí tài khoản',
+            type: 'forum',
+            durationMinutes: 7,
+            isCompleted: false,
+            isRequired: true,
+            description: 'Tình huống: Lớp 12 mở gian hàng bán bánh tráng trộn trong Hội chợ ẩm thực của trường và cần tạo “Đơn đặt hàng online” cho các lớp khác đặt trước.\n\nThảo luận cặp đôi (3 phút) và trả lời trên Diễn đàn:\n1. Đơn đặt hàng cần hỏi những thông tin nào? Hãy phân loại theo 4 nhóm: Gõ vào (Họ tên, Ghi chú...) | Chọn một (Kích cỡ Nhỏ/Lớn...) | Chọn nhiều (Phần ăn kèm...) | Nút bấm (Đặt hàng).\n2. Mở rộng (Hoạt động 1 – SGK tr.67): Em đã từng đăng kí tài khoản trên trang web hay ứng dụng nào? Mô tả các bước thực hiện (chú ý các ô nhập tên, mật khẩu, lựa chọn và nút Đăng kí).'
+          },
+          {
+            id: 'tin12-act-1-2',
+            moduleId: 'tin12-mod-1',
+            title: 'Hoạt động 2.1: Kiến thức trọng tâm Biểu mẫu web, thẻ <form>, action, GET/POST & type="password" (SGK tr.67–68)',
+            type: 'document',
+            durationMinutes: 15,
+            isCompleted: false,
+            isRequired: true,
+            description: '1. KHÁI NIỆM & 2 THÀNH PHẦN CỦA BIỂU MẪU WEB (SGK tr.67):\n• Biểu mẫu web (web form) là giao diện cho phép người dùng nhập dữ liệu trên trang web và gửi về máy chủ xử lí (VD: đăng kí tài khoản, đăng nhập, đặt hàng, bình chọn, tìm kiếm).\n• Một biểu mẫu web gồm 2 thành phần:\n  (1) Phần hiển thị trên trang web: tạo bằng các phần tử HTML như <form>, <label>, <input>, <select>, <textarea>, <fieldset>, <legend>.\n  (2) Các ứng dụng/script xử lí dữ liệu (ở máy chủ hoặc trình duyệt): tiếp nhận, kiểm tra và lưu trữ dữ liệu (phần này không thuộc phạm vi lập trình HTML Bài 12).\n\n2. CẤU TRÚC THẺ <form> VÀ THUỘC TÍNH action:\n<form action="/action_page.php" method="POST">\n  <!-- Các phần tử nhập dữ liệu đặt ở đây -->\n</form>\n• action: xác định địa chỉ (URL/chương trình) nơi dữ liệu biểu mẫu được gửi tới khi bấm nút Submit.\n• Mở rộng thuộc tính method:\n  - GET: dữ liệu gắn trực tiếp lên thanh địa chỉ URL (phù hợp ô tìm kiếm, KHÔNG dùng cho mật khẩu).\n  - POST: dữ liệu gửi ẩn trong thân gói tin HTTP (phù hợp đăng nhập, đăng kí, gửi thông tin cá nhân).\n\n3. AN TOÀN THÔNG TIN & QUYỀN RIÊNG TƯ (4.2.NC1a):\n• Dùng type="password" để che mật khẩu bằng dấu chấm (•••) tránh bị nhìn trộm trên màn hình.\n• Khi thiết kế biểu mẫu cho CLB hoặc gian hàng trường học: CHỈ hỏi những thông tin thật sự cần thiết (không thu thập thừa số CCCD, mật khẩu ngân hàng, địa chỉ nhà riêng...).\n• Khi dùng AI hỗ trợ viết mã HTML: tuyệt đối KHÔNG nhập dữ liệu cá nhân thật của mình hay bạn bè vào câu lệnh AI.'
+          },
+          {
+            id: 'tin12-act-1-3',
+            moduleId: 'tin12-mod-1',
+            title: 'Phiếu học tập số 1 (Câu 1 & Câu 2 – Chọn phần tử cho Đơn đặt bánh tráng trộn)',
+            type: 'assignment',
+            durationMinutes: 15,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            programmingLanguage: 'Tài liệu & Dự án',
+            description: 'Hoàn thành Câu 1 & Câu 2 của Phiếu học tập số 1 theo KHBD Bài 12.',
+            assignmentPrompt: 'PHIẾU HỌC TẬP SỐ 1 – BIỂU MẪU WEB VÀ CÁC PHẦN TỬ NHẬP DỮ LIỆU\n\nCâu 1 (Khái niệm – SGK tr.67):\n1) Biểu mẫu web dùng để làm gì? Gồm mấy thành phần?\n2) Kể tên 4 phần tử HTML thường dùng trong biểu mẫu.\n\nCâu 2 (Chọn phần tử phù hợp cho “Đơn đặt bánh tráng trộn” – CHỈ sử dụng các kiểu trong Bảng 12.1 SGK tr.68 cùng <select> và <textarea>):\nHãy chỉ rõ phần tử / thuộc tính type phù hợp và giải thích ngắn cho từng mục sau:\n1. Họ tên người đặt\n2. Email liên hệ\n3. Số phần ăn\n4. Giờ nhận hàng\n5. Kích cỡ: Nhỏ / Lớn (chỉ chọn một)\n6. Phần ăn kèm: Trứng cút, Khô bò, Xoài, Hành phi (được chọn nhiều)\n7. Lớp: chọn từ danh sách 10 / 11 / 12\n8. Ghi chú (nhiều dòng)\n\n(Gợi ý mở rộng: với Email/Số phần ăn/Giờ nhận hàng, ngoài type="text" trong Bảng 12.1, HTML5 còn hỗ trợ các kiểu mở rộng email, number, time.)'
+          }
+        ]
+      },
+      {
+        id: 'tin12-mod-2',
+        courseId: 'TIN12-B12',
+        order: 2,
+        title: 'BÀI 12 – HOẠT ĐỘNG 2.2 (A2.3): PHÒNG THÍ NGHIỆM BIỂU MẪU (ĐOÁN – CHẠY – GIẢI THÍCH)',
+        description: 'Học liệu tương tác A2.3 triển khai theo mô hình Blended Learning (tự học ở nhà 15–20 phút sau Tiết 1): đọc mã, dự đoán, chạy biểu mẫu thật, sửa mã và phản tư.',
+        learningObjectives: '• Dự đoán và giải thích được ảnh hưởng của for–id (Chặng 1), 7 giá trị type theo Bảng 12.1 (Chặng 2), name và value của radio (Chặng 3).\n• Tự chạy mã HTML trực tiếp, quan sát bảng “Dữ liệu gửi đi” (FormData) và sửa được 3 lỗi thường gặp ở Chặng 4 (mức Phân tích).\n• Xuất phiếu kết quả (.txt) & viết phản tư (Metacognitive) mà không cần lộ dữ liệu cá nhân.',
+        ownerName: 'Phan Phi Phú',
+        activities: [
+          {
+            id: 'tin12-act-2-1',
+            moduleId: 'tin12-mod-2',
+            title: '🔬 Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích (Học liệu tương tác HTML5 trực tiếp)',
+            type: 'document',
+            durationMinutes: 20,
+            isCompleted: false,
+            isRequired: true,
+            fileUrl: '/a23-phong-thi-nghiem-bieu-mau.html',
+            description: 'Học liệu tương tác 4 chặng (Đoán → Chạy → Giải thích → Thử nghiệm) bám sát SGK Tin học 12 KNTT tr.67–69. Có nút phóng to chữ (UDL), chạy offline 1 tệp HTML và tải phiếu kết quả (.txt) không thu thập dữ liệu cá nhân.'
+          },
+          {
+            id: 'tin12-act-2-2',
+            moduleId: 'tin12-mod-2',
+            title: 'Trắc nghiệm Dự đoán 4 Chặng A2.3 (6 câu có phản hồi sư phạm riêng cho từng phương án)',
+            type: 'quiz',
+            durationMinutes: 15,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            passScore: 5,
+            timeLimitMinutes: 15,
+            shuffleQuestions: false,
+            description: '6 câu hỏi dự đoán chuẩn Mục 4 (Học liệu A2.3). Sau khi nộp bài, hệ thống tự động chấm điểm và hiển thị phản hồi riêng giải thích đúng cho phương án em đã chọn.',
+            quizQuestions: [
+              {
+                id: 'a23-q1',
+                question: '[Chặng 1 – label và input] Cho đoạn mã: <label for="ten">Họ tên:</label><input type="text" id="ten" name="hoTen">. Khi chạy đoạn mã rồi nháy chuột vào chữ “Họ tên:”, điều gì xảy ra?',
+                options: [
+                  'Không có gì xảy ra, nhãn chỉ là chữ trang trí',
+                  'Con trỏ nhảy vào ô nhập bên cạnh',
+                  'Trình duyệt mở một trang mới',
+                  'Chữ “Họ tên:” bị xóa'
+                ],
+                correctAnswer: 1,
+                optionFeedback: [
+                  'Nhiều bạn nghĩ vậy! Nhưng nhãn này có thuộc tính for trỏ tới ô nhập. Hãy chạy thử ở Phòng thí nghiệm A2.3 và nháy vào chữ “Họ tên:” để kiểm chứng.',
+                  'Chính xác! for của label trùng với id của input (đều là "ten") nên nháy vào nhãn cũng như nháy vào ô.',
+                  'Chưa đúng. Mở trang mới là việc của liên kết (thẻ a). Label chỉ gắn nhãn cho ô nhập.',
+                  'Chưa đúng. Nháy chuột không làm thay đổi nội dung trang. Hãy chạy thử để xem nhãn làm gì.'
+                ],
+                explanation: 'Theo SGK tr.67–68: label định nghĩa nhãn cho vùng nhập; giá trị for phải trùng id của input thì nhãn mới gắn với ô (“For với id là một cặp – phải giống nhau”).'
+              },
+              {
+                id: 'a23-q2a',
+                question: '[Chặng 2 – type="password"] Cho thẻ <input type="password" id="o1" name="oThu">. Gõ chữ abc vào ô, em sẽ thấy gì trên màn hình?',
+                options: [
+                  'Thấy abc',
+                  'Thấy ••• (dấu chấm)',
+                  'Ô biến mất',
+                  'Thấy ABC viết hoa'
+                ],
+                correctAnswer: 1,
+                optionFeedback: [
+                  'Đó là kết quả của type="text". Với password, Bảng 12.1 ghi gì? Hãy chạy thử và gõ để kiểm chứng.',
+                  'Đúng! password tạo trường nhập mật khẩu: vẫn nhập văn bản nhưng bị che thành dấu chấm, để người bên cạnh không nhìn trộm.',
+                  'Chưa đúng. Ô vẫn hiện, chỉ cách hiển thị chữ thay đổi.',
+                  'Chưa đúng. type không đổi chữ thường thành chữ hoa.'
+                ],
+                explanation: 'Theo Bảng 12.1 (SGK tr.68): type="password" tạo trường nhập mật khẩu giúp che kí tự nhập vào.'
+              },
+              {
+                id: 'a23-q2b',
+                question: '[Chặng 2 – Câu hỏi 2 SGK tr.69] Câu lệnh HTML nào thêm đúng nút “Quên mật khẩu” vào biểu mẫu?',
+                options: [
+                  '<input type="submit" value="Quên mật khẩu">',
+                  '<input type="button" value="Quên mật khẩu">',
+                  '<input type="button">Quên mật khẩu</input>',
+                  '<input type="text" value="Quên mật khẩu">'
+                ],
+                correctAnswer: 1,
+                optionFeedback: [
+                  'Gần đúng, nhưng submit là nút gửi biểu mẫu đi. Nút Quên mật khẩu không gửi dữ liệu biểu mẫu.',
+                  'Chính xác! button tạo nút bấm thông thường; chữ hiển thị trên nút đặt ở thuộc tính value (Bảng 12.1).',
+                  'input là thẻ đơn, không có thẻ đóng </input>. Chữ trên nút phải đặt ở thuộc tính value.',
+                  'text tạo ô nhập chữ, không tạo nút bấm. Hãy thử trong khung sửa mã Chặng 2.'
+                ],
+                explanation: 'Theo Bảng 12.1 (SGK tr.68–69): input là thẻ đơn; type="button" tạo nút bấm không gửi biểu mẫu và chữ trên nút đặt trong value.'
+              },
+              {
+                id: 'a23-q3a',
+                question: '[Chặng 3 – Hai ô radio khác name] Ô Nhỏ có name="size", ô Lớn có name="size2". Khi bấm chọn Nhỏ rồi bấm chọn Lớn, em thấy gì?',
+                options: [
+                  'Chỉ Lớn được chọn, Nhỏ tự bỏ',
+                  'Cả hai ô cùng được chọn',
+                  'Không bấm được ô nào',
+                  'Trình duyệt báo lỗi'
+                ],
+                correctAnswer: 1,
+                optionFeedback: [
+                  'Đó là khi hai ô cùng name. Ở đây name khác nhau (size và size2), hãy chạy thử để xem.',
+                  'Đúng! Radio chỉ “loại trừ nhau” khi cùng name (cùng nhóm). Khác name = hai nhóm riêng nên chọn được cả hai.',
+                  'Chưa đúng. Các ô vẫn bấm được bình thường.',
+                  'Trình duyệt không báo lỗi HTML kiểu này; nó vẫn chạy nhưng chạy sai ý mình. Đó là lí do phải chạy thử.'
+                ],
+                explanation: 'Theo SGK tr.68: các ô radio thuộc cùng một nhóm lựa chọn phải có cùng giá trị thuộc tính name.'
+              },
+              {
+                id: 'a23-q3b',
+                question: '[Chặng 3 – Xóa value="nho"] Sau khi sửa 2 ô radio cùng name="size", nếu xóa thuộc tính value="nho" rồi chọn Nhỏ và bấm Gửi, dữ liệu gửi đi là gì?',
+                options: [
+                  'size = nho',
+                  'size = on',
+                  'Không gửi gì',
+                  'Trình duyệt báo lỗi'
+                ],
+                correctAnswer: 1,
+                optionFeedback: [
+                  'Không còn value thì trình duyệt không biết gửi chữ “nho”. Hãy xóa value="nho" và bấm Gửi để kiểm chứng.',
+                  'Đúng! Thiếu value, trình duyệt gửi giá trị mặc định “on”, không biết em chọn ô nào. Vì vậy mỗi ô radio, checkbox cần có value.',
+                  'Vẫn gửi, vì ô có name. Nhưng giá trị gửi đi vô nghĩa (“on”). Chạy thử để xem.',
+                  'Không có lỗi nào hiện ra. Đây là lỗi “âm thầm”, chỉ phát hiện được khi chạy thử và xem bảng dữ liệu gửi đi.'
+                ],
+                explanation: 'Câu chốt Chặng 3: “Radio thì nhớ: cùng name, thêm value.” Thiếu value sẽ gửi giá trị mặc định on.'
+              },
+              {
+                id: 'a23-q4',
+                question: '[Chặng 4 – Phân tích lỗi đơn đặt hàng] Trong đoạn mã: <input type="text" id="ten"> (Họ tên), <input type="text" id="email" name="email"> (Email), và 2 radio size1/size2. Nhập đủ thông tin rồi bấm Gửi đơn hàng, dữ liệu nào KHÔNG được gửi đi?',
+                options: [
+                  'Họ tên',
+                  'Email',
+                  'Kích cỡ',
+                  'Tất cả đều được gửi'
+                ],
+                correctAnswer: 0,
+                optionFeedback: [
+                  'Đúng! Ô Họ tên không có thuộc tính name nên không được trình duyệt đóng gói gửi đi. Quên name là mất dữ liệu.',
+                  'Ô Email có name="email" nên vẫn được gửi. Lỗi của ô Email nằm ở chỗ for="mail" không khớp id="email".',
+                  'Kích cỡ vẫn được gửi (vì có name), nhưng lại chọn được cả hai ô do khác name (size1 và size2).',
+                  'Chạy thử, bấm Gửi đơn hàng và xem bảng “Dữ liệu gửi đi”: bị mất hẳn mục Họ tên!'
+                ],
+                explanation: 'Thuộc tính name của thẻ input dùng để định danh dữ liệu khi gửi tới máy chủ. Thiếu name thì trình duyệt bỏ qua ô đó khi gửi biểu mẫu.'
+              }
+            ]
+          },
+          {
+            id: 'tin12-act-2-3',
+            moduleId: 'tin12-mod-2',
+            title: 'Nộp Phiếu kết quả A2.3 (.txt) & Phản tư (Metacognitive)',
+            type: 'assignment',
+            durationMinutes: 10,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            programmingLanguage: 'Tài liệu & Dự án',
+            description: 'Nộp tệp .txt tải về từ cuối Phòng thí nghiệm A2.3 (hoặc dán nội dung phản tư trực tiếp) để giáo viên nắm lỗi sai phổ biến trước Tiết 2.',
+            assignmentPrompt: 'HƯỚNG DẪN NỘP KẾT QUẢ PHÒNG THÍ NGHIỆM BIỂU MẪU A2.3\n\n1. Hoàn thành đủ 4 chặng trong hoạt động “🔬 Phòng thí nghiệm Biểu mẫu A2.3” ở ngay phía trên.\n2. Ở màn hình Tổng kết & Phản tư, trả lời ngắn gọn 3 câu hỏi:\n   • Câu nào em đoán sai ở lần đầu?\n   • Vì sao lúc đầu em lại đoán như vậy?\n   • Sau khi chạy thử và sửa mã, giờ em hiểu lại như thế nào?\n3. Bấm nút “⬇ Tải phiếu kết quả (.txt)” rồi tải tệp đó lên mục này (hoặc chuyển sang tab “Nhập bài làm trực tiếp” để dán câu trả lời phản tư).\n\n(Mục đích: Đánh giá quá trình không tính áp lực điểm số — giúp giáo viên biết lỗi nào cả lớp hay mắc để chốt nhanh đầu Tiết 2.)'
+          }
+        ]
+      },
+      {
+        id: 'tin12-mod-3',
+        courseId: 'TIN12-B12',
+        order: 3,
+        title: 'BÀI 12 – TIẾT 2: TRÒ CHƠI “ĐẤU TRƯỜNG BIỂU MẪU” (HOẠT ĐỘNG 3.1)',
+        description: '12 câu hỏi trắc nghiệm chuẩn KHBD Bài 12 củng cố toàn bộ thẻ & thuộc tính biểu mẫu HTML + Câu 12 Ngôi sao hi vọng về an toàn dữ liệu khi dùng AI.',
+        learningObjectives: '• Củng cố chính xác thẻ <form>, <label>, <input> (Bảng 12.1), <textarea>, <select>, <fieldset>, <legend> và các thuộc tính action, for, id, name, type, value.\n• Nhận diện và xử lí đúng tình huống AI gợi ý thu thập thừa dữ liệu nhạy cảm (số CCCD).',
+        ownerName: 'Phan Phi Phú',
+        activities: [
+          {
+            id: 'tin12-act-3-1',
+            moduleId: 'tin12-mod-3',
+            title: 'Trò chơi “Đấu trường Biểu mẫu” (12 câu hỏi trắc nghiệm chuẩn KHBD)',
+            type: 'quiz',
+            durationMinutes: 12,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            passScore: 5,
+            timeLimitMinutes: 12,
+            shuffleQuestions: false,
+            description: 'Gồm 12 câu hỏi chuẩn KHBD Bài 12 (20 giây/câu khi thi trên lớp; Câu 12 là câu “Ngôi sao hi vọng” về kiểm duyệt mã AI và bảo vệ số CCCD).',
+            quizQuestions: [
+              {
+                id: 'dt-q1',
+                question: 'Câu 1: Thẻ HTML nào dùng để tạo biểu mẫu?',
+                options: ['<table>', '<form>', '<input>', '<label>'],
+                correctAnswer: 1,
+                explanation: 'Thẻ <form>...</form> dùng để tạo biểu mẫu web (SGK tr.67).'
+              },
+              {
+                id: 'dt-q2',
+                question: 'Câu 2: Kiểu input nào dùng để nhập mật khẩu?',
+                options: ['text', 'hidden', 'textarea', 'password'],
+                correctAnswer: 3,
+                explanation: 'type="password" dùng để nhập mật khẩu, kí tự hiển thị ẩn bằng dấu chấm (Bảng 12.1 – SGK tr.68).'
+              },
+              {
+                id: 'dt-q3',
+                question: 'Câu 3: Kiểu radio có đặc điểm gì?',
+                options: [
+                  'Chọn được nhiều đáp án',
+                  'Dùng để tải tệp',
+                  'Chỉ chọn được một đáp án trong cùng một nhóm',
+                  'Dùng nhập văn bản'
+                ],
+                correctAnswer: 2,
+                explanation: 'Các ô radio có cùng thuộc tính name tạo thành một nhóm và chỉ cho chọn duy nhất 1 giá trị (SGK tr.68).'
+              },
+              {
+                id: 'dt-q4',
+                question: 'Câu 4: Phần tử HTML nào dùng để nhập văn bản nhiều dòng?',
+                options: ['<textarea>', '<input>', '<select>', '<option>'],
+                correctAnswer: 0,
+                explanation: 'Phần tử <textarea> dùng để nhập đoạn văn bản nhiều dòng như ghi chú, ý kiến đóng góp (SGK tr.68).'
+              },
+              {
+                id: 'dt-q5',
+                question: 'Câu 5: Cho đoạn mã <label for="email">Email</label><input id="email" type="email">. Vai trò của for="email" là gì?',
+                options: [
+                  'Đặt tên cho biểu mẫu',
+                  'Đặt kiểu dữ liệu của ô nhập',
+                  'Gửi dữ liệu đến máy chủ',
+                  'Liên kết nhãn với ô nhập có id="email"'
+                ],
+                correctAnswer: 3,
+                explanation: 'Thuộc tính for của <label> liên kết nhãn với ô nhập có id tương ứng — nháy vào nhãn sẽ đưa con trỏ vào ô (SGK tr.67–68).'
+              },
+              {
+                id: 'dt-q6',
+                question: 'Câu 6: Thuộc tính action của thẻ <form> xác định điều gì?',
+                options: [
+                  'Nơi dữ liệu biểu mẫu được gửi đến',
+                  'Kiểu dữ liệu của ô nhập',
+                  'Chữ hiển thị trên nút bấm',
+                  'Số dòng của vùng nhập văn bản'
+                ],
+                correctAnswer: 0,
+                explanation: 'Thuộc tính action chỉ định địa chỉ/chương trình tiếp nhận và xử lí dữ liệu biểu mẫu khi gửi đi (SGK tr.67).'
+              },
+              {
+                id: 'dt-q7',
+                question: 'Câu 7: Thuộc tính nào của thẻ <input> dùng để tham chiếu tới dữ liệu khi tính toán hay gửi tới máy chủ?',
+                options: ['id', 'name', 'type', 'for'],
+                correctAnswer: 1,
+                explanation: 'Thuộc tính name dùng để định danh dữ liệu của ô nhập khi gửi tới máy chủ hoặc xử lí (SGK tr.68).'
+              },
+              {
+                id: 'dt-q8',
+                question: 'Câu 8: Phần tử nào dùng để nhóm các phần tử có liên quan trong biểu mẫu bằng một hình chữ nhật bao quanh?',
+                options: ['<legend>', '<label>', '<fieldset>', '<select>'],
+                correctAnswer: 2,
+                explanation: '<fieldset> dùng để nhóm các phần tử liên quan bằng khung hình chữ nhật; <legend> đặt tiêu đề cho khung đó (SGK tr.68).'
+              },
+              {
+                id: 'dt-q9',
+                question: 'Câu 9: Hai ô radio “Nam”, “Nữ” có name="gt1" và name="gt2". Khi chạy trên trình duyệt sẽ thấy gì?',
+                options: [
+                  'Chọn được cả hai ô cùng lúc',
+                  'Không chọn được ô nào',
+                  'Chỉ chọn được một ô',
+                  'Trình duyệt báo lỗi'
+                ],
+                correctAnswer: 0,
+                explanation: 'Hai ô radio khác giá trị name nên thuộc 2 nhóm độc lập, trình duyệt cho phép chọn cả hai ô cùng lúc.'
+              },
+              {
+                id: 'dt-q10',
+                question: 'Câu 10: Thu thập “Sở thích: Bóng đá, Cờ vua, Âm nhạc (được chọn nhiều)” nên dùng phần tử nào?',
+                options: [
+                  'Ba ô radio cùng name',
+                  'Ba ô checkbox cùng name',
+                  'Một vùng textarea',
+                  'Một ô input kiểu password'
+                ],
+                correctAnswer: 1,
+                explanation: 'Checkbox cho phép chọn nhiều mục cùng lúc trong nhóm; radio chỉ cho chọn duy nhất 1 mục.'
+              },
+              {
+                id: 'dt-q11',
+                question: 'Câu 11: Muốn tạo nút cho phép người dùng chọn tệp và tải lên máy chủ, ta dùng input có type nào?',
+                options: ['submit', 'button', 'text', 'file'],
+                correctAnswer: 3,
+                explanation: 'Theo Bảng 12.1 (SGK tr.68): type="file" tạo nút chọn tệp từ thiết bị để tải lên máy chủ.'
+              },
+              {
+                id: 'dt-q12',
+                question: 'Câu 12 (Ngôi sao hi vọng): Khi dùng AI gợi ý mã cho biểu mẫu đăng kí CLB, AI thêm ô nhập số CCCD không cần thiết. Em nên làm gì?',
+                options: [
+                  'Đưa lên trang web ngay vì mã do AI viết',
+                  'Nhập số CCCD thật của bạn vào AI để nhờ kiểm tra',
+                  'Kiểm tra lại, bỏ ô không cần thiết, chạy thử rồi mới dùng',
+                  'Xóa hết và không bao giờ dùng AI'
+                ],
+                correctAnswer: 2,
+                explanation: 'Phải kiểm duyệt mã do AI gợi ý: lược bỏ các trường thu thập dữ liệu nhạy cảm không cần thiết (số CCCD), chạy thử kiểm chứng rồi mới sử dụng, và tuyệt đối không nhập dữ liệu cá nhân thật vào AI (4.2.NC1a).'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'tin12-mod-4',
+        courseId: 'TIN12-B12',
+        order: 4,
+        title: 'BÀI 12 – TIẾT 2: THỰC HÀNH TẠO BIỂU MẪU & KIỂM DUYỆT MÃ AI (HOẠT ĐỘNG 3.2)',
+        description: 'Thực hành viết mã HTML trên máy (nv1_monan.html, nv2_dangkithi.html) và kiểm duyệt mã do AI gợi ý theo Bảng kiểm 5 tiêu chí + Phiếu nhật kí sử dụng AI.',
+        learningObjectives: '• Tự viết được mã HTML tạo biểu mẫu Món ăn (Hình 12.2) và Đăng kí môn thi tốt nghiệp (Hình 12.3 có fieldset, legend, date, number, radio, checkbox, select).\n• Phát hiện và sửa đủ 5 lỗi trong đoạn mã AI mẫu theo Bảng kiểm 5 tiêu chí; ghi Phiếu nhật kí sử dụng AI trung thực.',
+        ownerName: 'Phan Phi Phú',
+        activities: [
+          {
+            id: 'tin12-act-4-1',
+            moduleId: 'tin12-mod-4',
+            title: 'Nhiệm vụ 1 & 2: Tạo nv1_monan.html (Hình 12.2) và nv2_dangkithi.html (Hình 12.3)',
+            type: 'assignment',
+            durationMinutes: 22,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            programmingLanguage: 'Web HTML/CSS',
+            description: 'Thực hành viết mã HTML chuẩn theo SGK Tin học 12 KNTT tr.69–70 và nộp tệp (.html / .zip) hoặc dán mã nguồn trực tiếp.',
+            assignmentPrompt: 'HOẠT ĐỘNG 3.2 – THỰC HÀNH TẠO BIỂU MẪU (CẶP ĐÔI / CÁ NHÂN)\n\n• Nhiệm vụ 1 (nv1_monan.html – Hình 12.2 SGK tr.69): Tạo biểu mẫu gồm 1 ô nhập văn bản “Món ăn ưa thích” (<label for="monAn"> khớp id="monAn", có name="monAn") và nút gửi “Gửi” (<input type="submit" value="Gửi">).\n\n• Nhiệm vụ 2 (nv2_dangkithi.html – Hình 12.3 SGK tr.70): Tạo biểu mẫu “Đăng kí môn thi tốt nghiệp” gồm:\n  1. Khung <fieldset> với tiêu đề <legend>Thông tin thí sinh</legend>: Họ tên (text), Số CCCD (text – lưu ý: chỉ là khung mẫu thi tốt nghiệp, KHÔNG gõ số CCCD thật khi chụp ảnh nộp!), Ngày sinh (type="date"), Giới tính Nam/Nữ (radio cùng name="gioiTinh", có value).\n  2. Khung <fieldset> với <legend>Đăng kí môn thi</legend>: Môn thi bắt buộc (Toán, Ngữ văn – checkbox có name & value), Tổ hợp tự chọn (select/option: KHTN / KHXH), Điểm trung bình lớp 12 (type="number" step="0.1" min="0" max="10").\n  3. Nút “Đăng kí” (type="submit").\n\nTIÊU CHÍ CHẤM ĐIỂM (THANG 10Đ – RUBRIC KHBD):\n- Cấu trúc biểu mẫu (2,0đ): Đủ thẻ <form>, <fieldset>, <legend>, không lỗi mở/đóng thẻ.\n- Phần tử và kiểu nhập (3,0đ): Dùng đúng text, date, number, radio, checkbox, select, submit.\n- Thuộc tính nhãn, id, name (2,0đ): Đủ label–for khớp id, radio cùng name, có name & value.\n- Chạy thử và kết quả (2,0đ): Hiển thị đúng, chọn được 1 radio, chọn được nhiều checkbox.\n- An toàn & ghi nhận AI (1,0đ): Không dùng dữ liệu cá nhân thật; nếu có dùng AI phải kiểm duyệt rõ ràng.',
+            starterCode: `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng kí môn thi tốt nghiệp</title>
+</head>
+<body>
+  <h2>ĐĂNG KÍ MÔN THI TỐT NGHIỆP</h2>
+  <form action="#" method="POST">
+    <fieldset>
+      <legend>Thông tin thí sinh</legend>
+      <label for="hoTen">Họ và tên:</label>
+      <input type="text" id="hoTen" name="hoTen" required><br><br>
+
+      <label for="ngaySinh">Ngày sinh:</label>
+      <input type="date" id="ngaySinh" name="ngaySinh"><br><br>
+
+      Giới tính:
+      <input type="radio" id="nam" name="gioiTinh" value="Nam">
+      <label for="nam">Nam</label>
+      <input type="radio" id="nu" name="gioiTinh" value="Nu">
+      <label for="nu">Nữ</label>
+    </fieldset>
+    <br>
+    <!-- Hoàn thiện tiếp fieldset Đăng kí môn thi & nút submit tại đây -->
+    <input type="submit" value="Đăng kí">
+  </form>
+</body>
+</html>`
+          },
+          {
+            id: 'tin12-act-4-2',
+            moduleId: 'tin12-mod-4',
+            title: 'Nhiệm vụ 3: Kiểm duyệt mã AI gợi ý (5 lỗi) & Phiếu nhật kí sử dụng AI',
+            type: 'assignment',
+            durationMinutes: 15,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            programmingLanguage: 'Web HTML/CSS',
+            description: 'Kiểm tra đoạn mã biểu mẫu do AI tạo ra theo Bảng kiểm 5 tiêu chí (KHBD tr.21), sửa đủ 5 lỗi và hoàn thành Phiếu nhật kí sử dụng AI (KHBD tr.22).',
+            assignmentPrompt: 'NHIỆM VỤ 3 – KIỂM DUYỆT MÃ DO AI GỢI Ý (KHBD BÀI 12 TR.21–22)\n\nYêu cầu 1: Đọc kỹ đoạn mã mẫu ở khung “Mã nguồn mẫu” bên dưới (chứa 5 lỗi điển hình khi AI sinh mã), đối chiếu BẢNG KIỂM 5 TIÊU CHÍ sau, liệt kê đủ 5 lỗi và nộp lại đoạn mã đã sửa hoàn chỉnh:\n  [1] Có đúng cặp thẻ <form> và nút gửi hợp lệ (type="submit")?\n  [2] Kiểu nhập (type) của từng ô có đúng yêu cầu không (đặc biệt Ngày sinh)?\n  [3] Mỗi ô radio cùng nhóm có cùng thuộc tính name không?\n  [4] Mỗi <label> có thuộc tính for khớp với id của ô nhập, và mỗi ô có thuộc tính name không?\n  [5] Có thu thập thừa dữ liệu nhạy cảm không? Có chạy thử kiểm chứng trên trình duyệt chưa?\n\nYêu cầu 2: Ghi ngắn gọn PHIẾU NHẬT KÍ SỬ DỤNG AI (6 mục):\n  1. Nhiệm vụ thực hiện:\n  2. Công cụ AI đã dùng (nếu có):\n  3. Câu lệnh (prompt) đã dùng:\n  4. Điểm AI làm tốt:\n  5. Lỗi/thiếu sót em phát hiện được:\n  6. Em đã tự sửa cụ thể những gì & cam kết không nhập dữ liệu cá nhân thật:',
+            starterCode: `<!-- ĐOẠN MÃ MẪU DO AI TẠO (CHỨA 5 LỖI CẦN KIỂM DUYỆT & SỬA) -->
+<form action="/submit">
+  <fieldset>
+    <legend>Thông tin thí sinh</legend>
+    <label for="cccd">Số CCCD:</label>
+    <input type="text" id="so_cccd" name="cccd"><br>
+
+    <label for="ns">Ngày sinh:</label>
+    <input type="text" id="ns" name="ngay_sinh"><br>
+
+    Giới tính:
+    <input type="radio" id="nam" name="gt1" value="Nam">
+    <label for="nam">Nam</label>
+    <input type="radio" id="nu" name="gt2" value="Nu">
+    <label for="nu">Nữ</label><br>
+
+    Môn thi:
+    <input type="checkbox" id="toan" value="Toan">
+    <label for="toan">Toán</label>
+    <input type="checkbox" id="van" name="mon_thi" value="Van">
+    <label for="van">Ngữ văn</label><br>
+
+    <input type="button" value="Đăng kí">
+  </fieldset>
+</form>`
+          }
+        ]
+      },
+      {
+        id: 'tin12-mod-5',
+        courseId: 'TIN12-B12',
+        order: 5,
+        title: 'BÀI 12 – VẬN DỤNG: BIỂU MẪU ĐĂNG KÍ CLB & NHÚNG IFRAME (HOẠT ĐỘNG 4)',
+        description: 'Vận dụng (SGK tr.70): Thiết kế biểu mẫu dangki_clb.html cho CLB trường học và nhúng trực tiếp vào trang web Bài 11 bằng thẻ <a> target và <iframe>.',
+        learningObjectives: '• Thiết kế được biểu mẫu dangki_clb.html có ít nhất 6 trường đa dạng (text, radio, checkbox, select/textarea, fieldset, legend), bảo vệ quyền riêng tư (không hỏi thừa CCCD/mật khẩu).\n• Tích hợp biểu mẫu vào trang web giới thiệu CLB (Bài 11) bằng liên kết target và khung nội tuyến <iframe> (3.1.NC1a).',
+        ownerName: 'Phan Phi Phú',
+        activities: [
+          {
+            id: 'tin12-act-5-1',
+            moduleId: 'tin12-mod-5',
+            title: 'Vận dụng (SGK tr.70): Tạo dangki_clb.html & Nhúng bằng <iframe> vào trang Bài 11',
+            type: 'assignment',
+            durationMinutes: 30,
+            isCompleted: false,
+            isRequired: true,
+            maxScore: 10,
+            programmingLanguage: 'Web HTML/CSS',
+            description: 'Nộp sản phẩm vận dụng gồm tệp dangki_clb.html và tệp trang chủ CLB (Bài 11 đã thêm liên kết target + khung <iframe>), kèm Phiếu nhật kí AI nếu có dùng AI.',
+            assignmentPrompt: 'HOẠT ĐỘNG 4 – VẬN DỤNG (SGK TIN HỌC 12 KNTT TR.70)\n\nNhiệm vụ:\n1. Tạo tệp dangki_clb.html (Biểu mẫu đăng kí thành viên CLB của trường) bảo đảm:\n   • Có tối thiểu 6 trường dữ liệu đa dạng: text (Họ tên, Lớp), radio (Khối hoặc Vai trò dự kiến – cùng name, có value), checkbox (Kĩ năng/Sở thích – được chọn nhiều), select (CLB muốn tham gia), textarea (Lí do tham gia/Nguyện vọng), nút submit.\n   • Sử dụng <fieldset> và <legend> chia nhóm hợp lí; mọi <label for> khớp id.\n   • Đạo đức & quyền riêng tư: CHỈ hỏi thông tin cần thiết cho việc đăng kí CLB — KHÔNG yêu cầu số CCCD, mật khẩu hay ảnh giấy tờ tùy thân.\n\n2. Mở lại trang web giới thiệu CLB đã tạo ở Bài 11, thêm liên kết “Đăng kí” và khung nội tuyến <iframe> sao cho khi nháy vào liên kết “Đăng kí”, biểu mẫu dangki_clb.html hiển thị ngay trong khung iframe.\n\n3. Nén 2 tệp HTML thành .zip (hoặc nộp tệp dangki_clb.html / dán mã trực tiếp kèm Phiếu nhật kí sử dụng AI nếu có sử dụng).',
+            starterCode: `<!-- Gợi ý nhúng biểu mẫu dangki_clb.html vào trang Bài 11 bằng <iframe> -->
+<nav>
+  <a href="dangki_clb.html" target="khungDangKi">📝 Mở biểu mẫu Đăng kí CLB</a>
+</nav>
+
+<iframe
+  name="khungDangKi"
+  src="dangki_clb.html"
+  width="640"
+  height="480"
+  title="Biểu mẫu đăng kí thành viên CLB"
+  style="border: 1px solid #cbd5e1; border-radius: 12px;"
+></iframe>`
+          }
+        ]
+      }
+    ],
+    enrolledStudents: [],
+    enrolledStudentsCount: 0,
+    files: [
+      {
+        id: 'file-tin12-a23-html',
+        name: 'Phong_Thi_Nghiem_Bieu_Mau_A23.html',
+        filename: 'a23-phong-thi-nghiem-bieu-mau.html',
+        url: '/a23-phong-thi-nghiem-bieu-mau.html',
+        size: '48 KB',
+        mimetype: 'text/html',
+        fileType: 'code',
+        folder: 'Bài 2 - Hoạt động 2.2 (A2.3)',
+        moduleId: 'tin12-mod-2',
+        description: 'Học liệu tương tác HTML5 độc lập (chạy trực tiếp hoặc tải về chạy offline không cần Internet) — Bài A2.3 Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích.',
+        uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+        uploadedAt: '27/11/2026'
+      }
+    ],
+    announcements: [
+      {
+        id: 'anc-tin12-welcome',
+        title: 'Hướng dẫn học tập Bài 12: Tạo biểu mẫu & Học liệu tương tác A2.3',
+        content: 'Chào mừng các em đến với học phần Tin học 12 KNTT – Bài 12: Tạo biểu mẫu.\n• Sau Tiết 1 trên lớp, các em vào Mô-đun 2 mở “🔬 Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích” (15–20 phút, không đếm giờ, có nút tải chạy offline) rồi nộp Phiếu kết quả .txt.\n• Lưu ý an toàn thông tin: Học liệu A2.3 không thu thập dữ liệu cá nhân; trong suốt Bài 12 các em không nhập số CCCD hay mật khẩu thật vào AI hoặc biểu mẫu mẫu.',
+        author: 'Phan Phi Phú',
+        createdAt: '27/11/2026',
+        isImportant: true
+      }
+    ],
+    certificateEligible: true
+  };
+}
+
+// Khởi tạo 1 lần khóa học thực tế TIN12-B12 (nếu chưa từng seed và chưa tồn tại). Không bao giờ ghi đè chỉnh sửa của giáo viên hay tự tạo lại sau khi quản trị viên chủ động xóa.
+async function ensureTin12B12Course() {
+  const tin12 = buildTin12B12Course();
+  if (isMongoConnected) {
+    try {
+      const flagDoc = await SettingModel.findOne({ key: 'seededTin12B12' }).lean();
+      const existing = await CourseModel.findOne({ $or: [{ id: 'TIN12-B12' }, { code: 'TIN12-B12' }] }).lean();
+      if (existing) {
+        if (!flagDoc) {
+          await SettingModel.findOneAndUpdate(
+            { key: 'seededTin12B12' },
+            { $set: { value: { seeded: true }, updatedAt: new Date().toISOString() } },
+            { upsert: true }
+          );
+        }
+        return existing;
+      }
+      if (flagDoc?.value?.seeded) return null;
+      const created = await CourseModel.create(tin12);
+      await SettingModel.findOneAndUpdate(
+        { key: 'seededTin12B12' },
+        { $set: { value: { seeded: true }, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
+      return created.toObject();
+    } catch (e) {
+      console.warn('Thông báo seed TIN12-B12 Mongo:', e.message);
+      return null;
+    }
+  } else {
+    const db = readDb();
+    db.courses = db.courses || [];
+    db.settings = db.settings || {};
+    const existing = db.courses.find(c => c.id === 'TIN12-B12' || c.code === 'TIN12-B12');
+    if (existing) {
+      if (!db.settings.seededTin12B12) {
+        db.settings.seededTin12B12 = true;
+        writeDb(db);
+      }
+      return existing;
+    }
+    if (db.settings.seededTin12B12) return null;
+    db.courses.push(tin12);
+    db.settings.seededTin12B12 = true;
+    writeDb(db);
+    return tin12;
+  }
+}
+
 app.get('/api/courses', async (req, res) => {
+  await ensureTin12B12Course();
   let list = isMongoConnected
     ? (await CourseModel.find()).map(c => c.toObject())
     : (readDb().courses || []);

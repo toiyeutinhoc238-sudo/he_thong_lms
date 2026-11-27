@@ -177,6 +177,7 @@ export interface QuizQuestion {
   options: string[];
   correctAnswer: number; // index of option
   explanation?: string;
+  optionFeedback?: string[]; // Phản hồi sư phạm riêng cho từng phương án (A, B, C, D)
 }
 
 export interface CourseModule {
