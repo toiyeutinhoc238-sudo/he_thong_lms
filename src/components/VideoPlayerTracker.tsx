@@ -220,14 +220,12 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
     const exactPos = Math.max(0, Math.round((Number(pos) || 0) * 1000) / 1000);
 
-    // 1. Tìm neo chặn sớm nhất chưa vượt qua mà vị trí phát đã chạm hoặc vượt qua (so sánh chính xác đến từng ms)
+    // 1. Tìm neo chặn sớm nhất chưa vượt qua mà vị trí phát đã chạm hoặc vượt qua (so sánh chính xác đến từng ms).
+    //    Áp dụng cả khi tắt chống tua: kéo thanh thời gian vượt qua mốc vẫn bị đưa về mốc để trả lời câu hỏi.
     const blockingCp = checkpoints.find(cp => {
       if (isCheckpointCleared(cp, cpResultsRef.current)) return false;
       const cpTime = Math.max(0, Math.round((Number(cp.timeSeconds) || 0) * 1000) / 1000);
-      if (preventSkip) {
-        return exactPos >= cpTime;
-      }
-      return exactPos >= cpTime && exactPos <= cpTime + 3;
+      return exactPos >= cpTime;
     });
 
     if (blockingCp) {

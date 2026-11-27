@@ -1391,7 +1391,7 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v13-bai2-trac-nghiem-2b-moi';
+const AI6_BAI12_REVISION = 'v14-video-neo-chan-khoa-tua';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1434,8 +1434,8 @@ function buildAi6Bai12SeedData() {
         isRequired: true,
         videoUrl: 'https://www.youtube.com/watch?v=Ok-xpKjKp2g',
         videoDuration: 90,
-        preventVideoSkip: false,
-        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.\nVideo sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được.',
+        preventVideoSkip: true,
+        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.\nVideo sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được và không tua nhanh qua đoạn chưa xem.',
         videoCheckpoints: [
           {
             id: 'b1-cp1',
@@ -3350,6 +3350,39 @@ function mergeAi6Bai12IntoCourse(courseObj) {
   courseObj.totalActivities = courseObj.modules.reduce((s, m) => s + (m.activities || []).length, 0);
 }
 
+// Bỏ trạng thái "hoàn thành" của video có neo chặn nếu học sinh chưa vượt qua đủ neo chặn
+// (ví dụ: đã xem 80% video Bài 1 từ trước khi video được gắn neo chặn). Giữ nguyên số giây đã xem.
+async function revokeStaleVideoCompletion(courseObj) {
+  const videos = (courseObj.modules || []).flatMap(m => m.activities || [])
+    .filter(a => a && a.type === 'video' && Array.isArray(a.videoCheckpoints) && a.videoCheckpoints.length > 0);
+  let revoked = 0;
+  for (const act of videos) {
+    const cleared = p => act.videoCheckpoints.every(cp => {
+      const r = p?.videoProgress?.checkpointResults?.[cp.id];
+      return r && (cp.requireCorrect !== false ? !!r.isCorrect : true);
+    });
+    if (isMongoConnected) {
+      const recs = await ProgressModel.find({ courseId: courseObj.id, activityId: act.id, isCompleted: true }).lean();
+      for (const p of recs) {
+        if (cleared(p)) continue;
+        await ProgressModel.updateOne({ _id: p._id }, { $set: { isCompleted: false, completedAt: '', updatedAt: new Date().toISOString() } });
+        revoked++;
+      }
+    } else {
+      const db = readDb();
+      let changed = false;
+      (db.progress || []).forEach(p => {
+        if (p.courseId === courseObj.id && p.activityId === act.id && p.isCompleted && !cleared(p)) {
+          p.isCompleted = false; p.completedAt = ''; p.updatedAt = new Date().toISOString(); changed = true; revoked++;
+        }
+      });
+      if (changed) writeDb(db);
+    }
+  }
+  if (revoked) console.log(`Đã bỏ ${revoked} trạng thái hoàn thành video chưa vượt qua đủ neo chặn (${courseObj.id})`);
+  return revoked;
+}
+
 // Đồng bộ 1 lần toàn bộ học liệu Bài 1 & Bài 2 (từ thư mục BAI1 & BAI2) vào khóa 6AIAB01 mà không làm mất dữ liệu giáo viên hay học sinh
 async function ensureAi6Bai12Content() {
   if (isMongoConnected) {
@@ -3363,6 +3396,7 @@ async function ensureAi6Bai12Content() {
       course.markModified('files');
       course.markModified('syllabus');
       await course.save();
+      await revokeStaleVideoCompletion(course.toObject ? course.toObject() : course);
       await SettingModel.findOneAndUpdate(
         { key: 'seededAi6Bai12' },
         { $set: { value: { seeded: true, revision: AI6_BAI12_REVISION }, updatedAt: new Date().toISOString() } },
@@ -3380,6 +3414,7 @@ async function ensureAi6Bai12Content() {
     mergeAi6Bai12IntoCourse(course);
     db.settings.ai6Bai12Revision = AI6_BAI12_REVISION;
     writeDb(db);
+    await revokeStaleVideoCompletion(course);
   }
 }
 
@@ -4739,7 +4774,8 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
   const maxWatchedSeconds = Math.max(prevVp.watchedSeconds || 0, currentPos);
   const maxProgressPercent = Math.min(100, Math.max(prevVp.progressPercent || 0, incomingPercent));
   const allCheckpointsCleared = checkpointsTotal === 0 || checkpointsPassed >= checkpointsTotal;
-  const isCompleted = !!existing?.isCompleted || (maxProgressPercent >= 80 && allCheckpointsCleared);
+  // Video có neo chặn chỉ được tính hoàn thành khi đã vượt qua đủ neo chặn; trạng thái hoàn thành cũ (trước khi gắn neo chặn) không được giữ lại
+  const isCompleted = allCheckpointsCleared && (!!existing?.isCompleted || maxProgressPercent >= 80);
   const now = nowVN();
 
   const videoProgress = {
@@ -4766,6 +4802,9 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
   if (isCompleted) {
     patch.isCompleted = true;
     patch.completedAt = existing?.completedAt || now;
+  } else if (existing?.isCompleted && checkpointsTotal > 0) {
+    patch.isCompleted = false;
+    patch.completedAt = '';
   }
 
   await saveProgress(ctx.course.id, req.user.id, ctx.activity.id, patch, req.user.email);
