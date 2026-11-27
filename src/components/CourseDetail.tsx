@@ -318,7 +318,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         {/* Trang chủ khóa học (home): Tổng quan mục tiêu, tiến độ & Thông báo lớp học */}
         {activeTab === 'home' && !activeModuleId && !isEmbedMode && (() => {
           const allCourseActs = (activeCourse.modules || []).flatMap(m => m.activities || []);
-          const htmlLabActs = allCourseActs.filter(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || '')).slice(0, 2);
+          const allHtmlLabActs = allCourseActs.filter(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || ''));
+          const htmlLabActs = allHtmlLabActs.slice(0, 2);
           const featuredQuizActs = allCourseActs.filter(a => a.type === 'quiz').slice(0, 2);
           return (
           <div className="mx-4 sm:mx-8 mt-4 space-y-4">
@@ -332,9 +333,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-400/20 border border-sky-200/30 text-sky-100 text-[11px] font-semibold">
                       {activeCourse.category}
                     </span>
-                    {htmlLabActs.length > 0 && (
+                    {allHtmlLabActs.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-400/25 border border-emerald-200/40 text-emerald-100 text-[11px] font-bold">
-                        {htmlLabActs.length} học liệu tương tác HTML5
+                        {allHtmlLabActs.length} học liệu tương tác HTML5
                       </span>
                     )}
                   </div>

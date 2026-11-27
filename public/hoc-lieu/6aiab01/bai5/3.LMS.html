@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="vi"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>LMS Bài 5: Đánh giá độ an toàn của Trí tuệ nhân tạo – Tin học 6</title> <style> :root {
+      --blue-900: #0f2a66;
+      --blue-800: #1e3a8a;
+      --blue-700: #1d4ed8;
+      --blue-600: #2563eb;
+      --blue-500: #3b82f6;
+      --blue-100: #dbeafe;
+      --blue-50: #eff6ff;
+      --sky-50: #f0f9ff;
+      --orange-700: #c2410c;
+      --orange-600: #ea580c;
+      --orange-500: #f97316;
+      --orange-100: #ffedd5;
+      --orange-50: #fff7ed;
+      --green-700: #15803d;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --green-50: #f0fdf4;
+      --red-700: #b91c1c;
+      --red-600: #dc2626;
+      --red-100: #fee2e2;
+      --red-50: #fef2f2;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --white: #ffffff;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 14px 36px rgba(15, 23, 42, 0.14);
+      --font-sans: "Segoe UI", "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      background: var(--slate-100);
+      color: var(--slate-800);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Header */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+      color: var(--white);
+      padding: 12px 20px;
+      box-shadow: 0 4px 16px rgba(15, 42, 102, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-meta {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+      font-weight: 700;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: rgba(15, 23, 42, 0.35);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: #dbeafe;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--white);
+      color: var(--blue-800);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .unlock-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      background: rgba(249, 115, 22, 0.22);
+      border: 1px solid rgba(251, 146, 60, 0.6);
+      color: #ffedd5;
+    }
+
+    .unlock-pill.unlocked {
+      background: rgba(22, 163, 74, 0.25);
+      border-color: #86efac;
+      color: #dcfce7;
+    }
+
+    /* Main Shell */
+    .shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 68px);
+      max-width: 1540px;
+      margin: 0 auto;
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--slate-200);
+      padding: 18px 14px;
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--slate-500);
+      margin: 14px 10px 8px;
+    }
+
+    .nav-section-label:first-child {
+      margin-top: 2px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      padding: 10px 12px;
+      margin-bottom: 5px;
+      border: 1.5px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--slate-700);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+    }
+
+    .nav-btn:hover {
+      background: var(--blue-50);
+      color: var(--blue-800);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, var(--blue-50), #e0f2fe);
+      border-color: var(--blue-500);
+      color: var(--blue-900);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--slate-100);
+      color: var(--blue-700);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .nav-btn.active .nav-badge {
+      background: var(--blue-600);
+      color: var(--white);
+    }
+
+    .nav-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .nav-title {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .nav-sub {
+      display: block;
+      font-size: 11.5px;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+
+    .nav-check {
+      font-size: 13px;
+      color: var(--green-600);
+      font-weight: 800;
+    }
+
+    /* Progress card in sidebar */
+    .sidebar-progress {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+    }
+
+    .progress-bar-wrap {
+      height: 10px;
+      background: var(--slate-200);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0 6px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue-600), var(--orange-500));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Content area */
+    .main-content {
+      padding: 24px 28px 60px;
+      min-width: 0;
+    }
+
+    .module-panel {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .module-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Module Header & Export Toolbar */
+    .module-header {
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--blue-100);
+      color: var(--blue-800);
+      margin-bottom: 6px;
+    }
+
+    .module-tag.orange {
+      background: var(--orange-100);
+      color: var(--orange-700);
+    }
+
+    .module-tag.green {
+      background: var(--green-100);
+      color: var(--green-700);
+    }
+
+    .module-header h2 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--blue-900);
+      line-height: 1.3;
+    }
+
+    .module-header p {
+      margin: 4px 0 0;
+      color: var(--slate-600);
+      font-size: 14px;
+    }
+
+    .lms-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    body.student-mode .teacher-only {
+      display: none !important;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      border: 1.5px solid transparent;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.16s;
+      text-decoration: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--blue-600);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-700);
+    }
+
+    .btn-orange {
+      background: var(--orange-500);
+      color: var(--white);
+    }
+
+    .btn-orange:hover {
+      background: var(--orange-600);
+    }
+
+    .btn-green {
+      background: var(--green-600);
+      color: var(--white);
+    }
+
+    .btn-green:hover {
+      background: var(--green-700);
+    }
+
+    .btn-danger {
+      background: var(--red-600);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background: var(--red-700);
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--blue-800);
+      border-color: var(--blue-200, #bfdbfe);
+    }
+
+    .btn-outline:hover {
+      background: var(--blue-50);
+      border-color: var(--blue-500);
+    }
+
+    .btn-ghost {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      border-color: var(--slate-200);
+    }
+
+    .btn-ghost:hover {
+      background: var(--slate-200);
+    }
+
+    .btn-sm {
+      padding: 6px 11px;
+      font-size: 12.5px;
+      border-radius: 8px;
+    }
+
+    /* Cards & Grids */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+      margin: 0 0 12px;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--blue-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 14px;
+      padding: 18px 20px;
+      border-left: 5px solid var(--blue-600);
+      background: var(--blue-50);
+      margin-bottom: 16px;
+    }
+
+    .callout.orange {
+      border-left-color: var(--orange-500);
+      background: var(--orange-50);
+    }
+
+    .callout.green {
+      border-left-color: var(--green-600);
+      background: var(--green-50);
+    }
+
+    .callout.red {
+      border-left-color: var(--red-600);
+      background: var(--red-50);
+    }
+
+    .callout h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--blue-900);
+    }
+
+    .callout.orange h3 {
+      color: var(--orange-700);
+    }
+
+    .callout.green h3 {
+      color: var(--green-700);
+    }
+
+    .callout.red h3 {
+      color: var(--red-700);
+    }
+
+    /* Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--slate-200);
+    }
+
+    .data-table th {
+      background: var(--blue-800);
+      color: var(--white);
+      text-align: left;
+      padding: 11px 14px;
+      font-weight: 700;
+    }
+
+    .data-table td {
+      padding: 11px 14px;
+      border-top: 1px solid var(--slate-200);
+      vertical-align: top;
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: var(--slate-50);
+    }
+
+    /* Overview Module Cards */
+    .lms-comp-card {
+      background: var(--white);
+      border: 1.5px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.18s;
+    }
+
+    .lms-comp-card:hover {
+      border-color: var(--blue-500);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    /* ==================== SLIDE DECK STYLES ==================== */
+    .slide-shell {
+      background: #0f172a;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .slide-shell.fullscreen-mode {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 32px;
+    }
+
+    .slide-viewport {
+      background: var(--white);
+      border-radius: 14px;
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      max-height: 74vh;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .slide-shell.fullscreen-mode .slide-viewport {
+      max-height: calc(100vh - 96px);
+      max-width: calc((100vh - 96px) * 16 / 9);
+    }
+
+    .slide-item {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      padding: 28px 36px 22px;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .slide-item.active {
+      display: flex;
+    }
+
+    .slide-item.cover-slide {
+      background: linear-gradient(135deg, #0f2a66 0%, #1d4ed8 55%, #0284c7 100%);
+      color: var(--white);
+      justify-content: center;
+      align-items: flex-start;
+      padding: 44px 52px;
+    }
+
+    .slide-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--blue-100);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .slide-kicker {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--orange-600);
+      background: var(--orange-100);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+
+    .slide-h1 {
+      margin: 0;
+      font-size: clamp(20px, 2.2vw, 30px);
+      color: var(--blue-900);
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .slide-num-pill {
+      background: var(--blue-800);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-size: clamp(13.5px, 1.2vw, 17px);
+    }
+
+    .slide-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+      color: var(--white);
+      flex-wrap: wrap;
+    }
+
+    .slide-thumbs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .slide-thumb-btn {
+      width: 34px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .slide-thumb-btn.active {
+      background: var(--orange-500);
+      border-color: var(--orange-500);
+      color: var(--white);
+    }
+
+    .reveal-row {
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+
+    .reveal-row:hover {
+      background: var(--blue-50) !important;
+    }
+
+    .reveal-answer {
+      filter: blur(6px);
+      user-select: none;
+      transition: filter 0.25s;
+      display: inline-block;
+    }
+
+    .reveal-row.revealed .reveal-answer,
+    .reveal-answer.revealed {
+      filter: none;
+      user-select: auto;
+    }
+
+    .timer-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--orange-50);
+      border: 2px solid var(--orange-500);
+      border-radius: 12px;
+      padding: 6px 14px;
+    }
+
+    .timer-digits {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--orange-700);
+      font-variant-numeric: tabular-nums;
+      min-width: 68px;
+      text-align: center;
+    }
+
+    /* ==================== GAME STYLES ==================== */
+    .game-stage {
+      background: linear-gradient(160deg, #eff6ff 0%, #ffffff 55%, #fff7ed 100%);
+      border: 2px solid #bfdbfe;
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .game-stage.fullscreen-mode {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      border-radius: 0;
+      border: none;
+      overflow-y: auto;
+      padding: 28px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .game-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .game-progress-dots {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .game-dot {
+      width: 36px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--slate-200);
+      transition: all 0.25s;
+    }
+
+    .game-dot.current {
+      background: var(--blue-600);
+      width: 48px;
+    }
+
+    .game-dot.correct {
+      background: var(--green-600);
+    }
+
+    .game-dot.wrong {
+      background: var(--orange-500);
+    }
+
+    .dossier-card {
+      background: var(--white);
+      border: 2.5px solid var(--blue-600);
+      border-radius: 18px;
+      padding: 28px 32px;
+      position: relative;
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.12);
+      margin-bottom: 20px;
+    }
+
+    .dossier-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed var(--slate-200);
+    }
+
+    .dossier-text {
+      font-size: clamp(20px, 2.4vw, 30px);
+      font-weight: 800;
+      color: var(--slate-900);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .game-stamp {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      padding: 10px 22px;
+      border-radius: 12px;
+      border: 5px solid;
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transform: rotate(-8deg) scale(0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.28s cubic-bezier(0.22, 1.4, 0.36, 1);
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .game-stamp.show {
+      transform: rotate(-8deg) scale(1);
+      opacity: 1;
+    }
+
+    .game-stamp.safe {
+      color: var(--green-700);
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+    }
+
+    .game-stamp.risk {
+      color: var(--orange-700);
+      border-color: var(--red-600);
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+    }
+
+    .game-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .game-choice-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 20px 22px;
+      cursor: pointer;
+      color: var(--white);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.14s, filter 0.14s;
+      font-family: inherit;
+    }
+
+    .game-choice-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .game-choice-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .game-choice-btn.safe-btn {
+      background: linear-gradient(135deg, #15803d, #16a34a);
+    }
+
+    .game-choice-btn.risk-btn {
+      background: linear-gradient(135deg, #c2410c, #dc2626);
+    }
+
+    .key-cap {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.22);
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .game-feedback {
+      margin-top: 18px;
+      padding: 18px 22px;
+      border-radius: 14px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .game-feedback.show {
+      display: flex;
+    }
+
+    /* ==================== DATA SAFETY & INFOGRAPHIC ==================== */
+    .phone-frame {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 2px solid var(--slate-300);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .phone-status {
+      background: var(--slate-900);
+      color: var(--white);
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .perm-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--slate-200);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.18s;
+      background: var(--white);
+    }
+
+    .perm-chip:hover {
+      border-color: var(--blue-500);
+      background: var(--blue-50);
+    }
+
+    .perm-chip.annotated-risk {
+      border: 2.5px dashed var(--red-600);
+      background: var(--red-50);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+
+    .perm-chip.annotated-ok {
+      border: 2px solid var(--green-600);
+      background: var(--green-50);
+    }
+
+    .svg-preview-box {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      overflow-x: auto;
+    }
+
+    .svg-preview-box svg {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ==================== QUIZ & FORMS ==================== */
+    .quiz-q {
+      background: var(--white);
+      border: 1.5px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 10px;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quiz-opt:hover {
+      background: var(--blue-50);
+      border-color: var(--blue-500);
+    }
+
+    .quiz-opt.is-correct {
+      background: var(--green-50);
+      border-color: var(--green-600);
+    }
+
+    .quiz-opt.is-wrong {
+      background: var(--red-50);
+      border-color: var(--red-600);
+    }
+
+    .quiz-fb {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .quiz-fb.show {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--slate-800);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--slate-300);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--slate-900);
+      background: var(--white);
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--blue-600);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10000;
+      background: var(--slate-900);
+      color: var(--white);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: all 0.25s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--slate-200);
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .game-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+    }
+
+    /* Print Styles (for Worksheet A4 printing) */
+    @media print {
+
+      .topbar,
+      .sidebar,
+      .lms-toolbar,
+      .no-print,
+      .toast {
+        display: none !important;
+      }
+
+      .shell {
+        display: block;
+      }
+
+      .main-content {
+        padding: 0;
+      }
+
+      .module-panel {
+        display: none !important;
+      }
+
+      .module-panel.print-target {
+        display: block !important;
+      }
+
+      .card {
+        box-shadow: none;
+        border: 1px solid #94a3b8;
+        break-inside: avoid;
+      }
+    }
+  </style> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet"> <style id="lms-clean-student-overrides"> /* Clean academic LMS presentation: hide teacher export/Moodle/Canvas chrome & enforce crisp Vietnamese typography */
+    body, button, input, select, textarea {
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+    .mode-switch,
+    .teacher-only,
+    .teacher-bar,
+    .module-export-bar,
+    .export-tab,
+    #btn-teacher-mode,
+    [onclick*="exportStandalone"],
+    [onclick*="downloadStandalone"],
+    [onclick*="copyModuleHtml"],
+    [onclick*="copyLMSGuide"],
+    [onclick*="copyM1Html"],
+    [onclick*="exportQuizGIFT"],
+    [onclick*="exportQuizCSV"],
+    [onclick*="copyMoodleGift"],
+    [onclick*="copyGoogleAppsScript"],
+    [onclick*="copyGoogleFormBlueprint"],
+    [onclick*="openExportModal"],
+    [onclick*="copyRubricHTML"],
+    [onclick*="copySlideEmbedSnippet"],
+    [onclick*="copyInfographicHTML"],
+    [onclick*="copyWorksheetHTML"],
+    [onclick*="copyTextTemplate"],
+    [onclick*="copyModuleText"],
+    [onclick*="switchSubtab('m7-tab-teacher'"] {
+      display: none !important;
+    }
+    .lms-toolbar {
+      display: none !important;
+    }
+  </style>
+</head> <body class="student-mode"> <!-- TOP NAVIGATION BAR --> <header class="topbar"> <div class="topbar-left"> <div class="brand-icon" aria-hidden="true"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round"> <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> <path d="m9 12 2 2 4-4" /> </svg> </div> <div> <div class="brand-meta">TIN HỌC 6 • CHỦ ĐỀ B: ĐẠO ĐỨC AI • YCCĐ 6.B2.1</div> <h1 class="brand-title">BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO </h1> </div> </div> <div class="topbar-right"> <div id="unlockBadge" class="unlock-pill" title="Hoàn thành Quiz ≥ 8/10 điểm để mở khóa Bài 6"> Bài 6: Đang khóa (Cần Quiz ≥ 8/10)
+      </div> <div class="mode-switch" role="group" aria-label="Chọn chế độ hiển thị"> <button class="mode-btn active" id="btnModeTeacher" onclick="setViewMode('teacher')"> Giáo viên (Xuất
+          LMS)</button> <button class="mode-btn" id="btnModeStudent" onclick="setViewMode('student')"> Học sinh (LMS)</button> </div> </div> </header> <div class="shell"> <!-- SIDEBAR NAVIGATION --> <aside class="sidebar"> <div class="nav-section-label">Điều phối khóa học LMS</div> <button class="nav-btn active" data-tab="overview" onclick="switchTab('overview')"> <span class="nav-badge">0</span> <span class="nav-text"> <span class="nav-title">Tổng quan Bài 5</span> <span class="nav-sub">Cấu trúc 5 thành phần LMS</span> </span> </button> <div class="nav-section-label">Thành phần 1 & 2 (Đầu trang LMS)</div> <button class="nav-btn" data-tab="tp12" onclick="switchTab('tp12')"> <span class="nav-badge">1-2</span> <span class="nav-text"> <span class="nav-title">Study Guide & Kiến thức nền</span> <span class="nav-sub">Lộ trình, Bài 4, SGK Hình 5.1</span> </span> <span class="nav-check" id="chk-tp12"></span> </button> <div class="nav-section-label">Thành phần 3 (Bài giảng & Lưu trữ)</div> <button class="nav-btn" data-tab="slides" onclick="switchTab('slides')"> <span class="nav-badge">8S</span> <span class="nav-text"> <span class="nav-title">Bộ 8 Slide trực tiếp</span> <span class="nav-sub">Trình chiếu, Hẹn giờ 5p, Đáp án</span> </span> <span class="nav-check" id="chk-slides"></span> </button> <button class="nav-btn" data-tab="visuals" onclick="switchTab('visuals')"> <span class="nav-badge">3</span> <span class="nav-text"> <span class="nav-title">Data Safety & Infographic</span> <span class="nav-sub">Meitu + Hình 5.2, 5.3 (Xuất PNG)</span> </span> <span class="nav-check" id="chk-visuals"></span> </button> <div class="nav-section-label">Hoạt động 3 (Luyện tập tại lớp)</div> <button class="nav-btn" data-tab="game" onclick="switchTab('game')"> <span class="nav-badge">G</span> <span class="nav-text"> <span class="nav-title">Game Trạm kiểm định AI</span> <span class="nav-sub">HTML5 • 5 hồ sơ • Phím 1 / 2</span> </span> <span class="nav-check" id="chk-game"></span> </button> <button class="nav-btn" data-tab="worksheet" onclick="switchTab('worksheet')"> <span class="nav-badge">P</span> <span class="nav-text"> <span class="nav-title">Phiếu kiểm duyệt AI</span> <span class="nav-sub">Meitu + Công cụ A/B + Rubric 4.1</span> </span> <span class="nav-check" id="chk-worksheet"></span> </button> <div class="nav-section-label">Thành phần 4 & 5 (Chốt chặn & Nộp bài)</div> <button class="nav-btn" data-tab="quiz" onclick="switchTab('quiz')"> <span class="nav-badge">4</span> <span class="nav-text"> <span class="nav-title">Quiz chốt chặn (5 câu)</span> <span class="nav-sub">Đạt ≥ 8/10 mở khóa Bài 6</span> </span> <span class="nav-check" id="chk-quiz"></span> </button> <button class="nav-btn" data-tab="vandung" onclick="switchTab('vandung')"> <span class="nav-badge">5</span> <span class="nav-text"> <span class="nav-title">Vận dụng & Cầu nối Bài 6</span> <span class="nav-sub">Google Form nhúng + Rubric 4.2</span> </span> <span class="nav-check" id="chk-vandung"></span> </button> <div class="sidebar-progress"> <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--blue-900);"> <span>Tiến độ Bài 5 LMS</span> <span id="progressPct">0%</span> </div> <div class="progress-bar-wrap"> <div class="progress-bar-fill" id="progressFill"></div> </div> <div style="font-size:11.5px;color:var(--slate-600);" id="progressNote">Hoàn thành các học liệu & đạt Quiz ≥
+          8/10 để mở khóa Bài 6.</div> </div> </aside> <!-- MAIN CONTENT PANELS --> <main class="main-content"> <!-- ==================== TAB 0: OVERVIEW ==================== --> <section id="panel-overview" class="module-panel active"> <div class="module-header"> <div> <span class="module-tag">Bản đồ học liệu số LMS • Chuẩn CV 5512 & UNICEF (2021)</span> <h2>Trung tâm điều phối học liệu số Bài 5</h2> <p>Toàn bộ 7 nhóm học liệu số chuẩn hóa theo SGK, KHBD (45 phút trực tiếp kết hợp LMS) và 5 thành phần bắt
+              buộc trên hệ thống LMS. Bấm vào từng module để sử dụng trực tiếp hoặc tải riêng từng file
+              <code>.html</code> / <code>.png</code> đưa lên LMS.</p> </div> <div class="lms-toolbar teacher-only"> <button class="btn btn-orange" onclick="switchTab('slides'); toggleSlideFullscreen()"> Trình chiếu 8
+              Slide</button> <button class="btn btn-primary" onclick="switchTab('game')"> Mở Game HTML5</button> </div> </div> <div class="callout"> <h3> Mục tiêu cốt lõi Bài 5 (YCCĐ 6.B2.1 – Mức độ Đánh giá – Vận dụng)</h3> <ul style="margin:6px 0 0 18px;padding:0;"> <li><strong>Đặt được câu hỏi kiểm tra:</strong> Đặt được một số câu hỏi đơn giản để kiểm tra tính an toàn và
+              minh bạch của ứng dụng AI (<em>“Công cụ này có an toàn không?”</em>, <em>“Công cụ này có thu thập thông
+                tin cá nhân không?”</em>, <em>“Có thể tắt tính năng này không?”</em>).</li> <li><strong>Nhận xét & Đánh giá:</strong> Áp dụng bộ câu hỏi kiểm tra và kỹ năng đọc mục <em>An toàn dữ liệu
+                (Data Safety)</em> để nhận xét đơn giản về mức độ an toàn, minh bạch và phù hợp lứa tuổi của các công cụ
+              AI.</li> <li><strong>Cơ sở khoa học:</strong> UNICEF (2021) – <em>Policy Guidance on AI for Children 2.0</em> &amp;
+              U.S. Department of Education (2023) – <em>Humans in the Loop</em>.</li> </ul> </div> <div class="grid-3"> <div class="lms-comp-card"> <div> <span class="module-tag">Đầu trang LMS • TP 1 &amp; 2</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">1. Study Guide &amp; Kiến thức nền</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">Sổ tay 3 giai đoạn học tập, khung kết nối Bài
+                4 &amp; Bài 9 Tin học 6, tình huống An–Minh–Khoa (Hình 5.1) và bảng thuật ngữ SGK.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="switchTab('tp12')">Mở Module</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('tp12')">⬇ Tải
+                .html</button> </div> </div> <div class="lms-comp-card"> <div> <span class="module-tag">Trực tiếp &amp; Lưu LMS • TP 3</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">2. Bộ 8 Slide trình chiếu</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">Đầy đủ 8 Slide theo đúng kịch bản KHBD, tích
+                hợp đồng hồ đếm ngược 5 phút, bảng đáp án click hiện và mã QR LMS.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="switchTab('slides')">Mở 8 Slide</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('slides')">⬇ Tải
+                .html</button> </div> </div> <div class="lms-comp-card"> <div> <span class="module-tag">Lưu LMS &amp; SGK • TP 3</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">3. Data Safety Meitu &amp; Infographic</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">Mô phỏng App Store/Google Play của Meitu
+                (khoanh đỏ quyền bất hợp lí) + Infographic Hình 5.2 &amp; 5.3 bản dọc LMS &amp; bản ngang SGK.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="switchTab('visuals')">Mở Học liệu</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('visuals')">⬇ Tải
+                .html</button> </div> </div> <div class="lms-comp-card"> <div> <span class="module-tag orange">Hoạt động 3 – Chặng 1</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">4. Game HTML5 Trạm kiểm định AI</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">5 hồ sơ ứng dụng AI chiếu màn hình lớn, hỗ
+                trợ phím 1 / 2, hiệu ứng đóng mộc <em>ĐẠT KIỂM ĐỊNH / CẢNH BÁO RỦI RO</em> và âm thanh.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-orange btn-sm" onclick="switchTab('game')">Chơi ngay</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('game')">⬇ Tải Game
+                .html</button> </div> </div> <div class="lms-comp-card"> <div> <span class="module-tag orange">Hoạt động 3 – Chặng 2</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">5. Phiếu kiểm duyệt AI &amp; Rubric 4.1</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">Phiếu thực hành cặp đôi kiểm định Meitu + So
+                sánh Công cụ A – B (SGK), chế độ in A4, ẩn/hiện đáp án GV và bảng chấm Rubric 10 điểm.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="switchTab('worksheet')">Mở Phiếu</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('worksheet')">⬇ Tải
+                .html</button> </div> </div> <div class="lms-comp-card"> <div> <span class="module-tag green">Hoạt động 4 – Chốt chặn • TP 4</span> <h3 style="margin:6px 0 6px;color:var(--blue-900);">6. LMS Quiz 5 câu (≥ 8/10)</h3> <p style="font-size:13.5px;color:var(--slate-600);margin:0;">5 câu trắc nghiệm (2đ/câu), phản hồi giải
+                thích tự động, điều kiện bắt buộc đạt ≥ 8/10 mở khóa Bài 6 + xuất định dạng Moodle GIFT.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-green btn-sm" onclick="switchTab('quiz')">Làm Quiz</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('quiz')">⬇ Tải Quiz
+                .html</button> </div> </div> </div> <div class="card" style="margin-top:18px;"> <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"> <div> <span class="module-tag green">Hoạt động 4 – Nộp bài &amp; Cầu nối • TP 5 LMS</span> <h3 style="margin:4px 0 4px;color:var(--blue-900);">7. Biểu mẫu Vận dụng Bài 5 &amp; Cầu nối Bài 6 (Google
+                Form + Rubric 4.2)</h3> <p style="margin:0;font-size:14px;color:var(--slate-600);">Đầy đủ 7 câu hỏi cấu trúc chuẩn (Phần A, B, C),
+                công cụ tạo mã nhúng <code>&lt;iframe&gt;</code> Google Form &amp; Mã QR tự động cho Slide 8, kèm Bảng
+                Rubric 4.2 chấm 10 điểm.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-green" onclick="switchTab('vandung')">Mở Module Vận dụng</button> <button class="btn btn-outline teacher-only" onclick="downloadStandaloneModule('vandung')">⬇ Tải
+                .html</button> </div> </div> </div> <div class="card teacher-only"> <h3 class="card-title"> Bảng quy cách triển khai 5 thành phần trên hệ thống LMS (Moodle / Canvas / Google
+            Classroom / Azota)</h3> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th>Vị trí trên LMS</th> <th>Học liệu / Hình thức</th> <th>Cách lấy nhanh từ trang HTML này để up lên LMS</th> </tr> </thead> <tbody> <tr> <td><strong>Đầu trang Bài 5 (TP 1 &amp; 2)</strong></td> <td>Sổ tay hướng dẫn &amp; Kiến thức nền</td> <td>Vào mục <strong>TP 1 &amp; 2</strong> → bấm <em>“Sao chép HTML dán LMS”</em> dán vào Label / Page
+                    đầu trang Bài 5.</td> </tr> <tr> <td><strong>Kho lưu trữ học liệu (TP 3)</strong></td> <td>8 Slide + Ảnh Data Safety Meitu + Infographic</td> <td>Vào mục <strong>8 Slide</strong> tải file <code>.html</code> hoặc vào mục <strong>Data Safety
+                      &amp; Infographic</strong> bấm <em>“Tải ảnh PNG”</em> để tải lên LMS.</td> </tr> <tr> <td><strong>Hoạt động 3 (Tại lớp / LMS)</strong></td> <td>Game HTML5 + Phiếu kiểm duyệt AI</td> <td>Bấm <em>“Tải Game .html”</em> chạy trực tiếp không cần mạng hoặc nhúng lên LMS; in A4 Phiếu kiểm
+                    duyệt ở mục 5.</td> </tr> <tr> <td><strong>Hoạt động 4 – Chốt chặn (TP 4)</strong></td> <td>LMS Quiz 5 câu (đạt ≥ 8/10 mở khóa Bài 6)</td> <td>Vào mục <strong>Quiz</strong> bấm <em>“Sao chép định dạng Moodle GIFT”</em> nhập vào LMS Quiz và
+                    đặt điều kiện Restrict Access ≥ 8/10 cho Bài 6, hoặc up trực tiếp file Quiz <code>.html</code>.</td> </tr> <tr> <td><strong>Hoạt động 4 – Nộp bài (TP 5)</strong></td> <td>Google Form nhúng trực tiếp vào LMS</td> <td>Vào mục <strong>Vận dụng</strong>, dán link Google Form đã tạo theo 7 câu mẫu để lấy mã nhúng
+                    <code>&lt;iframe&gt;</code> + Mã QR tự động gắn Slide 8.</td> </tr> </tbody> </table> </div> </div> </section> <!-- ==================== TAB 1: TP 1 & TP 2 ==================== --> <section id="panel-tp12" class="module-panel"> <div class="module-header"> <div> <span class="module-tag">Thành phần 1 &amp; 2 LMS • Dán đầu trang Bài 5</span> <h2>Sổ tay hướng dẫn học tập (Study Guide) &amp; Kết nối kiến thức nền</h2> <p>Học sinh đọc trước giờ học tại lớp (5 phút trên LMS) để nắm lộ trình 3 giai đoạn và kết nối kiến thức Bài
+              4, Bài 9 Tin học 6.</p> </div> <div class="lms-toolbar teacher-only"> <button class="btn btn-primary btn-sm"
+              onclick="copyElementHTML('tp12-lms-block', 'Đã sao chép mã HTML Study Guide & Kiến thức nền! Dán vào trình soạn thảo HTML trên LMS.')"> Sao chép HTML dán LMS</button> <button class="btn btn-outline btn-sm" onclick="downloadStandaloneModule('tp12')">⬇ Tải Module
+              (.html)</button> </div> </div> <!-- Exportable LMS Block Start --> <div id="tp12-lms-block"> <!-- 1.1 Study Guide --> <div class="card" style="border-top:5px solid var(--blue-600);"> <h3 class="card-title" style="font-size:19px;"> HƯỚNG DẪN HỌC TẬP BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ
+              NHÂN TẠO</h3> <p
+              style="margin:0 0 14px;background:var(--blue-50);padding:12px 16px;border-radius:10px;border:1px solid var(--blue-100);"> <strong>Hình thức học tập:</strong> 01 tiết học trực tiếp tại lớp (45 phút) kết hợp đọc kiến thức nền, ôn
+              tập, nộp bài Vận dụng và kiểm tra chốt chặn trên hệ thống LMS.
+            </p> <div style="font-weight:800;color:var(--blue-900);margin-bottom:10px;">Lộ trình 3 giai đoạn học tập dành cho
+              học sinh:</div> <div class="grid-3"> <div style="background:var(--sky-50);border:1.5px solid #bae6fd;border-radius:12px;padding:15px;"> <div style="font-size:12px;font-weight:800;color:#0369a1;text-transform:uppercase;margin-bottom:4px;"> Giai đoạn 1 • 5 phút trên LMS</div> <div style="font-weight:800;color:var(--slate-900);margin-bottom:6px;">Trước giờ học tại lớp</div> <p style="font-size:13.5px;margin:0;color:var(--slate-700);">Đọc phần <strong>Kết nối kiến thức
+                    nền</strong> bên dưới và xem trước tình huống Khởi động của ba bạn <strong>An, Minh, Khoa</strong> trong SGK Bài 5.</p> </div> <div style="background:var(--blue-50);border:1.5px solid #bfdbfe;border-radius:12px;padding:15px;"> <div
+                  style="font-size:12px;font-weight:800;color:var(--blue-700);text-transform:uppercase;margin-bottom:4px;"> Giai đoạn 2 • 45 phút trực tiếp</div> <div style="font-weight:800;color:var(--slate-900);margin-bottom:6px;">Trong giờ học tại lớp</div> <p style="font-size:13.5px;margin:0;color:var(--slate-700);">Tìm hiểu hai tiêu chí <strong>an toàn –
+                    minh bạch</strong> và <strong>Bộ 4 câu hỏi kiểm tra</strong> ứng dụng AI; quan sát hướng dẫn đọc mục
+                  <em>“An toàn dữ liệu”</em> trên kho ứng dụng; tham gia Trò chơi <em>“Trạm kiểm định ứng dụng AI”</em>,
+                  thảo luận cặp đôi hoàn thành <em>“Phiếu kiểm duyệt AI”</em> và viết lời khuyên cảnh báo vào SGK.</p> </div> <div style="background:var(--orange-50);border:1.5px solid #fed7aa;border-radius:12px;padding:15px;"> <div
+                  style="font-size:12px;font-weight:800;color:var(--orange-700);text-transform:uppercase;margin-bottom:4px;"> Giai đoạn 3 • 15 phút trên LMS</div> <div style="font-weight:800;color:var(--slate-900);margin-bottom:6px;">Sau giờ học tại lớp</div> <p style="font-size:13.5px;margin:0;color:var(--slate-700);">(1) Hoàn thành <strong>bài kiểm tra nhanh 5
+                    câu</strong> trên LMS (điều kiện bắt buộc đạt <strong>≥ 8/10 điểm</strong> để mở khóa Bài 6); (2)
+                  Nộp sản phẩm <strong>Vận dụng</strong> đánh giá 01 công cụ AI quen thuộc và trả lời 01 câu hỏi cầu nối
+                  chuẩn bị Bài 6 qua Biểu mẫu Google Form nhúng ở cuối trang.</p> </div> </div> </div> <!-- 1.2 Prerequisites --> <div class="card" style="border-top:5px solid var(--orange-500);"> <h3 class="card-title" style="font-size:19px;color:var(--orange-700);"> KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI
+              HỌC BÀI 5</h3> <ul style="margin:0 0 14px 18px;padding:0;display:grid;gap:10px;"> <li><strong>Từ Bài 4 (Khám phá mặt tích cực và tiêu cực của một số tính năng AI):</strong> Em đã biết các
+                nền tảng AI thường thu thập dữ liệu hành vi người dùng để gợi ý nội dung, điều này có thể ảnh hưởng đến
+                quyền riêng tư nếu không được kiểm soát.</li> <li><strong>Từ Bài 9 môn Tin học 6 (An toàn thông tin trên Internet):</strong> Em đã biết các nguy cơ lộ
+                thông tin cá nhân và nguyên tắc không cung cấp dữ liệu bí mật cho các nguồn không rõ ràng.</li> </ul> <div class="callout orange" style="margin-bottom:0;"> <h3> Câu hỏi định hướng</h3> <p style="margin:0;font-weight:600;">Trước khi tải về hoặc đăng nhập một ứng dụng AI mới trên mạng, em cần
+                đặt ra những câu hỏi kiểm tra nào và xem ở mục nào trên kho ứng dụng để đánh giá ứng dụng đó có an toàn,
+                minh bạch hay không?</p> </div> </div> </div> <!-- Exportable LMS Block End --> <!-- SGK Khởi động + Hình 5.1 SVG + Thuật ngữ --> <div class="card"> <h3 class="card-title"> Xem trước Tình huống Khởi động (SGK Bài 5 – Hình 5.1)</h3> <p style="margin-top:0;">Để chuẩn bị hình ảnh minh họa cho bài thuyết trình của lớp, nhóm của <strong>An, Minh
+              và Khoa</strong> tìm kiếm một ứng dụng AI hỗ trợ vẽ tranh trực tuyến:</p> <div class="grid-2" style="align-items:center;"> <div style="display:grid;gap:10px;"> <div
+                style="background:var(--blue-50);padding:12px 15px;border-radius:12px;border-left:4px solid var(--blue-600);"> <strong> Minh:</strong> “Tớ tìm thấy hai ứng dụng tạo ảnh AI: <strong>Ứng dụng A</strong> của một tổ
+                chức giáo dục uy tín, có thông tin hướng dẫn rõ ràng cho học sinh; <strong>Ứng dụng B</strong> không ghi
+                tên nhà phát triển và yêu cầu nhập mật khẩu tài khoản mạng xã hội để sử dụng.”
+              </div> <div
+                style="background:var(--orange-50);padding:12px 15px;border-radius:12px;border-left:4px solid var(--orange-500);"> <strong> An:</strong> “Ứng dụng B có dấu hiệu không an toàn rồi! Trước khi sử dụng bất kì ứng dụng AI
+                nào, chúng mình cần kiểm tra tính an toàn và minh bạch của nó.”
+              </div> <div
+                style="background:var(--green-50);padding:12px 15px;border-radius:12px;border-left:4px solid var(--green-600);"> <strong> Khoa:</strong> “Đúng vậy! Chúng ta cùng tìm hiểu cách đặt các câu hỏi kiểm tra để đánh giá
+                mức độ an toàn của ứng dụng AI nhé!”
+              </div> </div> <!-- SVG Illustration Hình 5.1 --> <div class="svg-preview-box"> <svg viewBox="0 0 640 245" width="640" height="245" xmlns="http://www.w3.org/2000/svg" role="img"
+                aria-label="Hình 5.1. An, Minh, Khoa xem xét thông tin an toàn dữ liệu của hai ứng dụng AI"> <defs> <linearGradient id="bg51" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#eff6ff" /> <stop offset="100%" stop-color="#fff7ed" /> </linearGradient> </defs> <rect width="640" height="245" rx="14" fill="url(#bg51)" /> <!-- Monitor frame --> <rect x="34" y="16" width="572" height="176" rx="12" fill="#0f172a" /> <rect x="44" y="26" width="552" height="156" rx="7" fill="#f8fafc" /> <rect x="275" y="192" width="90" height="16" fill="#334155" /> <rect x="235" y="206" width="170" height="8" rx="4" fill="#475569" /> <!-- App A card --> <rect x="62" y="40" width="246" height="128" rx="10" fill="#f0fdf4" stroke="#16a34a"
+                  stroke-width="2.5" /> <rect x="62" y="40" width="246" height="32" rx="10" fill="#16a34a" /> <text x="185" y="61" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="13"
+                  font-weight="800">ỨNG DỤNG A • AI VẼ TRANH</text> <text x="76" y="92" fill="#14532d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✓ Tổ
+                  chức giáo dục uy tín</text> <text x="76" y="112" fill="#14532d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✓
+                  Hướng dẫn rõ ràng cho HS</text> <text x="76" y="132" fill="#14532d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✓
+                  Không đòi mật khẩu MXH</text> <rect x="122" y="142" width="126" height="20" rx="10" fill="#dcfce7" stroke="#16a34a" /> <text x="185" y="156" text-anchor="middle" fill="#15803d" font-family="Segoe UI, Arial" font-size="11"
+                  font-weight="800">AN TOÀN – MINH BẠCH</text> <!-- App B card --> <rect x="332" y="40" width="246" height="128" rx="10" fill="#fef2f2" stroke="#dc2626"
+                  stroke-width="2.5" /> <rect x="332" y="40" width="246" height="32" rx="10" fill="#dc2626" /> <text x="455" y="61" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="13"
+                  font-weight="800">ỨNG DỤNG B • AI VẼ TRANH</text> <text x="346" y="92" fill="#7f1d1d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✗
+                  Không ghi tên nhà phát triển</text> <text x="346" y="112" fill="#7f1d1d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✗
+                  Bắt nhập mật khẩu MXH</text> <text x="346" y="132" fill="#7f1d1d" font-family="Segoe UI, Arial" font-size="12" font-weight="700">✗
+                  Không rõ chính sách dữ liệu</text> <rect x="386" y="142" width="138" height="20" rx="10" fill="#fee2e2" stroke="#dc2626" /> <text x="455" y="156" text-anchor="middle" fill="#b91c1c" font-family="Segoe UI, Arial" font-size="11"
+                  font-weight="800">CẢNH BÁO RỦI RO</text> <!-- Caption --> <text x="320" y="234" text-anchor="middle" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="12.5"
+                  font-weight="700">Hình 5.1. An, Minh, Khoa xem xét thông tin an toàn dữ liệu của hai ứng dụng
+                  AI</text> </svg> </div> </div> </div> <div class="card"> <h3 class="card-title"> Giải thích thuật ngữ cốt lõi (SGK Bài 5)</h3> <table class="data-table"> <thead> <tr> <th style="width:28%;">Thuật ngữ</th> <th>Giải thích chuẩn SGK Tin học 6</th> </tr> </thead> <tbody> <tr> <td><strong>Tính minh bạch của AI</strong></td> <td>Sự công khai, rõ ràng về nguồn gốc nhà phát triển, cách thức hoạt động, việc thu thập dữ liệu và
+                  giới hạn của hệ thống AI.</td> </tr> <tr> <td><strong>Tính an toàn của AI</strong></td> <td>Mức độ bảo đảm hệ thống AI không gây hại về tâm lí, sức khỏe, quyền riêng tư và dữ liệu cá nhân của
+                  người sử dụng.</td> </tr> </tbody> </table> <div style="margin-top:14px;display:flex;justify-content:flex-end;"> <button class="btn btn-green" onclick="markDone('tp12'); switchTab('slides')">✓ Đánh dấu đã đọc &amp; Sang
+              Bộ 8 Slide →</button> </div> </div> </section> <!-- ==================== TAB 2: 8 SLIDES ==================== --> <section id="panel-slides" class="module-panel"> <div class="module-header"> <div> <span class="module-tag">Trực tiếp tại lớp (45 phút) &amp; Lưu trữ TP 3 LMS</span> <h2>Bộ 8 Slide bài giảng trực tiếp Bài 5</h2> <p>Dùng phím mũi tên <code>←</code> <code>→</code> để chuyển Slide, bấm <strong>Toàn màn hình</strong> khi
+              chiếu máy chiếu. Slide 7 tích hợp đồng hồ đếm ngược 5 phút &amp; click hiện đáp án chuẩn.</p> </div> <div class="lms-toolbar"> <button class="btn btn-orange btn-sm" onclick="toggleSlideFullscreen()"> Toàn màn hình</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('slides')">⬇ Tải
+              riêng Bộ 8 Slide (.html)</button> </div> </div> <div class="slide-shell" id="slideShell"> <div class="slide-viewport"> <!-- SLIDE 1 --> <div class="slide-item cover-slide active" data-slide="1"> <div
+                style="display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.3);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:18px;"> TIN HỌC 6 • CHUYÊN ĐỀ TRÍ TUỆ NHÂN TẠO • CHỦ ĐỀ B: ĐẠO ĐỨC AI
+              </div> <div style="font-size:clamp(28px,3.6vw,48px);font-weight:900;line-height:1.15;margin-bottom:14px;"> BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO
+              </div> <div style="font-size:clamp(15px,1.5vw,21px);color:#dbeafe;max-width:780px;margin-bottom:24px;"> Hình thức: 01 tiết trực tiếp (45 phút) kết hợp hệ thống quản lí học tập LMS
+              </div> <div
+                style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.28);border-radius:16px;padding:18px 22px;max-width:820px;"> <div
+                  style="font-size:13px;font-weight:800;color:#fed7aa;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;"> Yêu cầu cần đạt (6.B2.1)</div> <ul style="margin:0 0 0 18px;padding:0;font-size:clamp(14px,1.3vw,18px);display:grid;gap:6px;"> <li>Đặt được một số câu hỏi đơn giản để kiểm tra <strong>tính an toàn và minh bạch</strong> của ứng
+                    dụng AI.</li> <li>Áp dụng được các câu hỏi kiểm tra và kỹ năng đọc mục <strong>An toàn dữ liệu</strong> để nhận xét
+                    mức độ an toàn, phù hợp của một số công cụ AI.</li> </ul> </div> </div> <!-- SLIDE 2 --> <div class="slide-item" data-slide="2"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 1 • Khởi động (5 phút)</span> <h2 class="slide-h1">“Cài đặt hay Không cài đặt?”</h2> </div> <span class="slide-num-pill">Slide 2 / 8</span> </div> <div class="slide-body"> <div class="grid-2" style="flex:1;align-items:stretch;"> <div
+                    style="background:var(--blue-50);border:2px solid var(--blue-100);border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;"> <div> <div style="font-weight:800;color:var(--blue-900);margin-bottom:8px;"> Tình huống của An, Minh,
+                        Khoa (SGK Hình 5.1)</div> <p style="margin:0 0 8px;">Nhóm tìm ứng dụng AI vẽ tranh cho bài thuyết trình:</p> <ul style="margin:0 0 0 18px;padding:0;display:grid;gap:6px;"> <li><strong>Ứng dụng A:</strong> Tổ chức giáo dục uy tín, hướng dẫn rõ ràng cho học sinh.</li> <li><strong>Ứng dụng B:</strong> Không ghi tên nhà phát triển, yêu cầu nhập <strong>mật khẩu
+                            mạng xã hội</strong>.</li> </ul> </div> <div
+                      style="background:var(--orange-50);border-left:4px solid var(--orange-500);padding:10px 12px;border-radius:8px;margin-top:10px;font-weight:700;color:var(--orange-700);"> Câu hỏi vấn đáp: Trước khi bấm “Tải về” hoặc đăng nhập một ứng dụng AI mới, em thường dựa vào
+                      dấu hiệu nào để biết ứng dụng đó có an toàn không?
+                    </div> </div> <div
+                    style="background:var(--white);border:2px solid var(--slate-200);border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;"> <div> <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"> <div
+                          style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#ec4899,#f43f5e);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;"> Meitu</div> <div> <div style="font-weight:900;font-size:18px;color:var(--slate-900);">Meitu – Chỉnh sửa ảnh
+                            &amp; Video AI</div> <div style="font-size:13px;color:var(--slate-500);">Chụp ảnh &amp; Làm đẹp AI • ★ 4.8 (1,2 Tr
+                            đánh giá)</div> </div> </div> <div style="display:flex;gap:8px;margin-bottom:12px;"> <span
+                          style="background:var(--blue-600);color:#fff;padding:7px 22px;border-radius:999px;font-weight:800;font-size:14px;">⬇
+                          Tải về (Miễn phí)</span> <span
+                          style="background:var(--slate-100);color:var(--slate-700);padding:7px 14px;border-radius:999px;font-weight:700;font-size:13px;">4+
+                          tuổi • Có mua trong ứng dụng</span> </div> <div
+                        style="background:var(--red-50);border:1.5px dashed var(--red-600);border-radius:10px;padding:10px 12px;font-size:14px;"> <strong> Lưu ý:</strong> Rất nhiều lượt tải và điểm 4.8★ có đồng nghĩa ứng dụng <em>tuyệt đối
+                          an toàn về dữ liệu cá nhân</em> không?
+                      </div> </div> <button class="btn btn-outline btn-sm" style="margin-top:10px;align-self:flex-start;"
+                      onclick="document.getElementById('s2-ans').style.display = document.getElementById('s2-ans').style.display==='block'?'none':'block'"> Hiện/Ẩn chốt dẫn dắt (GV)</button> <div id="s2-ans"
+                      style="display:none;margin-top:8px;font-size:13.5px;background:var(--green-50);padding:8px 10px;border-radius:8px;color:var(--green-700);font-weight:600;"> Chỉ dựa vào số sao đánh giá hoặc cảm tính là chưa đủ! Cần đặt bộ câu hỏi kiểm tra và tự đọc mục
+                      “An toàn dữ liệu” trước khi cài đặt.
+                    </div> </div> </div> </div> </div> <!-- SLIDE 3 --> <div class="slide-item" data-slide="3"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 2.1 • Hình thành kiến thức (7 phút)</span> <h2 class="slide-h1">Hai tiêu chí: Tính An toàn &amp; Tính Minh bạch (UNICEF, 2021)</h2> </div> <span class="slide-num-pill">Slide 3 / 8</span> </div> <div class="slide-body"> <div class="grid-2" style="flex:1;"> <div
+                    style="background:linear-gradient(180deg,#f0fdf4,#ffffff);border:2.5px solid var(--green-600);border-radius:16px;padding:18px;"> <div style="font-size:20px;font-weight:900;color:var(--green-700);margin-bottom:10px;"> 1. TÍNH
+                      AN TOÀN CỦA ỨNG DỤNG AI</div> <ul style="margin:0 0 0 18px;padding:0;display:grid;gap:8px;font-weight:600;"> <li>Không chứa mã độc, không gây hại thiết bị.</li> <li>Không tạo ra nội dung bạo lực hoặc không lành mạnh.</li> <li>Phù hợp với độ tuổi học sinh lớp 6.</li> <li>Có biện pháp bảo vệ dữ liệu cá nhân của người dùng.</li> </ul> </div> <div
+                    style="background:linear-gradient(180deg,#eff6ff,#ffffff);border:2.5px solid var(--blue-600);border-radius:16px;padding:18px;"> <div style="font-size:20px;font-weight:900;color:var(--blue-800);margin-bottom:10px;"> 2. TÍNH
+                      MINH BẠCH CỦA ỨNG DỤNG AI</div> <ul style="margin:0 0 0 18px;padding:0;display:grid;gap:8px;font-weight:600;"> <li>Công khai rõ ràng tên cơ quan, tổ chức phát triển.</li> <li>Nêu rõ mục đích sử dụng và giới hạn của hệ thống AI.</li> <li>Thông báo rõ việc có thu thập dữ liệu cá nhân hay không.</li> <li>Cho phép người dùng kiểm soát (tắt thu thập hoặc xóa dữ liệu đã lưu).</li> </ul> </div> </div> <div
+                  style="background:var(--orange-50);border:1.5px solid var(--orange-500);border-radius:12px;padding:11px 16px;font-weight:700;color:var(--orange-700);"> Kiến thức trọng tâm (SGK): Ứng dụng AI an toàn và minh bạch là ứng dụng có nguồn gốc rõ ràng, nội
+                  dung phù hợp lứa tuổi, bảo vệ thông tin cá nhân và cho phép người dùng kiểm soát dữ liệu.
+                </div> </div> </div> <!-- SLIDE 4 --> <div class="slide-item" data-slide="4"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 2.1 • Đồng bộ Mục 2 SGK Bài 5</span> <h2 class="slide-h1">Bộ 4 câu hỏi kiểm tra trước khi sử dụng ứng dụng AI</h2> </div> <span class="slide-num-pill">Slide 4 / 8</span> </div> <div class="slide-body"> <div class="grid-2" style="gap:12px;"> <div
+                    style="background:var(--blue-50);border-left:6px solid var(--blue-600);border-radius:12px;padding:14px;"> <div style="font-weight:900;color:var(--blue-800);"> CÂU HỎI 1: An toàn &amp; Phù hợp</div> <p style="margin:5px 0 0;font-weight:700;">“Công cụ này có an toàn và phù hợp với lứa tuổi học sinh
+                      không?”</p> </div> <div
+                    style="background:var(--orange-50);border-left:6px solid var(--orange-500);border-radius:12px;padding:14px;"> <div style="font-weight:900;color:var(--orange-700);"> CÂU HỎI 2: Thu thập dữ liệu</div> <p style="margin:5px 0 0;font-weight:700;">“Công cụ này có thu thập thông tin cá nhân không? (Thu
+                      thập dữ liệu nào và có cần thiết cho chức năng chính không?)”</p> </div> <div
+                    style="background:var(--green-50);border-left:6px solid var(--green-600);border-radius:12px;padding:14px;"> <div style="font-weight:900;color:var(--green-700);"> CÂU HỎI 3: Quyền kiểm soát</div> <p style="margin:5px 0 0;font-weight:700;">“Có thể tắt tính năng thu thập dữ liệu hoặc xóa lịch sử
+                      hoạt động không?”</p> </div> <div style="background:#f5f3ff;border-left:6px solid #7c3aed;border-radius:12px;padding:14px;"> <div style="font-weight:900;color:#5b21b6;"> CÂU HỎI 4: Minh bạch nguồn gốc</div> <p style="margin:5px 0 0;font-weight:700;">“Ứng dụng có công khai tên nhà phát triển và lưu ý kiểm
+                      chứng thông tin không?”</p> </div> </div> <div style="background:var(--slate-900);color:var(--white);border-radius:12px;padding:13px 16px;"> <div style="font-weight:800;color:#fbbf24;"> Câu hỏi phân tích nhanh:</div> <div>Vì sao một ứng dụng thu thập dữ liệu chưa chắc nguy hiểm ngay, nhưng nếu thu thập dữ liệu
+                    <u>không liên quan đến chức năng chính</u> thì lại là dấu hiệu rủi ro?</div> </div> </div> </div> <!-- SLIDE 5 --> <div class="slide-item" data-slide="5"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 2.2 • Làm mẫu trực quan (8 phút)</span> <h2 class="slide-h1">Hướng dẫn đọc mục “An toàn dữ liệu / Quyền riêng tư” (Meitu)</h2> </div> <span class="slide-num-pill">Slide 5 / 8</span> </div> <div class="slide-body"> <div class="grid-2" style="align-items:center;"> <div
+                    style="background:var(--white);border:2px solid var(--slate-300);border-radius:16px;padding:14px;"> <div
+                      style="font-weight:900;color:var(--blue-900);margin-bottom:8px;display:flex;justify-content:space-between;"> <span> Quyền riêng tư ứng dụng: Meitu</span> <span
+                        style="font-size:12px;background:var(--blue-100);color:var(--blue-800);padding:2px 8px;border-radius:999px;">App
+                        Store / Google Play</span> </div> <div style="display:grid;gap:7px;font-size:14px;"> <div
+                        style="padding:8px 12px;border-radius:10px;border:2px solid var(--green-600);background:var(--green-50);display:flex;justify-content:space-between;"> <span><strong> Ảnh &amp; Camera</strong> (Nội dung người dùng)</span> <span style="color:var(--green-700);font-weight:800;"> Hợp lí</span> </div> <div
+                        style="padding:8px 12px;border-radius:10px;border:2.5px dashed var(--red-600);background:var(--red-50);display:flex;justify-content:space-between;"> <span><strong> Danh bạ / Thông tin liên hệ</strong></span> <span style="color:var(--red-700);font-weight:800;"> Bất hợp lí!</span> </div> <div
+                        style="padding:8px 12px;border-radius:10px;border:2.5px dashed var(--red-600);background:var(--red-50);display:flex;justify-content:space-between;"> <span><strong> Vị trí chính xác (GPS)</strong></span> <span style="color:var(--red-700);font-weight:800;"> Bất hợp lí!</span> </div> <div
+                        style="padding:8px 12px;border-radius:10px;border:2px dashed var(--orange-500);background:var(--orange-50);display:flex;justify-content:space-between;"> <span><strong> Lịch sử mua hàng &amp; Mã định danh</strong></span> <span style="color:var(--orange-700);font-weight:800;"> Theo dõi quảng cáo</span> </div> </div> </div> <div style="display:grid;gap:12px;"> <div
+                      style="background:var(--blue-50);border-radius:12px;padding:14px;border-left:5px solid var(--blue-600);"> <div style="font-weight:800;color:var(--blue-900);margin-bottom:4px;"> Câu hỏi vấn đáp 1</div> Quan sát các biểu tượng bên trái, ứng dụng chỉnh sửa ảnh này đang thu thập những loại dữ liệu nào
+                      của người dùng?
+                    </div> <div
+                      style="background:var(--orange-50);border-radius:12px;padding:14px;border-left:5px solid var(--orange-500);"> <div style="font-weight:800;color:var(--orange-700);margin-bottom:4px;"> Câu hỏi vấn đáp 2</div> Với chức năng chính là <strong>chụp và chỉnh sửa ảnh</strong>, quyền truy cập nào là <strong>cần
+                        thiết</strong>, còn quyền nào là <strong>bất hợp lí</strong>?
+                    </div> <div
+                      style="font-size:13.5px;color:var(--slate-600);background:var(--slate-100);padding:10px 12px;border-radius:10px;"> <strong>Em có biết (SGK):</strong> Trên Google Play / App Store, mục <em>An toàn dữ liệu (Data
+                        Safety)</em> giúp xem trước ứng dụng thu thập dữ liệu nào trước khi tải về.
+                    </div> </div> </div> </div> </div> <!-- SLIDE 6 --> <div class="slide-item" data-slide="6"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 3 – Chặng 1 • Trò chơi hóa (5 phút)</span> <h2 class="slide-h1">Trò chơi: “TRẠM KIỂM ĐỊNH ỨNG DỤNG AI”</h2> </div> <span class="slide-num-pill">Slide 6 / 8</span> </div> <div class="slide-body" style="justify-content:center;align-items:center;text-align:center;"> <p style="max-width:740px;font-weight:600;margin:0 0 12px;">Cả lớp cùng kiểm định nhanh <strong>5 hồ sơ
+                    ứng dụng AI</strong> và giơ tay biểu quyết trật tự theo quy ước sau:</p> <div class="grid-2" style="width:100%;max-width:820px;margin-bottom:18px;"> <div
+                    style="background:var(--green-50);border:3px solid var(--green-600);border-radius:16px;padding:18px;"> <div style="font-size:38px;margin-bottom:6px;"></div> <div style="font-size:20px;font-weight:900;color:var(--green-700);">1 NGÓN TAY (Phím 1)</div> <div style="font-weight:700;color:var(--slate-700);margin-top:4px;">AN TOÀN – MINH BẠCH (PHÙ HỢP)
+                    </div> </div> <div
+                    style="background:var(--red-50);border:3px solid var(--red-600);border-radius:16px;padding:18px;"> <div style="font-size:38px;margin-bottom:6px;"></div> <div style="font-size:20px;font-weight:900;color:var(--red-700);">2 NGÓN TAY (Phím 2)</div> <div style="font-weight:700;color:var(--slate-700);margin-top:4px;">CÓ DẤU HIỆU RỦI RO (CẦN THẬN
+                      TRỌNG)</div> </div> </div> <button class="btn btn-orange" style="font-size:18px;padding:14px 28px;border-radius:14px;"
+                  onclick="exitSlideFullscreenIfAny(); switchTab('game'); toggleGameFullscreen(true);"> MỞ NGAY GAME HTML5 “TRẠM KIỂM ĐỊNH ỨNG DỤNG AI”
+                </button> </div> </div> <!-- SLIDE 7 --> <div class="slide-item" data-slide="7"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 3 – Chặng 2 • Thảo luận cặp đôi (10 phút)</span> <h2 class="slide-h1">Thực hành “Phiếu kiểm duyệt AI” &amp; So sánh Công cụ A – B</h2> </div> <div class="timer-box"> <span style="font-size:13px;font-weight:800;color:var(--orange-700);"> Thảo luận:</span> <span class="timer-digits" id="slideTimerDisplay">05:00</span> <button class="btn btn-orange btn-sm" id="btnTimerToggle" onclick="toggleSlideTimer()">Bắt
+                    đầu</button> <button class="btn btn-ghost btn-sm" onclick="resetSlideTimer()">Đặt lại</button> </div> </div> <div class="slide-body"> <div
+                  style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:var(--slate-600);"> <span> <strong>Mẹo trình chiếu:</strong> Bấm vào từng dòng bên dưới để hiện đáp án chuẩn theo hiệu
+                    ứng từng bước!</span> <button class="btn btn-outline btn-sm" onclick="revealAllSlide7()">Hiện / Ẩn tất cả đáp án</button> </div> <table class="data-table" style="font-size:13.5px;"> <thead> <tr> <th style="width:22%;">Nhiệm vụ / Câu hỏi</th> <th>Đáp án chuẩn (Click vào dòng để hiển thị)</th> </tr> </thead> <tbody> <tr class="reveal-row" onclick="this.classList.toggle('revealed')"> <td><strong>Meitu – Câu 1:</strong> Có thu thập dữ liệu cá nhân?</td> <td><span class="reveal-answer"><strong>CÓ</strong> thu thập dữ liệu cá nhân của người
+                          dùng.</span></td> </tr> <tr class="reveal-row" onclick="this.classList.toggle('revealed')"> <td><strong>Meitu – Câu 2:</strong> Dữ liệu nào KHÔNG CẦN THIẾT?</td> <td><span class="reveal-answer">Thu thập Ảnh, Danh bạ, Vị trí chính xác, Lịch sử mua hàng →
+                          <strong>Không cần thiết: Danh bạ &amp; Vị trí chính xác</strong>.</span></td> </tr> <tr class="reveal-row" onclick="this.classList.toggle('revealed')"> <td><strong>Meitu – Câu 3 &amp; 4:</strong> Tắt dữ liệu &amp; Kết luận</td> <td><span class="reveal-answer"><strong>KHÔNG RÕ</strong> cách tắt trên mô phỏng → <strong>[✓] Có
+                            rủi ro – Cần tắt quyền hoặc Từ chối cài đặt</strong>.</span></td> </tr> <tr class="reveal-row" onclick="this.classList.toggle('revealed')"> <td><strong>SGK Luyện tập 1:</strong> Công cụ A vs Công cụ B</td> <td><span class="reveal-answer"><strong>Công cụ A:</strong> An toàn, minh bạch, phù hợp HS lớp 6.
+                          | <strong>Công cụ B:</strong> Thiếu minh bạch, đòi danh bạ/vị trí → <strong>Không an toàn, cần
+                            tránh</strong>.</span></td> </tr> </tbody> </table> </div> </div> <!-- SLIDE 8 --> <div class="slide-item" data-slide="8"> <div class="slide-header-bar"> <div> <span class="slide-kicker">Hoạt động 4 • Vận dụng &amp; Chốt chặn LMS (10 phút + Tại nhà)</span> <h2 class="slide-h1">Viết lời khuyên cảnh báo &amp; Nhiệm vụ trên hệ thống LMS</h2> </div> <span class="slide-num-pill">Slide 8 / 8</span> </div> <div class="slide-body"> <div class="grid-2" style="align-items:stretch;"> <div
+                    style="background:var(--orange-50);border:2px solid var(--orange-500);border-radius:14px;padding:16px;"> <div style="font-weight:900;color:var(--orange-700);margin-bottom:8px;"> Tại lớp (4 phút): Viết
+                      vào SGK Bài 5</div> <p style="margin:0 0 8px;">Ghi quyết định (Cài đặt / Tắt quyền / Từ chối) và <strong>01 lời khuyên
+                        cảnh báo thực tế</strong> dành cho bạn bè.</p> <button class="btn btn-outline btn-sm"
+                      onclick="document.getElementById('s8-samples').style.display=document.getElementById('s8-samples').style.display==='block'?'none':'block'"> Xem 3 lời khuyên mẫu</button> <ul id="s8-samples"
+                      style="display:none;margin:8px 0 0 18px;padding:0;font-size:13.5px;color:var(--slate-700);"> <li>“Không nên cài đặt ứng dụng này vì nó đòi quyền danh bạ và vị trí dù chỉ là ứng dụng chỉnh sửa
+                        ảnh.”</li> <li>“Trước khi tải bất kì ứng dụng AI nào, hãy đọc kĩ mục An toàn dữ liệu và đặt đủ 4 câu hỏi kiểm
+                        tra.”</li> <li>“Nếu cần dùng ứng dụng có thu thập dữ liệu phụ, hãy vào Cài đặt thiết bị để tắt ngay quyền vị
+                        trí và danh bạ.”</li> </ul> </div> <div
+                    style="background:var(--blue-50);border:2px solid var(--blue-600);border-radius:14px;padding:16px;display:flex;gap:14px;align-items:center;"> <div style="flex:1;"> <div style="font-weight:900;color:var(--blue-900);margin-bottom:8px;"> Trên LMS tại nhà (trong 3
+                        ngày)</div> <ol style="margin:0 0 0 18px;padding:0;display:grid;gap:6px;font-size:14px;"> <li><strong>LMS Quiz chốt chặn (5 câu):</strong> Bắt buộc đạt <strong>≥ 8/10 điểm</strong> để tự
+                          động <strong>mở khóa Bài 6</strong>.</li> <li><strong>Nộp Google Form Vận dụng:</strong> Nhận xét 4–5 dòng về 01 công cụ AI quen thuộc
+                          (Google Dịch / Duolingo) + trả lời <strong>Câu hỏi cầu nối Bài 6</strong>.</li> </ol> </div> <div
+                      style="text-align:center;background:#fff;padding:10px;border-radius:12px;border:1.5px solid var(--blue-200,#bfdbfe);flex-shrink:0;"> <div id="slide8QrWrap"></div> <div style="font-size:11px;font-weight:800;color:var(--blue-800);margin-top:4px;">QUÉT QR NỘP BÀI
+                      </div> </div> </div> </div> <div
+                  style="background:var(--blue-900);color:#fff;text-align:center;padding:10px 14px;border-radius:10px;font-weight:800;"> Thông điệp Bài 5: “Đọc kĩ mục An toàn dữ liệu – Đặt đủ 4 câu hỏi kiểm tra trước khi cài đặt!”
+                </div> </div> </div> </div><!-- /slide-viewport --> <div class="slide-controls"> <div style="display:flex;gap:8px;align-items:center;"> <button class="btn btn-ghost btn-sm" onclick="changeSlide(-1)">← Slide trước</button> <button class="btn btn-primary btn-sm" onclick="changeSlide(1)">Slide tiếp →</button> </div> <div class="slide-thumbs" id="slideThumbs"></div> <div style="display:flex;gap:8px;"> <button class="btn btn-orange btn-sm" onclick="toggleSlideFullscreen()" id="btnSlideFs"> Toàn màn
+                hình</button> </div> </div> </div> </section> <!-- ==================== TAB 3: DATA SAFETY & INFOGRAPHIC ==================== --> <section id="panel-visuals" class="module-panel"> <div class="module-header"> <div> <span class="module-tag">Thành phần 3 LMS &amp; Hình 5.2, 5.3 SGK</span> <h2>Ảnh mô phỏng Data Safety (Meitu) &amp; Infographic Bộ 4 Tiêu chí – 4 Câu hỏi</h2> <p>Dùng trực tiếp khi giảng Hoạt động 2.1, 2.2 hoặc tải ngay file ảnh <strong>PNG chất lượng cao</strong> để
+              chèn vào Slide, SGK và tải lên Thành phần 3 LMS.</p> </div> <div class="lms-toolbar teacher-only"> <button class="btn btn-outline btn-sm" onclick="downloadStandaloneModule('visuals')">⬇ Tải Module
+              (.html)</button> </div> </div> <!-- PART 3A: MEITU DATA SAFETY SIMULATOR --> <div class="card"> <div
+            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;"> <div> <h3 class="card-title" style="margin-bottom:4px;"> 3A. Mô phỏng tương tác mục “Quyền riêng tư / An toàn
+                dữ liệu” – Ứng dụng Meitu</h3> <p style="margin:0;font-size:13.5px;color:var(--slate-600);">Nhấp vào từng nhóm dữ liệu để xem giải thích
+                vì sao hợp lí hay bất hợp lí đối với học sinh lớp 6.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" id="btnStoreIOS" onclick="setStoreType('ios')">App Store (Quyền
+                riêng tư)</button> <button class="btn btn-outline btn-sm" id="btnStoreAndroid" onclick="setStoreType('android')">Google Play
+                (An toàn dữ liệu)</button> <button class="btn btn-orange btn-sm" id="btnToggleAnnotate" onclick="toggleMeituAnnotate()"> Bật khoanh
+                đỏ phân tích</button> <button class="btn btn-green btn-sm teacher-only"
+                onclick="exportSvgToPng('meituSvgExport', 'Meitu_DataSafety_Bai5.png', 1080, 1260)"> Tải ảnh
+                PNG</button> </div> </div> <div class="grid-2" style="align-items:start;"> <!-- Interactive Phone Mockup --> <div class="phone-frame"> <div class="phone-status"> <span id="storeStatusLeft">9:41 • App Store (VN)</span> <span> 100%</span> </div> <div style="padding:18px;"> <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"> <div
+                    style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#ec4899,#fb7185);color:#fff;display:grid;place-items:center;font-weight:900;font-size:16px;"> Meitu</div> <div> <div style="font-weight:900;font-size:16px;color:var(--slate-900);">Meitu – Ảnh &amp; Video AI</div> <div style="font-size:12.5px;color:var(--slate-500);" id="storeSubtitle">Quyền riêng tư của ứng dụng
+                      • Xem chi tiết</div> </div> </div> <div
+                  style="font-size:12.5px;font-weight:800;color:var(--slate-600);text-transform:uppercase;margin-bottom:8px;"
+                  id="storeSectionLabel"> Dữ liệu được liên kết với bạn (Ứng dụng có thể thu thập):
+                </div> <div class="perm-chip annotated-ok" data-perm="photo" onclick="selectPerm('photo')"> <div><strong> Nội dung người dùng (Ảnh &amp; Camera)</strong> <div style="font-size:12px;color:var(--slate-500);">Chụp và tải ảnh lên để chỉnh sửa</div> </div> <span style="font-size:12px;font-weight:800;color:var(--green-700);">Hợp lí</span> </div> <div class="perm-chip annotated-risk" data-perm="contacts" onclick="selectPerm('contacts')"> <div><strong> Thông tin liên hệ / Danh bạ</strong> <div style="font-size:12px;color:var(--slate-500);">Tên, số điện thoại, danh sách liên hệ</div> </div> <span style="font-size:12px;font-weight:800;color:var(--red-700);">Bất hợp lí</span> </div> <div class="perm-chip annotated-risk" data-perm="location" onclick="selectPerm('location')"> <div><strong> Vị trí chính xác (GPS)</strong> <div style="font-size:12px;color:var(--slate-500);">Tọa độ nơi em đang ở / học tập</div> </div> <span style="font-size:12px;font-weight:800;color:var(--red-700);">Bất hợp lí</span> </div> <div class="perm-chip annotated-risk" data-perm="purchase" onclick="selectPerm('purchase')"> <div><strong> Lịch sử mua hàng</strong> <div style="font-size:12px;color:var(--slate-500);">Các giao dịch trong ứng dụng</div> </div> <span style="font-size:12px;font-weight:800;color:var(--orange-700);">Cần lưu ý</span> </div> <div class="perm-chip annotated-risk" data-perm="device" onclick="selectPerm('device')"> <div><strong> Mã định danh &amp; Dữ liệu sử dụng</strong> <div style="font-size:12px;color:var(--slate-500);">ID thiết bị, thói quen tương tác quảng cáo</div> </div> <span style="font-size:12px;font-weight:800;color:var(--orange-700);">Theo dõi</span> </div> <div
+                  style="margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--slate-100);font-size:12.5px;color:var(--slate-700);"> <strong>Tùy chọn xóa / tắt thu thập:</strong> Không hiển thị nút tắt trực tiếp tại đây – người dùng
+                  phải tự vào <em>Cài đặt thiết bị</em> để thu hồi quyền.
+                </div> </div> </div> <!-- Interactive Analysis Box + Capture Guide --> <div style="display:grid;gap:14px;"> <div class="callout" id="permExplainBox"> <h3> Bấm vào từng quyền trên màn hình điện thoại để phân tích</h3> <p style="margin:0;">Với chức năng chính là <strong>chỉnh sửa ảnh</strong>, hãy kiểm tra xem mỗi nhóm dữ
+                  liệu Meitu thu thập có thực sự cần thiết hay không!</p> </div> <div class="card teacher-only" style="margin-bottom:0;background:var(--slate-50);"> <h4 style="margin:0 0 8px;color:var(--blue-900);"> Hướng dẫn GV tự chụp ảnh thật trên kho ứng dụng
+                  (nếu muốn bổ sung)</h4> <ol style="margin:0 0 0 18px;padding:0;font-size:13.5px;display:grid;gap:6px;color:var(--slate-700);"> <li><strong>Bước 1:</strong> Mở trình duyệt web truy cập <code>apps.apple.com</code> hoặc
+                    <code>play.google.com</code> và tìm từ khóa <strong>“Meitu”</strong>.</li> <li><strong>Bước 2:</strong> Cuộn xuống mục <strong>“Quyền riêng tư của ứng dụng”</strong> (App
+                    Privacy) hoặc <strong>“An toàn dữ liệu”</strong> (Data Safety), nhấp <em>Xem chi tiết</em>.</li> <li><strong>Bước 3:</strong> Chụp ảnh màn hình danh mục dữ liệu thu thập bằng tiếng Việt rõ nét để
+                    chèn vào Slide 5, Slide 7 và tải lên Thành phần 3 LMS (hoặc dùng ngay nút <strong> Tải ảnh
+                      PNG</strong> ở trên).</li> </ol> </div> </div> </div> <!-- Hidden Pure SVG for Crisp PNG Export of Meitu Data Safety --> <div style="display:none;"> <svg id="meituSvgExport" viewBox="0 0 540 630" width="540" height="630" xmlns="http://www.w3.org/2000/svg"> <rect width="540" height="630" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="4" /> <rect x="0" y="0" width="540" height="44" rx="20" fill="#0f172a" /> <text x="24" y="28" fill="#ffffff" font-family="Segoe UI, Arial" font-size="14" font-weight="700">MÔ PHỎNG
+                KHO ỨNG DỤNG • AN TOÀN DỮ LIỆU (DATA SAFETY)</text> <rect x="24" y="62" width="60" height="60" rx="16" fill="#ec4899" /> <text x="54" y="98" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="16"
+                font-weight="900">Meitu</text> <text x="100" y="86" fill="#0f172a" font-family="Segoe UI, Arial" font-size="20" font-weight="900">Meitu –
+                Chỉnh sửa ảnh &amp; Video AI</text> <text x="100" y="110" fill="#475569" font-family="Segoe UI, Arial" font-size="14" font-weight="600">Mục:
+                Quyền riêng tư của ứng dụng / An toàn dữ liệu</text> <line x1="24" y1="138" x2="516" y2="138" stroke="#e2e8f0" stroke-width="2" /> <text x="24" y="166" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">CÁC
+                NHÓM DỮ LIỆU ỨNG DỤNG CÓ THỂ THU THẬP:</text> <!-- Item 1 --> <rect x="24" y="182" width="492" height="66" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5" /> <text x="42" y="210" fill="#14532d" font-family="Segoe UI, Arial" font-size="16" font-weight="800">1. Ảnh
+                &amp; Camera (Nội dung người dùng)</text> <text x="42" y="233" fill="#15803d" font-family="Segoe UI, Arial" font-size="13" font-weight="600"> HỢP
+                LÍ – Cần thiết cho chức năng chính là chụp và chỉnh sửa ảnh</text> <!-- Item 2 --> <rect x="24" y="262" width="492" height="66" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="3"
+                stroke-dasharray="8 5" /> <text x="42" y="290" fill="#7f1d1d" font-family="Segoe UI, Arial" font-size="16" font-weight="800">2. Danh
+                bạ / Thông tin liên hệ</text> <text x="42" y="313" fill="#dc2626" font-family="Segoe UI, Arial" font-size="13" font-weight="700"> BẤT
+                HỢP LÍ – Không cần thiết cho chức năng chỉnh sửa ảnh</text> <!-- Item 3 --> <rect x="24" y="342" width="492" height="66" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="3"
+                stroke-dasharray="8 5" /> <text x="42" y="370" fill="#7f1d1d" font-family="Segoe UI, Arial" font-size="16" font-weight="800">3. Vị
+                trí chính xác (GPS)</text> <text x="42" y="393" fill="#dc2626" font-family="Segoe UI, Arial" font-size="13" font-weight="700"> BẤT
+                HỢP LÍ – Nguy cơ lộ địa chỉ nhà riêng, trường học</text> <!-- Item 4 --> <rect x="24" y="422" width="492" height="66" rx="12" fill="#fff7ed" stroke="#f97316" stroke-width="2.5"
+                stroke-dasharray="6 4" /> <text x="42" y="450" fill="#9a3412" font-family="Segoe UI, Arial" font-size="16" font-weight="800">4. Lịch
+                sử mua hàng &amp; Mã định danh thiết bị</text> <text x="42" y="473" fill="#c2410c" font-family="Segoe UI, Arial" font-size="13" font-weight="600"> CẦN
+                THẬN TRỌNG – Thường dùng theo dõi hành vi &amp; quảng cáo</text> <!-- Footer note --> <rect x="24" y="506" width="492" height="96" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2" /> <text x="42" y="534" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">KẾT
+                LUẬN KIỂM ĐỊNH CHO HỌC SINH LỚP 6:</text> <text x="42" y="558" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5" font-weight="600">•
+                Không rõ nút tắt thu thập dữ liệu trực tiếp trên giao diện tải.</text> <text x="42" y="582" fill="#b91c1c" font-family="Segoe UI, Arial" font-size="13.5" font-weight="800">→ Cần
+                thận trọng: Vào Cài đặt tắt quyền Danh bạ, Vị trí hoặc Từ chối cài đặt!</text> </svg> </div> </div> <!-- PART 3B: INFOGRAPHIC (VERTICAL LMS & HORIZONTAL SGK) --> <div class="card"> <div
+            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;"> <div> <h3 class="card-title" style="margin-bottom:4px;"> 3B. Infographic: 4 Tiêu chí &amp; Bộ 4 Câu hỏi kiểm
+                tra độ an toàn ứng dụng AI</h3> <p style="margin:0;font-size:13.5px;color:var(--slate-600);">Tông màu xanh dương – cam chuẩn SGK Tin học
+                6. Hỗ trợ 2 khổ chuẩn: <strong>Bản dọc LMS (1080×1920px)</strong> và <strong>Bản ngang SGK (Hình 5.2
+                  &amp; 5.3)</strong>.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" id="btnInfoHoriz" onclick="setInfoLayout('horizontal')"> Bản
+                ngang (SGK Hình 5.2 &amp; 5.3)</button> <button class="btn btn-outline btn-sm" id="btnInfoVert" onclick="setInfoLayout('vertical')"> Bản dọc
+                (LMS 1080×1920)</button> <button class="btn btn-green btn-sm teacher-only" onclick="downloadCurrentInfographicPng()">⬇ Tải
+                Infographic PNG</button> </div> </div> <!-- Horizontal Infographic SVG (SGK) --> <div id="infoHorizontalWrap" class="svg-preview-box"> <svg id="svgInfoHoriz" viewBox="0 0 1160 620" width="1160" height="620" xmlns="http://www.w3.org/2000/svg"> <defs> <linearGradient id="hdrGradH" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#0f2a66" /> <stop offset="65%" stop-color="#1d4ed8" /> <stop offset="100%" stop-color="#ea580c" /> </linearGradient> </defs> <rect width="1160" height="620" rx="18" fill="#ffffff" stroke="#bfdbfe" stroke-width="3" /> <!-- Header --> <rect x="0" y="0" width="1160" height="78" rx="18" fill="url(#hdrGradH)" /> <rect x="0" y="54" width="1160" height="24" fill="url(#hdrGradH)" /> <text x="580" y="34" text-anchor="middle" fill="#fed7aa" font-family="Segoe UI, Arial" font-size="14"
+                font-weight="800">TIN HỌC 6 • CHỦ ĐỀ B: ĐẠO ĐỨC AI • BÀI 5 (UNICEF, 2021 &amp; U.S. DEPT. OF EDUCATION,
+                2023)</text> <text x="580" y="62" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="24"
+                font-weight="900">4 TIÊU CHÍ VÀ BỘ 4 CÂU HỎI KIỂM TRA ĐỘ AN TOÀN CỦA ỨNG DỤNG AI</text> <!-- Section 1: Hình 5.2 --> <rect x="26" y="96" width="1108" height="202" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" /> <rect x="44" y="110" width="530" height="30" rx="15" fill="#1d4ed8" /> <text x="309" y="130" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="14.5"
+                font-weight="800">HÌNH 5.2 • 4 TIÊU CHÍ CỦA ỨNG DỤNG AI AN TOÀN VÀ MINH BẠCH</text> <!-- 4 Criteria boxes --> <rect x="44" y="154" width="254" height="128" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" /> <circle cx="76" cy="184" r="18" fill="#2563eb" /> <text x="76" y="190" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="16"
+                font-weight="900">1</text> <text x="104" y="190" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="16" font-weight="800">Nguồn
+                gốc rõ ràng</text> <text x="60" y="220" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">Công khai tên cơ quan,
+                tổ</text> <text x="60" y="240" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">chức phát triển uy tín
+                và</text> <text x="60" y="260" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">mục đích hoạt động rõ
+                ràng.</text> <rect x="316" y="154" width="254" height="128" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" /> <circle cx="348" cy="184" r="18" fill="#f97316" /> <text x="348" y="190" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="16"
+                font-weight="900">2</text> <text x="376" y="190" fill="#c2410c" font-family="Segoe UI, Arial" font-size="16" font-weight="800">Nội
+                dung lành mạnh</text> <text x="332" y="220" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">Không chứa mã độc,
+                không</text> <text x="332" y="240" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">nội dung bạo lực, phù
+                hợp</text> <text x="332" y="260" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">với lứa tuổi học sinh
+                lớp 6.</text> <rect x="588" y="154" width="254" height="128" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" /> <circle cx="620" cy="184" r="18" fill="#16a34a" /> <text x="620" y="190" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="16"
+                font-weight="900">3</text> <text x="648" y="190" fill="#15803d" font-family="Segoe UI, Arial" font-size="16" font-weight="800">Bảo
+                mật dữ liệu</text> <text x="604" y="220" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">Bảo vệ thông tin cá
+                nhân,</text> <text x="604" y="240" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">không thu thập quyền
+                thừa</text> <text x="604" y="260" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">ngoài chức năng
+                chính.</text> <rect x="860" y="154" width="254" height="128" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" /> <circle cx="892" cy="184" r="18" fill="#7c3aed" /> <text x="892" y="190" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="16"
+                font-weight="900">4</text> <text x="920" y="190" fill="#5b21b6" font-family="Segoe UI, Arial" font-size="16" font-weight="800">Quyền
+                kiểm soát</text> <text x="876" y="220" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">Cho phép người dùng
+                chủ</text> <text x="876" y="240" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">động tắt thu thập dữ
+                liệu</text> <text x="876" y="260" fill="#334155" font-family="Segoe UI, Arial" font-size="13.5">hoặc xóa lịch sử đã
+                lưu.</text> <!-- Section 2: Hình 5.3 --> <rect x="26" y="314" width="1108" height="232" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="2" /> <rect x="44" y="328" width="590" height="30" rx="15" fill="#ea580c" /> <text x="339" y="348" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="14.5"
+                font-weight="800">HÌNH 5.3 • BỘ 4 CÂU HỎI KIỂM TRA TRƯỚC KHI SỬ DỤNG ỨNG DỤNG AI</text> <!-- 4 Checkboxes 2x2 --> <rect x="44" y="372" width="526" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="388" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="413" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="402" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 1:
+                Công cụ này có an toàn và phù hợp</text> <text x="108" y="424" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">với
+                lứa tuổi học sinh không?</text> <rect x="588" y="372" width="526" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="602" y="388" width="36" height="36" rx="8" fill="#16a34a" /> <text x="620" y="413" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="652" y="400" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="14.5" font-weight="800">Câu
+                2: Công cụ này có thu thập thông tin cá nhân không?</text> <text x="652" y="423" fill="#475569" font-family="Segoe UI, Arial" font-size="13.5" font-weight="600">(Thu
+                thập dữ liệu nào và có cần thiết cho chức năng chính không?)</text> <rect x="44" y="458" width="526" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="474" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="499" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="488" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 3:
+                Có thể tắt tính năng thu thập dữ liệu</text> <text x="108" y="510" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">hoặc
+                xóa lịch sử hoạt động không?</text> <rect x="588" y="458" width="526" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="602" y="474" width="36" height="36" rx="8" fill="#16a34a" /> <text x="620" y="499" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="652" y="488" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 4:
+                Ứng dụng có công khai tên nhà phát triển</text> <text x="652" y="510" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">và lưu
+                ý kiểm chứng thông tin không?</text> <!-- Footer --> <rect x="26" y="560" width="1108" height="44" rx="12" fill="#0f2a66" /> <text x="580" y="588" text-anchor="middle" fill="#fef08a" font-family="Segoe UI, Arial" font-size="16.5"
+                font-weight="900">“ĐỌC KĨ MỤC AN TOÀN DỮ LIỆU – ĐẶT ĐỦ 4 CÂU HỎI KIỂM TRA TRƯỚC KHI CÀI ĐẶT!”</text> </svg> </div> <!-- Vertical Infographic SVG (LMS 1080x1920 ratio) --> <div id="infoVerticalWrap" class="svg-preview-box" style="display:none;"> <svg id="svgInfoVert" viewBox="0 0 600 1066" width="540" height="960" xmlns="http://www.w3.org/2000/svg"> <defs> <linearGradient id="hdrGradV" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#0f2a66" /> <stop offset="65%" stop-color="#1d4ed8" /> <stop offset="100%" stop-color="#ea580c" /> </linearGradient> </defs> <rect width="600" height="1066" rx="20" fill="#ffffff" stroke="#bfdbfe" stroke-width="3" /> <rect x="0" y="0" width="600" height="132" rx="20" fill="url(#hdrGradV)" /> <rect x="0" y="100" width="600" height="32" fill="url(#hdrGradV)" /> <text x="300" y="38" text-anchor="middle" fill="#fed7aa" font-family="Segoe UI, Arial" font-size="13"
+                font-weight="800">TIN HỌC 6 • CHỦ ĐỀ B: ĐẠO ĐỨC AI • BÀI 5</text> <text x="300" y="74" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="24"
+                font-weight="900">4 TIÊU CHÍ &amp; BỘ 4 CÂU HỎI</text> <text x="300" y="106" text-anchor="middle" fill="#dbeafe" font-family="Segoe UI, Arial" font-size="18"
+                font-weight="800">KIỂM TRA ĐỘ AN TOÀN CỦA ỨNG DỤNG AI</text> <!-- Top: 4 Criteria --> <rect x="24" y="152" width="552" height="366" rx="16" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" /> <rect x="44" y="168" width="512" height="34" rx="17" fill="#1d4ed8" /> <text x="300" y="190" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="14"
+                font-weight="800">4 TIÊU CHÍ CỦA ỨNG DỤNG AI AN TOÀN VÀ MINH BẠCH</text> <rect x="44" y="216" width="248" height="132" rx="12" fill="#ffffff" stroke="#2563eb" stroke-width="2" /> <circle cx="74" cy="246" r="16" fill="#2563eb" /> <text x="74" y="252" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="15"
+                font-weight="900">1</text> <text x="100" y="252" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Nguồn
+                gốc rõ ràng</text> <text x="60" y="282" fill="#334155" font-family="Segoe UI, Arial" font-size="13">Công khai nhà phát
+                triển</text> <text x="60" y="302" fill="#334155" font-family="Segoe UI, Arial" font-size="13">uy tín và mục đích
+                hoạt</text> <text x="60" y="322" fill="#334155" font-family="Segoe UI, Arial" font-size="13">động minh bạch.</text> <rect x="308" y="216" width="248" height="132" rx="12" fill="#ffffff" stroke="#f97316" stroke-width="2" /> <circle cx="338" cy="246" r="16" fill="#f97316" /> <text x="338" y="252" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="15"
+                font-weight="900">2</text> <text x="364" y="252" fill="#c2410c" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Nội
+                dung lành mạnh</text> <text x="324" y="282" fill="#334155" font-family="Segoe UI, Arial" font-size="13">Không mã độc, không
+                bạo</text> <text x="324" y="302" fill="#334155" font-family="Segoe UI, Arial" font-size="13">lực, phù hợp với lứa
+                tuổi</text> <text x="324" y="322" fill="#334155" font-family="Segoe UI, Arial" font-size="13">học sinh lớp 6.</text> <rect x="44" y="364" width="248" height="132" rx="12" fill="#ffffff" stroke="#16a34a" stroke-width="2" /> <circle cx="74" cy="394" r="16" fill="#16a34a" /> <text x="74" y="400" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="15"
+                font-weight="900">3</text> <text x="100" y="400" fill="#15803d" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Bảo
+                mật dữ liệu</text> <text x="60" y="430" fill="#334155" font-family="Segoe UI, Arial" font-size="13">Bảo vệ thông tin cá
+                nhân,</text> <text x="60" y="450" fill="#334155" font-family="Segoe UI, Arial" font-size="13">không đòi quyền truy
+                cập</text> <text x="60" y="470" fill="#334155" font-family="Segoe UI, Arial" font-size="13">vượt quá chức năng
+                chính.</text> <rect x="308" y="364" width="248" height="132" rx="12" fill="#ffffff" stroke="#7c3aed" stroke-width="2" /> <circle cx="338" cy="394" r="16" fill="#7c3aed" /> <text x="338" y="400" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="15"
+                font-weight="900">4</text> <text x="364" y="400" fill="#5b21b6" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Quyền
+                kiểm soát</text> <text x="324" y="430" fill="#334155" font-family="Segoe UI, Arial" font-size="13">Cho phép người dùng
+                tắt</text> <text x="324" y="450" fill="#334155" font-family="Segoe UI, Arial" font-size="13">thu thập dữ liệu hoặc
+                xóa</text> <text x="324" y="470" fill="#334155" font-family="Segoe UI, Arial" font-size="13">lịch sử hoạt
+                động.</text> <!-- Bottom: 4 Questions --> <rect x="24" y="538" width="552" height="414" rx="16" fill="#fff7ed" stroke="#fdba74" stroke-width="2" /> <rect x="44" y="556" width="512" height="34" rx="17" fill="#ea580c" /> <text x="300" y="578" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="14"
+                font-weight="800">BỘ 4 CÂU HỎI KIỂM TRA TRƯỚC KHI SỬ DỤNG AI</text> <rect x="44" y="606" width="512" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="623" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="648" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="636" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 1:
+                Công cụ này có an toàn và phù hợp</text> <text x="108" y="658" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">với
+                lứa tuổi học sinh không?</text> <rect x="44" y="690" width="512" height="78" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="710" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="735" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="718" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="14.5" font-weight="800">Câu
+                2: Công cụ này có thu thập thông tin cá nhân?</text> <text x="108" y="740" fill="#475569" font-family="Segoe UI, Arial" font-size="13" font-weight="600">(Thu
+                thập dữ liệu nào và có cần thiết cho chức năng chính?)</text> <rect x="44" y="780" width="512" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="797" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="822" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="810" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 3:
+                Có thể tắt tính năng thu thập dữ liệu</text> <text x="108" y="832" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">hoặc
+                xóa lịch sử hoạt động không?</text> <rect x="44" y="864" width="512" height="72" rx="12" fill="#ffffff" stroke="#fb923c" stroke-width="2" /> <rect x="58" y="881" width="36" height="36" rx="8" fill="#16a34a" /> <text x="76" y="906" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="22"
+                font-weight="900">✓</text> <text x="108" y="894" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">Câu 4:
+                Ứng dụng có công khai tên nhà phát triển</text> <text x="108" y="916" fill="#1e3a8a" font-family="Segoe UI, Arial" font-size="15" font-weight="800">và lưu
+                ý kiểm chứng thông tin không?</text> <!-- Footer --> <rect x="24" y="972" width="552" height="70" rx="14" fill="#0f2a66" /> <text x="300" y="1002" text-anchor="middle" fill="#fef08a" font-family="Segoe UI, Arial" font-size="14.5"
+                font-weight="900">“ĐỌC KĨ MỤC AN TOÀN DỮ LIỆU –</text> <text x="300" y="1026" text-anchor="middle" fill="#fef08a" font-family="Segoe UI, Arial" font-size="14.5"
+                font-weight="900">ĐẶT ĐỦ 4 CÂU HỎI KIỂM TRA TRƯỚC KHI CÀI ĐẶT!”</text> </svg> </div> <div style="margin-top:14px;display:flex;justify-content:flex-end;"> <button class="btn btn-green" onclick="markDone('visuals'); switchTab('game')">✓ Đã xem xong học liệu &amp;
+              Sang Game HTML5 →</button> </div> </div> </section> <!-- ==================== TAB 4: GAME HTML5 ==================== --> <section id="panel-game" class="module-panel"> <div class="module-header"> <div> <span class="module-tag orange">Hoạt động 3 – Chặng 1 • Trò chơi lớp học (5 phút)</span> <h2>Game HTML5: TRẠM KIỂM ĐỊNH ỨNG DỤNG AI</h2> <p>Chiếu lên màn hình lớn. Cả lớp giơ tay biểu quyết (1 ngón = An toàn; 2 ngón = Rủi ro), giáo viên nhấn
+              <strong>Phím 1</strong> hoặc <strong>Phím 2</strong> (hoặc click chuột) để đóng mộc kiểm định.</p> </div> <div class="lms-toolbar"> <button class="btn btn-ghost btn-sm" id="btnGameSound" onclick="toggleGameSound()"> Âm thanh: BẬT</button> <button class="btn btn-orange btn-sm" onclick="toggleGameFullscreen()"> Chiếu toàn màn hình</button> <button class="btn btn-primary btn-sm teacher-only" onclick="downloadStandaloneModule('game')">⬇ Tải Game
+              độc lập (.html)</button> </div> </div> <div class="game-stage" id="gameStage"> <div class="game-top"> <div style="display:flex;align-items:center;gap:12px;"> <span
+                style="background:var(--blue-800);color:#fff;padding:7px 14px;border-radius:10px;font-weight:900;font-size:15px;"> TRẠM KIỂM ĐỊNH ỨNG DỤNG AI</span> <span id="gameCounterLabel" style="font-weight:800;color:var(--blue-900);font-size:16px;">Hồ sơ 1 /
+                5</span> </div> <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;"> <div class="game-progress-dots" id="gameDots"></div> <span id="gameScorePill"
+                style="background:var(--orange-100);color:var(--orange-700);padding:6px 14px;border-radius:999px;font-weight:900;font-size:15px;">Điểm:
+                0 / 5</span> <button class="btn btn-ghost btn-sm" id="btnGameFsExit" style="display:none;"
+                onclick="toggleGameFullscreen(false)">✕ Thoát toàn màn hình</button> </div> </div> <!-- Play View --> <div id="gamePlayView"> <div class="dossier-card"> <div class="dossier-header"> <span
+                  style="font-size:14px;font-weight:900;letter-spacing:0.06em;color:var(--blue-700);text-transform:uppercase;"
+                  id="dossierCode">HỒ SƠ KIỂM ĐỊNH SỐ 01</span> <span style="font-size:13px;font-weight:700;color:var(--slate-500);">Phím tắt: [1] An toàn • [2] Rủi ro
+                  • [Enter] Câu tiếp</span> </div> <p class="dossier-text" id="dossierText"></p> <div class="game-stamp" id="gameStamp">ĐẠT KIỂM ĐỊNH</div> </div> <div class="game-actions"> <button class="game-choice-btn safe-btn" id="btnChoice1" onclick="answerGame(1)"> <span class="key-cap">1</span> <div> <div style="font-size:19px;font-weight:900;">AN TOÀN – MINH BẠCH (PHÙ HỢP)</div> <div style="font-size:13.5px;opacity:0.9;"> Biểu quyết 1 ngón tay • Nhấn phím 1</div> </div> </button> <button class="game-choice-btn risk-btn" id="btnChoice2" onclick="answerGame(2)"> <span class="key-cap">2</span> <div> <div style="font-size:19px;font-weight:900;">CÓ DẤU HIỆU RỦI RO (CẦN THẬN TRỌNG / TỪ CHỐI)</div> <div style="font-size:13.5px;opacity:0.9;"> Biểu quyết 2 ngón tay • Nhấn phím 2</div> </div> </button> </div> <div class="game-feedback" id="gameFeedback"> <div style="flex:1;min-width:260px;"> <div id="gameFbTitle" style="font-size:18px;font-weight:900;margin-bottom:4px;"></div> <div id="gameFbText" style="font-size:15.5px;font-weight:600;"></div> </div> <button class="btn btn-primary" style="font-size:16px;padding:12px 22px;" id="btnGameNext"
+                onclick="nextGameCase()">Hồ sơ tiếp theo →</button> </div> </div> <!-- Summary View --> <div id="gameSummaryView" style="display:none;text-align:center;padding:18px 10px;"> <div style="font-size:52px;margin-bottom:8px;"></div> <h3 style="font-size:28px;color:var(--blue-900);margin:0 0 8px;">TỔNG KẾT TRẠM KIỂM ĐỊNH ỨNG DỤNG AI</h3> <p id="gameFinalScoreText" style="font-size:20px;font-weight:800;color:var(--orange-600);margin:0 0 18px;"> </p> <div id="gameSummaryTableWrap" style="text-align:left;max-width:960px;margin:0 auto 20px;overflow-x:auto;"> </div> <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;"> <button class="btn btn-orange" style="font-size:16px;padding:12px 24px;" onclick="restartGame()">↻ Chơi
+                lại từ đầu</button> <button class="btn btn-primary" style="font-size:16px;padding:12px 24px;"
+                onclick="toggleGameFullscreen(false); switchTab('worksheet')"> Sang Chặng 2: Phiếu kiểm duyệt AI
+                →</button> </div> </div> </div> </section> <!-- ==================== TAB 5: WORKSHEET & RUBRIC 4.1 ==================== --> <section id="panel-worksheet" class="module-panel"> <div class="module-header"> <div> <span class="module-tag orange">Hoạt động 3 – Chặng 2 • Thảo luận cặp đôi (10 phút)</span> <h2>Phiếu kiểm duyệt AI (Meitu + Công cụ A – B) &amp; Rubric 4.1</h2> <p>Học sinh thảo luận cặp đôi trong 5 phút để hoàn thành Nhiệm vụ A (Meitu) và Nhiệm vụ B (Luyện tập 1 &amp;
+              2 SGK Bài 5).</p> </div> <div class="lms-toolbar"> <button class="btn btn-orange btn-sm teacher-only" id="btnToggleWsAns"
+              onclick="toggleWorksheetAnswers()"> Hiện Đáp án gợi ý GV</button> <button class="btn btn-ghost btn-sm" onclick="printWorksheet()"> In Phiếu A4</button> <button class="btn btn-outline btn-sm teacher-only" onclick="downloadStandaloneModule('worksheet')">⬇ Tải
+              Phiếu (.html)</button> </div> </div> <!-- Printable Worksheet Card --> <div class="card" id="worksheetPrintable"> <div
+            style="text-align:center;border-bottom:2px solid var(--blue-800);padding-bottom:12px;margin-bottom:16px;"> <div style="font-size:12.5px;font-weight:800;color:var(--slate-500);text-transform:uppercase;">TIN HỌC 6 –
+              CHUYÊN ĐỀ TRÍ TUỆ NHÂN TẠO – BÀI 5</div> <h3 style="margin:4px 0 6px;font-size:20px;color:var(--blue-900);">PHIẾU THỰC HÀNH CẶP ĐÔI: KIỂM DUYỆT ĐỘ AN
+              TOÀN CỦA ỨNG DỤNG AI</h3> <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:13.5px;margin-top:8px;"> <label>Họ tên cặp đôi: <input type="text" class="form-input"
+                  style="width:260px;display:inline-block;padding:5px 10px;" placeholder="Bạn 1 & Bạn 2..."></label> <label>Lớp: <input type="text" class="form-input"
+                  style="width:90px;display:inline-block;padding:5px 10px;" placeholder="6A..."></label> </div> </div> <div class="callout" style="margin-bottom:14px;"> <p style="margin:0 0 6px;"><strong>Nhiệm vụ A:</strong> Quan sát ảnh mô phỏng mục <em>“Quyền riêng tư / An
+                toàn dữ liệu”</em> của ứng dụng chỉnh sửa ảnh <strong>Meitu</strong> trên màn chiếu/tài liệu và điền
+              thông tin vào bảng kiểm duyệt dưới đây trong 5 phút.</p> <p style="margin:0;"><strong>Nhiệm vụ B:</strong> Áp dụng tương tự bộ 4 câu hỏi kiểm tra để nhận xét
+              <strong>Công cụ A</strong> và <strong>Công cụ B</strong> trong mục Luyện tập 1 SGK Bài 5.</p> </div> <table class="data-table"> <thead> <tr> <th style="width:65px;">STT</th> <th style="width:38%;">Câu hỏi kiểm tra (Checklist)</th> <th>Kết quả kiểm định của cặp đôi</th> </tr> </thead> <tbody> <tr> <td><strong>1</strong></td> <td>Ứng dụng có thu thập dữ liệu cá nhân của người dùng không?</td> <td> <textarea class="form-textarea" rows="2"
+                    placeholder="Nhập kết quả kiểm định của cặp đôi..."></textarea> <div class="ws-ans"
+                    style="display:none;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:700;"> ✓ Đáp án gợi ý GV: CÓ thu thập dữ liệu cá nhân.</div> </td> </tr> <tr> <td><strong>2</strong></td> <td>Ứng dụng thu thập những loại dữ liệu nào? Dữ liệu nào <strong>KHÔNG CẦN THIẾT</strong> cho chức năng
+                  chỉnh sửa ảnh?</td> <td> <textarea class="form-textarea" rows="2"
+                    placeholder="Liệt kê các dữ liệu và chỉ rõ quyền bất hợp lí..."></textarea> <div class="ws-ans"
+                    style="display:none;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:700;"> ✓ Đáp án gợi ý GV: Danh bạ, Vị trí chính xác, Lịch sử mua hàng, Ảnh, Mã định danh → Không cần thiết:
+                    Danh bạ, Vị trí chính xác.</div> </td> </tr> <tr> <td><strong>3</strong></td> <td>Trên giao diện mô phỏng có nêu rõ cách tắt thu thập dữ liệu hoặc xóa dữ liệu không?</td> <td> <textarea class="form-textarea" rows="2" placeholder="Nhập nhận xét của cặp đôi..."></textarea> <div class="ws-ans"
+                    style="display:none;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:700;"> ✓ Đáp án gợi ý GV: KHÔNG RÕ / Người dùng phải tự vào Cài đặt thiết bị để tắt quyền.</div> </td> </tr> <tr> <td><strong>4</strong></td> <td>Mức độ phù hợp và minh bạch đối với học sinh lớp 6?</td> <td> <textarea class="form-textarea" rows="2" placeholder="Nhập đánh giá mức độ phù hợp..."></textarea> <div class="ws-ans"
+                    style="display:none;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:700;"> ✓ Đáp án gợi ý GV: Cần thận trọng vì thu thập dữ liệu vượt quá chức năng chính.</div> </td> </tr> <tr> <td><strong>KẾT LUẬN</strong></td> <td>Đánh dấu (✓) vào phán quyết của cặp đôi:</td> <td> <div style="display:flex;gap:18px;flex-wrap:wrap;font-weight:700;"> <label style="cursor:pointer;"><input type="radio" name="wsVerdict" value="safe"> An toàn – Nên
+                      dùng</label> <label style="cursor:pointer;"><input type="radio" name="wsVerdict" value="risk"> Có rủi ro – Cần
+                      tắt quyền hoặc Từ chối cài đặt</label> </div> <div class="ws-ans"
+                    style="display:none;margin-top:8px;padding:7px 10px;border-radius:8px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:700;"> ✓ Phán quyết chuẩn: [✓] Có rủi ro – Cần tắt quyền hoặc Từ chối cài đặt.</div> </td> </tr> </tbody> </table> <!-- Nhiệm vụ B: SGK Luyện tập 1 & 2 --> <div style="margin-top:18px;padding-top:16px;border-top:2px dashed var(--slate-200);"> <h4 style="margin:0 0 10px;color:var(--blue-900);"> Nhiệm vụ B – Luyện tập SGK Bài 5 (So sánh Công cụ A –
+              Công cụ B &amp; Câu hỏi 2)</h4> <div class="grid-2"> <div
+                style="background:var(--slate-50);padding:14px;border-radius:12px;border:1px solid var(--slate-200);"> <strong>Công cụ A:</strong> Trang web luyện phát âm tiếng Anh của một tổ chức giáo dục uy tín, cho phép
+                luyện tập trực tiếp không cần khai báo thông tin cá nhân, có nút xóa lịch sử luyện tập.
+                <textarea class="form-textarea" rows="2" style="margin-top:8px;"
+                  placeholder="Nhận xét về Công cụ A..."></textarea> <div class="ws-ans"
+                  style="display:none;margin-top:6px;font-size:13px;color:var(--green-700);font-weight:700;">✓ An toàn,
+                  minh bạch, phù hợp HS lớp 6 (nguồn gốc uy tín, không đòi dữ liệu cá nhân, có quyền xóa lịch sử).</div> </div> <div
+                style="background:var(--slate-50);padding:14px;border-radius:12px;border:1px solid var(--slate-200);"> <strong>Công cụ B:</strong> Ứng dụng trò chuyện trực tuyến không rõ đơn vị phát triển, yêu cầu cấp quyền
+                truy cập danh bạ và vị trí, không có chức năng tắt lưu trữ dữ liệu.
+                <textarea class="form-textarea" rows="2" style="margin-top:8px;"
+                  placeholder="Nhận xét về Công cụ B..."></textarea> <div class="ws-ans"
+                  style="display:none;margin-top:6px;font-size:13px;color:var(--red-700);font-weight:700;">✓ Không an
+                  toàn, cần tránh (thiếu minh bạch tác giả, đòi danh bạ &amp; vị trí bất hợp lí, không tắt lưu trữ
+                  được).</div> </div> </div> <div style="margin-top:12px;background:var(--blue-50);padding:12px 14px;border-radius:10px;"> <strong>Luyện tập 2 (SGK):</strong> Vì sao câu hỏi <em>“Có thể tắt tính năng này không?”</em> lại cần
+              thiết khi đánh giá một ứng dụng AI?
+              <textarea class="form-textarea" rows="2" style="margin-top:6px;"
+                placeholder="Viết câu trả lời ngắn..."></textarea> <div class="ws-ans"
+                style="display:none;margin-top:6px;font-size:13px;color:var(--blue-800);font-weight:700;">✓ Gợi ý chuẩn:
+                Giúp biết người dùng có giữ được quyền chủ động kiểm soát và bảo vệ dữ liệu cá nhân của mình hay không.
+              </div> </div> </div> <div class="no-print" style="margin-top:14px;display:flex;justify-content:flex-end;"> <button class="btn btn-green" onclick="markDone('worksheet'); switchTab('quiz')">✓ Hoàn thành Phiếu &amp;
+              Sang Quiz chốt chặn →</button> </div> </div> <!-- Rubric 4.1 (Teacher Mode) --> <div class="card teacher-only no-print"> <div
+            style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;"> <h3 class="card-title" style="margin:0;"> Bảng Rubric 4.1 – Đánh giá Hoạt động 3: Phiếu kiểm duyệt AI
+              (Thang điểm 10)</h3> <div
+              style="background:var(--blue-900);color:#fff;padding:6px 14px;border-radius:999px;font-weight:800;font-size:14px;"> Tổng điểm chấm nhanh: <span id="rubric41Total">0</span> / 10 điểm
+            </div> </div> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th>Tiêu chí đánh giá</th> <th>Mức Tốt (Giỏi)</th> <th>Mức Đạt (Khá / TB)</th> <th>Mức Cần cố gắng</th> <th style="width:120px;">Chấm điểm</th> </tr> </thead> <tbody> <tr> <td><strong>1. Đọc hiểu dữ liệu thu thập &amp; phát hiện quyền bất hợp lí</strong> (4đ)</td> <td><strong>(4đ)</strong> Chỉ ra chính xác các dữ liệu thu thập và phân biệt đúng quyền cần thiết
+                    (Camera, Ảnh) với quyền bất hợp lí (Danh bạ, Vị trí).</td> <td><strong>(2.5đ)</strong> Chỉ ra được dữ liệu bị thu thập nhưng còn sót 1 quyền bất hợp lí hoặc giải
+                    thích chưa rõ.</td> <td><strong>(1đ)</strong> Chưa đọc đúng thông tin trên ảnh mô phỏng Data Safety hoặc xác định sai
+                    quyền.</td> <td> <select class="form-select r41-sel" onchange="calcRubric('r41-sel','rubric41Total')"> <option value="0">-- Chọn --</option> <option value="4">4 điểm</option> <option value="2.5">2.5 điểm</option> <option value="1">1 điểm</option> </select> </td> </tr> <tr> <td><strong>2. Vận dụng Bộ 4 câu hỏi &amp; So sánh Công cụ A – B</strong> (4đ)</td> <td><strong>(4đ)</strong> Trả lời đầy đủ 4 câu hỏi trên Phiếu, đánh giá đúng mức rủi ro Meitu và nhận
+                    xét chuẩn Công cụ A – B.</td> <td><strong>(2.5đ)</strong> Hoàn thành Phiếu nhưng nhận xét Công cụ A – B còn sơ lược hoặc thiếu 1 ý.
+                  </td> <td><strong>(1đ)</strong> Điền thiếu nhiều mục hoặc kết luận sai mức độ an toàn của ứng dụng.</td> <td> <select class="form-select r41-sel" onchange="calcRubric('r41-sel','rubric41Total')"> <option value="0">-- Chọn --</option> <option value="4">4 điểm</option> <option value="2.5">2.5 điểm</option> <option value="1">1 điểm</option> </select> </td> </tr> <tr> <td><strong>3. Trình bày &amp; Hợp tác cặp đôi</strong> (2đ)</td> <td><strong>(2đ)</strong> Phiếu ghi sạch sẽ, rõ ràng; hai bạn trao đổi trật tự, hoàn thành đúng thời
+                    gian.</td> <td><strong>(1đ)</strong> Trình bày còn gạch xóa hoặc chưa quản lí tốt thời gian thảo luận.</td> <td><strong>(0đ)</strong> Không hoàn thành Phiếu kiểm duyệt AI.</td> <td> <select class="form-select r41-sel" onchange="calcRubric('r41-sel','rubric41Total')"> <option value="0">-- Chọn --</option> <option value="2">2 điểm</option> <option value="1">1 điểm</option> <option value="0">0 điểm</option> </select> </td> </tr> </tbody> </table> </div> </div> </section> <!-- ==================== TAB 6: LMS QUIZ (TP 4) ==================== --> <section id="panel-quiz" class="module-panel"> <div class="module-header"> <div> <span class="module-tag green">Thành phần 4 LMS • Chốt chặn mở khóa Bài 6</span> <h2>Bài kiểm tra nhanh Bài 5 (5 câu trắc nghiệm – Thang 10 điểm)</h2> <p><strong>Điều kiện bắt buộc (Passing Grade):</strong> Đạt tối thiểu <strong>8/10 điểm</strong> (đúng từ
+              4/5 câu) để ghi nhận hoàn thành Bài 5 và <strong>tự động mở khóa Bài 6</strong>. Có phản hồi giải thích
+              ngay sau khi nộp và cho phép làm lại.</p> </div> <div class="lms-toolbar teacher-only"> <button class="btn btn-primary btn-sm" onclick="copyMoodleGift()"> Sao chép Moodle GIFT</button> <button class="btn btn-outline btn-sm" onclick="downloadStandaloneModule('quiz')">⬇ Tải riêng Quiz
+              (.html)</button> </div> </div> <div id="quizResultBanner" style="display:none;margin-bottom:18px;"></div> <div id="quizContainer"></div> <div class="card"
+          style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"> <div style="font-size:13.5px;color:var(--slate-600);">Mỗi câu đúng được <strong>2 điểm</strong> (Tổng 10
+            điểm). Bấm nộp bài để xem giải thích chi tiết từng câu.</div> <div style="display:flex;gap:10px;flex-wrap:wrap;"> <button class="btn btn-ghost" onclick="resetQuiz()">↻ Làm lại bài kiểm tra</button> <button class="btn btn-green" onclick="submitQuiz()">✓ Nộp bài &amp; Chấm điểm</button> </div> </div> </section> <!-- ==================== TAB 7: VẬN DỤNG & GOOGLE FORM (TP 5) ==================== --> <section id="panel-vandung" class="module-panel"> <div class="module-header"> <div> <span class="module-tag green">Thành phần 5 LMS • Hoạt động 4 &amp; Cầu nối Bài 6</span> <h2>Phiếu nộp bài Vận dụng Bài 5 &amp; Nhiệm vụ Cầu nối Bài 6</h2> <p>Học sinh hoàn thành tại nhà (trong vòng 3 ngày sau tiết học trực tiếp Bài 5) qua Biểu mẫu Google Form
+              nhúng ở cuối trang Bài 5 trên LMS.</p> </div> <div class="lms-toolbar teacher-only"> <button class="btn btn-outline btn-sm" onclick="downloadStandaloneModule('vandung')">⬇ Tải Module
+              (.html)</button> </div> </div> <!-- Teacher Google Form Config & Iframe Generator --> <div class="card teacher-only" style="border-top:5px solid var(--blue-700);background:var(--sky-50);"> <h3 class="card-title"> Cấu hình Google Form nhúng LMS &amp; Tạo mã QR cho Slide 8 (Dành cho Giáo viên)</h3> <div class="grid-2"> <div> <label class="form-label">Dán liên kết Google Form của lớp (sau khi tự tạo theo 7 câu mẫu bên
+                dưới):</label> <div style="display:flex;gap:8px;"> <input type="url" id="gformUrlInput" class="form-input"
+                  placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                  value=""> <button class="btn btn-primary" onclick="updateGoogleFormEmbed()">Cập nhật</button> </div> <div style="margin-top:10px;"> <label class="form-label">Mã nhúng <code>&lt;iframe&gt;</code> dán vào mục “Hoạt động 4 – Nộp bài Vận
+                  dụng Bài 5” trên LMS:</label> <div style="display:flex;gap:8px;align-items:flex-start;"> <textarea id="gformIframeCode" class="form-textarea" rows="3" readonly
+                    style="font-family:Consolas,monospace;font-size:12.5px;background:#fff;"></textarea> <button class="btn btn-orange btn-sm"
+                    onclick="copyText(document.getElementById('gformIframeCode').value, 'Đã sao chép mã nhúng <iframe> Google Form!')"> Copy</button> </div> </div> <div style="margin-top:10px;font-size:13px;color:var(--slate-700);"> <strong>Lưu ý kỹ thuật:</strong> Trong thẻ <em>Câu trả lời (Responses)</em> của Google Form → chọn
+                <strong>Liên kết với Trang tính (Google Sheets)</strong> để chấm Rubric 4.2. Nếu HS lớp 6 chưa có Gmail
+                đồng bộ, hãy tắt <strong>Câu 6 (Tải tệp)</strong> để các em nộp trực tiếp không cần đăng nhập Google.
+              </div> </div> <div
+              style="background:#fff;border:1.5px solid #bae6fd;border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;"> <div style="font-weight:800;color:var(--blue-900);font-size:14px;">Mã QR tự động (đồng bộ lên Slide 8)
+              </div> <div id="module7QrWrap"></div> <div style="display:flex;gap:8px;align-items:center;"> <label style="font-size:13px;font-weight:700;cursor:pointer;"> <input type="checkbox" id="toggleQ6Upload" checked onchange="toggleQ6Visibility()"> Bật Câu 6 (Tải ảnh
+                  SGK – yêu cầu Gmail)
+                </label> </div> </div> </div> </div> <!-- Interactive Form matching Phần 7 (7 Questions) --> <div class="card" style="border-top:5px solid var(--green-600);"> <div style="margin-bottom:16px;"> <span class="module-tag green">Biểu mẫu chuẩn 7 câu • Phần 7 Học liệu số</span> <h3 style="margin:6px 0 4px;color:var(--blue-900);font-size:20px;">[TIN HỌC 6 – AI] PHIẾU NỘP BÀI VẬN DỤNG
+              BÀI 5 &amp; CẦU NỐI BÀI 6</h3> <p style="margin:0;font-size:13.5px;color:var(--slate-600);">Học sinh hoàn thành phiếu này tại nhà (cùng sự
+              hướng dẫn của cha mẹ nếu cần) trong vòng 3 ngày sau tiết học trực tiếp Bài 5.</p> </div> <form id="vandungForm" onsubmit="submitVanDungForm(event)"> <div
+              style="background:var(--slate-50);padding:14px 16px;border-radius:12px;margin-bottom:16px;border:1px solid var(--slate-200);"> <div style="font-weight:900;color:var(--blue-800);margin-bottom:10px;">PHẦN A – THÔNG TIN HỌC SINH</div> <div class="grid-2"> <div class="form-group" style="margin-bottom:0;"> <label class="form-label">Câu 1. Họ và tên học sinh <span
+                      style="color:var(--red-600);">*</span></label> <input type="text" id="vdName" class="form-input" required placeholder="Ví dụ: Nguyễn Minh An"> </div> <div class="form-group" style="margin-bottom:0;"> <label class="form-label">Câu 2. Lớp <span style="color:var(--red-600);">*</span></label> <select id="vdClass" class="form-select" required> <option value="">-- Chọn lớp --</option> <option>6A1</option> <option>6A2</option> <option>6A3</option> <option>6A4</option> <option>6A5</option> </select> </div> </div> </div> <div
+              style="background:var(--blue-50);padding:14px 16px;border-radius:12px;margin-bottom:16px;border:1px solid var(--blue-100);"> <div style="font-weight:900;color:var(--blue-800);margin-bottom:10px;">PHẦN B – SẢN PHẨM VẬN DỤNG BÀI 5
+                (CHẤM THEO RUBRIC 10 ĐIỂM)</div> <div class="form-group"> <label class="form-label">Câu 3. Em hãy nhập lại 01 lời khuyên cảnh báo ngắn gọn về việc kiểm tra độ an
+                  toàn ứng dụng AI (ví dụ ứng dụng chỉnh sửa ảnh Meitu) mà em đã viết vào SGK Bài 5 trên lớp. <span
+                    style="color:var(--red-600);">*</span></label> <textarea id="vdAdvice" class="form-textarea" rows="2" required
+                  placeholder="Ví dụ: Trước khi tải bất kì ứng dụng AI nào, hãy luôn đọc kĩ mục An toàn dữ liệu và tự đặt đủ 4 câu hỏi kiểm tra..."></textarea> </div> <div class="form-group"> <label class="form-label">Câu 4. Chọn 01 công cụ AI học tập quen thuộc mà em sẽ thực hành đánh giá (theo
+                  mục Vận dụng SGK Bài 5): <span style="color:var(--red-600);">*</span></label> <div style="display:grid;gap:6px;font-size:14px;font-weight:600;"> <label style="cursor:pointer;"><input type="radio" name="vdTool" value="Google Dịch" required> (a)
+                    Google Dịch</label> <label style="cursor:pointer;"><input type="radio" name="vdTool"
+                      value="Ứng dụng học ngoại ngữ Duolingo"> (b) Ứng dụng học ngoại ngữ Duolingo</label> <label style="cursor:pointer;"><input type="radio" name="vdTool" value="Công cụ AI học tập khác"> (c)
+                    Công cụ AI học tập khác được giáo viên/cha mẹ giới thiệu</label> </div> </div> <div class="form-group"> <label class="form-label">Câu 5. Áp dụng Bộ 4 câu hỏi kiểm tra (1. Có an toàn, phù hợp lứa tuổi không?
+                  2. Có thu thập thông tin cá nhân không? 3. Có thể tắt tính năng thu thập/xóa lịch sử không? 4. Có công
+                  khai nhà phát triển không?), em hãy viết một đoạn nhận xét ngắn (4–5 dòng) về mức độ an toàn, minh
+                  bạch và phù hợp của công cụ AI em vừa chọn ở Câu 4. <span
+                    style="color:var(--red-600);">*</span></label> <textarea id="vdReview" class="form-textarea" rows="4" required oninput="updateWordCount()"
+                  placeholder="Viết đoạn nhận xét 4–5 dòng áp dụng đủ 4 câu hỏi kiểm tra..."></textarea> <div style="font-size:12px;color:var(--slate-600);margin-top:4px;">Số từ đã viết: <strong
+                    id="vdWordCount">0</strong> từ (gợi ý khoảng 45–90 từ tương đương 4–5 dòng).</div> </div> <div class="form-group" id="q6UploadGroup" style="margin-bottom:0;"> <label class="form-label">Câu 6 (Tùy chọn – chỉ bật nếu HS có sẵn Gmail). Chụp ảnh trang Phiếu kiểm
+                  duyệt AI và lời khuyên em đã viết trong SGK Bài 5 (.png/.jpg, tối đa 5MB):</label> <input type="file" id="vdFile" class="form-input" accept=".png,.jpg,.jpeg"> </div> </div> <div
+              style="background:var(--orange-50);padding:14px 16px;border-radius:12px;margin-bottom:16px;border:1px solid #fed7aa;"> <div style="font-weight:900;color:var(--orange-700);margin-bottom:10px;">PHẦN C – NHIỆM VỤ CẦU NỐI CHUẨN
+                BỊ BÀI 6 (DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI)</div> <div class="form-group" style="margin-bottom:0;"> <label class="form-label">Câu 7. Ngoài họ tên và số điện thoại, theo em hình ảnh khuôn mặt, giọng nói và
+                  lịch sử tìm kiếm trên mạng có được xem là tài sản cá nhân của em không? Ai là người có quyền quyết
+                  định việc chia sẻ những dữ liệu đó? <span style="color:var(--red-600);">*</span></label> <textarea id="vdBridge" class="form-textarea" rows="3" required
+                  placeholder="Trả lời suy nghĩ của em để chuẩn bị cho Bài 6..."></textarea> </div> </div> <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;"> <button type="reset" class="btn btn-ghost">Xóa nhập lại</button> <button type="submit" class="btn btn-green"> Gửi bài Vận dụng Bài 5</button> </div> </form> <div id="vdConfirmBox" class="callout green" style="display:none;margin-top:16px;margin-bottom:0;"> <h3> Gửi bài thành công!</h3> <p style="margin:0 0 10px;font-weight:700;">“Chúc mừng em đã hoàn thành nộp bài Vận dụng Bài 5! Hãy nhớ hoàn
+              thành bài Quiz 5 câu trên LMS (đạt ≥ 8/10 điểm) để mở khóa Bài 6 nhé!”</p> <button class="btn btn-outline btn-sm" onclick="downloadStudentSubmission()">⬇ Tải bản lưu bài làm của em
+              (.txt)</button> </div> </div> <!-- Rubric 4.2 (Teacher Mode) --> <div class="card teacher-only"> <div
+            style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;"> <h3 class="card-title" style="margin:0;"> Bảng Rubric 4.2 – Đánh giá Hoạt động 4: Sản phẩm nộp trên Google
+              Form (Thang điểm 10)</h3> <div
+              style="background:var(--green-700);color:#fff;padding:6px 14px;border-radius:999px;font-weight:800;font-size:14px;"> Tổng điểm chấm nhanh: <span id="rubric42Total">0</span> / 10 điểm
+            </div> </div> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th>Tiêu chí đánh giá</th> <th>Mức Tốt (Giỏi)</th> <th>Mức Đạt (Khá / TB)</th> <th>Mức Cần cố gắng</th> <th style="width:120px;">Chấm điểm</th> </tr> </thead> <tbody> <tr> <td><strong>1. Lời khuyên cảnh báo thực tế</strong> (3đ)</td> <td><strong>(3đ)</strong> Ngắn gọn, cụ thể, có căn cứ từ dữ liệu thu thập và khả thi đối với HS lớp 6.
+                  </td> <td><strong>(2đ)</strong> Đúng định hướng an toàn nhưng còn chung chung, chưa nêu rõ lí do.</td> <td><strong>(0.5đ)</strong> Chưa phù hợp hoặc không liên quan đến an toàn dữ liệu.</td> <td> <select class="form-select r42-sel" onchange="calcRubric('r42-sel','rubric42Total')"> <option value="0">-- Chọn --</option> <option value="3">3 điểm</option> <option value="2">2 điểm</option> <option value="0.5">0.5 điểm</option> </select> </td> </tr> <tr> <td><strong>2. Bài đánh giá 01 công cụ AI theo 4 câu hỏi</strong> (5đ)</td> <td><strong>(5đ)</strong> Viết đủ 4–5 dòng mạch lạc, áp dụng đầy đủ 4 câu hỏi kiểm tra để nhận xét
+                    đúng mức độ an toàn, minh bạch và phù hợp.</td> <td><strong>(3đ)</strong> Có nhận xét nhưng chỉ áp dụng 2–3 câu hỏi kiểm tra hoặc diễn đạt còn ngắn.
+                  </td> <td><strong>(1đ)</strong> Không áp dụng bộ câu hỏi kiểm tra hoặc nhận xét thiếu căn cứ.</td> <td> <select class="form-select r42-sel" onchange="calcRubric('r42-sel','rubric42Total')"> <option value="0">-- Chọn --</option> <option value="5">5 điểm</option> <option value="3">3 điểm</option> <option value="1">1 điểm</option> </select> </td> </tr> <tr> <td><strong>3. Câu hỏi cầu nối Bài 6 &amp; Nộp đúng hạn</strong> (2đ)</td> <td><strong>(2đ)</strong> Trả lời đầy đủ câu hỏi cầu nối Bài 6, đúng chính tả và nộp đúng thời hạn
+                    trên LMS.</td> <td><strong>(1đ)</strong> Nộp đúng hạn nhưng câu trả lời cầu nối sơ sài hoặc còn lỗi chính tả.</td> <td><strong>(0đ)</strong> Nộp quá hạn hoặc bỏ trống câu hỏi cầu nối.</td> <td> <select class="form-select r42-sel" onchange="calcRubric('r42-sel','rubric42Total')"> <option value="0">-- Chọn --</option> <option value="2">2 điểm</option> <option value="1">1 điểm</option> <option value="0">0 điểm</option> </select> </td> </tr> </tbody> </table> </div> </div> </section> </main> </div> <div id="toast" class="toast" role="status" aria-live="polite"></div> <script> /* ==================== GLOBAL STATE & PERSISTENCE ==================== */
+    const STORAGE_KEY = 'tin6_bai5_lms_state_v1';
+    let appState = {
+      completed: { tp12: false, slides: false, visuals: false, game: false, worksheet: false, quiz: false, vandung: false },
+      quizBestScore: 0,
+      unlockedBai6: false,
+      lastSubmission: null
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.completed) appState = Object.assign(appState, saved);
+    } catch (e) { }
+
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) { }
+      renderProgress();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    function setViewMode(mode) {
+      document.body.classList.toggle('student-mode', mode === 'student');
+      document.getElementById('btnModeTeacher').classList.toggle('active', mode === 'teacher');
+      document.getElementById('btnModeStudent').classList.toggle('active', mode === 'student');
+      showToast(mode === 'student' ? ' Đã chuyển sang giao diện Học sinh trên LMS' : ' Đã chuyển sang chế độ Giáo viên (Hiện công cụ xuất LMS & Đáp án)');
+    }
+
+    let currentTab = 'overview';
+    function switchTab(tabId) {
+      const target = document.getElementById('panel-' + tabId);
+      if (!target) {
+        showToast(' Bạn đang xem tệp module độc lập. Hãy mở tệp LMS tổng hợp hoặc module tương ứng trên LMS!');
+        return;
+      }
+      currentTab = tabId;
+      document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+      target.classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (tabId === 'slides') markDone('slides', true);
+    }
+
+    function markDone(key, silent) {
+      if (!appState.completed[key]) {
+        appState.completed[key] = true;
+        saveState();
+        if (!silent) showToast('✓ Đã ghi nhận hoàn thành học phần này!');
+      }
+    }
+
+    function renderProgress() {
+      const keys = ['tp12', 'slides', 'visuals', 'game', 'worksheet', 'quiz', 'vandung'];
+      let done = 0;
+      keys.forEach(k => {
+        const el = document.getElementById('chk-' + k);
+        if (appState.completed[k]) {
+          done++;
+          if (el) el.textContent = '✓';
+        } else if (el) {
+          el.textContent = '';
+        }
+      });
+      const pct = Math.round((done / keys.length) * 100);
+      const pctEl = document.getElementById('progressPct');
+      const fillEl = document.getElementById('progressFill');
+      const noteEl = document.getElementById('progressNote');
+      const badge = document.getElementById('unlockBadge');
+      if (pctEl) pctEl.textContent = pct + '%';
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (badge) {
+        if (appState.unlockedBai6) {
+          badge.classList.add('unlocked');
+          badge.textContent = ' Đã mở khóa Bài 6 (Quiz ' + appState.quizBestScore + '/10)';
+        } else {
+          badge.classList.remove('unlocked');
+          badge.textContent = ' Bài 6: Đang khóa (Cần Quiz ≥ 8/10)';
+        }
+      }
+      if (noteEl && appState.unlockedBai6) {
+        noteEl.textContent = ' Chúc mừng! Em đã đạt điều kiện mở khóa Bài 6: Dữ liệu cá nhân là tài sản của mỗi con người.';
+      }
+    }
+
+    /* ==================== SLIDE DECK ENGINE (8 SLIDES) ==================== */
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    function initSlides() {
+      const thumbs = document.getElementById('slideThumbs');
+      thumbs.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'slide-thumb-btn' + (i === 1 ? ' active' : '');
+        btn.textContent = i;
+        btn.onclick = () => goToSlide(i);
+        thumbs.appendChild(btn);
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = Math.max(1, Math.min(totalSlides, n));
+      document.querySelectorAll('.slide-item').forEach(s => {
+        s.classList.toggle('active', Number(s.dataset.slide) === currentSlide);
+      });
+      document.querySelectorAll('.slide-thumb-btn').forEach((b, idx) => {
+        b.classList.toggle('active', idx + 1 === currentSlide);
+      });
+    }
+
+    function changeSlide(delta) { goToSlide(currentSlide + delta); }
+
+    function toggleSlideFullscreen(force) {
+      const shell = document.getElementById('slideShell');
+      const isFs = typeof force === 'boolean' ? force : !shell.classList.contains('fullscreen-mode');
+      shell.classList.toggle('fullscreen-mode', isFs);
+      document.getElementById('btnSlideFs').textContent = isFs ? '✕ Thoát toàn màn hình' : ' Toàn màn hình';
+    }
+    function exitSlideFullscreenIfAny() { toggleSlideFullscreen(false); }
+
+    function revealAllSlide7() {
+      const rows = document.querySelectorAll('#panel-slides .reveal-row');
+      const anyHidden = Array.from(rows).some(r => !r.classList.contains('revealed'));
+      rows.forEach(r => r.classList.toggle('revealed', anyHidden));
+    }
+
+    // Slide 7 Countdown Timer (5 minutes)
+    let timerSeconds = 300;
+    let timerInterval = null;
+    function renderSlideTimer() {
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const s = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('slideTimerDisplay').textContent = m + ':' + s;
+    }
+    function toggleSlideTimer() {
+      const btn = document.getElementById('btnTimerToggle');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'Tiếp tục';
+      } else {
+        if (timerSeconds <= 0) timerSeconds = 300;
+        btn.textContent = 'Tạm dừng';
+        timerInterval = setInterval(() => {
+          timerSeconds--;
+          renderSlideTimer();
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = 'Hết giờ!';
+            playTone(660, 0.25);
+            setTimeout(() => playTone(880, 0.35), 260);
+            showToast(' Hết 5 phút thảo luận cặp đôi! Mời đại diện các cặp trình bày.');
+          }
+        }, 1000);
+      }
+    }
+    function resetSlideTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerSeconds = 300;
+      renderSlideTimer();
+      document.getElementById('btnTimerToggle').textContent = 'Bắt đầu';
+    }
+
+    /* ==================== MODULE 3: MEITU DATA SAFETY & INFOGRAPHIC ==================== */
+    let meituAnnotated = true;
+    function setStoreType(type) {
+      document.getElementById('btnStoreIOS').className = type === 'ios' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnStoreAndroid').className = type === 'android' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      if (type === 'ios') {
+        document.getElementById('storeStatusLeft').textContent = '9:41 • App Store (VN)';
+        document.getElementById('storeSubtitle').textContent = 'Quyền riêng tư của ứng dụng • Xem chi tiết';
+        document.getElementById('storeSectionLabel').textContent = 'Dữ liệu được liên kết với bạn (App Privacy):';
+      } else {
+        document.getElementById('storeStatusLeft').textContent = '9:41 • Google Play (VN)';
+        document.getElementById('storeSubtitle').textContent = 'An toàn dữ liệu (Data Safety) • Xem chi tiết';
+        document.getElementById('storeSectionLabel').textContent = 'Dữ liệu có thể được thu thập (Google Play):';
+      }
+    }
+
+    function toggleMeituAnnotate() {
+      meituAnnotated = !meituAnnotated;
+      document.getElementById('btnToggleAnnotate').textContent = meituAnnotated ? ' Bật khoanh đỏ phân tích' : ' Đang xem bản gốc mô phỏng';
+      document.querySelectorAll('.perm-chip').forEach(chip => {
+        const p = chip.dataset.perm;
+        chip.classList.remove('annotated-ok', 'annotated-risk');
+        if (meituAnnotated) {
+          chip.classList.add(p === 'photo' ? 'annotated-ok' : 'annotated-risk');
+        }
+      });
+    }
+
+    const PERM_INFO = {
+      photo: { cls: 'green', title: ' Ảnh & Camera – Quyền HỢP LÍ', text: 'Meitu là ứng dụng chụp và chỉnh sửa ảnh nên việc truy cập Camera và Thư viện ảnh phục vụ trực tiếp cho chức năng chính. Tuy nhiên, em vẫn chỉ nên chọn cấp quyền cho “Ảnh đã chọn” thay vì toàn bộ thư viện!' },
+      contacts: { cls: 'red', title: ' Danh bạ / Thông tin liên hệ – Quyền BẤT HỢP LÍ!', text: 'Chỉnh sửa ảnh hoàn toàn KHÔNG cần đọc danh bạ điện thoại (số điện thoại bố mẹ, thầy cô, bạn bè). Đây là dấu hiệu rủi ro thu thập dữ liệu vượt quá mục đích sử dụng.' },
+      location: { cls: 'red', title: ' Vị trí chính xác (GPS) – Quyền BẤT HỢP LÍ!', text: 'Ứng dụng chỉnh sửa ảnh không cần biết tọa độ nhà riêng hay trường học của học sinh lớp 6. Nếu cho phép, thông tin vị trí có thể bị lợi dụng hoặc lộ lọt.' },
+      purchase: { cls: 'orange', title: ' Lịch sử mua hàng – Cần lưu ý', text: 'Ghi nhận các giao dịch trong ứng dụng để phân tích hành vi tiêu dùng và gợi ý gói trả phí.' },
+      device: { cls: 'orange', title: ' Mã định danh & Dữ liệu sử dụng – Theo dõi quảng cáo', text: 'Dùng để nhận diện thiết bị và hiển thị quảng cáo cá nhân hóa. Học sinh nên cân nhắc tắt quyền theo dõi trong Cài đặt.' }
+    };
+
+    function selectPerm(key) {
+      const info = PERM_INFO[key];
+      const box = document.getElementById('permExplainBox');
+      box.className = 'callout ' + info.cls;
+      box.innerHTML = '<h3>' + info.title + '</h3><p style="margin:0;">' + info.text + '</p>';
+    }
+
+    let currentInfoLayout = 'horizontal';
+    function setInfoLayout(layout) {
+      currentInfoLayout = layout;
+      document.getElementById('infoHorizontalWrap').style.display = layout === 'horizontal' ? 'block' : 'none';
+      document.getElementById('infoVerticalWrap').style.display = layout === 'vertical' ? 'block' : 'none';
+      document.getElementById('btnInfoHoriz').className = layout === 'horizontal' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      document.getElementById('btnInfoVert').className = layout === 'vertical' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+    }
+
+    function exportSvgToPng(svgId, filename, outW, outH) {
+      const svgEl = document.getElementById(svgId);
+      const clone = svgEl.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const svgStr = new XMLSerializer().serializeToString(clone);
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, outW, outH);
+        ctx.drawImage(img, 0, 0, outW, outH);
+        const a = document.createElement('a');
+        a.download = filename;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        showToast(' Đã tải xuống ảnh PNG: ' + filename);
+      };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+    }
+
+    function downloadCurrentInfographicPng() {
+      if (currentInfoLayout === 'horizontal') {
+        exportSvgToPng('svgInfoHoriz', 'Infographic_Bai5_Ngang_SGK.png', 2320, 1240);
+      } else {
+        exportSvgToPng('svgInfoVert', 'Infographic_Bai5_Doc_LMS_1080x1920.png', 1080, 1920);
+      }
+    }
+
+    /* ==================== MODULE 4: HTML5 GAME (5 CASES) ==================== */
+    const GAME_CASES = [
+      {
+        id: 1,
+        text: 'Trang web luyện phát âm tiếng Anh của một tổ chức giáo dục uy tín, không yêu cầu nhập thông tin cá nhân và có nút xóa lịch sử luyện tập.',
+        answer: 1,
+        explain: 'Nguồn gốc rõ ràng (Câu 4), phù hợp lứa tuổi (Câu 1), không thu thập dữ liệu cá nhân thừa (Câu 2) và cho phép người dùng xóa lịch sử luyện tập (Câu 3).'
+      },
+      {
+        id: 2,
+        text: 'Ứng dụng trò chuyện AI không ghi tên nhà phát triển, bắt buộc nhập mật khẩu mạng xã hội và cấp quyền truy cập danh bạ.',
+        answer: 2,
+        explain: 'Thiếu minh bạch nguồn gốc (Câu 4) và đòi hỏi thông tin mật, quyền truy cập danh bạ hoàn toàn không cần thiết (Câu 2).'
+      },
+      {
+        id: 3,
+        text: 'Ứng dụng đèn pin thông minh tích hợp AI nhưng yêu cầu cấp quyền truy cập vị trí chính xác, micro và thư viện ảnh mà không giải thích lí do.',
+        answer: 2,
+        explain: 'Thu thập dữ liệu (vị trí, micro, ảnh) hoàn toàn không liên quan đến chức năng chiếu sáng (vi phạm Câu 2 về dữ liệu cần thiết).'
+      },
+      {
+        id: 4,
+        text: 'Công cụ dịch thuật học tập công khai rõ tên công ty phát triển, cho phép tra cứu trực tiếp không cần đăng nhập và có mục cài đặt tắt lưu lịch sử dịch.',
+        answer: 1,
+        explain: 'Đáp ứng đầy đủ tiêu chí minh bạch nguồn gốc (Câu 4), an toàn không đòi dữ liệu thừa (Câu 1, 2) và cho phép tắt lưu lịch sử (Câu 3).'
+      },
+      {
+        id: 5,
+        text: 'Trang web tạo ảnh hoạt hình AI miễn phí không có chính sách quyền riêng tư, không có nút xóa ảnh đã tải lên và hiện nhiều quảng cáo lạ.',
+        answer: 2,
+        explain: 'Thiếu minh bạch về cách lưu trữ hình ảnh cá nhân, không có quyền xóa dữ liệu (Câu 3) và chứa quảng cáo lạ tiềm ẩn nguy cơ mất an toàn (Câu 1).'
+      }
+    ];
+
+    let gameIdx = 0;
+    let gameScore = 0;
+    let gameAnswered = false;
+    let gameHistory = [];
+    let gameSoundOn = true;
+
+    function playTone(freq, dur, type) {
+      if (!gameSoundOn) return;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!window._ac) window._ac = new AC();
+        const osc = window._ac.createOscillator();
+        const gain = window._ac.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.14, window._ac.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, window._ac.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(window._ac.destination);
+        osc.start();
+        osc.stop(window._ac.currentTime + dur);
+      } catch (e) { }
+    }
+
+    function toggleGameSound() {
+      gameSoundOn = !gameSoundOn;
+      document.getElementById('btnGameSound').textContent = gameSoundOn ? ' Âm thanh: BẬT' : ' Âm thanh: TẮT';
+    }
+
+    function toggleGameFullscreen(force) {
+      const stage = document.getElementById('gameStage');
+      const isFs = typeof force === 'boolean' ? force : !stage.classList.contains('fullscreen-mode');
+      stage.classList.toggle('fullscreen-mode', isFs);
+      document.getElementById('btnGameFsExit').style.display = isFs ? 'inline-flex' : 'none';
+    }
+
+    function renderGameDots() {
+      const wrap = document.getElementById('gameDots');
+      wrap.innerHTML = '';
+      for (let i = 0; i < GAME_CASES.length; i++) {
+        const d = document.createElement('div');
+        d.className = 'game-dot';
+        if (i < gameHistory.length) d.classList.add(gameHistory[i].correct ? 'correct' : 'wrong');
+        else if (i === gameIdx) d.classList.add('current');
+        wrap.appendChild(d);
+      }
+    }
+
+    function loadGameCase() {
+      const item = GAME_CASES[gameIdx];
+      gameAnswered = false;
+      document.getElementById('gamePlayView').style.display = 'block';
+      document.getElementById('gameSummaryView').style.display = 'none';
+      document.getElementById('gameCounterLabel').textContent = 'Hồ sơ ' + (gameIdx + 1) + ' / ' + GAME_CASES.length;
+      document.getElementById('gameScorePill').textContent = 'Điểm: ' + gameScore + ' / ' + GAME_CASES.length;
+      document.getElementById('dossierCode').textContent = 'HỒ SƠ KIỂM ĐỊNH SỐ 0' + item.id;
+      document.getElementById('dossierText').textContent = '“' + item.text + '”';
+      const stamp = document.getElementById('gameStamp');
+      stamp.className = 'game-stamp';
+      document.getElementById('btnChoice1').disabled = false;
+      document.getElementById('btnChoice2').disabled = false;
+      document.getElementById('gameFeedback').className = 'game-feedback';
+      document.getElementById('btnGameNext').textContent = gameIdx === GAME_CASES.length - 1 ? 'Xem bảng tổng kết ' : 'Hồ sơ tiếp theo →';
+      renderGameDots();
+    }
+
+    function answerGame(choice) {
+      if (gameAnswered) return;
+      gameAnswered = true;
+      const item = GAME_CASES[gameIdx];
+      const isCorrect = choice === item.answer;
+      if (isCorrect) gameScore++;
+      gameHistory.push({ id: item.id, text: item.text, answer: item.answer, choice, correct: isCorrect, explain: item.explain });
+
+      document.getElementById('btnChoice1').disabled = true;
+      document.getElementById('btnChoice2').disabled = true;
+      document.getElementById('gameScorePill').textContent = 'Điểm: ' + gameScore + ' / ' + GAME_CASES.length;
+
+      const stamp = document.getElementById('gameStamp');
+      if (item.answer === 1) {
+        stamp.textContent = 'ĐẠT KIỂM ĐỊNH';
+        stamp.className = 'game-stamp safe show';
+      } else {
+        stamp.textContent = 'CẢNH BÁO RỦI RO';
+        stamp.className = 'game-stamp risk show';
+      }
+
+      if (isCorrect) {
+        playTone(587, 0.12);
+        setTimeout(() => playTone(880, 0.22), 120);
+      } else {
+        playTone(260, 0.16, 'sawtooth');
+        setTimeout(() => playTone(195, 0.25, 'sawtooth'), 160);
+      }
+
+      const fb = document.getElementById('gameFeedback');
+      fb.style.background = isCorrect ? 'var(--green-50)' : 'var(--orange-50)';
+      fb.style.border = '2px solid ' + (isCorrect ? 'var(--green-600)' : 'var(--orange-500)');
+      document.getElementById('gameFbTitle').style.color = isCorrect ? 'var(--green-700)' : 'var(--orange-700)';
+      document.getElementById('gameFbTitle').textContent = (isCorrect ? '✓ CHÍNH XÁC! ' : ' CHƯA ĐÚNG! ') + (item.answer === 1 ? 'Đáp án: Phím 1 (AN TOÀN – MINH BẠCH)' : 'Đáp án: Phím 2 (CÓ DẤU HIỆU RỦI RO)');
+      document.getElementById('gameFbText').textContent = 'Giải thích theo Bộ 4 câu hỏi: ' + item.explain;
+      fb.classList.add('show');
+      renderGameDots();
+    }
+
+    function nextGameCase() {
+      if (gameIdx < GAME_CASES.length - 1) {
+        gameIdx++;
+        loadGameCase();
+      } else {
+        showGameSummary();
+      }
+    }
+
+    function showGameSummary() {
+      markDone('game', true);
+      document.getElementById('gamePlayView').style.display = 'none';
+      document.getElementById('gameSummaryView').style.display = 'block';
+      document.getElementById('gameFinalScoreText').textContent = 'Cả lớp đã kiểm định đúng ' + gameScore + ' / ' + GAME_CASES.length + ' hồ sơ ứng dụng AI!';
+      let html = '<table class="data-table"><thead><tr><th>HS</th><th>Tóm tắt ứng dụng AI</th><th>Phán quyết chuẩn</th><th>Kết quả lớp</th></tr></thead><tbody>';
+      gameHistory.forEach(h => {
+        const badge = h.answer === 1
+          ? '<span style="color:var(--green-700);font-weight:800;">✓ ĐẠT KIỂM ĐỊNH (An toàn)</span>'
+          : '<span style="color:var(--red-700);font-weight:800;"> CẢNH BÁO RỦI RO</span>';
+        html += '<tr><td><strong>#' + h.id + '</strong></td><td>' + h.text + '</td><td>' + badge + '</td><td>' + (h.correct ? '✓ Đúng' : '✗ Nhầm') + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('gameSummaryTableWrap').innerHTML = html;
+      playTone(523, 0.12); setTimeout(() => playTone(659, 0.12), 130); setTimeout(() => playTone(784, 0.28), 260);
+    }
+
+    function restartGame() {
+      gameIdx = 0; gameScore = 0; gameHistory = [];
+      loadGameCase();
+    }
+
+    /* ==================== MODULE 5: WORKSHEET & RUBRIC ==================== */
+    let wsAnswersShown = false;
+    function toggleWorksheetAnswers() {
+      wsAnswersShown = !wsAnswersShown;
+      document.querySelectorAll('.ws-ans').forEach(el => el.style.display = wsAnswersShown ? 'block' : 'none');
+      document.getElementById('btnToggleWsAns').textContent = wsAnswersShown ? ' Ẩn Đáp án gợi ý GV' : ' Hiện Đáp án gợi ý GV';
+    }
+
+    function printWorksheet() {
+      const panel = document.getElementById('panel-worksheet');
+      panel.classList.add('print-target');
+      window.print();
+      panel.classList.remove('print-target');
+    }
+
+    function calcRubric(selClass, targetId) {
+      let sum = 0;
+      document.querySelectorAll('.' + selClass).forEach(s => sum += parseFloat(s.value || '0'));
+      document.getElementById(targetId).textContent = sum;
+    }
+
+    /* ==================== MODULE 6: LMS QUIZ (5 QUESTIONS) ==================== */
+    const QUIZ_DATA = [
+      {
+        q: 'Câu 1 (2 điểm): Đặc điểm nào sau đây thể hiện “Tính minh bạch” của một ứng dụng AI đối với học sinh?',
+        opts: [
+          'A. Giấu kín tên nhà phát triển và tự động thu thập dữ liệu mà không thông báo.',
+          'B. Công khai rõ ràng đơn vị phát triển, mục đích hoạt động, loại dữ liệu thu thập và cho phép người dùng kiểm soát dữ liệu.',
+          'C. Có rất nhiều quảng cáo trò chơi xuất hiện liên tục trên màn hình.',
+          'D. Yêu cầu học sinh nhập mật khẩu tài khoản mạng xã hội trước khi sử dụng.'
+        ],
+        correct: 1,
+        fb: 'Chính xác! Theo khuyến nghị của UNICEF (2021), tính minh bạch yêu cầu hệ thống AI công khai rõ ràng nguồn gốc và cách sử dụng dữ liệu bằng ngôn ngữ phù hợp lứa tuổi.'
+      },
+      {
+        q: 'Câu 2 (2 điểm): Một ứng dụng chỉnh sửa ảnh tích hợp AI yêu cầu cấp quyền truy cập vào Danh bạ điện thoại và Vị trí chính xác của em. Nhận xét nào sau đây là phù hợp nhất?',
+        opts: [
+          'A. Hoàn toàn bình thường vì mọi ứng dụng đều cần truy cập Danh bạ và Vị trí.',
+          'B. Đây là dấu hiệu rủi ro về an toàn dữ liệu vì Danh bạ và Vị trí không cần thiết cho chức năng chỉnh sửa ảnh.',
+          'C. Cứ bấm Đồng ý tất cả để ứng dụng chạy nhanh hơn.',
+          'D. Ứng dụng càng đòi nhiều quyền truy cập thì càng an toàn.'
+        ],
+        correct: 1,
+        fb: 'Rất tốt! Thu thập dữ liệu không phục vụ chức năng chính của ứng dụng là dấu hiệu cảnh báo rủi ro quyền riêng tư.'
+      },
+      {
+        q: 'Câu 3 (2 điểm): Trước khi tải một ứng dụng AI mới trên Google Play hoặc App Store, em nên đọc mục nào để biết ứng dụng đó thu thập những loại dữ liệu nào?',
+        opts: [
+          'A. Mục “An toàn dữ liệu” (Data Safety) hoặc “Quyền riêng tư của ứng dụng” (App Privacy).',
+          'B. Chỉ cần nhìn biểu tượng (logo) của ứng dụng có đẹp mắt hay không.',
+          'C. Chỉ cần xem dung lượng tệp cài đặt.',
+          'D. Không cần xem thông tin nào trước khi tải.'
+        ],
+        correct: 0,
+        fb: 'Chính xác! Mục “An toàn dữ liệu / Quyền riêng tư” giúp người dùng kiểm tra trước loại dữ liệu ứng dụng thu thập.'
+      },
+      {
+        q: 'Câu 4 (2 điểm): Vì sao câu hỏi “Có thể tắt tính năng thu thập dữ liệu hoặc xóa lịch sử hoạt động không?” lại quan trọng khi đánh giá một ứng dụng AI?',
+        opts: [
+          'A. Để giúp màn hình điện thoại sáng hơn.',
+          'B. Để biết người dùng có giữ được quyền chủ động kiểm soát và bảo vệ dữ liệu cá nhân của mình hay không.',
+          'C. Để tải ứng dụng mà không cần kết nối Internet.',
+          'D. Để thay đổi tên nhà phát triển của ứng dụng.'
+        ],
+        correct: 1,
+        fb: 'Chính xác! Khả năng tắt thu thập dữ liệu hoặc xóa lịch sử bảo đảm quyền kiểm soát của con người đối với dữ liệu cá nhân.'
+      },
+      {
+        q: 'Câu 5 (2 điểm): Trong hai công cụ AI dưới đây, công cụ nào an toàn và phù hợp hơn với học sinh lớp 6?',
+        opts: [
+          'A. Công cụ X: Trang web học ngoại ngữ của tổ chức giáo dục uy tín, không đòi khai báo thông tin cá nhân khi luyện tập, có nút xóa lịch sử.',
+          'B. Công cụ Y: Ứng dụng không rõ tác giả, bắt buộc cung cấp số điện thoại, địa chỉ nhà và không có nút tắt lưu trữ dữ liệu.',
+          'C. Cả hai công cụ đều thiếu an toàn như nhau.',
+          'D. Công cụ Y an toàn hơn vì yêu cầu khai báo đầy đủ thông tin cá nhân.'
+        ],
+        correct: 0,
+        fb: 'Xuất sắc! Công cụ X đáp ứng đầy đủ các tiêu chí an toàn, minh bạch và phù hợp lứa tuổi học sinh lớp 6.'
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = QUIZ_DATA.map((item, idx) => `
+        <div class="quiz-q" id="quiz-q-${idx}"> <div style="font-weight:800;color:var(--blue-900);margin-bottom:8px;">${item.q}</div> ${item.opts.map((opt, oi) => `
+            <label class="quiz-opt" id="quiz-opt-${idx}-${oi}"> <input type="radio" name="quiz_q_${idx}" value="${oi}" style="margin-top:3px;"> <span>${opt}</span> </label> `).join('')}
+          <div class="quiz-fb" id="quiz-fb-${idx}"></div> </div> `).join('');
+    }
+
+    function submitQuiz() {
+      let answeredCount = 0;
+      let correctCount = 0;
+      QUIZ_DATA.forEach((item, idx) => {
+        const checked = document.querySelector('input[name="quiz_q_' + idx + '"]:checked');
+        if (checked) answeredCount++;
+      });
+      if (answeredCount < QUIZ_DATA.length) {
+        showToast(' Em hãy chọn đáp án cho đủ cả 5 câu hỏi trước khi nộp bài nhé!');
+        return;
+      }
+
+      QUIZ_DATA.forEach((item, idx) => {
+        const chosen = Number(document.querySelector('input[name="quiz_q_' + idx + '"]:checked').value);
+        item.opts.forEach((_, oi) => {
+          const el = document.getElementById('quiz-opt-' + idx + '-' + oi);
+          el.classList.remove('is-correct', 'is-wrong');
+          if (oi === item.correct) el.classList.add('is-correct');
+          else if (oi === chosen && chosen !== item.correct) el.classList.add('is-wrong');
+        });
+        const fb = document.getElementById('quiz-fb-' + idx);
+        fb.classList.add('show');
+        if (chosen === item.correct) {
+          correctCount++;
+          fb.style.background = 'var(--green-50)';
+          fb.style.color = 'var(--green-700)';
+          fb.textContent = '✓ ' + item.fb;
+        } else {
+          fb.style.background = 'var(--red-50)';
+          fb.style.color = 'var(--red-700)';
+          fb.textContent = '✗ Chưa đúng. Đáp án đúng là phương án ' + ['A', 'B', 'C', 'D'][item.correct] + '. Giải thích: ' + item.fb;
+        }
+      });
+
+      const score = correctCount * 2;
+      const passed = score >= 8;
+      if (score > appState.quizBestScore) appState.quizBestScore = score;
+      if (passed) {
+        appState.unlockedBai6 = true;
+        appState.completed.quiz = true;
+        playTone(523, 0.12); setTimeout(() => playTone(659, 0.12), 130); setTimeout(() => playTone(784, 0.25), 260);
+      } else {
+        playTone(250, 0.22, 'sawtooth');
+      }
+      saveState();
+
+      const banner = document.getElementById('quizResultBanner');
+      banner.style.display = 'block';
+      banner.className = 'callout ' + (passed ? 'green' : 'orange');
+      banner.innerHTML = passed
+        ? `<h3> CHÚC MỪNG! EM ĐẠT ${score}/10 ĐIỂM (${correctCount}/5 CÂU ĐÚNG) – ĐÃ MỞ KHÓA BÀI 6!</h3> <p style="margin:0;">Hệ thống LMS đã ghi nhận em hoàn thành Bài 5 và mở khóa <strong>Bài 6: Dữ liệu cá nhân là tài sản của mỗi con người</strong>. Đừng quên nộp bài Vận dụng ở Thành phần 5 nhé!</p>`
+        : `<h3> KẾT QUẢ: ${score}/10 ĐIỂM (${correctCount}/5 CÂU ĐÚNG) – CHƯA ĐẠT ĐIỀU KIỆN MỞ KHÓA BÀI 6</h3> <p style="margin:0;">Em cần đạt tối thiểu <strong>8/10 điểm</strong> (đúng từ 4/5 câu). Hãy đọc kĩ phản hồi giải thích bên dưới và bấm <strong>“Làm lại bài kiểm tra”</strong> để chinh phục ngay nhé!</p>`;
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+      document.getElementById('quizResultBanner').style.display = 'none';
+      renderQuiz();
+      showToast('↻ Đã làm mới bài kiểm tra 5 câu.');
+    }
+
+    function copyMoodleGift() {
+      const gift = QUIZ_DATA.map((item, idx) => {
+        const letters = ['A', 'B', 'C', 'D'];
+        const optsText = item.opts.map((o, oi) => {
+          const cleanOpt = o.replace(/^[A-D]\.\s*/, '');
+          return (oi === item.correct ? '=' : '~') + cleanOpt + (oi === item.correct ? ' #' + item.fb : '');
+        }).join('\n');
+        return `::Bai5_Cau${idx + 1}:: ${item.q} {\n${optsText}\n}`;
+      }).join('\n\n');
+      copyText(gift, ' Đã sao chép 5 câu Quiz chuẩn định dạng Moodle GIFT (kèm phản hồi tự động)!');
+    }
+
+    /* ==================== MODULE 7: VẬN DỤNG & GOOGLE FORM + QR ==================== */
+    function updateWordCount() {
+      const txt = document.getElementById('vdReview').value.trim();
+      const words = txt ? txt.split(/\s+/).length : 0;
+      document.getElementById('vdWordCount').textContent = words;
+    }
+
+    function toggleQ6Visibility() {
+      const show = document.getElementById('toggleQ6Upload').checked;
+      document.getElementById('q6UploadGroup').style.display = show ? 'block' : 'none';
+    }
+
+    function submitVanDungForm(e) {
+      e.preventDefault();
+      const toolEl = document.querySelector('input[name="vdTool"]:checked');
+      const data = {
+        name: document.getElementById('vdName').value.trim(),
+        cls: document.getElementById('vdClass').value,
+        advice: document.getElementById('vdAdvice').value.trim(),
+        tool: toolEl ? toolEl.value : '',
+        review: document.getElementById('vdReview').value.trim(),
+        bridge: document.getElementById('vdBridge').value.trim(),
+        submittedAt: new Date().toLocaleString('vi-VN')
+      };
+      appState.lastSubmission = data;
+      appState.completed.vandung = true;
+      saveState();
+      document.getElementById('vdConfirmBox').style.display = 'block';
+      document.getElementById('vdConfirmBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast(' Đã nộp bài Vận dụng Bài 5 thành công!');
+    }
+
+    function downloadStudentSubmission() {
+      const d = appState.lastSubmission;
+      if (!d) return;
+      const content = [
+        'PHIẾU NỘP BÀI VẬN DỤNG BÀI 5 & CẦU NỐI BÀI 6 (TIN HỌC 6)',
+        'Thời gian nộp: ' + d.submittedAt,
+        '--------------------------------------------------------',
+        'Họ và tên: ' + d.name,
+        'Lớp: ' + d.cls,
+        '',
+        '1. Lời khuyên cảnh báo tại lớp:',
+        d.advice,
+        '',
+        '2. Công cụ AI đã chọn đánh giá: ' + d.tool,
+        '3. Đoạn nhận xét theo Bộ 4 câu hỏi kiểm tra:',
+        d.review,
+        '',
+        '4. Trả lời Câu hỏi cầu nối Bài 6 (Dữ liệu cá nhân là tài sản):',
+        d.bridge
+      ].join('\n');
+      triggerDownload('Bai5_VanDung_' + d.name.replace(/\s+/g, '_') + '.txt', content, 'text/plain;charset=utf-8');
+    }
+
+    /* Deterministic Clean Visual QR SVG Generator (Offline fallback + Link hash) */
+    function renderVisualQrSvg(text, size) {
+      const cells = 21;
+      const cellSize = Math.floor(size / (cells + 2));
+      const realSize = cellSize * (cells + 2);
+      // Simple deterministic matrix with genuine 3 finder patterns
+      const grid = Array.from({ length: cells }, () => Array(cells).fill(0));
+      function drawFinder(r0, c0) {
+        for (let r = 0; r < 7; r++) {
+          for (let c = 0; c < 7; c++) {
+            const border = r === 0 || r === 6 || c === 0 || c === 6;
+            const inner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+            grid[r0 + r][c0 + c] = (border || inner) ? 1 : 0;
+          }
+        }
+      }
+      drawFinder(0, 0); drawFinder(0, cells - 7); drawFinder(cells - 7, 0);
+      // Timing patterns
+      for (let i = 8; i < cells - 8; i++) {
+        grid[6][i] = i % 2 === 0 ? 1 : 0;
+        grid[i][6] = i % 2 === 0 ? 1 : 0;
+      }
+      // Deterministic hash fill for data area
+      let seed = 2166136261;
+      for (let i = 0; i < text.length; i++) {
+        seed ^= text.charCodeAt(i);
+        seed = Math.imul(seed, 16777619);
+      }
+      for (let r = 0; r < cells; r++) {
+        for (let c = 0; c < cells; c++) {
+          const inFinder = (r < 8 && c < 8) || (r < 8 && c >= cells - 8) || (r >= cells - 8 && c < 8) || r === 6 || c === 6;
+          if (!inFinder) {
+            seed = Math.imul(seed ^ (r * 31 + c * 17), 1664525) + 1013904223;
+            grid[r][c] = ((seed >>> 28) & 1);
+          }
+        }
+      }
+      let rects = '';
+      for (let r = 0; r < cells; r++) {
+        for (let c = 0; c < cells; c++) {
+          if (grid[r][c]) {
+            rects += `<rect x="${(c + 1) * cellSize}" y="${(r + 1) * cellSize}" width="${cellSize}" height="${cellSize}" fill="#0f2a66"/>`;
+          }
+        }
+      }
+      return `<svg width="${realSize}" height="${realSize}" viewBox="0 0 ${realSize} ${realSize}" xmlns="http://www.w3.org/2000/svg"><rect width="${realSize}" height="${realSize}" fill="#ffffff" rx="6"/>${rects}</svg>`;
+    }
+
+    function updateGoogleFormEmbed() {
+      const inputEl = document.getElementById('gformUrlInput');
+      const rawUrl = inputEl ? (inputEl.value || '').trim() : '';
+      const embedUrl = rawUrl.includes('?') ? rawUrl + '&embedded=true' : rawUrl + '?embedded=true';
+      const iframeStr = `<iframe src="${embedUrl}" width="100%" height="920" frameborder="0" marginheight="0" marginwidth="0">Đang tải biểu mẫu Google Form Bài 5...</iframe>`;
+      const codeEl = document.getElementById('gformIframeCode');
+      if (codeEl) codeEl.value = iframeStr;
+      const s8Qr = document.getElementById('slide8QrWrap');
+      if (s8Qr) s8Qr.innerHTML = renderVisualQrSvg(rawUrl, 120);
+      const m7Qr = document.getElementById('module7QrWrap');
+      if (m7Qr) m7Qr.innerHTML = renderVisualQrSvg(rawUrl, 138);
+    }
+
+    /* ==================== CLIPBOARD & STANDALONE MODULE EXPORTER ==================== */
+    function copyText(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => fallbackCopy(text, successMsg));
+      } else {
+        fallbackCopy(text, successMsg);
+      }
+    }
+    function fallbackCopy(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      showToast(successMsg);
+    }
+
+    function copyElementHTML(elementId, successMsg) {
+      if (elementId === 'tp12-lms-block') {
+        const inlineLmsHtml = `<!-- BÀI 5 LMS: STUDY GUIDE & KIẾN THỨC NỀN (DÁN TRỰC TIẾP VÀO HTML EDITOR CỦA LMS) -->
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:980px;margin:0 auto;line-height:1.6;color:#1e293b;"> <div style="background:#ffffff;border:1px solid #cbd5e1;border-top:5px solid #2563eb;border-radius:14px;padding:20px 22px;margin-bottom:18px;"> <h3 style="margin:0 0 12px;font-size:19px;color:#0f2a66;"> HƯỚNG DẪN HỌC TẬP BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO</h3> <p style="margin:0 0 14px;background:#eff6ff;padding:12px 15px;border-radius:10px;border:1px solid #dbeafe;"> <strong>Hình thức học tập:</strong> 01 tiết học trực tiếp tại lớp (45 phút) kết hợp đọc kiến thức nền, ôn tập, nộp bài Vận dụng và kiểm tra chốt chặn trên hệ thống LMS.
+    </p> <p style="margin:0 0 8px;font-weight:700;color:#0f2a66;">Lộ trình 3 giai đoạn học tập dành cho học sinh:</p> <ul style="margin:0 0 0 18px;padding:0;"> <li style="margin-bottom:8px;"><strong>Trước giờ học tại lớp (5 phút trên LMS):</strong> Đọc phần <em>Kết nối kiến thức nền</em> bên dưới và xem trước tình huống Khởi động của ba bạn An, Minh, Khoa trong SGK Bài 5.</li> <li style="margin-bottom:8px;"><strong>Trong giờ học tại lớp (45 phút trực tiếp):</strong> Tìm hiểu hai tiêu chí an toàn – minh bạch và Bộ 4 câu hỏi kiểm tra ứng dụng AI; quan sát hướng dẫn đọc mục <em>“An toàn dữ liệu”</em> trên kho ứng dụng; tham gia Trò chơi <em>“Trạm kiểm định ứng dụng AI”</em>, thảo luận cặp đôi hoàn thành <em>“Phiếu kiểm duyệt AI”</em> và viết lời khuyên cảnh báo vào SGK.</li> <li><strong>Sau giờ học tại lớp (15 phút trên LMS):</strong> (1) Hoàn thành bài kiểm tra nhanh 5 câu trên LMS (điều kiện bắt buộc đạt <strong>≥ 8/10 điểm</strong> để mở khóa Bài 6); (2) Nộp sản phẩm Vận dụng đánh giá 01 công cụ AI quen thuộc và trả lời 01 câu hỏi cầu nối chuẩn bị Bài 6 qua Biểu mẫu Google Form nhúng ở cuối trang.</li> </ul> </div> <div style="background:#ffffff;border:1px solid #fed7aa;border-top:5px solid #f97316;border-radius:14px;padding:20px 22px;"> <h3 style="margin:0 0 12px;font-size:19px;color:#c2410c;"> KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI HỌC BÀI 5</h3> <ul style="margin:0 0 14px 18px;padding:0;"> <li style="margin-bottom:8px;"><strong>Từ Bài 4 (Khám phá mặt tích cực và tiêu cực của một số tính năng AI):</strong> Em đã biết các nền tảng AI thường thu thập dữ liệu hành vi người dùng để gợi ý nội dung, điều này có thể ảnh hưởng đến quyền riêng tư nếu không được kiểm soát.</li> <li><strong>Từ Bài 9 môn Tin học 6 (An toàn thông tin trên Internet):</strong> Em đã biết các nguy cơ lộ thông tin cá nhân và nguyên tắc không cung cấp dữ liệu bí mật cho các nguồn không rõ ràng.</li> </ul> <div style="background:#fff7ed;border-left:5px solid #f97316;border-radius:10px;padding:12px 16px;"> <strong style="color:#c2410c;"> Câu hỏi định hướng:</strong> Trước khi tải về hoặc đăng nhập một ứng dụng AI mới trên mạng, em cần đặt ra những câu hỏi kiểm tra nào và xem ở mục nào trên kho ứng dụng để đánh giá ứng dụng đó có an toàn, minh bạch hay không?
+    </div> </div>
+</div>`;
+        copyText(inlineLmsHtml, successMsg);
+        return;
+      }
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      copyText(el.innerHTML, successMsg);
+    }
+
+    function triggerDownload(filename, content, mime) {
+      const blob = new Blob([content], { type: mime || 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function downloadStandaloneModule(modKey) {
+      const names = {
+        tp12: 'Module1_StudyGuide_KienThucNen_Bai5.html',
+        slides: 'Module2_Bo8Slide_Bai5.html',
+        visuals: 'Module3_DataSafety_Infographic_Bai5.html',
+        game: 'Module4_Game_TramKiemDinhAI_Bai5.html',
+        worksheet: 'Module5_PhieuKiemDuyetAI_Bai5.html',
+        quiz: 'Module6_QuizChotChan_Bai5.html',
+        vandung: 'Module7_VanDung_CauNoiBai6.html'
+      };
+      const titles = {
+        tp12: 'Bài 5 LMS – Study Guide & Kiến thức nền',
+        slides: 'Bài 5 – Bộ 8 Slide trình chiếu trực tiếp',
+        visuals: 'Bài 5 – Data Safety Meitu & Infographic',
+        game: 'Trò chơi HTML5 – Trạm kiểm định ứng dụng AI (Bài 5)',
+        worksheet: 'Bài 5 – Phiếu kiểm duyệt AI & Rubric 4.1',
+        quiz: 'Bài 5 LMS – Quiz chốt chặn 5 câu (Mở khóa Bài 6)',
+        vandung: 'Bài 5 LMS – Phiếu nộp bài Vận dụng & Cầu nối Bài 6'
+      };
+
+      const styleContent = document.querySelector('style').innerHTML;
+      const panelEl = document.getElementById('panel-' + modKey).cloneNode(true);
+      panelEl.classList.add('active');
+      // Hide top-level download buttons inside the exported single-module file
+      panelEl.querySelectorAll('.lms-toolbar').forEach(tb => {
+        tb.querySelectorAll('button').forEach(b => {
+          if (b.textContent.includes('Tải riêng') || b.textContent.includes('Tải Module') || b.textContent.includes('Tải Phiếu') || b.textContent.includes('Tải Game độc lập')) {
+            b.remove();
+          }
+        });
+      });
+
+      const scriptSource = document.querySelector('script').innerHTML;
+      const standaloneHtml = `<!DOCTYPE html>
+<html lang="vi">
+<head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>${titles[modKey]}</title> <style>${styleContent}
+    body { padding: 20px; background: #f1f5f9; }
+    .standalone-wrap { max-width: 1180px; margin: 0 auto; }
+  </style>
+</head>
+<body> <div class="standalone-wrap"> ${panelEl.outerHTML}
+  </div> <div id="toast" class="toast" role="status" aria-live="polite"></div> <script> ${scriptSource}
+    window.addEventListener('DOMContentLoaded', function() {
+      currentTab = '${modKey}';
+    });
+  <\/script>
+</body>
+</html>`;
+
+      triggerDownload(names[modKey], standaloneHtml, 'text/html;charset=utf-8');
+      showToast('⬇ Đã xuất tệp module độc lập: ' + names[modKey]);
+    }
+
+    /* ==================== KEYBOARD SHORTCUTS (GAME & SLIDES) ==================== */
+    document.addEventListener('keydown', function (e) {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      if (currentTab === 'game') {
+        if (e.key === '1') { e.preventDefault(); answerGame(1); }
+        else if (e.key === '2') { e.preventDefault(); answerGame(2); }
+        else if ((e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') && gameAnswered) {
+          e.preventDefault();
+          nextGameCase();
+        } else if (e.key === 'Escape') {
+          toggleGameFullscreen(false);
+        }
+      } else if (currentTab === 'slides') {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); changeSlide(1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); changeSlide(-1); }
+        else if (e.key === 'Escape') { toggleSlideFullscreen(false); }
+      }
+    });
+
+    /* ==================== INITIALIZATION ==================== */
+    window.addEventListener('DOMContentLoaded', function () {
+      if (document.getElementById('slideThumbs')) initSlides();
+      if (document.getElementById('dossierText')) loadGameCase();
+      if (document.getElementById('quizContainer')) renderQuiz();
+      if (document.getElementById('gformUrlInput') || document.getElementById('slide8QrWrap')) updateGoogleFormEmbed();
+      if (document.getElementById('progressPct')) renderProgress();
+    });
+  </script>
+</body> </html>
