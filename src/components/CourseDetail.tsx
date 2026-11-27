@@ -318,7 +318,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         {/* Trang chủ khóa học (home): Tổng quan mục tiêu, tiến độ & Thông báo lớp học */}
         {activeTab === 'home' && !activeModuleId && !isEmbedMode && (() => {
           const allCourseActs = (activeCourse.modules || []).flatMap(m => m.activities || []);
-          const htmlLabAct = allCourseActs.find(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || ''));
+          const htmlLabActs = allCourseActs.filter(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || '')).slice(0, 2);
           const featuredQuizActs = allCourseActs.filter(a => a.type === 'quiz').slice(0, 2);
           return (
           <div className="mx-4 sm:mx-8 mt-4 space-y-4">
@@ -332,9 +332,9 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-400/20 border border-sky-200/30 text-sky-100 text-[11px] font-semibold">
                       {activeCourse.category}
                     </span>
-                    {htmlLabAct && (
+                    {htmlLabActs.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-400/25 border border-emerald-200/40 text-emerald-100 text-[11px] font-bold">
-                        🔬 Có Phòng thí nghiệm HTML5 tương tác
+                        🔬 {htmlLabActs.length} Bộ học liệu HTML5 tương tác
                       </span>
                     )}
                   </div>
@@ -363,17 +363,18 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                   onClick={() => setActiveTab('modules')}
                   className="px-3.5 py-2 rounded-xl bg-white hover:bg-sky-50 text-[#0b3b64] text-xs font-bold shadow-xs transition-all"
                 >
-                  Vào Nội dung học tập ({(activeCourse.modules || []).length} mô-đun)
+                  Vào Nội dung học tập ({(activeCourse.modules || []).length} bài)
                 </button>
-                {htmlLabAct && (
+                {htmlLabActs.map(lab => (
                   <button
+                    key={lab.id}
                     type="button"
-                    onClick={() => navigateToActivity(activeCourse.id, htmlLabAct.id)}
+                    onClick={() => navigateToActivity(activeCourse.id, lab.id)}
                     className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold shadow-xs transition-all"
                   >
-                    🔬 Mở Phòng thí nghiệm Biểu mẫu A2.3
+                    {lab.title.length > 42 ? lab.title.slice(0, 42) + '…' : lab.title}
                   </button>
-                )}
+                ))}
                 {featuredQuizActs.map((qz, qi) => (
                   <button
                     key={qz.id}

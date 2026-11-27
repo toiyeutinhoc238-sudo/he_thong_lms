@@ -433,11 +433,12 @@ if (MONGODB_URI && process.env.DISABLE_MONGO !== '1') {
           ]
         });
         console.log('🧹 Đã hoàn tất kiểm tra và làm sạch tài khoản trong MongoDB.');
-        // Đảm bảo khóa học 6AIAB01 luôn sạch dữ liệu ảo (xóa sạch act-*-1..4 cũ và học sinh ảo mẫu)
+        // Đảm bảo khóa học 6AIAB01 luôn sạch dữ liệu ảo (xóa sạch act-*-1..4 cũ và học sinh ảo mẫu) và nạp trọn bộ học liệu Bài 1 & Bài 2
         await ensureDefaultCourse();
+        await ensureAi6Bai12Content();
         // Khởi tạo 1 lần khóa học thực tế Tin học 12 KNTT – Bài 12: Tạo biểu mẫu (kèm Học liệu tương tác A2.3) nếu chưa có
         await ensureTin12B12Course();
-        console.log('🧹 Đã đồng bộ khóa học 6AIAB01 & Tin học 12 Bài 12 (A2.3).');
+        console.log('🧹 Đã đồng bộ khóa học 6AIAB01 (Bài 1 & Bài 2) & Tin học 12 Bài 12 (A2.3).');
       } catch (cleanErr) {
         console.warn('Thông báo dọn dẹp dữ liệu cũ:', cleanErr.message);
       }
@@ -1385,6 +1386,590 @@ async function ensureDefaultCourse() {
   }
 }
 
+// ====================== HỌC LIỆU CHÍNH THỨC BÀI 1 & BÀI 2 CHO KHÓA HỌC 6AIAB01 ======================
+// Đồng bộ 100% với 2 thư mục BAI1/ và BAI2/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html)
+const AI6_BAI12_REVISION = 'v1-bai1-bai2';
+
+function buildAi6Bai12SeedData() {
+  const bai1Module = {
+    id: 'module-lesson-1',
+    courseId: '6AIAB01',
+    order: 1,
+    title: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+    description: 'Thời lượng: 02 tiết (Tiết 1: Trực tuyến trên LMS – Mức Hiểu 6.A1.1 | Tiết 2: Trực tiếp tại lớp – Mức Vận dụng 6.A1.2).',
+    learningObjectives: '• (6.A1.1) Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; AI không tự sinh ra và không hoạt động độc lập; nêu ví dụ công cụ AI quen thuộc và vai trò con người (Dữ liệu – Thuật toán – Điều khiển).\n• (6.A1.2) Trình bày được vai trò của AI chỉ là công cụ hỗ trợ; con người luôn giám sát (Humans in the Loop / EU AI Act 2024), đưa ra quyết định cuối cùng và chịu trách nhiệm 100%.',
+    ownerName: 'Nhóm 2 – Bài 1',
+    activities: [
+      {
+        id: 'ai6-b1-act-1',
+        moduleId: 'module-lesson-1',
+        title: '🔬 Bộ Học liệu số Tương tác Bài 1 (Study Guide, Infographic 1 & 2, Quiz kéo thả & Game “Người cầm lái thông thái”)',
+        type: 'document',
+        durationMinutes: 45,
+        isCompleted: false,
+        isRequired: true,
+        fileUrl: '/hoc-lieu/6aiab01/bai1/3.LMS.html',
+        description: 'Gói học liệu HTML5 tương tác toàn diện cho Bài 1 (Tiết 1 Trực tuyến & Tiết 2 Trực tiếp): Sổ tay hướng dẫn 4 bước, Tình huống An–Minh–Khoa, Infographic “Hậu trường của AI” & “AI quanh ta”, Video tích hợp, Bài chốt chặn kéo thả và Game HTML5 “Người cầm lái thông thái – Con người trong vòng lặp”.'
+      },
+      {
+        id: 'ai6-b1-act-2',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 1 (Khởi động): Tình huống ba bạn An, Minh, Khoa & Khảo sát nguồn gốc AI',
+        type: 'forum',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        description: '📘 SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem Infographic & Video 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\n🔗 KIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\n💬 TÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\n👉 Em hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
+      },
+      {
+        id: 'ai6-b1-act-3',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 2.1 (Video bài giảng – Code.org): “AI là gì? Vì sao gọi là Trí tuệ Nhân tạo?”',
+        type: 'video',
+        durationMinutes: 4,
+        isCompleted: false,
+        isRequired: true,
+        videoUrl: 'https://www.youtube.com/watch?v=Ok-xpKjKp2g',
+        preventVideoSkip: true,
+        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) và trả lời 2 mốc neo chặn. 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.',
+        videoCheckpoints: [
+          {
+            id: 'ai6-b1-cp-1',
+            timeSeconds: 90,
+            question: 'Để một hệ thống AI có thể nhận diện hình ảnh hoặc dự đoán thông minh, nguồn nguyên liệu quan trọng đầu tiên mà con người phải thu thập và xử lí là gì?',
+            options: [
+              'Các dòng lệnh cố định không cần thay đổi theo thời gian',
+              'Dữ liệu mẫu đã được chọn lọc và làm sạch (hình ảnh, âm thanh, văn bản...)',
+              'Các linh kiện điện tử có khả năng tự sinh ra ý thức',
+              'Công tắc cơ học bật tắt nguồn điện của thiết bị'
+            ],
+            correctAnswer: 1,
+            explanation: 'Bước 1 trong quy trình tạo ra AI (SGK Bài 1 – Hình 1.2): Con người thu thập, phân loại và làm sạch lượng lớn dữ liệu mẫu để “dạy” máy tính học.',
+            requireCorrect: true
+          },
+          {
+            id: 'ai6-b1-cp-2',
+            timeSeconds: 180,
+            question: 'Vì sao công nghệ này được gọi là Trí tuệ “NHÂN TẠO” (Artificial Intelligence)?',
+            options: [
+              'Vì AI có thể tự tiến hóa và hoạt động độc lập tách rời khỏi con người',
+              'Vì mọi thiết bị sử dụng điện trong nhà đều có trí thông minh giống con người',
+              'Vì AI hoàn toàn là sản phẩm do con người tạo ra, lập trình thuật toán và trực tiếp điều khiển',
+              'Vì sau khi cài đặt xong, AI tự viết lại luật pháp thay thế trách nhiệm con người'
+            ],
+            correctAnswer: 2,
+            explanation: 'Khác với phim viễn tưởng, AI do con người dẫn dắt (human-led – UNESCO 2024): con người giữ vai trò quyết định ở cả 3 khâu Dữ liệu – Thuật toán – Điều khiển.',
+            requireCorrect: true
+          }
+        ]
+      },
+      {
+        id: 'ai6-b1-act-4',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 3A (Chốt chặn kiểm tra ≥ 8/10đ): Phân loại công cụ AI & Vai trò con người (5 câu · 10 phút)',
+        type: 'quiz',
+        durationMinutes: 10,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        passScore: 8,
+        timeLimitMinutes: 10,
+        shuffleQuestions: false,
+        description: 'Bài kiểm tra chốt chặn Tiết 1 (5 câu, thang 10 điểm, điều kiện đạt ≥ 8/10 điểm theo KHBD Bài 1). Sau khi nộp bài, hệ thống chấm tự động và hiển thị phản hồi riêng cho từng phương án em chọn.',
+        quizQuestions: [
+          {
+            id: 'ai6-b1-q1',
+            question: 'Câu 1 (Phân loại công cụ AI): Trong các thiết bị và ứng dụng sau, công cụ nào CÓ ứng dụng Trí tuệ nhân tạo (AI)?',
+            options: [
+              'Chiếc quạt điện có điều khiển hẹn giờ tự tắt theo số phút cài sẵn',
+              'Ứng dụng dịch ngôn ngữ qua giọng nói và chữ trên hình ảnh (như Google Dịch)',
+              'Chiếc máy tính bỏ túi khoa học thực hiện nhanh các phép tính công thức cố định',
+              'Chiếc nồi cơm điện tử tự chuyển sang chế độ giữ ấm khi cảm biến đủ nhiệt độ'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'Quạt hẹn giờ chỉ đếm lùi thời gian theo bộ đếm cố định chứ không học từ dữ liệu — không phải AI.',
+              'Chính xác! Ứng dụng dịch ngôn ngữ dùng AI để học từ dữ liệu ngôn ngữ, nhận diện giọng nói, mặt chữ và dịch nghĩa theo ngữ cảnh.',
+              'Rất dễ nhầm! Máy tính bỏ túi dù tính rất nhanh nhưng chỉ chạy theo công thức cài sẵn cố định, không học từ dữ liệu.',
+              'Nồi cơm điện chỉ hoạt động theo cảm biến/rơ-le nhiệt lập trình sẵn mức nhiệt cố định, không phải AI.'
+            ],
+            explanation: 'Theo Infographic 2 (Hình 1.3 SGK Bài 1): Công cụ AI có khả năng học từ dữ liệu để nhận dạng, dự đoán, dịch thuật hoặc gợi ý thông minh.'
+          },
+          {
+            id: 'ai6-b1-q2',
+            question: 'Câu 2 (Phân loại thiết bị thông thường): Thiết bị hoặc tính năng nào dưới đây KHÔNG phải là công cụ ứng dụng Trí tuệ nhân tạo (AI)?',
+            options: [
+              'Tính năng mở khóa điện thoại bằng nhận diện khuôn mặt chủ nhân (Face ID)',
+              'Hệ thống tự động đề xuất video trên YouTube dựa theo lịch sử xem',
+              'Chiếc máy tính bỏ túi cầm tay thực hiện phép cộng, trừ, nhân, chia cơ bản',
+              'Trợ lý ảo nghe hiểu câu lệnh giọng nói (Google Assistant, Siri) để tìm kiếm thông tin'
+            ],
+            correctAnswer: 2,
+            optionFeedback: [
+              'Face ID có ứng dụng AI để học và phân tích đặc điểm khuôn mặt nhằm nhận diện đúng chủ nhân.',
+              'Hệ thống gợi ý YouTube sử dụng AI phân tích lịch sử xem để dự đoán nội dung phù hợp.',
+              'Chính xác! Máy tính bỏ túi thông thường chỉ hoạt động theo mạch điện tử và công thức cố định, không học từ dữ liệu.',
+              'Trợ lý ảo giọng nói ứng dụng AI để nhận dạng âm thanh và hiểu ngôn ngữ tự nhiên.'
+            ],
+            explanation: 'Không phải mọi thiết bị điện tử đều là AI: máy tính bỏ túi, quạt cơ, đèn pin chỉ thực hiện thao tác cố định.'
+          },
+          {
+            id: 'ai6-b1-q3',
+            question: 'Câu 3 (Vai trò con người – Dữ liệu): Để một hệ thống AI có thể nhận diện chính xác hình ảnh con mèo, bước đầu tiên các kĩ sư con người phải thực hiện là gì?',
+            options: [
+              'Cài đặt công cụ AI lên điện thoại rồi chờ máy tính tự chụp và tự suy ra hình ảnh con mèo',
+              'Thu thập, phân loại và làm sạch hàng nghìn bức ảnh mẫu về các loài mèo để dạy máy tính học',
+              'Chỉ cần viết một câu lệnh điều kiện kiểm tra kích thước tệp ảnh mà không cần ảnh mẫu',
+              'Bật nguồn máy tính và để hệ thống AI tự sinh ra cơ sở dữ liệu mẫu trong bộ nhớ'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'AI không thể tự biết con mèo là gì nếu chưa được con người cung cấp dữ liệu mẫu để huấn luyện trước.',
+              'Chính xác! Thu thập và xử lí dữ liệu là bước nền tảng đầu tiên do con người thực hiện (Hình 1.2 SGK Bài 1, UNESCO 2024).',
+              'Kích thước tệp ảnh không thể giúp máy tính phân biệt được con mèo với các vật thể khác.',
+              'Máy tính không thể tự sinh ra dữ liệu chuẩn nếu không có con người lựa chọn và làm sạch.'
+            ],
+            explanation: 'Bước 1 trong 3 bước tạo ra AI: Con người lựa chọn, thu thập và làm sạch lượng lớn dữ liệu làm nguồn học cho máy tính.'
+          },
+          {
+            id: 'ai6-b1-q4',
+            question: 'Câu 4 (Vai trò con người – Thuật toán): Trong quy trình phát triển công cụ AI, công việc “viết chương trình máy tính và hướng dẫn máy tính cách học từ dữ liệu, nhận diện mẫu” thuộc bước nào?',
+            options: [
+              'Thiết kế thuật toán và lập trình',
+              'Thu thập và làm sạch dữ liệu đầu vào',
+              'Triển khai, bật tắt và vận hành thiết bị cuối',
+              'Giám sát đạo đức sau khi người dùng sử dụng'
+            ],
+            correctAnswer: 0,
+            optionFeedback: [
+              'Chính xác! Con người thiết kế thuật toán và viết chương trình để dẫn dắt cách máy tính học từ dữ liệu.',
+              'Thu thập và làm sạch dữ liệu là Bước 1 (chuẩn bị nguồn học), chưa phải bước viết thuật toán lập trình.',
+              'Triển khai và điều khiển là Bước 3 (đưa AI vào thiết bị, bật/tắt, cập nhật khi có sai sót).',
+              'Giám sát trong quá trình sử dụng thuộc vai trò người dùng vận hành AI ở bước triển khai.'
+            ],
+            explanation: 'Theo Hình 1.2 SGK Bài 1: Bước 2 là Thiết kế thuật toán và lập trình do các kĩ sư thực hiện.'
+          },
+          {
+            id: 'ai6-b1-q5',
+            question: 'Câu 5 (Bản chất nguồn gốc & Quyền quyết định): Phát biểu nào sau đây là CHÍNH XÁC nhất về nguồn gốc và vai trò của Trí tuệ nhân tạo (AI)?',
+            options: [
+              'AI có ý thức độc lập sau khi được huấn luyện xong và có thể tự chịu trách nhiệm nếu đưa kết quả sai',
+              'AI là sản phẩm do con người tạo ra, lập trình và điều khiển; con người luôn giữ quyền quyết định cuối cùng',
+              'Mọi thiết bị điện tử thông minh chạy bằng điện trong gia đình đều là hệ thống Trí tuệ nhân tạo',
+              'AI do con người tạo ra nhưng một khi đã cài đặt vào thiết bị thì con người không thể kiểm soát hay điều chỉnh nữa'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'AI chỉ là phần mềm/công cụ, không có ý thức riêng và không có tư cách pháp lí để chịu trách nhiệm thay con người.',
+              'Xuất sắc! Em đã nắm vững yêu cầu 6.A1.1 & 6.A1.2: Con người tạo ra, dẫn dắt, giám sát và chịu trách nhiệm 100% khi dùng AI.',
+              'Nhiều thiết bị chạy điện như quạt cơ, đèn bàn, máy tính bỏ túi hoạt động cố định, không phải AI.',
+              'Ở Bước 3 (Triển khai & điều khiển), con người luôn trực tiếp bật, tắt, kiểm tra và cập nhật khi AI sai sót.'
+            ],
+            explanation: 'Kiến thức trọng tâm Bài 1: AI do con người tạo ra, lập trình và điều khiển; AI chỉ là công cụ hỗ trợ — con người luôn ở trong vòng lặp (Humans in the Loop).'
+          }
+        ]
+      },
+      {
+        id: 'ai6-b1-act-5',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 3B (Nhiệm vụ cầu nối chuẩn bị Tiết 2): Tình huống bạn Minh nộp bài Lịch sử sai năm sinh',
+        type: 'assignment',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Nhiệm vụ cầu nối cuối Tiết 1 chuẩn bị cho Tiết 2 trực tiếp tại lớp (trích Luyện tập 3 SGK Bài 1).',
+        assignmentPrompt: 'NHIỆM VỤ CẦU NỐI CHUẨN BỊ TIẾT 2 (Luyện tập 3 – SGK Bài 1)\n\nTình huống: Trong giờ học Lịch sử, bạn Minh nhờ một công cụ AI tóm tắt thông tin về một nhân vật lịch sử và chép nguyên văn vào bài nộp mà không kiểm tra lại với sách giáo khoa. Kết quả là bài làm của Minh bị sai năm sinh của nhân vật đó.\n\nEm hãy trả lời ngắn gọn (nhập trực tiếp bên dưới):\n1. Nếu là bạn Minh, em sẽ làm gì trước khi nộp bài cho cô giáo?\n2. Theo em, khi bài nộp bị sai thông tin như vậy thì ai là người phải chịu trách nhiệm? Vì sao?\n\n(Thầy/Cô sẽ tổng hợp các ý kiến tiêu biểu để cả lớp thảo luận mở đầu Tiết 2!)'
+      },
+      {
+        id: 'ai6-b1-act-6',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 5 & 6 (Tiết 2 – Vận dụng): Tòa án công nghệ giả định & Lập “Tuyên ngôn làm chủ AI” (Rubric 10đ)',
+        type: 'assignment',
+        durationMinutes: 15,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Hoàn thành tình huống Vận dụng 1 (Tòa án công nghệ giả định) và Vận dụng 2 (Tuyên ngôn làm chủ AI: 1 điều NÊN – 1 điều KHÔNG NÊN) kèm Rubric 10 điểm.',
+        assignmentPrompt: 'NHIỆM VỤ VẬN DỤNG TIẾT 2 (SGK BÀI 1)\n\nPhần 1 – Tình huống “Tòa án công nghệ giả định” (Vận dụng 1):\nMột chiếc ô tô có tích hợp tính năng AI hỗ trợ lái tự động. Người lái xe đã bật chế độ tự lái rồi bỏ tay khỏi vô-lăng để chơi trò chơi trên điện thoại, dẫn đến việc xe không kịp phanh khi gặp chướng ngại vật bất ngờ.\n→ Nếu là thành viên hội đồng phân xử, em kết luận trách nhiệm thuộc về ai và rút ra bài học gì về nguyên tắc “Con người trong vòng lặp” (Humans in the Loop / EU AI Act 2024)?\n\nPhần 2 – Lập “Tuyên ngôn làm chủ AI” (Vận dụng 2):\nHãy chọn 01 công việc học tập hằng ngày của em (VD: học từ vựng Tiếng Anh, lập dàn ý bài văn, tìm ý tưởng vẽ tranh...) và viết rõ:\n• Công việc học tập em chọn:\n• 1 điều em NÊN làm (tận dụng AI hỗ trợ đúng cách):\n• 1 điều em KHÔNG NÊN làm (giữ quyền quyết định, bước kiểm chứng và tính trung thực):\n\nTIÊU CHÍ CHẤM ĐIỂM (RUBRIC 10 ĐIỂM – KHBD BÀI 1):\n- Phân định rõ vai trò hỗ trợ của AI – Quy tắc NÊN (4,0đ)\n- Thể hiện quyền quyết định & trách nhiệm – Quy tắc KHÔNG NÊN (4,0đ)\n- Trình bày mạch lạc, chính tả chuẩn và tính thực tiễn (2,0đ)'
+      }
+    ]
+  };
+
+  const bai2Module = {
+    id: 'module-lesson-2',
+    courseId: '6AIAB01',
+    order: 2,
+    title: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+    description: 'Thời lượng: 01 tiết – 45 phút (Dạy học trực tuyến trên hệ thống LMS theo chu trình 5 thành phần – Yêu cầu cần đạt 6.A3.2).',
+    learningObjectives: '• (6.A3.2) Trình bày được 3 lợi ích của AI trong học tập (học hỏi kiến thức mới, rèn luyện kĩ năng, mở rộng hiểu biết) khi sử dụng đúng mục đích.\n• Nắm công thức viết câu lệnh (Prompt) 3 thành phần: Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu & định dạng cụ thể; tuân thủ Cẩm nang “4 KHÔNG” bảo vệ dữ liệu cá nhân.\n• Sử dụng công cụ AI phù hợp lứa tuổi hỗ trợ 1 nhiệm vụ học tập lớp 6 và tự tóm tắt 3–5 câu bằng ngôn ngữ riêng kèm đối chiếu SGK chuẩn bị Bài 3.',
+    ownerName: 'Nhóm 2 – Bài 2',
+    activities: [
+      {
+        id: 'ai6-b2-act-1',
+        moduleId: 'module-lesson-2',
+        title: '🔬 Bộ Học liệu số Tương tác Bài 2 (Study Guide, Infographic Bí kíp Prompt, Video tương tác 06:27, Cẩm nang 4 KHÔNG & Trạm luyện Prompt)',
+        type: 'document',
+        durationMinutes: 45,
+        isCompleted: false,
+        isRequired: true,
+        fileUrl: '/hoc-lieu/6aiab01/bai2/3.LMS.html',
+        description: 'Gói học liệu HTML5 tương tác toàn diện cho Bài 2 (45 phút trực tuyến): Sổ tay hướng dẫn 4 bước, Tình huống An–Minh–Khoa (Hình 2.1), Infographic “Bí kíp giao tiếp với AI”, Bài giảng Video tương tác 06:27 có 3 mốc neo chặn chống tua nhanh, Poster Cẩm nang “4 KHÔNG” và Trạm luyện viết câu lệnh AI Lớp 6.'
+      },
+      {
+        id: 'ai6-b2-act-2',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 1 (Khởi động – Diễn đàn): Công cụ AI hỗ trợ em học tập như thế nào? (Hình 2.1 SGK)',
+        type: 'forum',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        description: '📘 SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Infographic & Video tương tác 15p (đạt ≥ 70/100đ) → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\n💬 CHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\n🔒 Lưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
+      },
+      {
+        id: 'ai6-b2-act-3',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 2A (Kiến thức trọng tâm & Cẩm nang 4 KHÔNG): 3 Lợi ích của AI & Công thức Prompt 3 thành phần',
+        type: 'document',
+        durationMinutes: 10,
+        isCompleted: false,
+        isRequired: true,
+        description: '1. BA LỢI ÍCH CỦA CÔNG CỤ AI KHI SỬ DỤNG ĐÚNG CÁCH (UNESCO 2023 – Hình 2.2 SGK):\n• Hỗ trợ học hỏi kiến thức mới: Giải thích khái niệm phức tạp bằng ngôn ngữ đơn giản, dễ hiểu cho học sinh lớp 6 kèm ví dụ minh họa gần gũi.\n• Rèn luyện kĩ năng học tập: Luyện phát âm ngoại ngữ, chỉnh sửa lỗi chính tả, tạo bộ câu hỏi trắc nghiệm tự ôn tập.\n• Mở rộng hiểu biết và tư duy: Đặt câu hỏi khám phá lịch sử, địa lí, khoa học, nghệ thuật để mở mang tri thức.\n⚠️ Lưu ý: KHÔNG dùng AI để làm thay toàn bộ bài tập hay copy-paste thụ động.\n\n2. CÔNG THỨC VIẾT CÂU LỆNH (PROMPT) 3 THÀNH PHẦN (Hình 2.3 SGK):\n[1. BỐI CẢNH (NGỮ CẢNH)] + [2. VAI TRÒ CỦA AI] + [3. YÊU CẦU & ĐỊNH DẠNG CỤ THỂ]\n• Ví dụ chưa rõ (Câu lệnh A): “Nước tuần hoàn thế nào?”\n• Ví dụ đạt chuẩn (Câu lệnh B): “Em là học sinh lớp 6. Hãy đóng vai một giáo viên Khoa học tự nhiên, giải thích ngắn gọn quá trình tuần hoàn của nước trong tự nhiên bằng ngôn ngữ dễ hiểu trong 4 câu kèm 1 ví dụ thực tế.”\n\n3. CẨM NANG “4 KHÔNG” BẢO VỆ DỮ LIỆU CÁ NHÂN KHI TƯƠNG TÁC VỚI AI:\n1. KHÔNG nhập họ tên đầy đủ và ngày tháng năm sinh của bản thân hoặc người thân.\n2. KHÔNG cung cấp số điện thoại, địa chỉ nhà riêng hoặc tên trường, lớp đang học.\n3. KHÔNG tải lên hình ảnh khuôn mặt riêng tư hoặc các thông tin bí mật của gia đình.\n4. KHÔNG nhập mật khẩu tài khoản học tập, thư điện tử hoặc mạng xã hội vào ô trò chuyện AI.'
+      },
+      {
+        id: 'ai6-b2-act-4',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 2B (Trắc nghiệm chốt chặn ≥ 7/10đ): “Bí kíp giao tiếp với AI” & Bài tập SGK (5 câu · 8 phút)',
+        type: 'quiz',
+        durationMinutes: 8,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        passScore: 7,
+        timeLimitMinutes: 8,
+        shuffleQuestions: false,
+        description: 'Gồm 3 câu hỏi mốc neo chặn trong KHBD Bài 2 và 2 câu kiểm tra SGK Bài 2 (ngưỡng đạt ≥ 7/10 điểm tương đương 70/100 điểm theo KHBD). Các phương án nhiễu gần giống nhau kèm phản hồi riêng từng lựa chọn.',
+        quizQuestions: [
+          {
+            id: 'ai6-b2-q1',
+            question: 'Câu 1 (Mốc neo chặn 1 – KHBD Bài 2): So sánh giữa câu lệnh “Viết về măng” và “Viết 3 câu bán măng sạch”, vì sao câu lệnh thứ hai giúp AI trả lời hữu ích hơn?',
+            options: [
+              'Vì câu lệnh thứ hai ngắn gọn hơn và sử dụng nhiều dấu câu cảm thán để thu hút AI',
+              'Vì câu lệnh thứ hai giao việc rõ ràng, nêu cụ thể số lượng (3 câu) và mục đích sử dụng thay vì hỏi chung chung',
+              'Vì câu lệnh thứ hai dùng từ khóa sản phẩm cụ thể nên tốc độ truyền mạng tới máy chủ AI nhanh hơn',
+              'Vì các công cụ AI chỉ phản hồi chính xác khi câu lệnh bắt đầu bằng động từ “Viết” kèm chữ số'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'Câu lệnh thứ hai thực tế còn dài hơn câu lệnh thứ nhất và không hề phụ thuộc vào dấu cảm thán.',
+              'Chính xác! AI phản hồi dựa trên thông tin đầu vào; nêu rõ mục đích và định dạng/số lượng sẽ cho kết quả sát nhu cầu.',
+              'Từ khóa trong câu lệnh không làm thay đổi tốc độ đường truyền mạng, mà giúp AI thu hẹp ngữ cảnh xử lí.',
+              'AI hiểu nhiều cách đặt câu lệnh khác nhau chứ không bắt buộc phải bắt đầu bằng từ “Viết” kèm chữ số.'
+            ],
+            explanation: 'Câu lệnh (Prompt) càng nêu cụ thể nhiệm vụ, mục đích và định dạng trình bày thì phản hồi của AI càng chính xác (UNESCO 2023).'
+          },
+          {
+            id: 'ai6-b2-q2',
+            question: 'Câu 2 (Mốc neo chặn 2 – KHBD Bài 2): Công thức gồm 3 thành phần cốt lõi để viết một câu lệnh (Prompt) hiệu quả khi học tập với AI là gì?',
+            options: [
+              'Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu và định dạng cụ thể',
+              'Bối cảnh (Ngữ cảnh) + Họ tên đầy đủ của người học + Yêu cầu cụ thể',
+              'Tên công cụ AI + Số lượng từ tối đa + Lời cảm ơn cuối câu lệnh',
+              'Chủ đề môn học + Nguồn sách giáo khoa + Mật khẩu tài khoản học tập'
+            ],
+            correctAnswer: 0,
+            optionFeedback: [
+              'Chính xác! Đủ 3 mảnh ghép: (1) Bối cảnh/Ngữ cảnh người học + (2) Vai trò của AI + (3) Yêu cầu & định dạng cụ thể.',
+              'Cẩn thận vi phạm Cẩm nang 4 KHÔNG! Tuyệt đối KHÔNG đưa họ tên đầy đủ hay thông tin cá nhân vào câu lệnh AI.',
+              'Ghi tên công cụ AI hay lời cảm ơn không giúp xác định vai trò chuyên môn và bối cảnh người học.',
+              'Tuyệt đối KHÔNG bao giờ nhập mật khẩu tài khoản vào ô trò chuyện AI!'
+            ],
+            explanation: 'Công thức chuẩn trong Infographic “Bí kíp giao tiếp với AI” (Bài 2): Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu và định dạng cụ thể.'
+          },
+          {
+            id: 'ai6-b2-q3',
+            question: 'Câu 3 (Mốc neo chặn 3 – KHBD Bài 2): Trong câu lệnh: “Tôi là nông dân mới trồng sâm. Hãy đóng vai một chuyên gia nông nghiệp. Viết 3 gạch đầu dòng những lưu ý quan trọng nhất về tưới nước cho cây sâm 1 năm tuổi”, cụm từ nào thể hiện yếu tố BỐI CẢNH (Ngữ cảnh)?',
+            options: [
+              '“Hãy đóng vai một chuyên gia nông nghiệp”',
+              '“Tôi là nông dân mới trồng sâm”',
+              '“Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”',
+              '“về tưới nước cho cây sâm 1 năm tuổi”'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'Cụm “Hãy đóng vai một chuyên gia nông nghiệp” là yếu tố VAI TRÒ của AI, không phải bối cảnh người dùng.',
+              'Chính xác! “Tôi là nông dân mới trồng sâm” cho biết đối tượng và hoàn cảnh thực tế để AI điều chỉnh mức độ giải thích phù hợp.',
+              '“Viết 3 gạch đầu dòng...” là yếu tố ĐỊNH DẠNG trình bày của yêu cầu.',
+              '“tưới nước cho cây sâm 1 năm tuổi” là nội dung cụ thể của NHIỆM VỤ cần thực hiện.'
+            ],
+            explanation: 'Yếu tố Bối cảnh (Ngữ cảnh) xác định em là ai / đối tượng người học nào và đang trong hoàn cảnh nào.'
+          },
+          {
+            id: 'ai6-b2-q4',
+            question: 'Câu 4 (SGK Bài 2 – Mục 2): Câu lệnh nào được viết rõ ràng, đủ ngữ cảnh và phù hợp nhất để hỗ trợ học sinh lớp 6 ôn tập môn Tiếng Anh?',
+            options: [
+              '“Làm giúp em toàn bộ bài tập Tiếng Anh lớp 6 hôm nay thật nhanh và đầy đủ để em chép nộp.”',
+              '“Em là học sinh lớp 6, hãy đưa ra 5 từ vựng tiếng Anh về chủ đề Trường học kèm nghĩa tiếng Việt và một câu ví dụ đơn giản cho mỗi từ.”',
+              '“Cho 5 từ vựng tiếng Anh chủ đề Trường học bất kì, không cần giải thích hay lấy ví dụ.”',
+              '“Em tên là Nguyễn Minh An học lớp 6A1 trường THCS A, hãy dịch giúp em bài văn Tiếng Anh.”'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'Nhờ AI làm thay toàn bộ bài tập để chép nộp là lạm dụng AI, làm giảm tư duy độc lập của người học.',
+              'Chính xác! Đủ ngữ cảnh (học sinh lớp 6), nhiệm vụ rõ ràng (5 từ vựng chủ đề Trường học) và định dạng cụ thể (kèm nghĩa + 1 câu ví dụ đơn giản).',
+              'Câu lệnh thiếu ngữ cảnh trình độ lớp 6 và bỏ qua giải thích/ví dụ nên khó giúp học sâu và hiểu cách dùng từ.',
+              'Vi phạm Cẩm nang “4 KHÔNG”: để lộ họ tên đầy đủ và tên trường, lớp đang học vào ô trò chuyện AI!'
+            ],
+            explanation: 'Câu lệnh hiệu quả cho HS lớp 6 phải có ngữ cảnh trình độ, yêu cầu học tập rõ ràng, định dạng cụ thể và bảo vệ dữ liệu cá nhân.'
+          },
+          {
+            id: 'ai6-b2-q5',
+            question: 'Câu 5 (SGK Bài 2 – Luyện tập 1): Trường hợp nào dưới đây KHÔNG phải là cách sử dụng công cụ AI đúng mục đích để phát triển bản thân trong học tập?',
+            options: [
+              'Nhờ AI giải thích khái niệm “Quang hợp” bằng ví dụ dễ hiểu cho lớp 6 rồi tự tóm tắt lại vào vở',
+              'Nhờ AI tạo 4 câu hỏi trắc nghiệm về bài Lịch sử vừa học để tự ôn tập và kiểm tra kiến thức',
+              'Nhập toàn bộ đề bài văn biểu cảm vào AI rồi sao chép nguyên văn bài AI viết để nộp lấy điểm',
+              'Nhờ AI gợi ý dàn ý 3 phần cho bài thuyết trình nhóm để cả nhóm thảo luận và tự triển khai nội dung'
+            ],
+            correctAnswer: 2,
+            optionFeedback: [
+              'Đây là cách dùng AI ĐÚNG mục đích (hỗ trợ học hỏi kiến thức mới kết hợp tự tóm tắt lại bằng lời mình).',
+              'Đây là cách dùng AI ĐÚNG mục đích (rèn luyện kĩ năng và tự kiểm tra kiến thức).',
+              'Chính xác! Sao chép nguyên văn bài do AI viết thay mình là lạm dụng AI, vi phạm tính trung thực và làm thui chột khả năng tư duy.',
+              'Dùng AI gợi ý dàn ý rồi tự thảo luận và phát triển là cách dùng AI đúng vai trò hỗ trợ.'
+            ],
+            explanation: 'Theo SGK Bài 2: Không sử dụng AI để làm thay toàn bộ nhiệm vụ học tập; người học cần chủ động suy nghĩ, kiểm chứng và rèn luyện.'
+          }
+        ]
+      },
+      {
+        id: 'ai6-b2-act-5',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 3 (Luyện tập – Assignment): Thực hành “Hỏi đúng – Trúng đáp án” trên Trạm AI an toàn (Rubric 10đ)',
+        type: 'assignment',
+        durationMinutes: 15,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Thực hành viết câu lệnh 3 thành phần trên SchoolAI Space (hoặc Trạm luyện Prompt trong Bộ học liệu số Bài 2), chụp ảnh màn hình minh chứng và nộp lên LMS.',
+        assignmentPrompt: 'HOẠT ĐỘNG 3 – THỰC HÀNH “HỎI ĐÚNG – TRÚNG ĐÁP ÁN” (KHBD BÀI 2)\n\nBước 1 – Tuân thủ Cẩm nang “4 KHÔNG”: Không nhập họ tên đầy đủ, ngày sinh, số điện thoại, địa chỉ, tên trường lớp, ảnh khuôn mặt hay mật khẩu.\n\nBước 2 – Chọn 01 trong 03 chủ đề học tập lớp 6 sau và soạn câu lệnh theo đúng 3 thành phần (Bối cảnh + Vai trò + Yêu cầu & định dạng cụ thể):\n  • Chủ đề 1 (Lịch sử 6): Ý nghĩa lịch sử của Chiến thắng Bạch Đằng năm 938 do Ngô Quyền lãnh đạo.\n  • Chủ đề 2 (Khoa học tự nhiên 6): Giải thích vì sao Mặt Trăng có các hình dạng khác nhau (tròn, khuyết) khi quan sát từ Trái Đất.\n  • Chủ đề 3 (Địa lí 6): Nguyên nhân xảy ra hiện tượng ngày và đêm luân phiên trên Trái Đất.\n(Mẫu gợi ý: “Em là học sinh lớp 6. Hãy đóng vai một giáo viên Lịch sử, giải thích ngắn gọn ý nghĩa của Chiến thắng Bạch Đằng năm 938 trong khoảng 4 câu dễ hiểu.”)\n\nBước 3 – Chạy câu lệnh trên SchoolAI Space (qua Room Code giáo viên cung cấp) hoặc Trạm luyện câu lệnh ở Hoạt động đầu bài, chụp ảnh màn hình hiển thị đầy đủ câu lệnh + phản hồi AI, đặt tên tệp [HoTen]_[Lop]_Prompt.png và tải lên đây (hoặc dán câu lệnh + kết quả trực tiếp).\n\nRUBRIC CHẤM ĐIỂM (10 ĐIỂM – KHBD BÀI 2):\n- Cấu trúc câu lệnh đủ 3 thành phần Bối cảnh – Vai trò – Yêu cầu/Định dạng (5,0đ)\n- Nội dung đúng chủ đề lớp 6, tiếng Việt có dấu, an toàn dữ liệu 4 KHÔNG (3,0đ)\n- Ảnh chụp minh chứng rõ nét, đúng quy cách tên tệp (2,0đ)'
+      },
+      {
+        id: 'ai6-b2-act-6',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 4 (Vận dụng & Cầu nối Bài 3): “Nhà báo nhí tổng hợp tin tức” (Tóm tắt 3–5 câu + Đối chiếu SGK – Rubric 10đ)',
+        type: 'assignment',
+        durationMinutes: 10,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Gấp màn hình AI, tự tóm tắt 3–5 câu kiến thức học thêm được bằng văn phong cá nhân kèm dòng đối chiếu SGK chuẩn bị sang Bài 3: Thực chứng thông tin – Làm chủ AI.',
+        assignmentPrompt: 'HOẠT ĐỘNG 4 – “NHÀ BÁO NHÍ TỔNG HỢP TIN TỨC” & CẦU NỐI BÀI 3 (KHBD BÀI 2)\n\nNhiệm vụ 1 – Viết bản tin tóm tắt bằng chính lời văn của em:\nĐọc kĩ câu trả lời của AI ở Hoạt động 3, sau đó đóng cửa sổ trò chuyện AI, tự suy nghĩ và viết 01 đoạn văn ngắn từ 3 đến 5 câu tóm tắt điều em vừa học thêm được bằng văn phong cá nhân.\n⚠️ Quy tắc tự chủ: Tuyệt đối KHÔNG sao chép (copy-paste) nguyên văn câu chữ của AI.\n\nNhiệm vụ 2 – Cầu nối chuẩn bị Bài 3 (Thực chứng thông tin – Làm chủ AI):\nMở Sách giáo khoa Lịch sử & Địa lí 6 hoặc Khoa học tự nhiên 6 để đối chiếu lại các sự kiện, con số trong câu trả lời của AI và ghi thêm 01 dòng nhận xét cuối bài:\n  “Em đã đối chiếu với SGK [Tên môn] trang [...] và thấy thông tin của AI [chính xác / cần chỉnh sửa ở điểm...].”\n\nRUBRIC CHẤM ĐIỂM (10 ĐIỂM – KHBD BÀI 2):\n- Tính tự chủ, diễn đạt hoàn toàn bằng ngôn ngữ riêng, không copy-paste (5,0đ)\n- Dung lượng 3–5 câu, kiến thức chính xác và có ghi chú đối chiếu SGK (3,0đ)\n- Trình bày mạch lạc, viết hoa đầu câu, đúng chính tả và dấu câu (2,0đ)'
+      }
+    ]
+  };
+
+  const officialFiles = [
+    {
+      id: 'file-ai6-b1-sgk',
+      name: '0.SGK_Bai1_NguonGocAI_QuyenQuyetDinh.docx',
+      filename: '0.SGK.docx',
+      url: '/hoc-lieu/6aiab01/bai1/0.SGK.docx',
+      size: '70 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+      moduleId: 'module-lesson-1',
+      description: 'Giáo trình / Sách giáo khoa Bài 1: Nguồn gốc của AI và quyền quyết định (Tin học 6 – Chuyên đề AI).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b1-khbd',
+      name: '1.KHBD_Bai1_NguonGocAI_QuyenQuyetDinh.docx',
+      filename: '1.KHBD.docx',
+      url: '/hoc-lieu/6aiab01/bai1/1.KHBD.docx',
+      size: '72 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+      moduleId: 'module-lesson-1',
+      description: 'Kế hoạch bài dạy (2 tiết: Tiết 1 Trực tuyến LMS, Tiết 2 Trực tiếp tại lớp) – Bài 1.',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b1-hoclieuso',
+      name: '2.HocLieuSo_Bai1_NguonGocAI.docx',
+      filename: '2.HocLieuSo.docx',
+      url: '/hoc-lieu/6aiab01/bai1/2.HocLieuSo.docx',
+      size: '51 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+      moduleId: 'module-lesson-1',
+      description: 'Trọn bộ kịch bản Học liệu số Bài 1 (Study Guide, Infographic 1 & 2, Quiz 5 câu, 7 Slide, Game & Rubric 10đ).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b1-lmshtml',
+      name: '3.LMS_Bai1_BoHocLieuSoTuongTac.html',
+      filename: '3.LMS.html',
+      url: '/hoc-lieu/6aiab01/bai1/3.LMS.html',
+      size: '218 KB',
+      mimetype: 'text/html',
+      fileType: 'code',
+      folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
+      moduleId: 'module-lesson-1',
+      description: 'Bộ Học liệu số HTML5 tương tác Bài 1 (chạy trực tiếp trên LMS hoặc tải mở offline không cần Internet).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b2-sgk',
+      name: '0.SGK_Bai2_LoiIch_CachSuDungAI.docx',
+      filename: '0.SGK.docx',
+      url: '/hoc-lieu/6aiab01/bai2/0.SGK.docx',
+      size: '65 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+      moduleId: 'module-lesson-2',
+      description: 'Giáo trình / Sách giáo khoa Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp (Tin học 6 – Chuyên đề AI).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b2-khbd',
+      name: '1.KHBD_Bai2_LoiIch_CachSuDungAI.docx',
+      filename: '1.KHBD.docx',
+      url: '/hoc-lieu/6aiab01/bai2/1.KHBD.docx',
+      size: '49 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+      moduleId: 'module-lesson-2',
+      description: 'Kế hoạch bài dạy trực tuyến 45 phút trên LMS theo chu trình 5 thành phần + 2 bảng Rubric 10đ – Bài 2.',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b2-hoclieuso',
+      name: '2.HocLieuSo_Bai2_LoiIch_CachSuDungAI.docx',
+      filename: '2.HocLieuSo.docx',
+      url: '/hoc-lieu/6aiab01/bai2/2.HocLieuSo.docx',
+      size: '418 KB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'word',
+      folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+      moduleId: 'module-lesson-2',
+      description: 'Bộ Học liệu số Bài 2 (Study Guide, Diễn đàn, Infographic Bí kíp Prompt, 3 mốc Video tương tác, Poster 4 KHÔNG & Trạm luyện Prompt).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    },
+    {
+      id: 'file-ai6-b2-lmshtml',
+      name: '3.LMS_Bai2_BoHocLieuSoTuongTac.html',
+      filename: '3.LMS.html',
+      url: '/hoc-lieu/6aiab01/bai2/3.LMS.html',
+      size: '197 KB',
+      mimetype: 'text/html',
+      fileType: 'code',
+      folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
+      moduleId: 'module-lesson-2',
+      description: 'Bộ Học liệu số HTML5 tương tác Bài 2 (Video tương tác 06:27 có 3 mốc neo chặn + Trạm luyện viết câu lệnh AI Lớp 6).',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    }
+  ];
+
+  return { bai1Module, bai2Module, officialFiles };
+}
+
+function mergeAi6Bai12IntoCourse(courseObj) {
+  const { bai1Module, bai2Module, officialFiles } = buildAi6Bai12SeedData();
+  courseObj.modules = Array.isArray(courseObj.modules) ? courseObj.modules : [];
+  for (let i = 0; i < OFFICIAL_AI_GRADE6_LESSONS.length; i++) {
+    if (!courseObj.modules[i]) {
+      courseObj.modules.push({
+        id: `module-lesson-${i + 1}`,
+        courseId: '6AIAB01',
+        order: i + 1,
+        title: OFFICIAL_AI_GRADE6_LESSONS[i],
+        description: `Nội dung học tập và bài thực hành cho ${OFFICIAL_AI_GRADE6_LESSONS[i]}`,
+        activities: []
+      });
+    }
+  }
+
+  const mergeModule = (idx, seedMod) => {
+    const cur = courseObj.modules[idx] || {};
+    const existingActs = (cur.activities || []).filter(a => a && a.id);
+    const seedIds = new Set(seedMod.activities.map(a => a.id));
+    const extraTeacherActs = existingActs.filter(a => !seedIds.has(a.id));
+    courseObj.modules[idx] = {
+      ...cur,
+      id: cur.id || seedMod.id,
+      courseId: '6AIAB01',
+      order: seedMod.order,
+      title: seedMod.title,
+      description: seedMod.description,
+      learningObjectives: seedMod.learningObjectives,
+      ownerName: cur.ownerName || seedMod.ownerName,
+      activities: [...seedMod.activities.map(a => ({ ...a, moduleId: cur.id || seedMod.id })), ...extraTeacherActs]
+    };
+  };
+
+  mergeModule(0, bai1Module);
+  mergeModule(1, bai2Module);
+
+  const curFiles = Array.isArray(courseObj.files) ? courseObj.files : [];
+  const existingFileIds = new Set(curFiles.map(f => f.id));
+  const mergedFiles = [...curFiles];
+  officialFiles.forEach(f => {
+    if (!existingFileIds.has(f.id)) mergedFiles.push(f);
+  });
+  courseObj.files = mergedFiles;
+  courseObj.totalActivities = courseObj.modules.reduce((s, m) => s + (m.activities || []).length, 0);
+}
+
+// Đồng bộ 1 lần toàn bộ học liệu Bài 1 & Bài 2 (từ thư mục BAI1 & BAI2) vào khóa 6AIAB01 mà không làm mất dữ liệu giáo viên hay học sinh
+async function ensureAi6Bai12Content() {
+  if (isMongoConnected) {
+    try {
+      const flagDoc = await SettingModel.findOne({ key: 'seededAi6Bai12' }).lean();
+      if (flagDoc?.value?.revision === AI6_BAI12_REVISION) return;
+      const course = await CourseModel.findOne({ $or: [{ id: '6AIAB01' }, { code: '6AIAB01' }] });
+      if (!course) return;
+      mergeAi6Bai12IntoCourse(course);
+      course.markModified('modules');
+      course.markModified('files');
+      await course.save();
+      await SettingModel.findOneAndUpdate(
+        { key: 'seededAi6Bai12' },
+        { $set: { value: { seeded: true, revision: AI6_BAI12_REVISION }, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
+    } catch (e) {
+      console.warn('Thông báo đồng bộ Bài 1 & 2 cho 6AIAB01 Mongo:', e.message);
+    }
+  } else {
+    const db = readDb();
+    db.settings = db.settings || {};
+    if (db.settings.ai6Bai12Revision === AI6_BAI12_REVISION) return;
+    const course = (db.courses || []).find(c => c.id === '6AIAB01' || c.code === '6AIAB01');
+    if (!course) return;
+    mergeAi6Bai12IntoCourse(course);
+    db.settings.ai6Bai12Revision = AI6_BAI12_REVISION;
+    writeDb(db);
+  }
+}
+
 // ====================== KHÓA HỌC THỰC TẾ TIN HỌC 12 KNTT – BÀI 12: TẠO BIỂU MẪU (+ HỌC LIỆU TƯƠNG TÁC A2.3) ======================
 // Xây dựng chuẩn theo 2 tài liệu:
 // 1) Ý tưởng học liệu tương tác A2.3 – Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích (Phan Phi Phú)
@@ -2075,6 +2660,8 @@ async function ensureTin12B12Course() {
 }
 
 app.get('/api/courses', async (req, res) => {
+  await ensureDefaultCourse();
+  await ensureAi6Bai12Content();
   await ensureTin12B12Course();
   let list = isMongoConnected
     ? (await CourseModel.find()).map(c => c.toObject())
@@ -2082,6 +2669,7 @@ app.get('/api/courses', async (req, res) => {
 
   if (!list || list.length === 0 || !list.some(c => c.code === '6AIAB01' || c.id === '6AIAB01')) {
     const seeded = await ensureDefaultCourse();
+    await ensureAi6Bai12Content();
     if (!list || list.length === 0) {
       list = [seeded];
     } else if (!list.some(c => c.code === '6AIAB01' || c.id === '6AIAB01')) {
