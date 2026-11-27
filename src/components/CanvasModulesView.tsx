@@ -94,6 +94,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
+  const [expandedObjectives, setExpandedObjectives] = useState<Record<string, boolean>>({});
 
   // Modal Thêm Mô-đun
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
@@ -186,6 +187,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
   const toggleModule = (id: string) => {
     setCollapsedModules(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleObjectives = (id: string) => {
+    setExpandedObjectives(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const toggleAll = () => {
@@ -779,20 +784,44 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 {/* Module Items Body */}
                 {!isCollapsed && (
                   <div>
-                    {/* Khung Mục tiêu học tập (Đối chiếu sư phạm BT4: Mục tiêu -> Nội dung -> Hoạt động -> Đánh giá) */}
-                    {mod.learningObjectives && (
-                      <div className="px-4 py-2.5 bg-sky-50/70 border-b border-sky-100 flex items-start gap-2.5 text-xs">
-                        <Target className="w-4 h-4 text-[#0374b5] shrink-0 mt-0.5" />
-                        <div className="space-y-0.5 min-w-0">
-                          <span className="font-extrabold text-[#0374b5] uppercase text-[10px] tracking-wider block">
-                            Mục tiêu bài học
-                          </span>
-                          <p className="text-slate-700 leading-relaxed whitespace-pre-line">
-                            {mod.learningObjectives}
-                          </p>
+                    {/* Khung Mục tiêu học tập (Nhấn vào để xem chi tiết) */}
+                    {mod.learningObjectives && (() => {
+                      const isObjOpen = Boolean(expandedObjectives[mod.id]);
+                      return (
+                        <div className="bg-sky-50/70 border-b border-sky-100 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => toggleObjectives(mod.id)}
+                            className="w-full px-4 py-2.5 flex items-center justify-between gap-2 hover:bg-sky-100/60 transition-colors text-left"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Target className="w-4 h-4 text-[#0374b5] shrink-0" />
+                              <span className="font-extrabold text-[#0374b5] uppercase text-[10px] tracking-wider">
+                                Mục tiêu bài học
+                              </span>
+                              <span className="text-[11px] text-slate-500 font-medium">
+                                ({isObjOpen ? 'Nhấn để thu gọn' : 'Nhấn để xem chi tiết'})
+                              </span>
+                            </div>
+                            <span className="text-[#0374b5] shrink-0">
+                              {isObjOpen ? (
+                                <ChevronDown className="w-4 h-4" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4" />
+                              )}
+                            </span>
+                          </button>
+
+                          {isObjOpen && (
+                            <div className="px-4 pb-3 pl-10">
+                              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                                {mod.learningObjectives}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {activities.length === 0 ? (
                       <div className="py-6 px-4 text-center text-xs text-slate-400 bg-slate-50/30">
