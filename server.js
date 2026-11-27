@@ -11,7 +11,7 @@ import {
   OFFICIAL_AI_GRADE6_LESSONS,
   AI6_BAI12_REVISION,
   buildAi6Bai12SeedData
-} from './ai6SeedData.js';
+} from './public/hoc-lieu/6aiab01/ai6SeedData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1369,7 +1369,6 @@ function mergeAi6Bai12IntoCourse(courseObj) {
     const cur = courseObj.modules[idx] || {};
     const existingActs = (cur.activities || []).filter(a => a && a.id);
     const seedIds = new Set(seedMod.activities.map(a => a.id));
-    // Chỉ giữ lại các hoạt động do GV tự thêm tay trên web, bỏ các hoạt động seed cũ (ai6-b...) đã bị xóa trong ai6SeedData.js
     const extraTeacherActs = existingActs.filter(
       a => !seedIds.has(a.id) && !/^ai6-b\d+-act-/.test(a.id)
     );
@@ -4528,6 +4527,12 @@ app.get('/api/courses/:id/students', requireAuth, async (req, res) => {
 });
 
 // ====================== SERVE PRODUCTION FRONTEND ======================
+// Chặn trình duyệt tải trực tiếp các file .js chứa dữ liệu & đáp án trong public/hoc-lieu/6aiab01
+app.use('/hoc-lieu/6aiab01', (req, res, next) => {
+  if (req.path.endsWith('.js')) return res.status(404).send('Not found');
+  next();
+});
+
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath, {
