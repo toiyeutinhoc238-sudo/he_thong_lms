@@ -4,16 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích (Bài A2.3 – Tin học 12)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --primary: #0b4f7c;
-      --primary-hover: #083b5e;
+      --primary: #0b3b64;
+      --primary-hover: #082b4a;
       --accent: #0374b5;
-      --bg: #f4f7fa;
+      --bg: #f1f5f9;
       --card: #ffffff;
-      --border: #d8e1ea;
-      --text: #162433;
-      --muted: #526477;
+      --border: #d8e2ec;
+      --text: #0f172a;
+      --muted: #475569;
       --ok-bg: #ecfdf5;
       --ok-border: #6ee7b7;
       --ok-text: #065f46;
@@ -28,26 +31,32 @@
       --font-scale: 1;
     }
     * { box-sizing: border-box; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
     body {
       margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, system-ui, -apple-system, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       font-size: calc(15px * var(--font-scale));
-      line-height: 1.55;
+      line-height: 1.65;
     }
     .topbar {
-      background: var(--primary);
+      background: linear-gradient(135deg, #0b2f52 0%, #035d94 55%, #0374b5 100%);
       color: #fff;
-      padding: 12px 18px;
+      padding: 12px 18px 0;
       position: sticky;
       top: 0;
-      z-index: 20;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.14);
+      z-index: 30;
+      box-shadow: 0 4px 18px rgba(11, 47, 82, 0.18);
     }
     .topbar-inner {
       max-width: 1120px;
       margin: 0 auto;
+      padding-bottom: 11px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -58,10 +67,12 @@
       font-weight: 800;
       font-size: calc(16px * var(--font-scale));
       letter-spacing: -0.01em;
+      line-height: 1.3;
     }
     .brand-sub {
       font-size: calc(12px * var(--font-scale));
-      opacity: 0.85;
+      opacity: 0.9;
+      margin-top: 2px;
     }
     .controls {
       display: flex;
@@ -69,12 +80,86 @@
       align-items: center;
       gap: 6px;
     }
-    .ctrl-btn {
+    .timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.34);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .timer-pill.warn {
+      background: #d97706;
+      border-color: #fde68a;
+    }
+    .timer-pill.danger {
+      background: #e11d48;
+      border-color: #fecdd3;
+      animation: timerPulse 1s infinite;
+    }
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.72; }
+    }
+    .timer-select {
       background: rgba(255, 255, 255, 0.14);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 8px;
+      padding: 4px 7px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .timer-select option {
+      background: #0b2f52;
+      color: #fff;
+    }
+    .timer-bar-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: #34d399;
+      transition: width 0.8s linear, background-color 0.3s;
+    }
+    .timer-bar-fill.warn { background: #fbbf24; }
+    .timer-bar-fill.danger { background: #fb7185; }
+    .time-over-banner {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #fff1f2;
+      border: 1.5px solid #fda4af;
+      color: #9f1239;
+      font-size: calc(13.5px * var(--font-scale));
+      font-weight: 700;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .time-over-banner.show { display: flex; }
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
       padding: 5px 10px;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -217,9 +302,9 @@
       color: var(--code-text);
       padding: 14px 16px;
       margin: 0;
-      font-family: 'Consolas', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
       font-size: calc(13.5px * var(--font-scale));
-      line-height: 1.65;
+      line-height: 1.7;
       overflow-x: auto;
       white-space: pre-wrap;
       word-break: break-word;
@@ -230,26 +315,26 @@
       color: #713f12;
       padding: 1px 5px;
       border-radius: 4px;
-      font-weight: 800;
+      font-weight: 700;
     }
     .hl-attr-2 {
       background: #bae6fd;
       color: #0c4a6e;
       padding: 1px 5px;
       border-radius: 4px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     textarea.code-editor {
       width: 100%;
-      min-height: 170px;
+      min-height: 175px;
       border: none;
       background: var(--code-bg);
       color: #f8fafc;
       padding: 14px 16px;
-      font-family: 'Consolas', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
       font-size: calc(13.5px * var(--font-scale));
-      line-height: 1.6;
+      line-height: 1.65;
       resize: vertical;
       outline: none;
       display: block;
@@ -540,10 +625,10 @@
     code.inline {
       background: #e2e8f0;
       color: #0f172a;
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-family: 'Consolas', monospace;
-      font-size: 0.92em;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.9em;
     }
   </style>
 </head>
@@ -554,17 +639,36 @@
         <div class="brand-title">Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích</div>
         <div class="brand-sub">Bài A2.3 · Tin học 12 KNTT – Bài 12 “Tạo biểu mẫu” (Hoạt động 2.2 · SGK tr.67–69)</div>
       </div>
-      <div class="controls" aria-label="Tùy chọn trợ năng và ngoại tuyến">
+      <div class="controls" aria-label="Bộ đếm thời gian, trợ năng và ngoại tuyến">
+        <div class="timer-pill" id="timerBadge" title="Bộ đếm thời gian thực hiện 4 chặng">
+          <span>⏱</span>
+          <span id="timerText">20:00</span>
+        </div>
+        <select class="timer-select" id="timerPreset" onchange="changeTimerPreset(this.value)" title="Chọn thời lượng đếm ngược hoặc chế độ đếm xuôi">
+          <option value="600">10 phút</option>
+          <option value="900">15 phút</option>
+          <option value="1200" selected>20 phút</option>
+          <option value="1800">30 phút</option>
+          <option value="0">Đếm xuôi</option>
+        </select>
+        <button type="button" class="ctrl-btn" id="timerPauseBtn" onclick="toggleTimerPause()" title="Tạm dừng hoặc tiếp tục đồng hồ">⏸ Tạm dừng</button>
         <button type="button" class="ctrl-btn" onclick="setFontScale(0.92)" id="fontSm" title="Chữ nhỏ hơn">A-</button>
         <button type="button" class="ctrl-btn active" onclick="setFontScale(1)" id="fontMd" title="Cỡ chữ chuẩn">A</button>
         <button type="button" class="ctrl-btn" onclick="setFontScale(1.16)" id="fontLg" title="Phóng to chữ (UDL)">A+</button>
-        <button type="button" class="ctrl-btn" onclick="downloadOfflineHtml()" title="Tải tệp HTML để mở không cần Internet">⬇ Tải chạy offline</button>
+        <button type="button" class="ctrl-btn" onclick="downloadOfflineHtml()" title="Tải tệp HTML để mở không cần Internet">⬇ Offline</button>
         <button type="button" class="ctrl-btn" onclick="resetAll()" title="Làm lại từ đầu (không giới hạn lượt)">↻ Làm lại</button>
       </div>
     </div>
+    <div class="timer-bar-track"><div class="timer-bar-fill" id="timerBarFill"></div></div>
   </header>
 
   <main class="container">
+    <!-- Thông báo hết giờ chuẩn (không khóa bài để học sinh vẫn hoàn thành nốt & nộp phiếu) -->
+    <div class="time-over-banner" id="timeOverBanner">
+      <span>⏰ Đã hết thời gian chuẩn! Em vẫn có thể hoàn thiện nốt chặng hiện tại hoặc bấm sang Tổng kết để xuất phiếu kết quả.</span>
+      <button type="button" class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="goView(5)">Đi tới Tổng kết &amp; Xuất phiếu →</button>
+    </div>
+
     <!-- Thanh tiến độ 6 màn hình (Segmenting) -->
     <nav class="stepper" id="stepper" aria-label="Tiến trình 4 chặng"></nav>
 
@@ -572,7 +676,7 @@
     <div id="stageRoot"></div>
 
     <div class="footer-note">
-      <strong>Học liệu tương tác A2.3</strong> · SV Phan Phi Phú (Đào tạo điện tử và Ứng dụng) · Không đếm giờ · Không thu thập hay gửi dữ liệu cá nhân đi đâu · Vai trò AI: hỗ trợ viết mã &amp; soạn nháp, SV đối chiếu 100% với SGK Tin học 12 KNTT.
+      <strong>Học liệu tương tác A2.3</strong> · SV Phan Phi Phú (Đào tạo điện tử và Ứng dụng) · Có bộ đếm thời gian linh hoạt (chọn 10–30 phút hoặc đếm xuôi) · Không thu thập hay gửi dữ liệu cá nhân đi đâu · Đối chiếu 100% với SGK Tin học 12 KNTT.
     </div>
   </main>
 
@@ -641,143 +745,143 @@
   <input type="submit" value="Gửi đơn hàng">
 </form>`;
 
-    // 6 câu hỏi dự đoán nguyên văn theo Mục 4 PDF A2.3
+    // 6 câu hỏi dự đoán với phương án nhiễu gần giống nhau, đồng đều độ dài, đánh trúng ngộ nhận thực tế của HS lớp 12
     const QUESTIONS = {
       q1: {
         label: 'Chặng 1 – label và input',
-        prompt: 'Câu hỏi dự đoán: Chạy đoạn mã rồi nháy chuột vào chữ “Họ tên:”. Điều gì xảy ra?',
+        prompt: 'Câu hỏi dự đoán: Chạy đoạn mã rồi nháy chuột trực tiếp vào chữ “Họ tên:”. Điều gì xảy ra?',
         correct: 1,
         options: [
           {
-            text: 'Không có gì xảy ra, nhãn chỉ là chữ trang trí',
-            fb: 'Nhiều bạn nghĩ vậy! Nhưng nhãn này có thuộc tính for trỏ tới ô nhập. Hãy chạy thử và nháy vào chữ “Họ tên:” để kiểm chứng.'
+            text: 'Con trỏ nhập liệu tự động nhảy vào ô nhập và điền sẵn nội dung mặc định là chữ “ten”',
+            fb: 'Gần đúng ở ý con trỏ nhảy vào ô, nhưng id="ten" chỉ là mã định danh chứ không tự điền chữ vào ô (muốn đặt giá trị sẵn phải dùng thuộc tính value).'
           },
           {
-            text: 'Con trỏ nhảy vào ô nhập bên cạnh',
-            fb: 'Chính xác! for của label trùng với id của input (đều là "ten") nên nháy vào nhãn cũng như nháy vào ô.'
+            text: 'Con trỏ nhập liệu tự động nhảy vào ô nhập tương ứng bên cạnh để người dùng gõ ngay',
+            fb: 'Chính xác! Thuộc tính for="ten" của label trùng khớp với id="ten" của input nên nháy vào nhãn cũng kích hoạt trực tiếp ô nhập đó.'
           },
           {
-            text: 'Trình duyệt mở một trang mới',
-            fb: 'Chưa đúng. Mở trang mới là việc của liên kết (thẻ a). Label chỉ gắn nhãn cho ô nhập.'
+            text: 'Con trỏ chỉ nhảy vào ô nếu for trùng với name="hoTen", còn trùng id="ten" thì không có tác dụng',
+            fb: 'Rất nhiều bạn nhầm cặp for–id với name! Hãy nhớ: for của label luôn liên kết với id của input; còn name dùng khi gửi dữ liệu.'
           },
           {
-            text: 'Chữ “Họ tên:” bị xóa',
-            fb: 'Chưa đúng. Nháy chuột không làm thay đổi nội dung trang. Hãy chạy thử để xem nhãn làm gì.'
+            text: 'Chữ “Họ tên:” chỉ được bôi đậm lên để đánh dấu, người dùng vẫn phải bấm vào khung ô nhập để gõ',
+            fb: 'Chưa đúng. Label không chỉ là chữ trang trí — khi có for khớp id, nháy trực tiếp vào nhãn sẽ đưa con trỏ vào ngay ô nhập. Hãy chạy thử để kiểm chứng!'
           }
         ]
       },
       q2a: {
         label: 'Chặng 2 – type="password"',
-        prompt: 'Câu hỏi dự đoán 1: Ô này có type="password". Gõ chữ abc vào ô, em sẽ thấy gì?',
+        prompt: 'Câu hỏi dự đoán 1: Ô có type="password". Khi gõ chuỗi abc vào ô rồi gửi biểu mẫu, cách hiển thị và dữ liệu gửi đi như thế nào?',
         correct: 1,
         options: [
           {
-            text: 'Thấy abc',
-            fb: 'Đó là kết quả của type="text". Với password, Bảng 12.1 ghi gì? Chạy thử và gõ để kiểm chứng.'
+            text: 'Trên màn hình hiện dấu chấm (•••), còn dữ liệu gửi đi cũng biến thành chuỗi dấu chấm (•••) thay cho abc',
+            fb: 'Rất dễ nhầm! type="password" chỉ che phần hiển thị trên màn hình để tránh nhìn trộm, chứ không biến đổi hay mã hóa giá trị gốc bên trong ô.'
           },
           {
-            text: 'Thấy ••• (dấu chấm)',
-            fb: 'Đúng! password tạo trường nhập mật khẩu: vẫn nhập văn bản nhưng bị che, để người bên cạnh không nhìn trộm.'
+            text: 'Trên màn hình bị che thành dấu chấm (•••), còn dữ liệu thực sự lưu trong ô và gửi đi vẫn là abc',
+            fb: 'Chính xác! Theo Bảng 12.1 (SGK tr.68), type="password" ẩn kí tự trên màn hình bằng dấu chấm để tránh bị nhìn trộm, còn giá trị gửi đi vẫn là chuỗi người dùng gõ.'
           },
           {
-            text: 'Ô biến mất',
-            fb: 'Chưa đúng. Ô vẫn hiện, chỉ cách hiển thị chữ thay đổi.'
+            text: 'Trên màn hình vẫn hiện rõ chữ abc khi đang gõ và chỉ chuyển thành dấu chấm (•••) sau khi bấm nút gửi',
+            fb: 'Chưa đúng. Trình duyệt che thành dấu chấm ngay tại thời điểm em gõ từng kí tự. Hãy chạy thử và gõ abc để quan sát ngay!'
           },
           {
-            text: 'Thấy ABC viết hoa',
-            fb: 'Chưa đúng. type không đổi chữ thường thành chữ hoa.'
+            text: 'Trên màn hình hiện dấu chấm (•••), đồng thời trình duyệt tự động chặn không cho nhập chuỗi abc quá ngắn',
+            fb: 'Chưa đúng. Thuộc tính type="password" không tự kiểm tra độ dài hay độ mạnh mật khẩu; nó vẫn nhận chuỗi abc bình thường.'
           }
         ]
       },
       q2b: {
         label: 'Chặng 2 – Nút “Quên mật khẩu” (SGK tr.69)',
-        prompt: 'Câu hỏi dự đoán 2 (Câu hỏi 2 SGK tr.69): Câu lệnh nào thêm đúng nút “Quên mật khẩu” vào biểu mẫu?',
+        prompt: 'Câu hỏi dự đoán 2 (Câu hỏi 2 SGK tr.69): Câu lệnh nào thêm đúng nút bấm “Quên mật khẩu” mà KHÔNG gửi dữ liệu biểu mẫu đi?',
         correct: 1,
         options: [
           {
             text: '<input type="submit" value="Quên mật khẩu">',
-            fb: 'Gần đúng, nhưng submit là nút gửi biểu mẫu đi. Nút Quên mật khẩu không gửi dữ liệu.'
+            fb: 'Rất giống đáp án đúng nhưng type="submit" là nút gửi toàn bộ dữ liệu biểu mẫu đi, không phù hợp cho nút “Quên mật khẩu”.'
           },
           {
             text: '<input type="button" value="Quên mật khẩu">',
-            fb: 'Chính xác! button tạo nút bấm; chữ trên nút đặt ở value (Bảng 12.1).'
+            fb: 'Chính xác! Theo Bảng 12.1, type="button" tạo nút bấm thông thường (không gửi biểu mẫu) và chữ hiển thị trên nút đặt trong thuộc tính value.'
+          },
+          {
+            text: '<input type="button" name="Quên mật khẩu">',
+            fb: 'Cẩn thận bẫy thuộc tính! name chỉ đặt tên biến nội bộ chứ không hiện chữ lên mặt nút — chữ hiển thị trên nút phải đặt ở thuộc tính value.'
           },
           {
             text: '<input type="button">Quên mật khẩu</input>',
-            fb: 'input là thẻ đơn, không có thẻ đóng. Chữ trên nút phải đặt ở value.'
-          },
-          {
-            text: '<input type="text" value="Quên mật khẩu">',
-            fb: 'text tạo ô nhập chữ, không tạo nút. Hãy thử trong khung sửa mã.'
+            fb: 'Dễ nhầm với cặp thẻ <button>...</button>! Thẻ <input> là thẻ đơn, không có thẻ đóng </input>; nhãn trên nút phải ghi bằng value="Quên mật khẩu".'
           }
         ]
       },
       q3a: {
         label: 'Chặng 3 – Hai ô radio khác name',
-        prompt: 'Câu hỏi dự đoán 1: Hai ô radio có name khác nhau. Bấm chọn Nhỏ rồi bấm Lớn, em thấy gì?',
+        prompt: 'Câu hỏi dự đoán 1: Hai ô radio “Nhỏ” (name="size") và “Lớn” (name="size2") nằm chung trong một <form>. Bấm chọn Nhỏ rồi bấm Lớn, hiện tượng nào xảy ra?',
         correct: 1,
         options: [
           {
-            text: 'Chỉ Lớn được chọn, Nhỏ tự bỏ',
-            fb: 'Đó là khi hai ô cùng name. Ở đây name khác nhau, chạy thử để xem.'
+            text: 'Chỉ ô Lớn được chọn, ô Nhỏ tự động bỏ chọn vì cả hai ô cùng nằm trong chung một thẻ <form>',
+            fb: 'Đây là ngộ nhận rất phổ biến! Đặt chung trong <form> là chưa đủ — radio chỉ tự bỏ chọn lẫn nhau khi có CÙNG giá trị thuộc tính name.'
           },
           {
-            text: 'Cả hai ô cùng được chọn',
-            fb: 'Đúng! Radio chỉ “loại trừ nhau” khi cùng name (cùng nhóm). Khác name = hai nhóm riêng.'
+            text: 'Cả hai ô Nhỏ và Lớn cùng được chọn đồng thời và không tự loại trừ nhau khi bấm qua lại',
+            fb: 'Chính xác! Vì name="size" và name="size2" khác nhau nên trình duyệt coi đây là 2 nhóm radio độc lập, cho phép chọn cả hai cùng lúc.'
           },
           {
-            text: 'Không bấm được ô nào',
-            fb: 'Chưa đúng. Các ô vẫn bấm được bình thường.'
+            text: 'Chỉ ô Nhỏ giữ nguyên trạng thái được chọn, ô Lớn bị khóa không bấm được do khác tên nhóm size',
+            fb: 'Chưa đúng. Trình duyệt không khóa ô thứ hai — cả hai ô vẫn bấm chọn được bình thường. Hãy chạy thử để quan sát!'
           },
           {
-            text: 'Trình duyệt báo lỗi',
-            fb: 'Trình duyệt không báo lỗi HTML kiểu này; nó vẫn chạy nhưng chạy sai ý mình. Đó là lí do phải chạy thử.'
+            text: 'Cả hai ô đều bấm chọn được, nhưng khi bấm Gửi thì trình duyệt dừng lại và báo lỗi cú pháp HTML',
+            fb: 'Trình duyệt không báo lỗi HTML kiểu này; biểu mẫu vẫn gửi đi sai ý đồ thiết kế. Đó chính là lí do cần chạy thử và kiểm tra bảng Dữ liệu gửi đi.'
           }
         ]
       },
       q3b: {
         label: 'Chặng 3 – Xóa value="nho" của radio',
-        prompt: 'Câu hỏi dự đoán 2 (Thử nghiệm 2): Nếu xóa value="nho" rồi chọn Nhỏ và bấm Gửi, dữ liệu gửi đi là gì?',
+        prompt: 'Câu hỏi dự đoán 2 (Thử nghiệm 2): Sau khi đặt cùng name="size", nếu xóa value="nho" ở ô Nhỏ (id="nho"), chọn Nhỏ rồi bấm Gửi, dữ liệu gửi đi là gì?',
         correct: 1,
         options: [
           {
-            text: 'size = nho',
-            fb: 'Không còn value thì trình duyệt không biết gửi chữ “nho”. Hãy xóa value và bấm Gửi để kiểm chứng.'
+            text: 'size = nho (trình duyệt tự lấy giá trị của thuộc tính id="nho" thay thế cho value bị thiếu)',
+            fb: 'Rất nhiều bạn đoán vậy! Nhưng id chỉ dùng trong trang HTML (liên kết label/CSS/JS), trình duyệt không bao giờ lấy id để gửi làm giá trị thay cho value.'
           },
           {
-            text: 'size = on',
-            fb: 'Đúng! Thiếu value, trình duyệt gửi giá trị mặc định “on”, không biết em chọn ô nào. Vì vậy mỗi ô radio, checkbox cần value.'
+            text: 'size = on (trình duyệt gửi chuỗi mặc định “on” vì ô có name nhưng không khai báo thuộc tính value)',
+            fb: 'Chính xác! Khi thiếu value, trình duyệt gửi giá trị mặc định “on”, máy chủ không phân biệt được em chọn ô nào. Vì vậy mỗi radio/checkbox luôn cần có value.'
           },
           {
-            text: 'Không gửi gì',
-            fb: 'Vẫn gửi, vì ô có name. Nhưng giá trị gửi đi vô nghĩa. Chạy thử để xem.'
+            text: 'size = Nhỏ (trình duyệt tự lấy phần chữ bên trong thẻ <label for="nho">Nhỏ</label> để gửi đi)',
+            fb: 'Rất dễ nhầm! Chữ trong <label> chỉ để người dùng đọc trên giao diện, trình duyệt không gửi nội dung thẻ label làm dữ liệu của ô radio.'
           },
           {
-            text: 'Trình duyệt báo lỗi',
-            fb: 'Không có lỗi nào hiện ra. Đây là lỗi “âm thầm”, chỉ phát hiện được khi chạy thử.'
+            text: 'size = (giá trị rỗng, vì trình duyệt chỉ gửi tên biến size mà không gắn kèm giá trị nào phía sau)',
+            fb: 'Đó là cách hoạt động của ô nhập văn bản (text) để trống. Riêng radio và checkbox được chọn nhưng thiếu value sẽ gửi giá trị mặc định là “on”.'
           }
         ]
       },
       q4: {
-        label: 'Chặng 4 – Tìm dữ liệu bị mất khi gửi đơn hàng',
-        prompt: 'Câu hỏi dự đoán (Trước khi chạy): Nhập đủ thông tin rồi bấm Gửi đơn hàng, dữ liệu nào KHÔNG được gửi đi?',
+        label: 'Chặng 4 – Phân tích lỗi đơn đặt hàng',
+        prompt: 'Câu hỏi dự đoán (Trước khi chạy): Nhập đủ Họ tên, Email, chọn cả Nhỏ và Lớn rồi bấm “Gửi đơn hàng”, kết quả ở bảng dữ liệu gửi đi là gì?',
         correct: 0,
         options: [
           {
-            text: 'Họ tên',
-            fb: 'Đúng! Ô Họ tên không có name nên không được gửi. Quên name là mất dữ liệu.'
+            text: 'Chỉ bị mất dữ liệu “Họ tên”; còn “Email” và cả hai mục “Kích cỡ” (size1, size2) vẫn được gửi đi',
+            fb: 'Chính xác! Ô Họ tên không có thuộc tính name nên trình duyệt bỏ qua hoàn toàn khi đóng gói dữ liệu. Quên name là mất dữ liệu!'
           },
           {
-            text: 'Email',
-            fb: 'Ô Email có name="email" nên vẫn được gửi. Lỗi của ô Email nằm ở chỗ khác, hãy thử nháy vào nhãn Email.'
+            text: 'Chỉ bị mất dữ liệu “Email” vì nhãn for="mail" không khớp id="email"; còn “Họ tên” vẫn gửi theo id="ten"',
+            fb: 'Cẩn thận bẫy hai lỗi khác nhau! Lệch for–id chỉ làm nháy nhãn không vào ô chứ không làm mất dữ liệu gửi (ô Email vẫn có name="email"). Ngược lại, id="ten" không thể thay cho name.'
           },
           {
-            text: 'Kích cỡ',
-            fb: 'Kích cỡ vẫn được gửi (vì có name), nhưng lại chọn được cả hai ô. Đó là một lỗi khác.'
+            text: 'Bị mất cả “Họ tên” (thiếu name) lẫn “Email” (lệch for–id); chỉ có hai ô radio kích cỡ được gửi đi',
+            fb: 'Đúng một nửa ở ô Họ tên, nhưng ô Email vẫn có đầy đủ name="email" nên dữ liệu người dùng gõ vào ô Email vẫn được gửi đi bình thường.'
           },
           {
-            text: 'Tất cả đều được gửi',
-            fb: 'Chạy thử, bấm Gửi và xem bảng “Dữ liệu gửi đi”: thiếu một mục.'
+            text: 'Bị mất dữ liệu “Kích cỡ” vì hai ô radio đặt khác name (size1, size2) gây xung đột; “Họ tên” và “Email” vẫn gửi đủ',
+            fb: 'Hai ô radio khác name không làm mất dữ liệu mà khiến cả hai giá trị size1 và size2 cùng bị gửi đi. Hãy chạy thử và bấm “Gửi đơn hàng” để kiểm chứng!'
           }
         ]
       }
@@ -852,6 +956,14 @@
         s4Sent: null,
         s4Checks: null, // { bugName, bugFor, bugRadio }
         s4HintLevel: { bugName: 0, bugFor: 0, bugRadio: 0 },
+        // Bộ đếm thời gian (mặc định đếm ngược 20 phút, cho phép đổi mốc hoặc đếm xuôi)
+        timerDuration: 1200,
+        timerRemaining: 1200,
+        timerElapsed: 0,
+        timerPaused: false,
+        timerStarted: false,
+        timerExpired: false,
+        stageElapsed: { 1: 0, 2: 0, 3: 0, 4: 0 },
         // Summary reflection
         studentName: '',
         studentClass: '',
@@ -860,6 +972,86 @@
     }
 
     let state = initialState();
+
+    function formatClockSec(sec) {
+      const s = Math.max(0, Math.floor(Number(sec) || 0));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return String(m).padStart(2, '0') + ':' + String(r).padStart(2, '0');
+    }
+
+    function updateTimerDisplay() {
+      const textEl = document.getElementById('timerText');
+      const badgeEl = document.getElementById('timerBadge');
+      const barEl = document.getElementById('timerBarFill');
+      const pauseBtn = document.getElementById('timerPauseBtn');
+      const overEl = document.getElementById('timeOverBanner');
+      const presetEl = document.getElementById('timerPreset');
+      if (presetEl && String(presetEl.value) !== String(state.timerDuration)) {
+        presetEl.value = String(state.timerDuration);
+      }
+
+      const isCountdown = state.timerDuration > 0;
+      const shownSeconds = isCountdown ? state.timerRemaining : state.timerElapsed;
+      if (textEl) {
+        const prefix = isCountdown ? '' : '+';
+        textEl.textContent = prefix + formatClockSec(shownSeconds);
+      }
+
+      const isDanger = isCountdown && state.timerRemaining <= 120;
+      const isWarn = isCountdown && !isDanger && state.timerRemaining <= 300;
+      if (badgeEl) {
+        badgeEl.classList.toggle('warn', isWarn);
+        badgeEl.classList.toggle('danger', isDanger);
+      }
+      if (barEl) {
+        const pct = isCountdown
+          ? Math.max(0, Math.min(100, (state.timerRemaining / Math.max(1, state.timerDuration)) * 100))
+          : 100;
+        barEl.style.width = pct + '%';
+        barEl.classList.toggle('warn', isWarn);
+        barEl.classList.toggle('danger', isDanger);
+      }
+      if (pauseBtn) {
+        pauseBtn.textContent = state.timerPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng';
+      }
+      if (overEl) {
+        overEl.classList.toggle('show', Boolean(isCountdown && state.timerExpired && state.view !== 5));
+      }
+    }
+
+    function changeTimerPreset(val) {
+      const dur = Math.max(0, Number(val) || 0);
+      state.timerDuration = dur;
+      state.timerRemaining = dur;
+      state.timerExpired = false;
+      updateTimerDisplay();
+    }
+
+    function toggleTimerPause() {
+      if (!state.timerStarted && state.view >= 1 && state.view <= 4) {
+        state.timerStarted = true;
+        state.timerPaused = false;
+      } else {
+        state.timerPaused = !state.timerPaused;
+      }
+      updateTimerDisplay();
+    }
+
+    if (window.__a23TimerInterval) clearInterval(window.__a23TimerInterval);
+    window.__a23TimerInterval = setInterval(function() {
+      if (!state.timerStarted || state.timerPaused) return;
+      if (state.view < 1 || state.view > 4) return;
+      state.timerElapsed += 1;
+      state.stageElapsed[state.view] = (state.stageElapsed[state.view] || 0) + 1;
+      if (state.timerDuration > 0 && state.timerRemaining > 0) {
+        state.timerRemaining -= 1;
+        if (state.timerRemaining === 0) {
+          state.timerExpired = true;
+        }
+      }
+      updateTimerDisplay();
+    }, 1000);
 
     function escHtml(str) {
       return String(str || '')
@@ -898,7 +1090,11 @@
 
     function goView(v) {
       state.view = v;
+      if (v >= 1 && v <= 4 && !state.timerStarted) {
+        state.timerStarted = true;
+      }
       render();
+      updateTimerDisplay();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1075,9 +1271,9 @@
     function renderIntro() {
       return `
         <div class="card">
-          <span class="badge">Học liệu tương tác A2.3 · Blended Learning · Không đếm giờ</span>
+          <span class="badge">Học liệu tương tác A2.3 · Blended Learning · Bộ đếm thời gian 20 phút</span>
           <h1 style="margin-top:10px">Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích</h1>
-          <p style="color:var(--muted)">Áp dụng cho <strong>Tin học 12 KNTT – Bài 12 “Tạo biểu mẫu”</strong> (Hoạt động 2.2 · SGK trang 67 – 69). Em tự chạy thử, sửa mã HTML trực tiếp trên trình duyệt trong khoảng 15 – 20 phút.</p>
+          <p style="color:var(--muted)">Áp dụng cho <strong>Tin học 12 KNTT – Bài 12 “Tạo biểu mẫu”</strong> (Hoạt động 2.2 · SGK trang 67 – 69). Em tự chạy thử, sửa mã HTML trực tiếp trên trình duyệt trong khung giờ chuẩn <strong>20 phút</strong> (có thể chọn 10–30 phút hoặc tạm dừng trên thanh công cụ).</p>
 
           <table class="meta-table">
             <tr>
@@ -1577,6 +1773,11 @@
               <div style="font-size:28px;font-weight:900;color:${s4Count === 3 ? '#059669' : '#d97706'}">${s4Count} / 3 lỗi</div>
               <div style="font-size:12px;color:var(--muted)">${s4Count === 3 ? 'Hoàn thành xuất sắc!' : 'Có thể quay lại Chặng 4 sửa thêm'}</div>
             </div>
+            <div class="panel" style="padding:14px;text-align:center">
+              <div style="font-size:12px;color:var(--muted);font-weight:700">⏱ Thời gian thực hiện</div>
+              <div style="font-size:28px;font-weight:900;color:var(--primary);font-family:'JetBrains Mono',Consolas,monospace">${formatClockSec(state.timerElapsed)}</div>
+              <div style="font-size:11.5px;color:var(--muted)">C1 ${formatClockSec(state.stageElapsed[1])} · C2 ${formatClockSec(state.stageElapsed[2])} · C3 ${formatClockSec(state.stageElapsed[3])} · C4 ${formatClockSec(state.stageElapsed[4])}</div>
+            </div>
           </div>
 
           <div class="takeaway" style="margin-bottom:16px">
@@ -1645,6 +1846,7 @@
         `Họ và tên: ${state.studentName.trim() || '(Chưa ghi)'}`,
         `Lớp: ${state.studentClass.trim() || '(Chưa ghi)'}`,
         `Thời điểm xuất phiếu: ${new Date().toLocaleString('vi-VN')}`,
+        `Tổng thời gian thực hiện: ${formatClockSec(state.timerElapsed)} (Chặng 1: ${formatClockSec(state.stageElapsed[1])} | Chặng 2: ${formatClockSec(state.stageElapsed[2])} | Chặng 3: ${formatClockSec(state.stageElapsed[3])} | Chặng 4: ${formatClockSec(state.stageElapsed[4])})`,
         '',
         `1. KẾT QUẢ DỰ ĐOÁN LẦN ĐẦU: ${rightFirst} / ${qKeys.length} câu đúng ngay lần đầu`,
         ...qKeys.map((k, i) => {
@@ -1723,6 +1925,7 @@
           if (box) box.innerHTML = renderSentTable(entries);
         });
       }
+      updateTimerDisplay();
     }
 
     render();

@@ -316,64 +316,103 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
         )}
 
         {/* Trang chủ khóa học (home): Tổng quan mục tiêu, tiến độ & Thông báo lớp học */}
-        {activeTab === 'home' && !activeModuleId && !isEmbedMode && (
+        {activeTab === 'home' && !activeModuleId && !isEmbedMode && (() => {
+          const allCourseActs = (activeCourse.modules || []).flatMap(m => m.activities || []);
+          const htmlLabAct = allCourseActs.find(a => a.type === 'document' && /\.html?(\?.*)?$/i.test(a.fileUrl || ''));
+          const featuredQuizActs = allCourseActs.filter(a => a.type === 'quiz').slice(0, 2);
+          return (
           <div className="mx-4 sm:mx-8 mt-4 space-y-4">
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#0374b5]/10 via-sky-50 to-indigo-50/70 border border-sky-200/80 space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#0374b5] text-white text-[10px] font-black uppercase tracking-wider">
-                    <BookOpen className="w-3 h-3" /> Trang chủ khóa học
-                  </span>
-                  <h2 className="text-base sm:text-lg font-black text-slate-900">
+            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#0b2f52] via-[#035d94] to-[#0374b5] text-white shadow-md space-y-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-2xs text-white text-[11px] font-bold tracking-wide">
+                      <BookOpen className="w-3.5 h-3.5" /> {activeCourse.code} · {activeCourse.gradeLevel || 'Phổ thông'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-400/20 border border-sky-200/30 text-sky-100 text-[11px] font-semibold">
+                      {activeCourse.category}
+                    </span>
+                    {htmlLabAct && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-400/25 border border-emerald-200/40 text-emerald-100 text-[11px] font-bold">
+                        🔬 Có Phòng thí nghiệm HTML5 tương tác
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-white leading-snug">
                     {activeCourse.name}
                   </h2>
-                  <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-[13px] text-sky-100/95 leading-relaxed">
                     {activeCourse.description || 'Khóa học trực tuyến tương tác theo lộ trình chuẩn trên LMS Nhóm 2.'}
                   </p>
                 </div>
-                <div className="shrink-0 bg-white/90 px-4 py-2.5 rounded-xl border border-sky-200 text-center min-w-[130px]">
-                  <div className="text-[10px] font-bold uppercase text-slate-400">Tiến độ khóa học</div>
-                  <div className="text-xl font-black text-[#0374b5] font-mono">{activeCourse.progress || 0}%</div>
-                  <div className="text-[10px] text-slate-500">
-                    {activeCourse.completedActivities || 0}/{activeCourse.totalActivities || 0} mục xong
+                <div className="shrink-0 bg-white/12 backdrop-blur-xs px-5 py-3.5 rounded-2xl border border-white/20 text-center min-w-[155px]">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-sky-100">Tiến độ hoàn thành</div>
+                  <div className="text-2xl font-extrabold text-white font-mono tabular-nums mt-0.5">{activeCourse.progress || 0}%</div>
+                  <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden my-1.5">
+                    <div className="h-full bg-emerald-400 rounded-full transition-all" style={{ width: `${Math.min(100, activeCourse.progress || 0)}%` }} />
+                  </div>
+                  <div className="text-[11px] text-sky-100 font-medium">
+                    {activeCourse.completedActivities || 0}/{activeCourse.totalActivities || 0} hoạt động xong
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 pt-1">
+
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/15">
                 <button
                   type="button"
                   onClick={() => setActiveTab('modules')}
-                  className="px-3 py-1.5 rounded-lg bg-[#0374b5] hover:bg-[#025a8c] text-white text-xs font-bold transition-colors"
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-sky-50 text-[#0b3b64] text-xs font-bold shadow-xs transition-all"
                 >
-                  Vào Nội dung học tập ({(activeCourse.modules || []).length} bài)
+                  Vào Nội dung học tập ({(activeCourse.modules || []).length} mô-đun)
                 </button>
+                {htmlLabAct && (
+                  <button
+                    type="button"
+                    onClick={() => navigateToActivity(activeCourse.id, htmlLabAct.id)}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold shadow-xs transition-all"
+                  >
+                    🔬 Mở Phòng thí nghiệm Biểu mẫu A2.3
+                  </button>
+                )}
+                {featuredQuizActs.map((qz, qi) => (
+                  <button
+                    key={qz.id}
+                    type="button"
+                    onClick={() => navigateToActivity(activeCourse.id, qz.id)}
+                    className="px-3.5 py-2 rounded-xl bg-amber-400/95 hover:bg-amber-300 text-slate-900 text-xs font-bold shadow-xs transition-all"
+                  >
+                    {qi === 0 ? '⚡ ' : '🏆 '}
+                    {qz.title.length > 36 ? qz.title.slice(0, 36) + '…' : qz.title}
+                    {qz.timeLimitMinutes ? ` (${qz.timeLimitMinutes}p)` : ''}
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={() => setActiveTab('syllabus')}
-                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold transition-colors"
                 >
                   Xem Lịch trình & Mục tiêu
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('files')}
-                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold transition-colors"
                 >
                   Thư mục Học liệu ({(activeCourse.files || []).length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('resources3d')}
-                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold transition-colors"
+                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold transition-colors"
                 >
-                  Phòng Lab AI tương tác
+                  Phòng Lab AI & HTML5
                 </button>
               </div>
             </div>
 
             {(activeCourse.announcements || []).length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Thông báo lớp học</h3>
                 {(activeCourse.announcements || []).slice(0, 3).map(anc => (
                   <div
                     key={anc.id}
@@ -381,7 +420,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       {anc.isImportant && (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">QUAN TRỌNG</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-extrabold text-[10px]">QUAN TRỌNG</span>
                       )}
                       <h4 className="font-extrabold text-slate-900 text-sm">{anc.title}</h4>
                     </div>
@@ -392,7 +431,8 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               </div>
             )}
           </div>
-        )}
+          );
+        })()}
 
         {/* Tab 1: Nội dung học tập (Modules View - EXACTLY LIKE SCREENSHOT) */}
         {(activeTab === 'modules' || activeTab === 'home') && (

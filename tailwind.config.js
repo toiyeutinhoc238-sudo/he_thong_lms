@@ -27,7 +27,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['"Be Vietnam Pro"', 'Segoe UI', 'Roboto', 'system-ui', '-apple-system', 'Arial', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'Cascadia Code', 'Consolas', 'ui-monospace', 'monospace'],
       }
     },
   },

@@ -63,6 +63,7 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState(timeLimitSeconds);
+  const [questionElapsed, setQuestionElapsed] = useState(0);
   const timeLeftRef = useRef(timeLeft);
   timeLeftRef.current = timeLeft;
   const [isSubmitted, setIsSubmitted] = useState(!!activity.quizResult);
@@ -71,11 +72,16 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
 
   const handleSubmitRef = useRef<() => void>(() => {});
 
-  // Countdown timer
+  useEffect(() => {
+    setQuestionElapsed(0);
+  }, [currentIndex, isSubmitted]);
+
+  // Countdown timer + per-question stopwatch
   useEffect(() => {
     if (isSubmitted) return;
 
     const timer = setInterval(() => {
+      setQuestionElapsed(prev => prev + 1);
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
@@ -159,35 +165,63 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
     );
   }
 
+  const timePct = timeLimitSeconds > 0 ? Math.max(0, Math.min(100, Math.round((timeLeft / timeLimitSeconds) * 100))) : 0;
+  const isDangerTime = timeLeft <= 60;
+  const isWarnTime = !isDangerTime && timePct <= 30;
+
   return (
-    <div className="space-y-6">
-      {/* Quiz Top bar: Info and Timer */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-base sm:text-lg font-bold text-slate-800">
-            {activity.title}
-          </h2>
-          <p className="text-xs text-slate-500">
-            Tổng cộng: {questions.length} câu • Điểm tối thiểu đạt: {activity.passScore || 5.0}/10
-            {activity.shuffleQuestions ? ' • Đã xáo trộn đề' : ''}
-            {maxAttempts > 0 ? ` • Tối đa ${maxAttempts} lượt làm` : ''}
-          </p>
+    <div className="space-y-5">
+      {/* Quiz Top bar: Info and Live Countdown Timer */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">
+              {activity.title}
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Tổng cộng: <strong className="text-slate-700">{questions.length} câu</strong> • Thời lượng: <strong className="text-slate-700">{Math.round(timeLimitSeconds / 60)} phút</strong> • Điểm đạt: <strong className="text-slate-700">{activity.passScore || 5.0}/10</strong>
+              {activity.shuffleQuestions ? ' • Đã xáo trộn đề' : ''}
+              {maxAttempts > 0 ? ` • Tối đa ${maxAttempts} lượt làm` : ''}
+            </p>
+          </div>
+
+          {/* Timer Box */}
+          {!isSubmitted ? (
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono tabular-nums font-bold text-slate-600">
+                Câu này: {formatTime(questionElapsed)}
+              </div>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono tabular-nums text-sm sm:text-base font-extrabold shadow-xs border transition-colors ${
+                isDangerTime
+                  ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse'
+                  : isWarnTime
+                    ? 'bg-amber-50 text-amber-800 border-amber-300'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+                <Clock className="w-4 h-4 shrink-0" />
+                <span>Còn lại: {formatTime(timeLeft)}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>
+                Đã nộp bài
+                {quizResult?.durationSeconds ? ` (${formatTime(quizResult.durationSeconds)})` : ''}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Timer Box */}
-        {!isSubmitted ? (
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-sm font-bold shadow-xs ${
-            timeLeft < 180 
-              ? 'bg-red-50 text-red-600 border border-red-200 animate-pulse' 
-              : 'bg-amber-50 text-amber-800 border border-amber-200'
-          }`}>
-            <Clock className="w-4 h-4" />
-            <span>Thời gian còn lại: {formatTime(timeLeft)}</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Đã hoàn thành nộp bài</span>
+        {/* Live Time Progress Strip */}
+        {!isSubmitted && (
+          <div className="w-full h-1.5 bg-slate-100 overflow-hidden" title={`Còn ${timePct}% thời gian`}>
+            <div
+              className={`h-full transition-all duration-1000 ${
+                isDangerTime ? 'bg-rose-500' : isWarnTime ? 'bg-amber-500' : 'bg-emerald-500'
+              }`}
+              style={{ width: `${timePct}%` }}
+            />
           </div>
         )}
       </div>
@@ -217,28 +251,31 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
                   </span>
                 ) : null}
               </p>
-              <p className="text-xs opacity-75">
+              <p className="text-xs opacity-80">
                 Nộp bài lúc: {quizResult.submittedAt}
+                {quizResult.durationSeconds ? ` • Thời gian làm bài: ${formatTime(quizResult.durationSeconds)}` : ''}
                 {quizResult.attemptCount ? ` • Lần làm thứ ${quizResult.attemptCount}${maxAttempts > 0 ? `/${maxAttempts}` : ''}` : ''}
                 {quizResult.isLate && <span className="ml-2 px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-black">Nộp trễ hạn</span>}
               </p>
-              {!quizResult.passed && (
-                maxAttempts > 0 && !canManage && (quizResult.attemptCount || 1) >= maxAttempts ? (
-                  <p className="pt-2 text-xs font-bold text-rose-700">
-                    Bạn đã sử dụng hết {maxAttempts}/{maxAttempts} lượt làm bài cho đề kiểm tra này.
-                  </p>
-                ) : (
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={handleRetakeQuiz}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition-all"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Làm lại bài kiểm tra để đạt chuẩn</span>
-                    </button>
-                  </div>
-                )
+              {(maxAttempts > 0 && !canManage && (quizResult.attemptCount || 1) >= maxAttempts) ? (
+                <p className="pt-2 text-xs font-bold text-rose-700">
+                  Bạn đã sử dụng hết {maxAttempts}/{maxAttempts} lượt làm bài cho đề kiểm tra này.
+                </p>
+              ) : (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleRetakeQuiz}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-bold shadow-sm transition-all ${
+                      quizResult.passed
+                        ? 'bg-[#0374b5] hover:bg-[#025a8c]'
+                        : 'bg-amber-600 hover:bg-amber-700'
+                    }`}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>{quizResult.passed ? 'Làm lại để rèn tốc độ & xem lại phản hồi' : 'Làm lại bài kiểm tra để đạt chuẩn'}</span>
+                  </button>
+                </div>
               )}
             </div>
           )}

@@ -3,9 +3,26 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, system-ui, -apple-system, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-[#f4f7fb] text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, system-ui, -apple-system, Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  code, pre, kbd, samp, .font-mono {
+    font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, ui-monospace, monospace;
+  }
+
+  /* Tránh cắt dấu tiếng Việt trên tiêu đề in đậm cỡ lớn */
+  h1, h2, h3, h4 {
+    line-height: 1.32;
   }
 }
 

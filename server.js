@@ -1483,122 +1483,122 @@ function buildTin12B12Course() {
           {
             id: 'tin12-act-2-2',
             moduleId: 'tin12-mod-2',
-            title: 'Trắc nghiệm Dự đoán 4 Chặng A2.3 (6 câu có phản hồi sư phạm riêng cho từng phương án)',
+            title: 'Trắc nghiệm Dự đoán 4 Chặng A2.3 (6 câu gây nhiễu cao · Đếm ngược 10 phút)',
             type: 'quiz',
-            durationMinutes: 15,
+            durationMinutes: 10,
             isCompleted: false,
             isRequired: true,
             maxScore: 10,
             passScore: 5,
-            timeLimitMinutes: 15,
+            timeLimitMinutes: 10,
             shuffleQuestions: false,
-            description: '6 câu hỏi dự đoán chuẩn Mục 4 (Học liệu A2.3). Sau khi nộp bài, hệ thống tự động chấm điểm và hiển thị phản hồi riêng giải thích đúng cho phương án em đã chọn.',
+            description: '6 câu hỏi dự đoán 4 chặng A2.3 có bộ đếm ngược 10 phút và các phương án nhiễu gần giống nhau, đánh trúng ngộ nhận thực tế của HS lớp 12. Nộp bài xong sẽ hiện phản hồi sư phạm riêng cho đúng lựa chọn của em.',
             quizQuestions: [
               {
                 id: 'a23-q1',
-                question: '[Chặng 1 – label và input] Cho đoạn mã: <label for="ten">Họ tên:</label><input type="text" id="ten" name="hoTen">. Khi chạy đoạn mã rồi nháy chuột vào chữ “Họ tên:”, điều gì xảy ra?',
+                question: '[Chặng 1 – label và input] Cho đoạn mã: <label for="ten">Họ tên:</label><input type="text" id="ten" name="hoTen">. Khi chạy đoạn mã rồi nháy chuột trực tiếp vào chữ “Họ tên:”, điều gì xảy ra?',
                 options: [
-                  'Không có gì xảy ra, nhãn chỉ là chữ trang trí',
-                  'Con trỏ nhảy vào ô nhập bên cạnh',
-                  'Trình duyệt mở một trang mới',
-                  'Chữ “Họ tên:” bị xóa'
+                  'Con trỏ nhập liệu tự động nhảy vào ô nhập và điền sẵn nội dung mặc định là chữ “ten”',
+                  'Con trỏ nhập liệu tự động nhảy vào ô nhập tương ứng bên cạnh để người dùng gõ ngay',
+                  'Con trỏ chỉ nhảy vào ô nếu for trùng với name="hoTen", còn trùng id="ten" thì không có tác dụng',
+                  'Chữ “Họ tên:” chỉ được bôi đậm lên để đánh dấu, người dùng vẫn phải bấm vào khung ô nhập để gõ'
                 ],
                 correctAnswer: 1,
                 optionFeedback: [
-                  'Nhiều bạn nghĩ vậy! Nhưng nhãn này có thuộc tính for trỏ tới ô nhập. Hãy chạy thử ở Phòng thí nghiệm A2.3 và nháy vào chữ “Họ tên:” để kiểm chứng.',
-                  'Chính xác! for của label trùng với id của input (đều là "ten") nên nháy vào nhãn cũng như nháy vào ô.',
-                  'Chưa đúng. Mở trang mới là việc của liên kết (thẻ a). Label chỉ gắn nhãn cho ô nhập.',
-                  'Chưa đúng. Nháy chuột không làm thay đổi nội dung trang. Hãy chạy thử để xem nhãn làm gì.'
+                  'Gần đúng ở ý con trỏ nhảy vào ô, nhưng id="ten" chỉ là mã định danh chứ không tự điền chữ vào ô (muốn đặt giá trị sẵn phải dùng thuộc tính value).',
+                  'Chính xác! Thuộc tính for="ten" của label trùng khớp với id="ten" của input nên nháy vào nhãn cũng kích hoạt trực tiếp ô nhập đó.',
+                  'Rất nhiều bạn nhầm cặp for–id với name! Hãy nhớ: for của label luôn liên kết với id của input; còn name dùng khi gửi dữ liệu.',
+                  'Chưa đúng. Label không chỉ là chữ trang trí — khi có for khớp id, nháy trực tiếp vào nhãn sẽ đưa con trỏ vào ngay ô nhập.'
                 ],
                 explanation: 'Theo SGK tr.67–68: label định nghĩa nhãn cho vùng nhập; giá trị for phải trùng id của input thì nhãn mới gắn với ô (“For với id là một cặp – phải giống nhau”).'
               },
               {
                 id: 'a23-q2a',
-                question: '[Chặng 2 – type="password"] Cho thẻ <input type="password" id="o1" name="oThu">. Gõ chữ abc vào ô, em sẽ thấy gì trên màn hình?',
+                question: '[Chặng 2 – type="password"] Cho thẻ <input type="password" id="o1" name="oThu">. Khi gõ chuỗi abc vào ô rồi gửi biểu mẫu, cách hiển thị và dữ liệu gửi đi như thế nào?',
                 options: [
-                  'Thấy abc',
-                  'Thấy ••• (dấu chấm)',
-                  'Ô biến mất',
-                  'Thấy ABC viết hoa'
+                  'Trên màn hình hiện dấu chấm (•••), còn dữ liệu gửi đi cũng biến thành chuỗi dấu chấm (•••) thay cho abc',
+                  'Trên màn hình bị che thành dấu chấm (•••), còn dữ liệu thực sự lưu trong ô và gửi đi vẫn là abc',
+                  'Trên màn hình vẫn hiện rõ chữ abc khi đang gõ và chỉ chuyển thành dấu chấm (•••) sau khi bấm nút gửi',
+                  'Trên màn hình hiện dấu chấm (•••), đồng thời trình duyệt tự động chặn không cho nhập chuỗi abc quá ngắn'
                 ],
                 correctAnswer: 1,
                 optionFeedback: [
-                  'Đó là kết quả của type="text". Với password, Bảng 12.1 ghi gì? Hãy chạy thử và gõ để kiểm chứng.',
-                  'Đúng! password tạo trường nhập mật khẩu: vẫn nhập văn bản nhưng bị che thành dấu chấm, để người bên cạnh không nhìn trộm.',
-                  'Chưa đúng. Ô vẫn hiện, chỉ cách hiển thị chữ thay đổi.',
-                  'Chưa đúng. type không đổi chữ thường thành chữ hoa.'
+                  'Rất dễ nhầm! type="password" chỉ che phần hiển thị trên màn hình để tránh nhìn trộm, chứ không biến đổi hay mã hóa giá trị gốc bên trong ô.',
+                  'Chính xác! Theo Bảng 12.1 (SGK tr.68), type="password" ẩn kí tự trên màn hình bằng dấu chấm, còn giá trị gửi đi vẫn là chuỗi người dùng gõ.',
+                  'Chưa đúng. Trình duyệt che thành dấu chấm ngay tại thời điểm em gõ từng kí tự chứ không đợi tới khi bấm gửi.',
+                  'Chưa đúng. Thuộc tính type="password" không tự kiểm tra độ dài hay độ mạnh mật khẩu; nó vẫn nhận chuỗi abc bình thường.'
                 ],
-                explanation: 'Theo Bảng 12.1 (SGK tr.68): type="password" tạo trường nhập mật khẩu giúp che kí tự nhập vào.'
+                explanation: 'Theo Bảng 12.1 (SGK tr.68): type="password" tạo trường nhập mật khẩu giúp che kí tự hiển thị trên màn hình, dữ liệu gốc vẫn giữ nguyên khi gửi.'
               },
               {
                 id: 'a23-q2b',
-                question: '[Chặng 2 – Câu hỏi 2 SGK tr.69] Câu lệnh HTML nào thêm đúng nút “Quên mật khẩu” vào biểu mẫu?',
+                question: '[Chặng 2 – Câu hỏi 2 SGK tr.69] Câu lệnh HTML nào tạo đúng nút bấm “Quên mật khẩu” mà KHÔNG gửi dữ liệu biểu mẫu đi?',
                 options: [
                   '<input type="submit" value="Quên mật khẩu">',
                   '<input type="button" value="Quên mật khẩu">',
-                  '<input type="button">Quên mật khẩu</input>',
-                  '<input type="text" value="Quên mật khẩu">'
+                  '<input type="button" name="Quên mật khẩu">',
+                  '<input type="button">Quên mật khẩu</input>'
                 ],
                 correctAnswer: 1,
                 optionFeedback: [
-                  'Gần đúng, nhưng submit là nút gửi biểu mẫu đi. Nút Quên mật khẩu không gửi dữ liệu biểu mẫu.',
-                  'Chính xác! button tạo nút bấm thông thường; chữ hiển thị trên nút đặt ở thuộc tính value (Bảng 12.1).',
-                  'input là thẻ đơn, không có thẻ đóng </input>. Chữ trên nút phải đặt ở thuộc tính value.',
-                  'text tạo ô nhập chữ, không tạo nút bấm. Hãy thử trong khung sửa mã Chặng 2.'
+                  'Rất giống đáp án đúng nhưng type="submit" là nút gửi toàn bộ dữ liệu biểu mẫu đi, không phù hợp cho nút “Quên mật khẩu”.',
+                  'Chính xác! Theo Bảng 12.1, type="button" tạo nút bấm thông thường (không gửi biểu mẫu) và chữ hiển thị trên nút đặt trong thuộc tính value.',
+                  'Cẩn thận bẫy thuộc tính! name chỉ đặt tên biến nội bộ chứ không hiện chữ lên mặt nút — chữ hiển thị trên nút phải đặt ở thuộc tính value.',
+                  'Dễ nhầm với cặp thẻ <button>...</button>! Thẻ <input> là thẻ đơn, không có thẻ đóng </input>; nhãn trên nút phải ghi bằng value="Quên mật khẩu".'
                 ],
-                explanation: 'Theo Bảng 12.1 (SGK tr.68–69): input là thẻ đơn; type="button" tạo nút bấm không gửi biểu mẫu và chữ trên nút đặt trong value.'
+                explanation: 'Theo Bảng 12.1 (SGK tr.68–69): input là thẻ đơn; type="button" tạo nút bấm không gửi biểu mẫu và chữ trên nút đặt trong thuộc tính value.'
               },
               {
                 id: 'a23-q3a',
-                question: '[Chặng 3 – Hai ô radio khác name] Ô Nhỏ có name="size", ô Lớn có name="size2". Khi bấm chọn Nhỏ rồi bấm chọn Lớn, em thấy gì?',
+                question: '[Chặng 3 – Hai ô radio khác name] Hai ô radio “Nhỏ” (name="size") và “Lớn” (name="size2") cùng nằm trong một <form>. Khi bấm chọn Nhỏ rồi bấm chọn Lớn, hiện tượng nào xảy ra?',
                 options: [
-                  'Chỉ Lớn được chọn, Nhỏ tự bỏ',
-                  'Cả hai ô cùng được chọn',
-                  'Không bấm được ô nào',
-                  'Trình duyệt báo lỗi'
+                  'Chỉ ô Lớn được chọn, ô Nhỏ tự động bỏ chọn vì cả hai ô cùng nằm trong chung một thẻ <form>',
+                  'Cả hai ô Nhỏ và Lớn cùng được chọn đồng thời và không tự loại trừ nhau khi bấm qua lại',
+                  'Chỉ ô Nhỏ giữ nguyên trạng thái được chọn, ô Lớn bị khóa không bấm được do khác tên nhóm size',
+                  'Cả hai ô đều bấm chọn được, nhưng khi bấm Gửi thì trình duyệt dừng lại và báo lỗi cú pháp HTML'
                 ],
                 correctAnswer: 1,
                 optionFeedback: [
-                  'Đó là khi hai ô cùng name. Ở đây name khác nhau (size và size2), hãy chạy thử để xem.',
-                  'Đúng! Radio chỉ “loại trừ nhau” khi cùng name (cùng nhóm). Khác name = hai nhóm riêng nên chọn được cả hai.',
-                  'Chưa đúng. Các ô vẫn bấm được bình thường.',
-                  'Trình duyệt không báo lỗi HTML kiểu này; nó vẫn chạy nhưng chạy sai ý mình. Đó là lí do phải chạy thử.'
+                  'Đây là ngộ nhận rất phổ biến! Đặt chung trong <form> là chưa đủ — radio chỉ tự bỏ chọn lẫn nhau khi có CÙNG giá trị thuộc tính name.',
+                  'Chính xác! Vì name="size" và name="size2" khác nhau nên trình duyệt coi đây là 2 nhóm radio độc lập, cho phép chọn cả hai cùng lúc.',
+                  'Chưa đúng. Trình duyệt không khóa ô thứ hai — cả hai ô vẫn bấm chọn được bình thường.',
+                  'Trình duyệt không báo lỗi HTML kiểu này; biểu mẫu vẫn chạy và gửi đi sai ý đồ thiết kế.'
                 ],
-                explanation: 'Theo SGK tr.68: các ô radio thuộc cùng một nhóm lựa chọn phải có cùng giá trị thuộc tính name.'
+                explanation: 'Theo SGK tr.68: các ô radio thuộc cùng một nhóm lựa chọn loại trừ nhau bắt buộc phải có cùng giá trị thuộc tính name.'
               },
               {
                 id: 'a23-q3b',
-                question: '[Chặng 3 – Xóa value="nho"] Sau khi sửa 2 ô radio cùng name="size", nếu xóa thuộc tính value="nho" rồi chọn Nhỏ và bấm Gửi, dữ liệu gửi đi là gì?',
+                question: '[Chặng 3 – Xóa value="nho"] Sau khi sửa 2 ô radio cùng name="size", nếu xóa thuộc tính value="nho" ở ô Nhỏ (id="nho"), chọn Nhỏ rồi bấm Gửi, dữ liệu gửi đi là gì?',
                 options: [
-                  'size = nho',
-                  'size = on',
-                  'Không gửi gì',
-                  'Trình duyệt báo lỗi'
+                  'size = nho (trình duyệt tự lấy giá trị của thuộc tính id="nho" thay thế cho value bị thiếu)',
+                  'size = on (trình duyệt gửi chuỗi mặc định “on” vì ô có name nhưng không khai báo thuộc tính value)',
+                  'size = Nhỏ (trình duyệt tự lấy phần chữ bên trong thẻ <label for="nho">Nhỏ</label> để gửi đi)',
+                  'size = (giá trị rỗng, vì trình duyệt chỉ gửi tên biến size mà không gắn kèm giá trị nào phía sau)'
                 ],
                 correctAnswer: 1,
                 optionFeedback: [
-                  'Không còn value thì trình duyệt không biết gửi chữ “nho”. Hãy xóa value="nho" và bấm Gửi để kiểm chứng.',
-                  'Đúng! Thiếu value, trình duyệt gửi giá trị mặc định “on”, không biết em chọn ô nào. Vì vậy mỗi ô radio, checkbox cần có value.',
-                  'Vẫn gửi, vì ô có name. Nhưng giá trị gửi đi vô nghĩa (“on”). Chạy thử để xem.',
-                  'Không có lỗi nào hiện ra. Đây là lỗi “âm thầm”, chỉ phát hiện được khi chạy thử và xem bảng dữ liệu gửi đi.'
+                  'Rất nhiều bạn đoán vậy! Nhưng id chỉ dùng trong trang HTML (liên kết label/CSS/JS), trình duyệt không bao giờ lấy id gửi làm giá trị thay cho value.',
+                  'Chính xác! Khi thiếu value, trình duyệt gửi giá trị mặc định “on”, máy chủ không phân biệt được em chọn ô nào. Vì vậy mỗi radio/checkbox luôn cần có value.',
+                  'Rất dễ nhầm! Chữ trong <label> chỉ để người dùng đọc trên giao diện, trình duyệt không gửi nội dung thẻ label làm dữ liệu của ô radio.',
+                  'Đó là cách hoạt động của ô nhập văn bản (text) để trống. Riêng radio và checkbox được chọn nhưng thiếu value sẽ gửi giá trị mặc định là “on”.'
                 ],
-                explanation: 'Câu chốt Chặng 3: “Radio thì nhớ: cùng name, thêm value.” Thiếu value sẽ gửi giá trị mặc định on.'
+                explanation: 'Câu chốt Chặng 3: “Radio thì nhớ: cùng name, thêm value.” Thiếu value sẽ gửi chuỗi mặc định on.'
               },
               {
                 id: 'a23-q4',
-                question: '[Chặng 4 – Phân tích lỗi đơn đặt hàng] Trong đoạn mã: <input type="text" id="ten"> (Họ tên), <input type="text" id="email" name="email"> (Email), và 2 radio size1/size2. Nhập đủ thông tin rồi bấm Gửi đơn hàng, dữ liệu nào KHÔNG được gửi đi?',
+                question: '[Chặng 4 – Phân tích lỗi đơn đặt hàng] Trong đoạn mã: Họ tên chỉ có id="ten" (không có name), Email có for="mail" và id="email" name="email", 2 radio dùng size1 và size2. Khi nhập đủ thông tin, chọn cả Nhỏ và Lớn rồi bấm “Gửi đơn hàng”, kết quả ở bảng dữ liệu gửi đi là gì?',
                 options: [
-                  'Họ tên',
-                  'Email',
-                  'Kích cỡ',
-                  'Tất cả đều được gửi'
+                  'Chỉ bị mất dữ liệu “Họ tên”; còn “Email” và cả hai mục “Kích cỡ” (size1, size2) vẫn được gửi đi',
+                  'Chỉ bị mất dữ liệu “Email” vì nhãn for="mail" không khớp id="email"; còn “Họ tên” vẫn gửi theo id="ten"',
+                  'Bị mất cả “Họ tên” (thiếu name) lẫn “Email” (lệch for–id); chỉ có hai ô radio kích cỡ được gửi đi',
+                  'Bị mất dữ liệu “Kích cỡ” vì hai ô radio đặt khác name (size1, size2) gây xung đột; “Họ tên” và “Email” vẫn gửi đủ'
                 ],
                 correctAnswer: 0,
                 optionFeedback: [
-                  'Đúng! Ô Họ tên không có thuộc tính name nên không được trình duyệt đóng gói gửi đi. Quên name là mất dữ liệu.',
-                  'Ô Email có name="email" nên vẫn được gửi. Lỗi của ô Email nằm ở chỗ for="mail" không khớp id="email".',
-                  'Kích cỡ vẫn được gửi (vì có name), nhưng lại chọn được cả hai ô do khác name (size1 và size2).',
-                  'Chạy thử, bấm Gửi đơn hàng và xem bảng “Dữ liệu gửi đi”: bị mất hẳn mục Họ tên!'
+                  'Chính xác! Ô Họ tên không có thuộc tính name nên trình duyệt bỏ qua hoàn toàn khi đóng gói dữ liệu. Quên name là mất dữ liệu!',
+                  'Cẩn thận bẫy hai lỗi khác nhau! Lệch for–id chỉ làm nháy nhãn không vào ô chứ không làm mất dữ liệu gửi (ô Email vẫn có name="email"). Ngược lại, id="ten" không thay được name.',
+                  'Đúng một nửa ở ô Họ tên, nhưng ô Email vẫn có đầy đủ name="email" nên dữ liệu người dùng gõ vào ô Email vẫn được gửi đi bình thường.',
+                  'Hai ô radio khác name không làm mất dữ liệu mà khiến cả hai giá trị size1 và size2 cùng bị gửi đi.'
                 ],
                 explanation: 'Thuộc tính name của thẻ input dùng để định danh dữ liệu khi gửi tới máy chủ. Thiếu name thì trình duyệt bỏ qua ô đó khi gửi biểu mẫu.'
               }
@@ -1631,129 +1631,201 @@ function buildTin12B12Course() {
           {
             id: 'tin12-act-3-1',
             moduleId: 'tin12-mod-3',
-            title: 'Trò chơi “Đấu trường Biểu mẫu” (12 câu hỏi trắc nghiệm chuẩn KHBD)',
+            title: 'Trò chơi “Đấu trường Biểu mẫu” (12 câu gây nhiễu cao · Đếm ngược 4 phút)',
             type: 'quiz',
-            durationMinutes: 12,
+            durationMinutes: 4,
             isCompleted: false,
             isRequired: true,
             maxScore: 10,
             passScore: 5,
-            timeLimitMinutes: 12,
+            timeLimitMinutes: 4,
             shuffleQuestions: false,
-            description: 'Gồm 12 câu hỏi chuẩn KHBD Bài 12 (20 giây/câu khi thi trên lớp; Câu 12 là câu “Ngôi sao hi vọng” về kiểm duyệt mã AI và bảo vệ số CCCD).',
+            description: 'Gồm 12 câu hỏi chuẩn KHBD Bài 12 với bộ đếm ngược 4 phút (20 giây/câu như thi trên lớp), các đáp án nhiễu gần giống nhau kèm phản hồi riêng từng lựa chọn và Câu 12 “Ngôi sao hi vọng” về kiểm duyệt mã AI & bảo vệ số CCCD.',
             quizQuestions: [
               {
                 id: 'dt-q1',
-                question: 'Câu 1: Thẻ HTML nào dùng để tạo biểu mẫu?',
-                options: ['<table>', '<form>', '<input>', '<label>'],
+                question: 'Câu 1: Cặp thẻ HTML nào dùng để khai báo và bao bọc toàn bộ một biểu mẫu web?',
+                options: ['<fieldset>', '<form>', '<input>', '<frame>'],
                 correctAnswer: 1,
+                optionFeedback: [
+                  '<fieldset> chỉ dùng để vẽ khung nhóm các trường con ở BÊN TRONG biểu mẫu, không thay thế thẻ tạo biểu mẫu.',
+                  'Chính xác! Cặp thẻ <form>...</form> định nghĩa toàn bộ biểu mẫu web và nơi nhận dữ liệu (action).',
+                  '<input> là thẻ đơn tạo từng ô nhập/nút bấm bên trong biểu mẫu chứ không phải thẻ bao toàn bộ biểu mẫu.',
+                  '<frame> (hoặc <iframe>) dùng để nhúng khung trang web, rất dễ nhầm mặt chữ với <form>!'
+                ],
                 explanation: 'Thẻ <form>...</form> dùng để tạo biểu mẫu web (SGK tr.67).'
               },
               {
                 id: 'dt-q2',
-                question: 'Câu 2: Kiểu input nào dùng để nhập mật khẩu?',
-                options: ['text', 'hidden', 'textarea', 'password'],
+                question: 'Câu 2: Để tạo trường nhập mật khẩu hiển thị ẩn kí tự bằng dấu chấm (•••), ta dùng giá trị type nào trong thẻ <input>?',
+                options: ['text', 'hidden', 'secret', 'password'],
                 correctAnswer: 3,
+                optionFeedback: [
+                  'type="text" hiển thị rõ toàn bộ kí tự người dùng gõ trên màn hình, không che mật khẩu.',
+                  'Rất dễ nhầm! type="hidden" làm ẩn hoàn toàn cả ô nhập khỏi màn hình (người dùng không thấy ô để gõ).',
+                  'Trong chuẩn HTML không có kiểu type="secret" — trình duyệt sẽ hiểu nhầm về ô text thông thường.',
+                  'Chính xác! Theo Bảng 12.1 (SGK tr.68), type="password" tạo ô nhập mật khẩu che kí tự thành dấu chấm.'
+                ],
                 explanation: 'type="password" dùng để nhập mật khẩu, kí tự hiển thị ẩn bằng dấu chấm (Bảng 12.1 – SGK tr.68).'
               },
               {
                 id: 'dt-q3',
-                question: 'Câu 3: Kiểu radio có đặc điểm gì?',
+                question: 'Câu 3: Phát biểu nào mô tả CHÍNH XÁC nhất đặc điểm hoạt động của ô chọn kiểu radio trong HTML?',
                 options: [
-                  'Chọn được nhiều đáp án',
-                  'Dùng để tải tệp',
-                  'Chỉ chọn được một đáp án trong cùng một nhóm',
-                  'Dùng nhập văn bản'
+                  'Cho phép chọn nhiều giá trị cùng lúc khi các ô có chung một thuộc tính name',
+                  'Tự động chỉ cho chọn một giá trị duy nhất trên toàn bộ biểu mẫu bất kể name giống hay khác nhau',
+                  'Chỉ cho phép chọn một giá trị duy nhất trong nhóm các ô có cùng thuộc tính name',
+                  'Chỉ cho phép chọn một giá trị duy nhất trong nhóm các ô có cùng thuộc tính id'
                 ],
                 correctAnswer: 2,
+                optionFeedback: [
+                  'Đó là đặc điểm của checkbox, không phải radio! Radio cùng name sẽ loại trừ lẫn nhau.',
+                  'Rất nhiều bạn nhầm ý này! Nếu đặt khác name, hai ô radio trong cùng <form> vẫn chọn được cả hai cùng lúc.',
+                  'Chính xác! Các ô radio chỉ tạo thành một nhóm loại trừ nhau khi có cùng giá trị thuộc tính name.',
+                  'Cẩn thận bẫy id vs name! Trong HTML, mỗi phần tử phải có id duy nhất; việc gom nhóm radio dựa vào thuộc tính name.'
+                ],
                 explanation: 'Các ô radio có cùng thuộc tính name tạo thành một nhóm và chỉ cho chọn duy nhất 1 giá trị (SGK tr.68).'
               },
               {
                 id: 'dt-q4',
-                question: 'Câu 4: Phần tử HTML nào dùng để nhập văn bản nhiều dòng?',
-                options: ['<textarea>', '<input>', '<select>', '<option>'],
+                question: 'Câu 4: Phần tử HTML chuẩn nào dùng để tạo vùng nhập văn bản nhiều dòng (như Ghi chú, Ý kiến đóng góp)?',
+                options: ['<textarea>', '<input type="textarea">', '<input type="multiline">', '<textblock>'],
                 correctAnswer: 0,
+                optionFeedback: [
+                  'Chính xác! <textarea>...</textarea> là phần tử riêng dùng để nhập văn bản nhiều dòng (SGK tr.68).',
+                  'Rất hay bị nhầm! textarea là một thẻ riêng biệt (<textarea>), KHÔNG phải một giá trị type của <input>.',
+                  'Chuẩn HTML không có type="multiline" cho thẻ <input>; muốn nhập nhiều dòng phải dùng <textarea>.',
+                  'Chuẩn HTML không có thẻ <textblock>; phần tử chuẩn để nhập văn bản nhiều dòng là <textarea>.'
+                ],
                 explanation: 'Phần tử <textarea> dùng để nhập đoạn văn bản nhiều dòng như ghi chú, ý kiến đóng góp (SGK tr.68).'
               },
               {
                 id: 'dt-q5',
-                question: 'Câu 5: Cho đoạn mã <label for="email">Email</label><input id="email" type="email">. Vai trò của for="email" là gì?',
+                question: 'Câu 5: Cho đoạn mã <label for="email">Email</label><input id="email" type="email">. Vai trò chính xác của for="email" là gì?',
                 options: [
-                  'Đặt tên cho biểu mẫu',
-                  'Đặt kiểu dữ liệu của ô nhập',
-                  'Gửi dữ liệu đến máy chủ',
-                  'Liên kết nhãn với ô nhập có id="email"'
+                  'Quy định tên trường dữ liệu gửi về máy chủ là “email” thay cho thuộc tính name',
+                  'Yêu cầu trình duyệt kiểm tra chuỗi người dùng nhập vào phải chứa kí tự @',
+                  'Hiển thị dòng chữ gợi ý mờ “email” nằm sẵn bên trong ô nhập liệu',
+                  'Liên kết trực tiếp nhãn với ô nhập có thuộc tính id="email" tương ứng'
                 ],
                 correctAnswer: 3,
+                optionFeedback: [
+                  'Đặt tên trường gửi về máy chủ là việc của thuộc tính name trên <input>, không phải for của <label>.',
+                  'Kiểm tra định dạng email có kí tự @ là việc của thuộc tính type="email" trên <input>, không phải for.',
+                  'Hiển thị chữ gợi ý mờ trong ô nhập là vai trò của thuộc tính placeholder, không phải for.',
+                  'Chính xác! Thuộc tính for="email" của <label> liên kết nhãn với phần tử có id="email" để nháy vào nhãn là đưa con trỏ vào ô.'
+                ],
                 explanation: 'Thuộc tính for của <label> liên kết nhãn với ô nhập có id tương ứng — nháy vào nhãn sẽ đưa con trỏ vào ô (SGK tr.67–68).'
               },
               {
                 id: 'dt-q6',
-                question: 'Câu 6: Thuộc tính action của thẻ <form> xác định điều gì?',
+                question: 'Câu 6: Thuộc tính action của thẻ <form> xác định thông tin gì?',
                 options: [
-                  'Nơi dữ liệu biểu mẫu được gửi đến',
-                  'Kiểu dữ liệu của ô nhập',
-                  'Chữ hiển thị trên nút bấm',
-                  'Số dòng của vùng nhập văn bản'
+                  'Địa chỉ trang hoặc chương trình xử lí nơi dữ liệu biểu mẫu được gửi đến',
+                  'Phương thức truyền gói tin dữ liệu biểu mẫu lên máy chủ (GET hoặc POST)',
+                  'Hành động JavaScript tự động chạy khi người dùng bấm vào một nút type="button"',
+                  'Quy tắc kiểm tra tính hợp lệ của từng ô dữ liệu trước khi cho phép gửi đi'
                 ],
                 correctAnswer: 0,
+                optionFeedback: [
+                  'Chính xác! Thuộc tính action chỉ định URL hoặc tệp script tiếp nhận và xử lí dữ liệu biểu mẫu khi gửi.',
+                  'Rất dễ nhầm giữa action và method! GET/POST được khai báo trong thuộc tính method, còn nơi nhận là action.',
+                  'Gắn hành động cho nút bấm thông thường dùng thuộc tính sự kiện (như onclick), không phải action của <form>.',
+                  'Kiểm tra hợp lệ dữ liệu dùng type và các thuộc tính như required, min, max — không phải action.'
+                ],
                 explanation: 'Thuộc tính action chỉ định địa chỉ/chương trình tiếp nhận và xử lí dữ liệu biểu mẫu khi gửi đi (SGK tr.67).'
               },
               {
                 id: 'dt-q7',
-                question: 'Câu 7: Thuộc tính nào của thẻ <input> dùng để tham chiếu tới dữ liệu khi tính toán hay gửi tới máy chủ?',
-                options: ['id', 'name', 'type', 'for'],
+                question: 'Câu 7: Thuộc tính nào của thẻ <input> dùng để định danh và tham chiếu tới dữ liệu khi tính toán hay gửi tới máy chủ?',
+                options: ['id', 'name', 'value', 'for'],
                 correctAnswer: 1,
+                optionFeedback: [
+                  'Cực kỳ dễ nhầm! id dùng để định danh phần tử trong trang HTML (gắn label for, CSS), KHÔNG dùng làm khóa gửi dữ liệu.',
+                  'Chính xác! Thuộc tính name đặt tên cho dữ liệu của ô nhập; nếu thiếu name, ô đó sẽ không được gửi đi.',
+                  'value chứa giá trị/nội dung gửi đi của phần tử chứ không phải tên tham chiếu của trường dữ liệu.',
+                  'for là thuộc tính của thẻ <label>, không dùng trên thẻ <input>.'
+                ],
                 explanation: 'Thuộc tính name dùng để định danh dữ liệu của ô nhập khi gửi tới máy chủ hoặc xử lí (SGK tr.68).'
               },
               {
                 id: 'dt-q8',
-                question: 'Câu 8: Phần tử nào dùng để nhóm các phần tử có liên quan trong biểu mẫu bằng một hình chữ nhật bao quanh?',
-                options: ['<legend>', '<label>', '<fieldset>', '<select>'],
+                question: 'Câu 8: Phần tử HTML nào dùng để nhóm các phần tử có liên quan trong biểu mẫu bằng một khung hình chữ nhật bao quanh?',
+                options: ['<legend>', '<formgroup>', '<fieldset>', '<optgroup>'],
                 correctAnswer: 2,
+                optionFeedback: [
+                  'Rất hay bị đảo ngược cặp thẻ! <legend> chỉ đặt tiêu đề chữ nằm trên viền khung, còn khung bao quanh là <fieldset>.',
+                  'Chuẩn HTML không có thẻ <formgroup>; phần tử chuẩn để nhóm các trường trong biểu mẫu là <fieldset>.',
+                  'Chính xác! <fieldset> tạo khung hình chữ nhật gom nhóm các phần tử liên quan, đi kèm <legend> làm tiêu đề nhóm.',
+                  '<optgroup> chỉ dùng để gom nhóm các thẻ <option> bên trong danh sách thả xuống <select>.'
+                ],
                 explanation: '<fieldset> dùng để nhóm các phần tử liên quan bằng khung hình chữ nhật; <legend> đặt tiêu đề cho khung đó (SGK tr.68).'
               },
               {
                 id: 'dt-q9',
-                question: 'Câu 9: Hai ô radio “Nam”, “Nữ” có name="gt1" và name="gt2". Khi chạy trên trình duyệt sẽ thấy gì?',
+                question: 'Câu 9: Hai ô radio “Nam” và “Nữ” trong cùng một <form> lần lượt có name="gt1" và name="gt2". Khi chạy trên trình duyệt sẽ xảy ra hiện tượng gì?',
                 options: [
-                  'Chọn được cả hai ô cùng lúc',
-                  'Không chọn được ô nào',
-                  'Chỉ chọn được một ô',
-                  'Trình duyệt báo lỗi'
+                  'Người dùng có thể bấm chọn đồng thời cả hai ô “Nam” và “Nữ” cùng lúc',
+                  'Người dùng chỉ chọn được tối đa một ô vì hai ô nằm cạnh nhau trong cùng thẻ <form>',
+                  'Người dùng chỉ chọn được ô “Nam”, còn ô “Nữ” bị khóa do khác tên nhóm gt1',
+                  'Trình duyệt hiện cảnh báo lỗi cú pháp HTML và không cho gửi biểu mẫu'
                 ],
                 correctAnswer: 0,
+                optionFeedback: [
+                  'Chính xác! Do gt1 và gt2 khác nhau nên hai ô thuộc hai nhóm radio độc lập, chọn được cả hai cùng lúc.',
+                  'Ngộ nhận kinh điển! Nằm chung <form> không làm radio tự loại trừ nhau — phải đặt CÙNG giá trị name (VD: name="gt").',
+                  'Trình duyệt không khóa ô thứ hai; cả hai ô radio đều bấm chọn bình thường.',
+                  'Trình duyệt không báo lỗi HTML trong tình huống này nên lỗi chỉ lộ ra khi chạy thử!'
+                ],
                 explanation: 'Hai ô radio khác giá trị name nên thuộc 2 nhóm độc lập, trình duyệt cho phép chọn cả hai ô cùng lúc.'
               },
               {
                 id: 'dt-q10',
-                question: 'Câu 10: Thu thập “Sở thích: Bóng đá, Cờ vua, Âm nhạc (được chọn nhiều)” nên dùng phần tử nào?',
+                question: 'Câu 10: Để thu thập mục “Sở thích: Bóng đá, Cờ vua, Âm nhạc (được phép chọn nhiều)”, cách thiết kế nào chuẩn nhất?',
                 options: [
-                  'Ba ô radio cùng name',
-                  'Ba ô checkbox cùng name',
-                  'Một vùng textarea',
-                  'Một ô input kiểu password'
+                  'Dùng ba ô input kiểu radio đặt khác thuộc tính name để chọn được nhiều mục cùng lúc',
+                  'Dùng ba ô input kiểu checkbox có cùng thuộc tính name và giá trị value riêng cho từng sở thích',
+                  'Dùng một thẻ <select> mặc định kèm ba thẻ <option> lồng bên trong',
+                  'Dùng ba ô input kiểu radio có cùng thuộc tính name và khác thuộc tính id'
                 ],
                 correctAnswer: 1,
-                explanation: 'Checkbox cho phép chọn nhiều mục cùng lúc trong nhóm; radio chỉ cho chọn duy nhất 1 mục.'
+                optionFeedback: [
+                  'Bẫy rất tinh vi! Radio khác name tuy chọn được nhiều nhưng một khi đã bấm thì KHÔNG thể bấm lại để bỏ chọn, sai chuẩn giao diện.',
+                  'Chính xác! Checkbox được thiết kế riêng cho lựa chọn nhiều mục (bật/tắt độc lập từng ô), mỗi ô có value rõ ràng.',
+                  'Thẻ <select> mặc định (không có multiple) chỉ cho phép chọn duy nhất 1 mục trong danh sách thả xuống.',
+                  'Ba ô radio cùng name chỉ cho phép chọn duy nhất 1 sở thích, không đáp ứng yêu cầu chọn nhiều.'
+                ],
+                explanation: 'Checkbox cho phép chọn nhiều mục cùng lúc và bật/tắt độc lập; radio chỉ dành cho chọn duy nhất 1 mục.'
               },
               {
                 id: 'dt-q11',
-                question: 'Câu 11: Muốn tạo nút cho phép người dùng chọn tệp và tải lên máy chủ, ta dùng input có type nào?',
-                options: ['submit', 'button', 'text', 'file'],
+                question: 'Câu 11: Muốn tạo nút cho phép người dùng chọn tệp từ thiết bị để tải lên máy chủ, ta dùng thẻ <input> có type nào?',
+                options: ['submit', 'upload', 'attachment', 'file'],
                 correctAnswer: 3,
+                optionFeedback: [
+                  'type="submit" chỉ tạo nút gửi toàn bộ biểu mẫu, không mở cửa sổ chọn tệp trên máy tính.',
+                  'Rất dễ nhầm theo nghĩa tiếng Anh! Chuẩn HTML không có type="upload" mà dùng type="file".',
+                  'Chuẩn HTML không có type="attachment"; giá trị đúng trong Bảng 12.1 là type="file".',
+                  'Chính xác! Theo Bảng 12.1 (SGK tr.68), type="file" tạo nút chọn tệp để tải lên máy chủ.'
+                ],
                 explanation: 'Theo Bảng 12.1 (SGK tr.68): type="file" tạo nút chọn tệp từ thiết bị để tải lên máy chủ.'
               },
               {
                 id: 'dt-q12',
-                question: 'Câu 12 (Ngôi sao hi vọng): Khi dùng AI gợi ý mã cho biểu mẫu đăng kí CLB, AI thêm ô nhập số CCCD không cần thiết. Em nên làm gì?',
+                question: 'Câu 12 (Ngôi sao hi vọng): Khi nhờ AI gợi ý mã biểu mẫu đăng kí CLB học sinh, AI tự thêm ô nhập số CCCD không cần thiết. Cách xử lí đúng nhất là gì?',
                 options: [
-                  'Đưa lên trang web ngay vì mã do AI viết',
-                  'Nhập số CCCD thật của bạn vào AI để nhờ kiểm tra',
-                  'Kiểm tra lại, bỏ ô không cần thiết, chạy thử rồi mới dùng',
-                  'Xóa hết và không bao giờ dùng AI'
+                  'Giữ nguyên ô nhập số CCCD vì AI tạo sẵn để ban chủ nhiệm CLB dễ xác minh danh tính thành viên',
+                  'Nhập thử số CCCD thật của một thành viên vào công cụ AI để kiểm tra biểu mẫu có nhận đủ 12 số không',
+                  'Kiểm duyệt lại mã, xóa bỏ ô số CCCD không cần thiết, chạy thử kiểm chứng trên trình duyệt rồi mới sử dụng',
+                  'Giữ lại ô số CCCD nhưng đổi sang type="password" để che thành dấu chấm là bảo đảm an toàn dữ liệu'
                 ],
                 correctAnswer: 2,
+                optionFeedback: [
+                  'Không nên tin tuyệt đối vào mã do AI sinh ra! Biểu mẫu đăng kí CLB học sinh không cần thu thập số CCCD (dữ liệu định danh nhạy cảm).',
+                  'Tuyệt đối KHÔNG nhập số CCCD thật hay dữ liệu cá nhân thật của mình/bạn bè vào công cụ AI công cộng!',
+                  'Chính xác! Người thiết kế phải làm chủ và kiểm duyệt mã AI: loại bỏ trường thu thập thừa dữ liệu nhạy cảm, tự chạy thử rồi mới triển khai (4.2.NC1a).',
+                  'Bẫy rất dễ mắc! type="password" chỉ che hiển thị trên màn hình chứ vẫn thu thập và gửi số CCCD đi — nguyên tắc quyền riêng tư là KHÔNG thu thập dữ liệu không cần thiết ngay từ đầu.'
+                ],
                 explanation: 'Phải kiểm duyệt mã do AI gợi ý: lược bỏ các trường thu thập dữ liệu nhạy cảm không cần thiết (số CCCD), chạy thử kiểm chứng rồi mới sử dụng, và tuyệt đối không nhập dữ liệu cá nhân thật vào AI (4.2.NC1a).'
               }
             ]
@@ -1897,12 +1969,12 @@ function buildTin12B12Course() {
         name: 'Phong_Thi_Nghiem_Bieu_Mau_A23.html',
         filename: 'a23-phong-thi-nghiem-bieu-mau.html',
         url: '/a23-phong-thi-nghiem-bieu-mau.html',
-        size: '48 KB',
+        size: '84 KB',
         mimetype: 'text/html',
         fileType: 'code',
         folder: 'Bài 2 - Hoạt động 2.2 (A2.3)',
         moduleId: 'tin12-mod-2',
-        description: 'Học liệu tương tác HTML5 độc lập (chạy trực tiếp hoặc tải về chạy offline không cần Internet) — Bài A2.3 Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích.',
+        description: 'Học liệu tương tác HTML5 độc lập có đồng hồ đếm ngược 20 phút & font tiếng Việt chuẩn (chạy trực tiếp hoặc tải về chạy offline) — Bài A2.3 Phòng thí nghiệm Biểu mẫu.',
         uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
         uploadedAt: '27/11/2026'
       }
@@ -1911,7 +1983,7 @@ function buildTin12B12Course() {
       {
         id: 'anc-tin12-welcome',
         title: 'Hướng dẫn học tập Bài 12: Tạo biểu mẫu & Học liệu tương tác A2.3',
-        content: 'Chào mừng các em đến với học phần Tin học 12 KNTT – Bài 12: Tạo biểu mẫu.\n• Sau Tiết 1 trên lớp, các em vào Mô-đun 2 mở “🔬 Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích” (15–20 phút, không đếm giờ, có nút tải chạy offline) rồi nộp Phiếu kết quả .txt.\n• Lưu ý an toàn thông tin: Học liệu A2.3 không thu thập dữ liệu cá nhân; trong suốt Bài 12 các em không nhập số CCCD hay mật khẩu thật vào AI hoặc biểu mẫu mẫu.',
+        content: 'Chào mừng các em đến với học phần Tin học 12 KNTT – Bài 12: Tạo biểu mẫu.\n• Sau Tiết 1 trên lớp, các em vào Mô-đun 2 mở “🔬 Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích” (đồng hồ đếm ngược chuẩn 20 phút, tùy chỉnh 10–30 phút, có tải chạy offline) rồi nộp Phiếu kết quả .txt.\n• Các đề trắc nghiệm đều có bộ đếm ngược thời gian, phương án nhiễu sát thực tế và phản hồi sư phạm riêng cho từng lựa chọn sau khi nộp bài.\n• Lưu ý an toàn thông tin: Học liệu A2.3 không thu thập dữ liệu cá nhân; trong suốt Bài 12 các em không nhập số CCCD hay mật khẩu thật vào AI hoặc biểu mẫu mẫu.',
         author: 'Phan Phi Phú',
         createdAt: '27/11/2026',
         isImportant: true
@@ -1921,28 +1993,57 @@ function buildTin12B12Course() {
   };
 }
 
-// Khởi tạo 1 lần khóa học thực tế TIN12-B12 (nếu chưa từng seed và chưa tồn tại). Không bao giờ ghi đè chỉnh sửa của giáo viên hay tự tạo lại sau khi quản trị viên chủ động xóa.
+const TIN12_CONTENT_REVISION = 'v2-distractors-timer';
+
+// Cập nhật nâng cấp 1 lần nội dung 2 bài quiz (đáp án nhiễu cao + đếm giờ + phản hồi từng phương án) cho TIN12-B12 nếu đang ở bản v1, giữ nguyên danh sách học sinh & điểm cũ
+function applyTin12RevisionV2(existingCourse, freshCourse) {
+  const freshActs = new Map();
+  (freshCourse.modules || []).forEach(m => (m.activities || []).forEach(a => freshActs.set(a.id, a)));
+  let changed = false;
+  existingCourse.modules = (existingCourse.modules || []).map(m => ({
+    ...m,
+    activities: (m.activities || []).map(a => {
+      if ((a.id === 'tin12-act-2-2' || a.id === 'tin12-act-3-1') && freshActs.has(a.id)) {
+        changed = true;
+        return freshActs.get(a.id);
+      }
+      return a;
+    })
+  }));
+  if (Array.isArray(freshCourse.announcements) && freshCourse.announcements.length > 0) {
+    existingCourse.announcements = freshCourse.announcements;
+    changed = true;
+  }
+  return changed;
+}
+
+// Khởi tạo 1 lần khóa học thực tế TIN12-B12 (nếu chưa từng seed và chưa tồn tại) và tự nâng cấp 1 lần lên bản v2-distractors-timer.
 async function ensureTin12B12Course() {
   const tin12 = buildTin12B12Course();
   if (isMongoConnected) {
     try {
       const flagDoc = await SettingModel.findOne({ key: 'seededTin12B12' }).lean();
-      const existing = await CourseModel.findOne({ $or: [{ id: 'TIN12-B12' }, { code: 'TIN12-B12' }] }).lean();
+      const existing = await CourseModel.findOne({ $or: [{ id: 'TIN12-B12' }, { code: 'TIN12-B12' }] });
       if (existing) {
-        if (!flagDoc) {
+        const curRev = flagDoc?.value?.revision || '';
+        if (curRev !== TIN12_CONTENT_REVISION) {
+          applyTin12RevisionV2(existing, tin12);
+          existing.markModified('modules');
+          existing.markModified('announcements');
+          await existing.save();
           await SettingModel.findOneAndUpdate(
             { key: 'seededTin12B12' },
-            { $set: { value: { seeded: true }, updatedAt: new Date().toISOString() } },
+            { $set: { value: { seeded: true, revision: TIN12_CONTENT_REVISION }, updatedAt: new Date().toISOString() } },
             { upsert: true }
           );
         }
-        return existing;
+        return existing.toObject();
       }
       if (flagDoc?.value?.seeded) return null;
       const created = await CourseModel.create(tin12);
       await SettingModel.findOneAndUpdate(
         { key: 'seededTin12B12' },
-        { $set: { value: { seeded: true }, updatedAt: new Date().toISOString() } },
+        { $set: { value: { seeded: true, revision: TIN12_CONTENT_REVISION }, updatedAt: new Date().toISOString() } },
         { upsert: true }
       );
       return created.toObject();
@@ -1956,8 +2057,10 @@ async function ensureTin12B12Course() {
     db.settings = db.settings || {};
     const existing = db.courses.find(c => c.id === 'TIN12-B12' || c.code === 'TIN12-B12');
     if (existing) {
-      if (!db.settings.seededTin12B12) {
+      if (db.settings.tin12Revision !== TIN12_CONTENT_REVISION) {
+        applyTin12RevisionV2(existing, tin12);
         db.settings.seededTin12B12 = true;
+        db.settings.tin12Revision = TIN12_CONTENT_REVISION;
         writeDb(db);
       }
       return existing;
@@ -1965,6 +2068,7 @@ async function ensureTin12B12Course() {
     if (db.settings.seededTin12B12) return null;
     db.courses.push(tin12);
     db.settings.seededTin12B12 = true;
+    db.settings.tin12Revision = TIN12_CONTENT_REVISION;
     writeDb(db);
     return tin12;
   }
