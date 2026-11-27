@@ -1391,7 +1391,7 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v12-khbd-khop-lms';
+const AI6_BAI12_REVISION = 'v13-bai2-trac-nghiem-2b-moi';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1719,61 +1719,61 @@ function buildAi6Bai12SeedData() {
         passScore: 7,
         timeLimitMinutes: 8,
         shuffleQuestions: false,
-        description: 'Gồm 3 câu hỏi mốc neo chặn trong KHBD Bài 2 và 2 câu kiểm tra SGK Bài 2 (ngưỡng đạt ≥ 7/10 điểm tương đương 70/100 điểm theo KHBD). Các phương án nhiễu gần giống nhau kèm phản hồi riêng từng lựa chọn.',
+        description: 'Bài trắc nghiệm củng cố Hoạt động 2B (5 câu, ngưỡng đạt ≥ 7/10 điểm): 3 lợi ích của AI, công thức câu lệnh 3 thành phần, Cẩm nang 4 KHÔNG và 2 câu kiểm tra SGK Bài 2. Câu hỏi khác với 3 câu neo chặn trong video. Sau khi nộp bài, em nhận phản hồi riêng cho từng phương án.',
         quizQuestions: [
           {
-            id: 'ai6-b2-q1',
-            question: 'Câu 1 (Mốc neo chặn 1 – KHBD Bài 2): So sánh giữa câu lệnh “Viết về măng” và “Viết 3 câu bán măng sạch”, vì sao câu lệnh thứ hai giúp AI trả lời hữu ích hơn?',
+            id: 'ai6-b2-q1b',
+            question: 'Câu 1 (SGK Bài 2 – Mục 1): Bạn Khoa dùng công cụ AI để luyện phát âm tiếng Anh và tự sửa lỗi chính tả trong bài viết. Đây là lợi ích nào của AI trong học tập?',
             options: [
-              'Vì câu lệnh thứ hai ngắn gọn hơn và sử dụng nhiều dấu câu cảm thán để thu hút AI',
-              'Vì câu lệnh thứ hai giao việc rõ ràng, nêu cụ thể số lượng (3 câu) và mục đích sử dụng thay vì hỏi chung chung',
-              'Vì câu lệnh thứ hai dùng từ khóa sản phẩm cụ thể nên tốc độ truyền mạng tới máy chủ AI nhanh hơn',
-              'Vì các công cụ AI chỉ phản hồi chính xác khi câu lệnh bắt đầu bằng động từ “Viết” kèm chữ số'
+              'Hỗ trợ học hỏi kiến thức mới',
+              'Rèn luyện kĩ năng học tập',
+              'Mở rộng hiểu biết và tư duy',
+              'Làm bài tập thay cho học sinh'
             ],
             correctAnswer: 1,
             optionFeedback: [
-              'Câu lệnh thứ hai thực tế còn dài hơn câu lệnh thứ nhất và không hề phụ thuộc vào dấu cảm thán.',
-              'Chính xác! AI phản hồi dựa trên thông tin đầu vào; nêu rõ mục đích và định dạng/số lượng sẽ cho kết quả sát nhu cầu.',
-              'Từ khóa trong câu lệnh không làm thay đổi tốc độ đường truyền mạng, mà giúp AI thu hẹp ngữ cảnh xử lí.',
-              'AI hiểu nhiều cách đặt câu lệnh khác nhau chứ không bắt buộc phải bắt đầu bằng từ “Viết” kèm chữ số.'
+              'Học kiến thức mới là khi AI giải thích khái niệm khó bằng ví dụ dễ hiểu; ở đây Khoa đang luyện tập kĩ năng.',
+              'Chính xác! Luyện phát âm, sửa lỗi chính tả, tự tạo câu hỏi ôn tập đều là rèn luyện kĩ năng học tập.',
+              'Mở rộng hiểu biết là khám phá thêm kiến thức Khoa học, Lịch sử, Nghệ thuật…; ở đây Khoa đang luyện kĩ năng.',
+              'AI không làm bài thay học sinh; Khoa vẫn tự luyện tập và tự sửa bài của mình.'
             ],
-            explanation: 'Câu lệnh (Prompt) càng nêu cụ thể nhiệm vụ, mục đích và định dạng trình bày thì phản hồi của AI càng chính xác (UNESCO 2023).'
+            explanation: 'Ba lợi ích của AI khi dùng đúng cách: hỗ trợ học kiến thức mới; rèn luyện kĩ năng học tập (luyện phát âm, sửa chính tả, tạo câu hỏi ôn tập); mở rộng hiểu biết và tư duy.'
           },
           {
-            id: 'ai6-b2-q2',
-            question: 'Câu 2 (Mốc neo chặn 2 – KHBD Bài 2): Công thức gồm 3 thành phần cốt lõi để viết một câu lệnh (Prompt) hiệu quả khi học tập với AI là gì?',
+            id: 'ai6-b2-q2b',
+            question: 'Câu 2 (Công thức câu lệnh): Trong câu lệnh “Em là học sinh lớp 6. Hãy đóng vai giáo viên Toán. Giải thích phân số là gì trong 3 câu kèm 1 ví dụ.”, phần “Hãy đóng vai giáo viên Toán” là thành phần nào?',
             options: [
-              'Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu và định dạng cụ thể',
-              'Bối cảnh (Ngữ cảnh) + Họ tên đầy đủ của người học + Yêu cầu cụ thể',
-              'Tên công cụ AI + Số lượng từ tối đa + Lời cảm ơn cuối câu lệnh',
-              'Chủ đề môn học + Nguồn sách giáo khoa + Mật khẩu tài khoản học tập'
-            ],
-            correctAnswer: 0,
-            optionFeedback: [
-              'Chính xác! Đủ 3 mảnh ghép: (1) Bối cảnh/Ngữ cảnh người học + (2) Vai trò của AI + (3) Yêu cầu & định dạng cụ thể.',
-              'Cẩn thận vi phạm Cẩm nang 4 KHÔNG! Tuyệt đối KHÔNG đưa họ tên đầy đủ hay thông tin cá nhân vào câu lệnh AI.',
-              'Ghi tên công cụ AI hay lời cảm ơn không giúp xác định vai trò chuyên môn và bối cảnh người học.',
-              'Tuyệt đối KHÔNG bao giờ nhập mật khẩu tài khoản vào ô trò chuyện AI!'
-            ],
-            explanation: 'Công thức chuẩn trong Infographic “Bí kíp giao tiếp với AI” (Bài 2): Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu và định dạng cụ thể.'
-          },
-          {
-            id: 'ai6-b2-q3',
-            question: 'Câu 3 (Mốc neo chặn 3 – KHBD Bài 2): Trong câu lệnh: “Tôi là nông dân mới trồng sâm. Hãy đóng vai một chuyên gia nông nghiệp. Viết 3 gạch đầu dòng những lưu ý quan trọng nhất về tưới nước cho cây sâm 1 năm tuổi”, cụm từ nào thể hiện yếu tố BỐI CẢNH (Ngữ cảnh)?',
-            options: [
-              '“Hãy đóng vai một chuyên gia nông nghiệp”',
-              '“Tôi là nông dân mới trồng sâm”',
-              '“Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”',
-              '“về tưới nước cho cây sâm 1 năm tuổi”'
+              'Bối cảnh (Ngữ cảnh)',
+              'Vai trò của AI',
+              'Yêu cầu và định dạng cụ thể',
+              'Thông tin cá nhân của người học'
             ],
             correctAnswer: 1,
             optionFeedback: [
-              'Cụm “Hãy đóng vai một chuyên gia nông nghiệp” là yếu tố VAI TRÒ của AI, không phải bối cảnh người dùng.',
-              'Chính xác! “Tôi là nông dân mới trồng sâm” cho biết đối tượng và hoàn cảnh thực tế để AI điều chỉnh mức độ giải thích phù hợp.',
-              '“Viết 3 gạch đầu dòng...” là yếu tố ĐỊNH DẠNG trình bày của yêu cầu.',
-              '“tưới nước cho cây sâm 1 năm tuổi” là nội dung cụ thể của NHIỆM VỤ cần thực hiện.'
+              'Bối cảnh là phần cho AI biết em là ai: “Em là học sinh lớp 6”.',
+              'Chính xác! Giao cho AI đóng vai ai (giáo viên, chuyên gia…) là thành phần Vai trò.',
+              'Yêu cầu và định dạng là phần “Giải thích phân số là gì trong 3 câu kèm 1 ví dụ”.',
+              'Câu lệnh này không có thông tin cá nhân nào – đúng với Cẩm nang 4 KHÔNG.'
             ],
-            explanation: 'Yếu tố Bối cảnh (Ngữ cảnh) xác định em là ai / đối tượng người học nào và đang trong hoàn cảnh nào.'
+            explanation: 'Câu lệnh rõ ràng gồm 3 thành phần: Bối cảnh (em là ai) + Vai trò của AI (đóng vai ai) + Yêu cầu và định dạng cụ thể (làm gì, bao nhiêu câu).'
+          },
+          {
+            id: 'ai6-b2-q3b',
+            question: 'Câu 3 (Cẩm nang 4 KHÔNG): Khi trò chuyện với công cụ AI để học tập, thông tin nào sau đây em KHÔNG được nhập vào ô trò chuyện?',
+            options: [
+              '“Em là học sinh lớp 6.”',
+              'Tên bài học em cần ôn tập',
+              'Mật khẩu tài khoản học tập hoặc thư điện tử của em',
+              'Số câu em muốn AI trả lời'
+            ],
+            correctAnswer: 2,
+            optionFeedback: [
+              'Đây là thông tin học tập chung, không làm lộ danh tính của em, nên được phép nhập.',
+              'Tên bài học là thông tin học tập chung, giúp AI trả lời đúng nội dung.',
+              'Chính xác! KHÔNG nhập mật khẩu tài khoản học tập, thư điện tử hoặc mạng xã hội vào ô trò chuyện AI.',
+              'Số câu muốn AI trả lời là yêu cầu về định dạng, giúp câu lệnh rõ ràng hơn.'
+            ],
+            explanation: 'Cẩm nang 4 KHÔNG: không nhập họ tên và ngày sinh; không cung cấp số điện thoại, địa chỉ, tên trường lớp; không tải ảnh khuôn mặt hay bí mật gia đình; không nhập mật khẩu tài khoản.'
           },
           {
             id: 'ai6-b2-q4',
