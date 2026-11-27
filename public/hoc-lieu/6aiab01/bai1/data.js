@@ -5,7 +5,7 @@ export const bai1Module = {
   order: 1,
   title: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
   description: 'Thời lượng: 02 tiết (Tiết 1: Trực tuyến trên LMS – Mức Hiểu 6.A1.1 | Tiết 2: Trực tiếp tại lớp – Mức Vận dụng 6.A1.2).',
-  learningObjectives: '• (6.A1.1) Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; AI không tự sinh ra và không hoạt động độc lập; nêu ví dụ công cụ AI quen thuộc và vai trò con người (Dữ liệu – Thuật toán – Điều khiển).\n• (6.A1.2) Trình bày được vai trò của AI chỉ là công cụ hỗ trợ; con người luôn giám sát (Humans in the Loop / EU AI Act 2024), đưa ra quyết định cuối cùng và chịu trách nhiệm 100%.',
+  learningObjectives: '• (6.A1.1) Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; AI không tự sinh ra và không hoạt động độc lập với con người.\nNêu được ví dụ về một số công cụ AI quen thuộc trong đời sống hằng ngày và chỉ ra được vai trò của con người trong việc tạo ra chúng.\n• (6.A1.2) Trình bày được vai trò của AI chỉ là công cụ hỗ trợ hoạt động của con người; con người đưa ra quyết định cuối cùng và chịu trách nhiệm khi sử dụng AI.',
   ownerName: '',
   activities: [
     {
