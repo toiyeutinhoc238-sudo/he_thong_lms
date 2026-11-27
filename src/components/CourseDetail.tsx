@@ -1364,9 +1364,10 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                               )}
                             </div>
                             {m.learningObjectives ? (
-                              <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed bg-sky-50/50 p-2.5 rounded-xl border border-sky-100">
-                                <strong className="text-[#0374b5]">🎯 Mục tiêu: </strong>{m.learningObjectives}
-                              </p>
+                              <div className="text-xs text-slate-700 leading-relaxed bg-sky-50/60 p-3 rounded-xl border border-sky-100 space-y-1">
+                                <div className="font-extrabold text-[#0374b5] text-[11px] uppercase tracking-wider">Mục tiêu bài học</div>
+                                <p className="whitespace-pre-line">{m.learningObjectives}</p>
+                              </div>
                             ) : m.description ? (
                               <p className="text-xs text-slate-500 italic">{m.description}</p>
                             ) : null}

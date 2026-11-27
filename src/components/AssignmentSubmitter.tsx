@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Activity } from '../types';
 import { useApp } from '../context/AppContext';
 import api, { StudentSubmission, resolveBackendUrl } from '../services/api';
+import { FormattedContent } from './FormattedContent';
 import { 
   UploadCloud, 
   FileCheck, 
@@ -113,18 +114,19 @@ export const AssignmentSubmitter: React.FC<AssignmentSubmitterProps> = ({ activi
         </div>
 
         {/* Prompt */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">
             Yêu cầu bài tập (Đề bài)
           </h4>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
-            <p className="whitespace-pre-line font-medium">
-              {activity.assignmentPrompt || 'Vui lòng thực hiện bài làm theo đúng yêu cầu của giáo viên và nộp tệp hoặc nhập bài làm trực tiếp.'}
-            </p>
-            <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-200/60 flex items-center gap-2 flex-wrap">
-              <span>Định dạng hỗ trợ: <strong>.html, .txt, .py, .sb3 (Scratch), .ipynb, .pdf, .docx, .zip</strong></span>
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-4">
+            <FormattedContent
+              text={activity.assignmentPrompt}
+              fallback="Vui lòng thực hiện bài làm theo đúng yêu cầu của giáo viên và nộp tệp hoặc nhập bài làm trực tiếp."
+            />
+            <div className="text-xs text-slate-500 pt-3 border-t border-slate-200/70 flex items-center gap-2 flex-wrap">
+              <span>Định dạng hỗ trợ: <strong className="text-slate-700">.html, .txt, .py, .sb3 (Scratch), .ipynb, .pdf, .docx, .zip</strong></span>
               <span>•</span>
-              <span>Thang điểm: <strong>{activity.maxScore || 10} điểm</strong></span>
+              <span>Thang điểm: <strong className="text-slate-700">{activity.maxScore || 10} điểm</strong></span>
             </div>
           </div>
         </div>
