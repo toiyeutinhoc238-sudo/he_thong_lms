@@ -1388,7 +1388,7 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC BÀI 1 & BÀI 2 CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 2 thư mục BAI1/ và BAI2/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v2-clean-no-mock';
+const AI6_BAI12_REVISION = 'v3-clean-ui';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1403,13 +1403,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b1-act-1',
         moduleId: 'module-lesson-1',
-        title: '🔬 Bộ Học liệu số Tương tác Bài 1 (Study Guide, Infographic 1 & 2, Quiz kéo thả & Game “Người cầm lái thông thái”)',
+        title: 'Học liệu tương tác Bài 1: Nguồn gốc của AI và Quyền quyết định',
         type: 'document',
         durationMinutes: 45,
         isCompleted: false,
         isRequired: true,
         fileUrl: '/hoc-lieu/6aiab01/bai1/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác toàn diện cho Bài 1 (Tiết 1 Trực tuyến & Tiết 2 Trực tiếp): Sổ tay hướng dẫn 4 bước, Tình huống An–Minh–Khoa, Infographic “Hậu trường của AI” & “AI quanh ta”, Video tích hợp, Bài chốt chặn kéo thả và Game HTML5 “Người cầm lái thông thái – Con người trong vòng lặp”.'
+        description: 'Gói học liệu HTML5 tương tác Bài 1 (Tiết 1 Trực tuyến & Tiết 2 Trực tiếp): Hướng dẫn học tập 4 bước, Tình huống An–Minh–Khoa, Infographic 1 & 2, Video bài giảng, Bài kiểm tra kéo thả và Trò chơi Người cầm lái thông thái.'
       },
       {
         id: 'ai6-b1-act-2',
@@ -1419,7 +1419,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: '📘 SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem Infographic & Video 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\n🔗 KIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\n💬 TÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\n👉 Em hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
+        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem Infographic & Video 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\nKIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
       },
       {
         id: 'ai6-b1-act-3',
@@ -1581,13 +1581,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b2-act-1',
         moduleId: 'module-lesson-2',
-        title: '🔬 Bộ Học liệu số Tương tác Bài 2 (Study Guide, Infographic Bí kíp Prompt, Video tương tác 06:27, Cẩm nang 4 KHÔNG & Trạm luyện Prompt)',
+        title: 'Học liệu tương tác Bài 2: Lợi ích và Cách sử dụng công cụ AI phù hợp',
         type: 'document',
         durationMinutes: 45,
         isCompleted: false,
         isRequired: true,
         fileUrl: '/hoc-lieu/6aiab01/bai2/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác toàn diện cho Bài 2 (45 phút trực tuyến): Sổ tay hướng dẫn 4 bước, Tình huống An–Minh–Khoa (Hình 2.1), Infographic “Bí kíp giao tiếp với AI”, Bài giảng Video tương tác 06:27 có 3 mốc neo chặn chống tua nhanh, Poster Cẩm nang “4 KHÔNG” và Trạm luyện viết câu lệnh AI Lớp 6.'
+        description: 'Gói học liệu HTML5 tương tác Bài 2 (45 phút trực tuyến): Hướng dẫn học tập 4 bước, Tình huống An–Minh–Khoa (Hình 2.1), Infographic công thức câu lệnh, Video tương tác 06:27 có 3 mốc câu hỏi, Quy tắc 4 KHÔNG và Trạm luyện viết câu lệnh AI.'
       },
       {
         id: 'ai6-b2-act-2',
@@ -1597,7 +1597,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: '📘 SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Infographic & Video tương tác 15p (đạt ≥ 70/100đ) → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\n💬 CHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\n🔒 Lưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
+        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Infographic & Video tương tác 15p (đạt ≥ 70/100đ) → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\nCHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\nLưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
       },
       {
         id: 'ai6-b2-act-3',
@@ -2028,13 +2028,13 @@ function buildTin12B12Course() {
           {
             id: 'tin12-act-2-1',
             moduleId: 'tin12-mod-2',
-            title: '🔬 Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích (Học liệu tương tác HTML5 trực tiếp)',
+            title: 'Phòng thí nghiệm Biểu mẫu A2.3: Đoán – Chạy – Giải thích (Học liệu HTML5 trực tiếp)',
             type: 'document',
             durationMinutes: 20,
             isCompleted: false,
             isRequired: true,
             fileUrl: '/a23-phong-thi-nghiem-bieu-mau.html',
-            description: 'Học liệu tương tác 4 chặng (Đoán → Chạy → Giải thích → Thử nghiệm) bám sát SGK Tin học 12 KNTT tr.67–69. Có nút phóng to chữ (UDL), chạy offline 1 tệp HTML và tải phiếu kết quả (.txt) không thu thập dữ liệu cá nhân.'
+            description: 'Học liệu tương tác 4 chặng (Đoán → Chạy → Giải thích → Thử nghiệm) bám sát SGK Tin học 12 KNTT tr.67–69. Có nút phóng to chữ (UDL), bộ đếm thời gian 20 phút, chạy offline 1 tệp HTML và tải phiếu kết quả (.txt) không thu thập dữ liệu cá nhân.'
           },
           {
             id: 'tin12-act-2-2',
@@ -2549,9 +2549,9 @@ function buildTin12B12Course() {
   };
 }
 
-const TIN12_CONTENT_REVISION = 'v2-distractors-timer';
+const TIN12_CONTENT_REVISION = 'v3-clean-ui';
 
-// Cập nhật nâng cấp 1 lần nội dung 2 bài quiz (đáp án nhiễu cao + đếm giờ + phản hồi từng phương án) cho TIN12-B12 nếu đang ở bản v1, giữ nguyên danh sách học sinh & điểm cũ
+// Cập nhật nâng cấp 1 lần nội dung 2 bài quiz & tiêu đề tinh gọn cho TIN12-B12, giữ nguyên danh sách học sinh & điểm cũ
 function applyTin12RevisionV2(existingCourse, freshCourse) {
   const freshActs = new Map();
   (freshCourse.modules || []).forEach(m => (m.activities || []).forEach(a => freshActs.set(a.id, a)));
@@ -2559,7 +2559,7 @@ function applyTin12RevisionV2(existingCourse, freshCourse) {
   existingCourse.modules = (existingCourse.modules || []).map(m => ({
     ...m,
     activities: (m.activities || []).map(a => {
-      if ((a.id === 'tin12-act-2-2' || a.id === 'tin12-act-3-1') && freshActs.has(a.id)) {
+      if ((a.id === 'tin12-act-2-1' || a.id === 'tin12-act-2-2' || a.id === 'tin12-act-3-1') && freshActs.has(a.id)) {
         changed = true;
         return freshActs.get(a.id);
       }

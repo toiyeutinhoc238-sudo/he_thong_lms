@@ -812,7 +812,7 @@
           },
           {
             text: '<input type="button">Quên mật khẩu</input>',
-            fb: 'Dễ nhầm với cặp thẻ <button>...</button>! Thẻ <input> là thẻ đơn, không có thẻ đóng </input>; nhãn trên nút phải ghi bằng value="Quên mật khẩu".'
+            fb: 'Dễ nhầm với cặp thẻ <button>...</button>! Thẻ <input>là thẻ đơn, không có thẻ đóng </input>; nhãn trên nút phải ghi bằng value="Quên mật khẩu".'
           }
         ]
       },
@@ -823,7 +823,7 @@
         options: [
           {
             text: 'Chỉ ô Lớn được chọn, ô Nhỏ tự động bỏ chọn vì cả hai ô cùng nằm trong chung một thẻ <form>',
-            fb: 'Đây là ngộ nhận rất phổ biến! Đặt chung trong <form> là chưa đủ — radio chỉ tự bỏ chọn lẫn nhau khi có CÙNG giá trị thuộc tính name.'
+            fb: 'Đây là ngộ nhận rất phổ biến! Đặt chung trong <form>là chưa đủ — radio chỉ tự bỏ chọn lẫn nhau khi có CÙNG giá trị thuộc tính name.'
           },
           {
             text: 'Cả hai ô Nhỏ và Lớn cùng được chọn đồng thời và không tự loại trừ nhau khi bấm qua lại',
@@ -853,8 +853,8 @@
             fb: 'Chính xác! Khi thiếu value, trình duyệt gửi giá trị mặc định “on”, máy chủ không phân biệt được em chọn ô nào. Vì vậy mỗi radio/checkbox luôn cần có value.'
           },
           {
-            text: 'size = Nhỏ (trình duyệt tự lấy phần chữ bên trong thẻ <label for="nho">Nhỏ</label> để gửi đi)',
-            fb: 'Rất dễ nhầm! Chữ trong <label> chỉ để người dùng đọc trên giao diện, trình duyệt không gửi nội dung thẻ label làm dữ liệu của ô radio.'
+            text: 'size = Nhỏ (trình duyệt tự lấy phần chữ bên trong thẻ <label for="nho">Nhỏ</label>để gửi đi)',
+            fb: 'Rất dễ nhầm! Chữ trong <label>chỉ để người dùng đọc trên giao diện, trình duyệt không gửi nội dung thẻ label làm dữ liệu của ô radio.'
           },
           {
             text: 'size = (giá trị rỗng, vì trình duyệt chỉ gửi tên biến size mà không gắn kèm giá trị nào phía sau)',
@@ -903,7 +903,7 @@
         hints: [
           'Gợi ý tầng 1: Nháy chuột vào từng nhãn (“Họ tên:”, “Email:”, “Nhỏ”, “Lớn”): nhãn nào “không ăn”?',
           'Gợi ý tầng 2: So giá trị thuộc tính for của nhãn Email với thuộc tính id của ô nhập Email.',
-          'Đáp án (Tầng 3): Sửa <label for="mail"> thành <label for="email"> để khớp với id="email".'
+          'Đáp án (Tầng 3): Sửa <label for="mail">thành <label for="email">để khớp với id="email".'
         ]
       },
       {
@@ -991,7 +991,7 @@
         presetEl.value = String(state.timerDuration);
       }
 
-      const isCountdown = state.timerDuration > 0;
+      const isCountdown = state.timerDuration >0;
       const shownSeconds = isCountdown ? state.timerRemaining : state.timerElapsed;
       if (textEl) {
         const prefix = isCountdown ? '' : '+';
@@ -1041,10 +1041,10 @@
     if (window.__a23TimerInterval) clearInterval(window.__a23TimerInterval);
     window.__a23TimerInterval = setInterval(function() {
       if (!state.timerStarted || state.timerPaused) return;
-      if (state.view < 1 || state.view > 4) return;
+      if (state.view < 1 || state.view >4) return;
       state.timerElapsed += 1;
       state.stageElapsed[state.view] = (state.stageElapsed[state.view] || 0) + 1;
-      if (state.timerDuration > 0 && state.timerRemaining > 0) {
+      if (state.timerDuration >0 && state.timerRemaining >0) {
         state.timerRemaining -= 1;
         if (state.timerRemaining === 0) {
           state.timerExpired = true;
@@ -1065,7 +1065,7 @@
       document.documentElement.style.setProperty('--font-scale', String(scale));
       document.getElementById('fontSm').classList.toggle('active', scale < 1);
       document.getElementById('fontMd').classList.toggle('active', scale === 1);
-      document.getElementById('fontLg').classList.toggle('active', scale > 1);
+      document.getElementById('fontLg').classList.toggle('active', scale >1);
     }
 
     function resetAll() {
@@ -1085,7 +1085,7 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setTimeout(() =>URL.revokeObjectURL(url), 1000);
     }
 
     function goView(v) {
@@ -1135,7 +1135,7 @@
     function sanitizeFormHtml(raw) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(String(raw || ''), 'text/html');
-      doc.querySelectorAll('script, iframe, object, embed, link, style').forEach(el => el.remove());
+      doc.querySelectorAll('script, iframe, object, embed, link, style').forEach(el =>el.remove());
       doc.querySelectorAll('*').forEach(el => {
         Array.from(el.attributes).forEach(attr => {
           if (/^on/i.test(attr.name) || /^javascript:/i.test(attr.value)) {
@@ -1151,7 +1151,7 @@
       if (!host) return;
       host.innerHTML = sanitizeFormHtml(htmlCode);
       const forms = host.querySelectorAll('form');
-      if (forms.length > 0) {
+      if (forms.length >0) {
         forms.forEach(form => {
           form.addEventListener('submit', function(ev) {
             ev.preventDefault();
@@ -1170,11 +1170,11 @@
     function renderSentTable(entries) {
       if (!entries) return '';
       if (entries.length === 0) {
-        return `<div class="sent-box"><h4>📤 Bảng “Dữ liệu gửi đi”</h4><p style="margin:0;font-size:13px;color:#9f1239;font-weight:700">(Trống — không có ô nào có thuộc tính name hoặc chưa chọn ô radio/checkbox nào!)</p></div>`;
+        return `<div class="sent-box"><h4>Bảng “Dữ liệu gửi đi”</h4><p style="margin:0;font-size:13px;color:#9f1239;font-weight:700">(Trống — không có ô nào có thuộc tính name hoặc chưa chọn ô radio/checkbox nào!)</p></div>`;
       }
       return `
         <div class="sent-box">
-          <h4>📤 Bảng “Dữ liệu gửi đi” (khi bấm nút Gửi)</h4>
+          <h4>Bảng “Dữ liệu gửi đi” (khi bấm nút Gửi)</h4>
           <table class="data-table">
             <thead><tr><th>Thuộc tính name</th><th>Giá trị gửi đi (value)</th></tr></thead>
             <tbody>
@@ -1252,7 +1252,7 @@
 
     function renderStepper() {
       const items = [
-        { v: 0, title: 'Mở đầu', done: state.view > 0 },
+        { v: 0, title: 'Mở đầu', done: state.view >0 },
         { v: 1, title: 'Chặng 1: label–id', done: isStageDone(1) },
         { v: 2, title: 'Chặng 2: type', done: isStageDone(2) },
         { v: 3, title: 'Chặng 3: radio', done: isStageDone(3) },
@@ -1273,24 +1273,24 @@
         <div class="card">
           <span class="badge">Học liệu tương tác A2.3 · Blended Learning · Bộ đếm thời gian 20 phút</span>
           <h1 style="margin-top:10px">Phòng thí nghiệm Biểu mẫu: Đoán – Chạy – Giải thích</h1>
-          <p style="color:var(--muted)">Áp dụng cho <strong>Tin học 12 KNTT – Bài 12 “Tạo biểu mẫu”</strong> (Hoạt động 2.2 · SGK trang 67 – 69). Em tự chạy thử, sửa mã HTML trực tiếp trên trình duyệt trong khung giờ chuẩn <strong>20 phút</strong> (có thể chọn 10–30 phút hoặc tạm dừng trên thanh công cụ).</p>
+          <p style="color:var(--muted)">Áp dụng cho <strong>Tin học 12 KNTT – Bài 12 “Tạo biểu mẫu”</strong>(Hoạt động 2.2 · SGK trang 67 – 69). Em tự chạy thử, sửa mã HTML trực tiếp trên trình duyệt trong khung giờ chuẩn <strong>20 phút</strong>(có thể chọn 10–30 phút hoặc tạm dừng trên thanh công cụ).</p>
 
           <table class="meta-table">
             <tr>
               <th>Mục tiêu học tập</th>
-              <td>Sau khi hoàn thành 4 chặng, em <strong>dự đoán và giải thích được</strong> ảnh hưởng của các thuộc tính <code class="inline">for – id</code>, <code class="inline">type</code>, <code class="inline">name</code>, <code class="inline">value</code> đến cách biểu mẫu hiển thị và gửi dữ liệu; <strong>phát hiện và sửa được 3 lỗi thường gặp</strong> trong một đoạn mã biểu mẫu.</td>
+              <td>Sau khi hoàn thành 4 chặng, em <strong>dự đoán và giải thích được</strong>ảnh hưởng của các thuộc tính <code class="inline">for – id</code>, <code class="inline">type</code>, <code class="inline">name</code>, <code class="inline">value</code>đến cách biểu mẫu hiển thị và gửi dữ liệu; <strong>phát hiện và sửa được 3 lỗi thường gặp</strong>trong một đoạn mã biểu mẫu.</td>
             </tr>
             <tr>
               <th>Tình huống gần gũi</th>
-              <td>Thiết kế <strong>đơn đặt hàng bánh tráng trộn</strong> ở hội chợ ẩm thực trường (mở rộng từ Hoạt động 1 SGK tr.67).</td>
+              <td>Thiết kế <strong>đơn đặt hàng bánh tráng trộn</strong>ở hội chợ ẩm thực trường (mở rộng từ Hoạt động 1 SGK tr.67).</td>
             </tr>
             <tr>
               <th>Chu trình 4 bước mỗi chặng</th>
               <td>
-                <strong>① ĐOÁN</strong> (đọc mã có tô màu, chốt dự đoán) →
-                <strong>② CHẠY</strong> (chạy biểu mẫu thật cạnh mã, bấm/gõ/gửi thử) →
-                <strong>③ GIẢI THÍCH</strong> (phản hồi riêng từng lựa chọn bám SGK) →
-                <strong>④ THỬ NGHIỆM</strong> (tự sửa mã, kiểm tra tự động & chốt kiến thức).
+                <strong>① ĐOÁN</strong>(đọc mã có tô màu, chốt dự đoán) →
+                <strong>② CHẠY</strong>(chạy biểu mẫu thật cạnh mã, bấm/gõ/gửi thử) →
+                <strong>③ GIẢI THÍCH</strong>(phản hồi riêng từng lựa chọn bám SGK) →
+                <strong>④ THỬ NGHIỆM</strong>(tự sửa mã, kiểm tra tự động & chốt kiến thức).
               </td>
             </tr>
           </table>
@@ -1305,7 +1305,7 @@
     // ===================== CHẶNG 1: LABEL VÀ INPUT =====================
     function renderStage1() {
       const qs = state.qState.q1;
-      const codeHighlighted = `&lt;form&gt;\n  &lt;label <span class="hl-attr">for="ten"</span>&gt;Họ tên:&lt;/label&gt;\n  &lt;input type="text" <span class="hl-attr">id="ten"</span> name="hoTen"&gt;\n&lt;/form&gt;`;
+      const codeHighlighted = `&lt;form&gt;\n  &lt;label <span class="hl-attr">for="ten"</span>&gt;Họ tên:&lt;/label&gt;\n  &lt;input type="text" <span class="hl-attr">id="ten"</span>name="hoTen"&gt;\n&lt;/form&gt;`;
 
       return `
         <div class="card">
@@ -1329,8 +1329,8 @@
               <div class="panel-head"><span>Kết quả biểu mẫu chạy thật</span></div>
               ${qs.ran
                 ? `<div class="preview-body live-form-host" id="s1LiveInitial"></div>
-                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">👉 Hãy nháy chuột trực tiếp vào chữ “Họ tên:” ở trên để quan sát con trỏ!</div>`
-                : `<div class="preview-locked">🔒 Chốt dự đoán ở bên dưới rồi bấm <strong>“▶ Chạy thử”</strong> để mở biểu mẫu thật.</div>`
+                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">Hãy nháy chuột trực tiếp vào chữ “Họ tên:” ở trên để quan sát con trỏ!</div>`
+                : `<div class="preview-locked">Chốt dự đoán ở bên dưới rồi bấm <strong>“▶ Chạy thử”</strong>để mở biểu mẫu thật.</div>`
               }
             </div>
           </div>
@@ -1339,12 +1339,12 @@
 
           ${qs.ran ? `
             <div class="feedback info">
-              <strong>📘 Giải thích (bám SGK tr.67 – 68):</strong> <code class="inline">label</code> định nghĩa nhãn cho vùng nhập; giá trị <code class="inline">for</code> phải trùng <code class="inline">id</code> của <code class="inline">input</code> thì nhãn mới gắn với ô. <code class="inline">input</code> là thẻ đơn; <code class="inline">name</code> dùng khi gửi dữ liệu; <code class="inline">type</code> quy định loại dữ liệu.
+              <strong>Giải thích (bám SGK tr.67 – 68):</strong> <code class="inline">label</code>định nghĩa nhãn cho vùng nhập; giá trị <code class="inline">for</code>phải trùng <code class="inline">id</code>của <code class="inline">input</code>thì nhãn mới gắn với ô. <code class="inline">input</code>là thẻ đơn; <code class="inline">name</code>dùng khi gửi dữ liệu; <code class="inline">type</code>quy định loại dữ liệu.
             </div>
 
             <div class="card" style="margin-top:16px;background:#f8fafc">
               <h3>④ Thử nghiệm: Tự sửa mã và kiểm chứng</h3>
-              <p><strong>Nhiệm vụ:</strong> Sửa <code class="inline">for="ten"</code> thành <code class="inline">for="ho"</code> trong khung mã bên trái, bấm <strong>Chạy lại</strong> rồi nháy chuột vào chữ “Họ tên:” để kiểm tra.</p>
+              <p><strong>Nhiệm vụ:</strong>Sửa <code class="inline">for="ten"</code>thành <code class="inline">for="ho"</code>trong khung mã bên trái, bấm <strong>Chạy lại</strong>rồi nháy chuột vào chữ “Họ tên:” để kiểm tra.</p>
 
               <div class="lab-grid">
                 <div class="panel">
@@ -1362,19 +1362,19 @@
               </div>
 
               <div class="quiz-box" style="margin-top:10px">
-                <div class="quiz-q">Câu kiểm tra: Sau khi sửa <code class="inline">for="ten"</code> thành <code class="inline">for="ho"</code>, nháy vào nhãn “Họ tên:” thì sao?</div>
+                <div class="quiz-q">Câu kiểm tra: Sau khi sửa <code class="inline">for="ten"</code>thành <code class="inline">for="ho"</code>, nháy vào nhãn “Họ tên:” thì sao?</div>
                 <div style="display:flex;flex-wrap:wrap;gap:8px">
                   <button type="button" class="btn ${state.s1CheckAns === 'broken' ? 'btn-ok' : 'btn-outline'}" onclick="answerS1Check('broken')">Con trỏ không vào ô nữa</button>
                   <button type="button" class="btn ${state.s1CheckAns === 'still' ? 'btn-warn' : 'btn-outline'}" onclick="answerS1Check('still')">Con trỏ vẫn nhảy vào ô như cũ</button>
                 </div>
                 ${state.s1CheckAns === 'broken' ? `
-                  <div class="feedback ok"><strong>✓ Chính xác!</strong> <code class="inline">for</code> và <code class="inline">id</code> không còn giống nhau nên nhãn mất liên kết với ô.</div>
+                  <div class="feedback ok"><strong>✓ Chính xác!</strong> <code class="inline">for</code>và <code class="inline">id</code>không còn giống nhau nên nhãn mất liên kết với ô.</div>
                 ` : state.s1CheckAns === 'still' ? `
-                  <div class="feedback err"><strong>✗ Chưa đúng!</strong> Hãy chắc chắn em đã sửa <code class="inline">for="ten"</code> thành <code class="inline">for="ho"</code>, bấm <strong>Chạy lại</strong> rồi nháy chuột thử vào chữ “Họ tên:”.</div>
+                  <div class="feedback err"><strong>✗ Chưa đúng!</strong>Hãy chắc chắn em đã sửa <code class="inline">for="ten"</code>thành <code class="inline">for="ho"</code>, bấm <strong>Chạy lại</strong>rồi nháy chuột thử vào chữ “Họ tên:”.</div>
                 ` : ''}
               </div>
 
-              ${state.s1CheckAns === 'broken' ? `<div class="takeaway">📌 Câu chốt Chặng 1: For với id là một cặp – phải giống nhau.</div>` : ''}
+              ${state.s1CheckAns === 'broken' ? `<div class="takeaway">Câu chốt Chặng 1: For với id là một cặp – phải giống nhau.</div>` : ''}
             </div>
           ` : ''}
 
@@ -1416,7 +1416,7 @@
       const curType = state.s2ActiveType;
       const info = TABLE_12_1[curType] || TABLE_12_1.text;
 
-      const codeHighlighted = `&lt;label for="o1"&gt;Ô thử:&lt;/label&gt;\n&lt;input <span class="hl-attr">type="password"</span> id="o1" name="oThu"&gt;`;
+      const codeHighlighted = `&lt;label for="o1"&gt;Ô thử:&lt;/label&gt;\n&lt;input <span class="hl-attr">type="password"</span>id="o1" name="oThu"&gt;`;
 
       return `
         <div class="card">
@@ -1438,8 +1438,8 @@
               <div class="panel-head"><span>Kết quả biểu mẫu chạy thật</span></div>
               ${qa.ran
                 ? `<div class="preview-body live-form-host" id="s2LiveInitial"></div>
-                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">👉 Hãy gõ thử chữ “abc” vào ô trên để kiểm chứng!</div>`
-                : `<div class="preview-locked">🔒 Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong> để gõ thử vào ô mật khẩu.</div>`
+                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">Hãy gõ thử chữ “abc” vào ô trên để kiểm chứng!</div>`
+                : `<div class="preview-locked">Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong>để gõ thử vào ô mật khẩu.</div>`
               }
             </div>
           </div>
@@ -1449,7 +1449,7 @@
           ${qa.ran ? `
             <div class="card" style="margin-top:16px;background:#f8fafc">
               <h3>④ Thử nghiệm: 7 nút chọn nhanh theo Bảng 12.1 (SGK tr.68)</h3>
-              <p>Bấm từng kiểu <code class="inline">type</code> bên dưới — mã tự đổi và biểu mẫu chạy lại ngay bên cạnh để em quan sát (đã thử <strong>${state.s2VisitedTypes.length}/7</strong> kiểu):</p>
+              <p>Bấm từng kiểu <code class="inline">type</code>bên dưới — mã tự đổi và biểu mẫu chạy lại ngay bên cạnh để em quan sát (đã thử <strong>${state.s2VisitedTypes.length}/7</strong>kiểu):</p>
 
               <div class="type-chips">
                 ${Object.keys(TABLE_12_1).map(t => `
@@ -1474,15 +1474,15 @@
               </div>
 
               <div class="feedback info" style="margin-top:0">
-                <strong>📘 Đối chiếu Bảng 12.1 (<code class="inline">type="${curType}"</code>):</strong> ${escHtml(info.desc)}<br>
-                <strong>💡 3 ví dụ sử dụng (Luyện tập SGK tr.70):</strong> ${escHtml(info.examples)}.
+                <strong>Đối chiếu Bảng 12.1 (<code class="inline">type="${curType}"</code>):</strong> ${escHtml(info.desc)}<br>
+                <strong>3 ví dụ sử dụng (Luyện tập SGK tr.70):</strong> ${escHtml(info.examples)}.
               </div>
 
               <div style="margin-top:14px">
                 ${renderQuestionBlock('q2b', '▶ ② Kiểm tra đáp án')}
               </div>
 
-              ${qb.ran ? `<div class="takeaway">📌 Câu chốt Chặng 2: Muốn ô kiểu gì, đổi type.</div>` : ''}
+              ${qb.ran ? `<div class="takeaway">Câu chốt Chặng 2: Muốn ô kiểu gì, đổi type.</div>` : ''}
             </div>
           ` : ''}
 
@@ -1512,7 +1512,7 @@
     function renderStage3() {
       const qa = state.qState.q3a;
       const qb = state.qState.q3b;
-      const codeHighlighted = `Kích cỡ:\n&lt;input type="radio" id="nho" <span class="hl-attr">name="size"</span> value="nho"&gt;\n&lt;label for="nho"&gt;Nhỏ&lt;/label&gt;\n&lt;input type="radio" id="lon" <span class="hl-attr-2">name="size2"</span> value="lon"&gt;\n&lt;label for="lon"&gt;Lớn&lt;/label&gt;\n&lt;input type="submit" value="Gửi"&gt;`;
+      const codeHighlighted = `Kích cỡ:\n&lt;input type="radio" id="nho" <span class="hl-attr">name="size"</span>value="nho"&gt;\n&lt;label for="nho"&gt;Nhỏ&lt;/label&gt;\n&lt;input type="radio" id="lon" <span class="hl-attr-2">name="size2"</span>value="lon"&gt;\n&lt;label for="lon"&gt;Lớn&lt;/label&gt;\n&lt;input type="submit" value="Gửi"&gt;`;
 
       return `
         <div class="card">
@@ -1534,8 +1534,8 @@
               <div class="panel-head"><span>Biểu mẫu chạy thật</span></div>
               ${qa.ran
                 ? `<div class="preview-body live-form-host" id="s3LiveInitial"></div>
-                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">👉 Hãy bấm chọn “Nhỏ” rồi bấm tiếp “Lớn” để kiểm chứng!</div>`
-                : `<div class="preview-locked">🔒 Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong> để tự bấm vào 2 ô radio.</div>`
+                   <div style="padding:0 16px 14px;font-size:12px;color:#0369a1;font-weight:700">Hãy bấm chọn “Nhỏ” rồi bấm tiếp “Lớn” để kiểm chứng!</div>`
+                : `<div class="preview-locked">Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong>để tự bấm vào 2 ô radio.</div>`
               }
             </div>
           </div>
@@ -1545,14 +1545,14 @@
           ${qa.ran ? `
             <div class="card" style="margin-top:16px;background:#f8fafc">
               <h3>④ Thử nghiệm 1 &amp; 2: Sửa cùng name và thử xóa value="nho"</h3>
-              <p><strong>Thử nghiệm 1:</strong> Sửa mã bên dưới sao cho 2 ô radio có <strong>cùng <code class="inline">name</code></strong> (ví dụ <code class="inline">name="size"</code>) để chỉ chọn được 1 ô, rồi bấm <strong>Kiểm tra &amp; Chạy lại</strong>, sau đó chọn Nhỏ và bấm <strong>Gửi</strong> để xem bảng dữ liệu gửi đi.</p>
+              <p><strong>Thử nghiệm 1:</strong>Sửa mã bên dưới sao cho 2 ô radio có <strong>cùng <code class="inline">name</code></strong>(ví dụ <code class="inline">name="size"</code>) để chỉ chọn được 1 ô, rồi bấm <strong>Kiểm tra &amp; Chạy lại</strong>, sau đó chọn Nhỏ và bấm <strong>Gửi</strong>để xem bảng dữ liệu gửi đi.</p>
 
               <div class="lab-grid">
                 <div class="panel">
                   <div class="panel-head">
                     <span>Khung sửa mã Chặng 3</span>
                     <div style="display:flex;gap:6px">
-                      <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:11px" onclick="quickRemoveValueNho()">✂ Xóa nhanh value="nho" (Thử nghiệm 2)</button>
+                      <button type="button" class="btn btn-outline" style="padding:4px 9px;font-size:11px" onclick="quickRemoveValueNho()">Xóa nhanh value="nho" (Thử nghiệm 2)</button>
                       <button type="button" class="btn btn-ok" style="padding:5px 12px;font-size:12px" onclick="checkStage3Code()">▶ Kiểm tra &amp; Chạy lại</button>
                     </div>
                   </div>
@@ -1572,7 +1572,7 @@
                 ${renderQuestionBlock('q3b', '▶ ② Xem giải thích & Kiểm chứng')}
               </div>
 
-              ${qb.ran ? `<div class="takeaway">📌 Câu chốt Chặng 3: Radio thì nhớ: cùng name, thêm value.</div>` : ''}
+              ${qb.ran ? `<div class="takeaway">Câu chốt Chặng 3: Radio thì nhớ: cùng name, thêm value.</div>` : ''}
             </div>
           ` : ''}
 
@@ -1589,7 +1589,7 @@
       if (ed) state.s3Code = ed.value;
       const doc = new DOMParser().parseFromString(state.s3Code, 'text/html');
       const radios = Array.from(doc.querySelectorAll('input[type="radio"]'));
-      const names = radios.map(r => (r.getAttribute('name') || '').trim()).filter(Boolean);
+      const names = radios.map(r =>(r.getAttribute('name') || '').trim()).filter(Boolean);
       const uniqueNames = new Set(names);
       if (radios.length >= 2 && names.length === radios.length && uniqueNames.size === 1) {
         state.s3Exp1Passed = true;
@@ -1621,7 +1621,7 @@
         <div class="card">
           <span class="badge">Chặng 4 / 4 · Mức Phân tích · Không tô màu gợi ý</span>
           <h2 style="margin-top:8px">Tìm và sửa 3 lỗi trong biểu mẫu Đơn đặt bánh tráng trộn</h2>
-          <p style="color:var(--muted)">Ở chặng này <strong>không tô màu thuộc tính</strong> để em tự phân tích và tìm lỗi như khi làm thực hành thật.</p>
+          <p style="color:var(--muted)">Ở chặng này <strong>không tô màu thuộc tính</strong>để em tự phân tích và tìm lỗi như khi làm thực hành thật.</p>
 
           <div class="cycle-bar">
             <span class="cycle-item ${!qs.locked ? 'active' : 'done'}">① ĐOÁN</span>
@@ -1651,10 +1651,10 @@
               ${qs.ran
                 ? `<div class="preview-body">
                      <div class="live-form-host" id="s4Live"></div>
-                     <p style="font-size:12px;color:#0369a1;font-weight:700;margin-top:8px">👉 Hãy nhập Họ tên, Email, nháy thử vào từng nhãn, chọn Nhỏ rồi Lớn và bấm “Gửi đơn hàng”!</p>
+                     <p style="font-size:12px;color:#0369a1;font-weight:700;margin-top:8px">Hãy nhập Họ tên, Email, nháy thử vào từng nhãn, chọn Nhỏ rồi Lớn và bấm “Gửi đơn hàng”!</p>
                      <div id="s4SentBox">${renderSentTable(state.s4Sent)}</div>
                    </div>`
-                : `<div class="preview-locked">🔒 Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong> để chạy và sửa trực tiếp biểu mẫu đơn hàng.</div>`
+                : `<div class="preview-locked">Chốt dự đoán bên dưới rồi bấm <strong>“▶ Chạy thử”</strong>để chạy và sửa trực tiếp biểu mẫu đơn hàng.</div>`
               }
             </div>
           </div>
@@ -1677,17 +1677,17 @@
                 return `
                   <div class="bug-card ${fixed ? 'fixed' : ''}">
                     <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px">
-                      <strong style="font-size:14px">${fixed ? '✅' : '🔧'} ${escHtml(bug.title)}</strong>
+                      <strong style="font-size:14px">${fixed ? '' : ''} ${escHtml(bug.title)}</strong>
                       <div style="display:flex;gap:6px;align-items:center">
                         <span class="badge ${fixed ? 'badge-ok' : 'badge-warn'}">${fixed ? 'Đã sửa đúng' : checks ? 'Chưa đạt' : 'Chưa kiểm tra'}</span>
                         ${!fixed && hLvl < 3 ? `
                           <button type="button" class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="nextHint('${bug.id}')">
-                            💡 Mở gợi ý tầng ${hLvl + 1}/3
+                             Mở gợi ý tầng ${hLvl + 1}/3
                           </button>
                         ` : ''}
                       </div>
                     </div>
-                    ${hLvl > 0 && !fixed ? `
+                    ${hLvl >0 && !fixed ? `
                       <div class="hint-box">
                         ${bug.hints.slice(0, hLvl).map(h => `<div>• ${escHtml(h)}</div>`).join('')}
                       </div>
@@ -1697,7 +1697,7 @@
               }).join('')}
 
               ${allFixed ? `
-                <div class="takeaway">🎉 Xuất sắc! Em đã phát hiện và sửa đúng cả 3/3 lỗi biểu mẫu! Bấm “Tổng kết &amp; Phản tư” để hoàn thành và tải phiếu kết quả nộp cho giáo viên.</div>
+                <div class="takeaway">Xuất sắc! Em đã phát hiện và sửa đúng cả 3/3 lỗi biểu mẫu! Bấm “Tổng kết &amp; Phản tư” để hoàn thành và tải phiếu kết quả nộp cho giáo viên.</div>
               ` : ''}
             </div>
           ` : ''}
@@ -1729,7 +1729,7 @@
 
       // 1. Ô Họ tên (#ten) có thuộc tính name không rỗng
       const tenInput = doc.querySelector('input#ten');
-      const bugName = Boolean(tenInput && (tenInput.getAttribute('name') || '').trim().length > 0);
+      const bugName = Boolean(tenInput && (tenInput.getAttribute('name') || '').trim().length >0);
 
       // 2. Mọi label có for đều khớp với id của một phần tử input/select/textarea tồn tại
       const labels = Array.from(doc.querySelectorAll('label[for]'));
@@ -1740,7 +1740,7 @@
 
       // 3. Các ô radio đều có cùng name khác rỗng
       const radios = Array.from(doc.querySelectorAll('input[type="radio"]'));
-      const rNames = radios.map(r => (r.getAttribute('name') || '').trim()).filter(Boolean);
+      const rNames = radios.map(r =>(r.getAttribute('name') || '').trim()).filter(Boolean);
       const bugRadio = radios.length >= 2 && rNames.length === radios.length && new Set(rNames).size === 1;
 
       state.s4Checks = { bugName, bugFor, bugRadio };
@@ -1750,9 +1750,9 @@
     // ===================== MÀN HÌNH 5: TỔNG KẾT & PHẢN TƯ (METACOGNITIVE) =====================
     function renderSummary() {
       const qKeys = Object.keys(QUESTIONS);
-      const answeredFirst = qKeys.filter(k => state.qState[k].firstPicked !== null);
-      const rightFirst = qKeys.filter(k => state.qState[k].firstCorrect === true);
-      const wrongFirst = qKeys.filter(k => state.qState[k].firstCorrect === false);
+      const answeredFirst = qKeys.filter(k =>state.qState[k].firstPicked !== null);
+      const rightFirst = qKeys.filter(k =>state.qState[k].firstCorrect === true);
+      const wrongFirst = qKeys.filter(k =>state.qState[k].firstCorrect === false);
       const s4Count = state.s4Checks
         ? [state.s4Checks.bugName, state.s4Checks.bugFor, state.s4Checks.bugRadio].filter(Boolean).length
         : 0;
@@ -1781,15 +1781,15 @@
           </div>
 
           <div class="takeaway" style="margin-bottom:16px">
-            <div style="margin-bottom:6px">📌 4 Câu chốt kiến thức cần ghi nhớ:</div>
+            <div style="margin-bottom:6px">4 Câu chốt kiến thức cần ghi nhớ:</div>
             <ul style="margin:0;padding-left:20px;font-weight:700">
               ${TAKEAWAYS.map(t => `<li style="margin:4px 0">${escHtml(t)}</li>`).join('')}
             </ul>
           </div>
 
-          ${wrongFirst.length > 0 ? `
+          ${wrongFirst.length >0 ? `
             <div class="feedback warn" style="margin-bottom:14px">
-              <strong>🔍 Gợi ý phản tư — Các câu em đoán sai ở lần đầu:</strong>
+              <strong>Gợi ý phản tư — Các câu em đoán sai ở lần đầu:</strong>
               <ul style="margin:6px 0 0;padding-left:18px">
                 ${wrongFirst.map(k => `<li>${escHtml(QUESTIONS[k].label)}</li>`).join('')}
               </ul>
@@ -1797,7 +1797,7 @@
           ` : ''}
 
           <div class="quiz-box">
-            <h3>✍️ Phiếu Phản tư (Metacognitive)</h3>
+            <h3>Phiếu Phản tư (Metacognitive)</h3>
             <p style="font-size:13px;color:var(--muted)">
               Trả lời ngắn gọn: <strong>“Câu nào em đoán sai? Vì sao em đoán như vậy? Giờ em hiểu lại thế nào?”</strong>
             </p>
@@ -1818,7 +1818,7 @@
               <button type="button" class="btn btn-outline" onclick="resetAll()">↻ Làm lại từ đầu (không giới hạn)</button>
             </div>
             <p style="font-size:12px;color:var(--muted);margin:10px 0 0">
-              🔒 <strong>Quyền riêng tư:</strong> Học liệu không lưu, không gửi dữ liệu của em đi đâu. Tệp <code class="inline">.txt</code> được tạo trực tiếp trên máy của em để tự nộp vào mục bài tập trên LMS.
+               <strong>Quyền riêng tư:</strong>Học liệu không lưu, không gửi dữ liệu của em đi đâu. Tệp <code class="inline">.txt</code>được tạo trực tiếp trên máy của em để tự nộp vào mục bài tập trên LMS.
             </p>
           </div>
 
@@ -1832,7 +1832,7 @@
 
     function downloadResultTxt() {
       const qKeys = Object.keys(QUESTIONS);
-      const rightFirst = qKeys.filter(k => state.qState[k].firstCorrect === true).length;
+      const rightFirst = qKeys.filter(k =>state.qState[k].firstCorrect === true).length;
       const letters = ['A', 'B', 'C', 'D'];
       const s4 = state.s4Checks || { bugName: false, bugFor: false, bugRadio: false };
       const s4FixedCount = [s4.bugName, s4.bugFor, s4.bugRadio].filter(Boolean).length;
@@ -1860,7 +1860,7 @@
         }),
         '',
         `2. KẾT QUẢ THỬ NGHIỆM & SỬA LỖI:`,
-        `   - Chặng 1 (Sửa for="ten" -> for="ho" & trả lời kiểm tra): ${state.s1CheckAns === 'broken' ? 'Đạt' : 'Chưa hoàn thành'}`,
+        `   - Chặng 1 (Sửa for="ten" ->for="ho" & trả lời kiểm tra): ${state.s1CheckAns === 'broken' ? 'Đạt' : 'Chưa hoàn thành'}`,
         `   - Chặng 2 (Thử nghiệm các kiểu input Bảng 12.1): Đã thử ${state.s2VisitedTypes.length}/7 kiểu (${state.s2VisitedTypes.join(', ')})`,
         `   - Chặng 3 (Sửa 2 radio cùng name): ${state.s3Exp1Passed ? 'Đạt' : 'Chưa hoàn thành'}`,
         `   - Chặng 4 (Tìm và sửa 3 lỗi biểu mẫu): ${s4FixedCount}/3 lỗi`,
@@ -1888,7 +1888,7 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setTimeout(() =>URL.revokeObjectURL(url), 1000);
     }
 
     function render() {

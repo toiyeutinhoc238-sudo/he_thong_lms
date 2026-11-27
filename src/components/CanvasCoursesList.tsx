@@ -526,7 +526,7 @@ export const CanvasCoursesList: React.FC = () => {
                           </div>
                           {hasHtmlLab && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
-                              🔬 Có Phòng thí nghiệm HTML5 · Đếm giờ
+                              Có học liệu tương tác HTML5
                             </span>
                           )}
                           <h3 className="text-sm sm:text-[15px] font-extrabold text-slate-900 group-hover:text-[#0374b5] transition-colors leading-snug line-clamp-2">

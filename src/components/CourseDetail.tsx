@@ -334,7 +334,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                     </span>
                     {htmlLabActs.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-400/25 border border-emerald-200/40 text-emerald-100 text-[11px] font-bold">
-                        🔬 {htmlLabActs.length} Bộ học liệu HTML5 tương tác
+                        {htmlLabActs.length} học liệu tương tác HTML5
                       </span>
                     )}
                   </div>
@@ -375,14 +375,13 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                     {lab.title.length > 42 ? lab.title.slice(0, 42) + '…' : lab.title}
                   </button>
                 ))}
-                {featuredQuizActs.map((qz, qi) => (
+                {featuredQuizActs.map((qz) => (
                   <button
                     key={qz.id}
                     type="button"
                     onClick={() => navigateToActivity(activeCourse.id, qz.id)}
                     className="px-3.5 py-2 rounded-xl bg-amber-400/95 hover:bg-amber-300 text-slate-900 text-xs font-bold shadow-xs transition-all"
                   >
-                    {qi === 0 ? '⚡ ' : '🏆 '}
                     {qz.title.length > 36 ? qz.title.slice(0, 36) + '…' : qz.title}
                     {qz.timeLimitMinutes ? ` (${qz.timeLimitMinutes}p)` : ''}
                   </button>

@@ -2231,15 +2231,15 @@
   </style>
 </head>
 
-<body>
+<body class="student-mode">
 
   <!-- TOP HEADER -->
   <header class="studio-header">
     <div class="studio-header-inner">
       <div class="brand-group">
-        <div class="brand-logo" aria-hidden="true">🤖</div>
+        <div class="brand-logo" aria-hidden="true" style="font-size:16px;font-weight:800;letter-spacing:-0.02em;">B2</div>
         <div>
-          <div class="brand-meta">Tin học 6 • Chủ đề A: Tư duy lấy con người làm trung tâm • LMS 45 phút</div>
+          <div class="brand-meta">Tin học 6 · Chủ đề A: Tư duy lấy con người làm trung tâm · 45 phút</div>
           <h1 class="brand-title">BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP</h1>
         </div>
       </div>
@@ -2252,41 +2252,40 @@
           </div>
         </div>
 
-        <div class="mode-switch" role="group" aria-label="Chế độ hiển thị">
-          <button class="mode-btn active" id="btnTeacherMode" onclick="setMode('teacher')">👩‍🏫 Chế độ GV (Xuất
-            LMS)</button>
-          <button class="mode-btn" id="btnStudentMode" onclick="setMode('student')">🎒 Chế độ Học sinh</button>
+        <div class="mode-switch" role="group" aria-label="Chế độ hiển thị" style="display:none;">
+          <button class="mode-btn" id="btnTeacherMode" onclick="setMode('teacher')">Chế độ GV</button>
+          <button class="mode-btn active" id="btnStudentMode" onclick="setMode('student')">Chế độ Học sinh</button>
         </div>
       </div>
     </div>
   </header>
 
   <!-- NAVIGATION TABS -->
-  <nav class="nav-shell" aria-label="Các module học liệu số LMS">
+  <nav class="nav-shell" aria-label="Các phần học Bài 2">
     <div class="nav-tabs">
       <button class="nav-tab active" data-tab="mod1" onclick="switchTab('mod1')">
-        <span class="tab-badge">TP 1</span> 📘 Sổ tay hướng dẫn
+        <span class="tab-badge">Phần 1</span>Hướng dẫn học tập
       </button>
       <button class="nav-tab" data-tab="mod2" onclick="switchTab('mod2')">
-        <span class="tab-badge">TP 2</span> 💬 Kiến thức nền & Diễn đàn
+        <span class="tab-badge">Phần 2</span>Khởi động &amp; Thảo luận
       </button>
       <button class="nav-tab" data-tab="mod3" onclick="switchTab('mod3')">
-        <span class="tab-badge">TP 3</span> 🎨 Infographic Bí kíp AI
+        <span class="tab-badge">Phần 3</span>Kiến thức &amp; Công thức
       </button>
       <button class="nav-tab" data-tab="mod4" onclick="switchTab('mod4')">
-        <span class="tab-badge">TP 4a</span> 🎬 Video tương tác (06:27)
+        <span class="tab-badge">Phần 4</span>Video tương tác (06:27)
       </button>
       <button class="nav-tab" data-tab="mod5" onclick="switchTab('mod5')">
-        <span class="tab-badge">TP 4b</span> 🛡️ Poster 4 KHÔNG
+        <span class="tab-badge">Phần 5</span>Quy tắc 4 KHÔNG
       </button>
       <button class="nav-tab" data-tab="mod6" onclick="switchTab('mod6')">
-        <span class="tab-badge">TP 4b</span> 🧪 Trạm luyện Prompt & Nộp bài
+        <span class="tab-badge">Phần 6</span>Thực hành viết câu lệnh
       </button>
       <button class="nav-tab" data-tab="mod7" onclick="switchTab('mod7')">
-        <span class="tab-badge">TP 5</span> 📰 Blog Nhà báo nhí & Cầu nối
+        <span class="tab-badge">Phần 7</span>Tổng hợp &amp; Đối chiếu SGK
       </button>
       <button class="nav-tab teacher-only" data-tab="mod8" onclick="switchTab('mod8')">
-        <span class="tab-badge">GV</span> ⚙️ Cấu hình LMS & Rubric
+        <span class="tab-badge">GV</span>Cấu hình &amp; Rubric
       </button>
     </div>
   </nav>
@@ -2301,11 +2300,11 @@
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 1 • Thành phần 1 LMS</span>
-          <span>Dán vào mục <strong>Sổ tay hướng dẫn (Study Guide / Label)</strong> ở đầu trang Bài 2 trên LMS.</span>
+          <span>Dán vào mục <strong>Sổ tay hướng dẫn (Study Guide / Label)</strong>ở đầu trang Bài 2 trên LMS.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod1-text')">📝 Copy văn bản</button>
-          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod1-export')">📋 Copy HTML nhúng LMS</button>
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod1-text')">Copy văn bản</button>
+          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod1-export')">Copy HTML nhúng LMS</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod1')">⬇️ Tải file HTML độc
             lập</button>
         </div>
@@ -2315,15 +2314,15 @@
         <div class="hero-banner">
           <div class="hero-meta-row">
             <span class="hero-chip">⏱️ Thời gian dự kiến: 45 phút</span>
-            <span class="hero-chip">💻 Hình thức: Tự học trực tuyến trên LMS</span>
-            <span class="hero-chip">🎯 Yêu cầu cần đạt: 6.A3.2 (Hiểu – Vận dụng)</span>
+            <span class="hero-chip">Hình thức: Tự học trực tuyến trên LMS</span>
+            <span class="hero-chip">Yêu cầu cần đạt: 6.A3.2 (Hiểu – Vận dụng)</span>
           </div>
           <h2 class="lms-u-1">
-            📘 SỔ TAY HƯỚNG DẪN HỌC TẬP BÀI 2 (STUDY GUIDE)
+             SỔ TAY HƯỚNG DẪN HỌC TẬP BÀI 2 (STUDY GUIDE)
           </h2>
           <p class="lms-u-2">
-            <strong>Mục tiêu bài học:</strong> Trình bày được <strong>3 lợi ích</strong> của AI trong học tập khi sử
-            dụng đúng cách, có mục đích rõ ràng; biết cách đặt <strong>câu lệnh (Prompt) rõ ràng</strong> và sử dụng
+            <strong>Mục tiêu bài học:</strong>Trình bày được <strong>3 lợi ích</strong>của AI trong học tập khi sử
+            dụng đúng cách, có mục đích rõ ràng; biết cách đặt <strong>câu lệnh (Prompt) rõ ràng</strong>và sử dụng
             công cụ AI phù hợp lứa tuổi để hỗ trợ một nhiệm vụ học tập đơn giản; nói lại được điều mình đã học thêm bằng
             lời văn của bản thân.
           </p>
@@ -2335,7 +2334,7 @@
               <span class="section-badge badge-blue">Lộ trình học tập trực tuyến 45 phút</span>
               <h2 class="card-title">4 bước chinh phục Bài 2 trên hệ thống LMS</h2>
             </div>
-            <button class="btn btn-ghost btn-sm no-print" onclick="resetProgress()">🔄 Đặt lại tiến độ</button>
+            <button class="btn btn-ghost btn-sm no-print" onclick="resetProgress()">Đặt lại tiến độ</button>
           </div>
 
           <div class="grid-4">
@@ -2346,12 +2345,12 @@
                   <span class="step-time">⏱️ 5 phút</span>
                 </div>
                 <div class="step-title">Khởi động</div>
-                <p class="step-desc">Đọc phần <strong>Kết nối kiến thức nền</strong> (Bài 1 & Tin học 6), xem tình huống
-                  An – Minh – Khoa và trả lời <strong>2 câu hỏi</strong> trên Diễn đàn lớp học.</p>
+                <p class="step-desc">Đọc phần <strong>Kết nối kiến thức nền</strong>(Bài 1 & Tin học 6), xem tình huống
+                  An – Minh – Khoa và trả lời <strong>2 câu hỏi</strong>trên Diễn đàn lớp học.</p>
               </div>
               <div class="step-footer">
                 <label class="step-check-label">
-                  <input type="checkbox" class="step-checkbox" data-step="1" onchange="updateRoadmapProgress()" /> Đã
+                  <input type="checkbox" class="step-checkbox" data-step="1" onchange="updateRoadmapProgress()" />Đã
                   xong
                 </label>
                 <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod2')">Vào Bước 1 →</button>
@@ -2365,13 +2364,13 @@
                   <span class="step-time">⏱️ 15 phút</span>
                 </div>
                 <div class="step-title">Khám phá kiến thức</div>
-                <p class="step-desc">Đọc <strong>Infographic “Bí kíp giao tiếp với AI”</strong> và xem <strong>Video
+                <p class="step-desc">Đọc <strong>Infographic “Bí kíp giao tiếp với AI”</strong>và xem <strong>Video
                     tương tác (06:27)</strong>, trả lời 3 câu hỏi trắc nghiệm (đạt tối thiểu <strong>70/100
-                    điểm</strong> để mở khóa Bước 3).</p>
+                    điểm</strong>để mở khóa Bước 3).</p>
               </div>
               <div class="step-footer">
                 <label class="step-check-label">
-                  <input type="checkbox" class="step-checkbox" data-step="2" onchange="updateRoadmapProgress()" /> Đã
+                  <input type="checkbox" class="step-checkbox" data-step="2" onchange="updateRoadmapProgress()" />Đã
                   xong
                 </label>
                 <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod3')">Vào Bước 2 →</button>
@@ -2386,11 +2385,11 @@
                 </div>
                 <div class="step-title">Luyện tập thực hành</div>
                 <p class="step-desc">Ghi nhớ <strong>Cẩm nang 4 KHÔNG</strong>, luyện viết câu lệnh 3 thành phần, truy
-                  cập trạm AI an toàn bằng <strong>Room Code</strong> và nộp ảnh chụp màn hình.</p>
+                  cập trạm AI an toàn bằng <strong>Room Code</strong>và nộp ảnh chụp màn hình.</p>
               </div>
               <div class="step-footer">
                 <label class="step-check-label">
-                  <input type="checkbox" class="step-checkbox" data-step="3" onchange="updateRoadmapProgress()" /> Đã
+                  <input type="checkbox" class="step-checkbox" data-step="3" onchange="updateRoadmapProgress()" />Đã
                   xong
                 </label>
                 <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod5')">Vào Bước 3 →</button>
@@ -2404,12 +2403,12 @@
                   <span class="step-time">⏱️ 10 phút</span>
                 </div>
                 <div class="step-title">Vận dụng & Cầu nối</div>
-                <p class="step-desc">Viết đoạn tóm tắt <strong>3–5 câu</strong> bằng lời văn của em trên <strong>Blog
-                    học tập</strong> (không copy-paste) và đối chiếu SGK chuẩn bị cho Bài 3.</p>
+                <p class="step-desc">Viết đoạn tóm tắt <strong>3–5 câu</strong>bằng lời văn của em trên <strong>Blog
+                    học tập</strong>(không copy-paste) và đối chiếu SGK chuẩn bị cho Bài 3.</p>
               </div>
               <div class="step-footer">
                 <label class="step-check-label">
-                  <input type="checkbox" class="step-checkbox" data-step="4" onchange="updateRoadmapProgress()" /> Đã
+                  <input type="checkbox" class="step-checkbox" data-step="4" onchange="updateRoadmapProgress()" />Đã
                   xong
                 </label>
                 <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod7')">Vào Bước 4 →</button>
@@ -2420,33 +2419,33 @@
 
         <div class="grid-2">
           <div class="card lms-u-3">
-            <span class="section-badge badge-green">🎯 Năng lực & Phẩm chất cần đạt</span>
+            <span class="section-badge badge-green">Năng lực & Phẩm chất cần đạt</span>
             <h3 class="lms-u-4">Sau bài học này em sẽ làm được gì?</h3>
             <ul class="lms-u-5">
-              <li><strong>Kiến thức (6.A3.2):</strong> Nêu được 3 lợi ích của AI (học hỏi kiến thức, rèn luyện kĩ năng,
+              <li><strong>Kiến thức (6.A3.2):</strong>Nêu được 3 lợi ích của AI (học hỏi kiến thức, rèn luyện kĩ năng,
                 mở rộng hiểu biết) và áp dụng công thức viết câu lệnh 3 thành phần.</li>
-              <li><strong>Năng lực AI (NLa):</strong> Biết kiểm chứng thông tin, kết quả do AI cung cấp và bảo vệ quyền
+              <li><strong>Năng lực AI (NLa):</strong>Biết kiểm chứng thông tin, kết quả do AI cung cấp và bảo vệ quyền
                 riêng tư, dữ liệu cá nhân.</li>
-              <li><strong>Tự chủ & Trách nhiệm:</strong> Tự học chủ động trên LMS, trung thực, không sao chép thụ động
+              <li><strong>Tự chủ & Trách nhiệm:</strong>Tự học chủ động trên LMS, trung thực, không sao chép thụ động
                 câu trả lời của máy móc.</li>
             </ul>
           </div>
 
           <div class="card lms-u-3">
-            <span class="section-badge badge-amber">📖 Thuật ngữ & Em có biết? (SGK)</span>
+            <span class="section-badge badge-amber">Thuật ngữ & Em có biết? (SGK)</span>
             <h3 class="lms-u-4">Giải thích thuật ngữ Bài 2</h3>
             <div class="lms-u-6">
               <div class="lms-u-7">
-                <strong>🔹 Câu lệnh (Prompt):</strong> Lời yêu cầu, câu hỏi hoặc chỉ dẫn rõ ràng do con người nhập vào
+                <strong>Câu lệnh (Prompt):</strong>Lời yêu cầu, câu hỏi hoặc chỉ dẫn rõ ràng do con người nhập vào
                 để công cụ AI thực hiện nhiệm vụ mong muốn.
               </div>
               <div class="lms-u-7">
-                <strong>🔹 Ngữ cảnh câu lệnh:</strong> Thông tin về bối cảnh, đối tượng sử dụng và mục đích học tập giúp
+                <strong>Ngữ cảnh câu lệnh:</strong>Thông tin về bối cảnh, đối tượng sử dụng và mục đích học tập giúp
                 AI tạo ra câu trả lời phù hợp.
               </div>
               <div class="callout callout-amber lms-u-8">
-                <strong>💡 Em có biết?</strong> Nhiều nền tảng giáo dục uy tín như <strong>Khan Academy</strong> hay
-                <strong>Duolingo</strong> tích hợp AI để gợi ý từng bước giải bài tập hoặc điều chỉnh bài luyện ngoại
+                <strong>Em có biết?</strong>Nhiều nền tảng giáo dục uy tín như <strong>Khan Academy</strong>hay
+                <strong>Duolingo</strong>tích hợp AI để gợi ý từng bước giải bài tập hoặc điều chỉnh bài luyện ngoại
                 ngữ phù hợp trình độ từng học sinh (UNESCO, 2023 – <em>1:1 coach</em>).
               </div>
             </div>
@@ -2473,15 +2472,15 @@ Lộ trình 4 bước thực hiện trên LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 2 • Thành phần 2 LMS</span>
-          <span>Gồm <strong>Khung Kết nối kiến thức nền</strong>, <strong>Tình huống SGK</strong> và <strong>Đề bài Diễn
+          <span>Gồm <strong>Khung Kết nối kiến thức nền</strong>, <strong>Tình huống SGK</strong>và <strong>Đề bài Diễn
               đàn Khởi động (5 phút)</strong>.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-prereq-text')">📝 Copy Kiến thức
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-prereq-text')">Copy Kiến thức
             nền</button>
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-forum-text')">💬 Copy đề bài Diễn
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-forum-text')">Copy đề bài Diễn
             đàn</button>
-          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod2-export')">📋 Copy HTML nhúng LMS</button>
+          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod2-export')">Copy HTML nhúng LMS</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod2')">⬇️ Tải file HTML độc
             lập</button>
         </div>
@@ -2490,23 +2489,23 @@ Lộ trình 4 bước thực hiện trên LMS:
       <div id="mod2-export">
         <!-- 2.1 Prerequisites -->
         <div class="card">
-          <span class="section-badge badge-purple">🔗 Kết nối kiến thức nền (Prerequisites)</span>
+          <span class="section-badge badge-purple">Kết nối kiến thức nền (Prerequisites)</span>
           <h2 class="card-title">Kiến thức nền cần nhớ trước khi học Bài 2</h2>
           <div class="grid-3 lms-u-10">
             <div class="lms-u-11">
-              <div class="lms-u-12">🧠</div>
+              <div class="lms-u-12"></div>
               <h4 class="lms-u-13">Từ Bài 1: Nguồn gốc AI & Quyền quyết định</h4>
               <p class="lms-u-14">AI là sản phẩm do con người tạo ra, lập trình và điều khiển. AI chỉ là công cụ hỗ trợ
                 học tập và đời sống; <strong>con người luôn là người đưa ra quyết định cuối cùng</strong>.</p>
             </div>
             <div class="lms-u-15">
-              <div class="lms-u-12">🌐</div>
+              <div class="lms-u-12"></div>
               <h4 class="lms-u-16">Từ môn Tin học 6</h4>
               <p class="lms-u-14">Em đã biết cách sử dụng trình duyệt web để truy cập trang thông tin trực tuyến và gõ
-                văn bản <strong>tiếng Việt có dấu</strong> đúng quy tắc.</p>
+                văn bản <strong>tiếng Việt có dấu</strong>đúng quy tắc.</p>
             </div>
             <div class="lms-u-17">
-              <div class="lms-u-12">❓</div>
+              <div class="lms-u-12"></div>
               <h4 class="lms-u-18">Câu hỏi gợi mở</h4>
               <p class="lms-u-14"><em>Để một công cụ AI hiểu đúng yêu cầu học tập của học sinh lớp 6 và đưa ra câu trả
                   lời hữu ích, chúng ta cần đặt câu lệnh như thế nào?</em></p>
@@ -2516,7 +2515,7 @@ Lộ trình 4 bước thực hiện trên LMS:
 
         <!-- 2.2 SGK Situation + Quick Case Check -->
         <div class="card">
-          <span class="section-badge badge-amber">📖 Tình huống Khởi động & Hoạt động 1 (SGK Bài 2)</span>
+          <span class="section-badge badge-amber">Tình huống Khởi động & Hoạt động 1 (SGK Bài 2)</span>
           <h2 class="card-title">Chuyện ở phòng Tin học: An, Minh và Khoa (Hình 2.1)</h2>
 
           <div class="comic-scene lms-u-19">
@@ -2561,18 +2560,18 @@ Lộ trình 4 bước thực hiện trên LMS:
                 <div class="dialogue-list">
                   <div class="dialogue-bubble">
                     <div class="avatar-circle lms-u-24">An</div>
-                    <div><strong>An:</strong> “Khoa ơi, cậu đang sử dụng ứng dụng gì để luyện tập môn Tiếng Anh vậy?”
+                    <div><strong>An:</strong>“Khoa ơi, cậu đang sử dụng ứng dụng gì để luyện tập môn Tiếng Anh vậy?”
                     </div>
                   </div>
                   <div class="dialogue-bubble">
                     <div class="avatar-circle lms-u-25">Kh</div>
-                    <div><strong>Khoa:</strong> “Tớ đang dùng công cụ AI hỗ trợ học tập đấy! Tớ đặt yêu cầu luyện 5 câu
+                    <div><strong>Khoa:</strong>“Tớ đang dùng công cụ AI hỗ trợ học tập đấy! Tớ đặt yêu cầu luyện 5 câu
                       hội thoại ngắn về chủ đề bảo vệ môi trường. Công cụ này giúp tớ sửa lỗi phát âm và giải thích
                       nghĩa từ mới rất rõ ràng.”</div>
                   </div>
                   <div class="dialogue-bubble">
                     <div class="avatar-circle lms-u-26">Mi</div>
-                    <div><strong>Minh:</strong> “Thật hữu ích! Nhưng chúng ta cần đặt câu lệnh như thế nào để công cụ AI
+                    <div><strong>Minh:</strong>“Thật hữu ích! Nhưng chúng ta cần đặt câu lệnh như thế nào để công cụ AI
                       hỗ trợ việc học hiệu quả và phù hợp với lứa tuổi học sinh lớp 6 nhỉ?”</div>
                   </div>
                 </div>
@@ -2582,38 +2581,38 @@ Lộ trình 4 bước thực hiện trên LMS:
 
           <!-- Interactive Mini-Activity: 3 Cases from SGK -->
           <h3 class="lms-u-27">
-            🔍 Thử tài nhanh (Hoạt động 1 SGK): Bạn nào đang dùng AI đúng mục đích?
+             Thử tài nhanh (Hoạt động 1 SGK): Bạn nào đang dùng AI đúng mục đích?
           </h3>
           <div class="grid-3">
             <div class="case-card" id="case1">
               <div class="lms-u-28">Trường hợp 1: Bạn An</div>
-              <p class="lms-u-29">Yêu cầu AI giải thích khái niệm <em>“Quang hợp”</em> bằng một ví dụ đơn giản dễ hiểu
+              <p class="lms-u-29">Yêu cầu AI giải thích khái niệm <em>“Quang hợp”</em>bằng một ví dụ đơn giản dễ hiểu
                 với học sinh lớp 6, sau đó <strong>tự tóm tắt lại vào vở</strong>.</p>
               <div class="lms-u-30">
-                <button class="btn btn-outline btn-sm" onclick="checkCase(1, true)">✅ Đúng mục đích</button>
-                <button class="btn btn-ghost btn-sm" onclick="checkCase(1, false)">❌ Chưa đúng</button>
+                <button class="btn btn-outline btn-sm" onclick="checkCase(1, true)">Đúng mục đích</button>
+                <button class="btn btn-ghost btn-sm" onclick="checkCase(1, false)">Chưa đúng</button>
               </div>
               <div class="lms-u-31" id="case1-fb"></div>
             </div>
 
             <div class="case-card" id="case2">
               <div class="lms-u-28">Trường hợp 2: Bạn Minh</div>
-              <p class="lms-u-29">Nhập toàn bộ đề bài tập về nhà vào công cụ AI và <strong>chép nguyên văn</strong> câu
+              <p class="lms-u-29">Nhập toàn bộ đề bài tập về nhà vào công cụ AI và <strong>chép nguyên văn</strong>câu
                 trả lời vào vở mà không tự suy nghĩ.</p>
               <div class="lms-u-30">
-                <button class="btn btn-outline btn-sm" onclick="checkCase(2, false)">✅ Đúng mục đích</button>
-                <button class="btn btn-ghost btn-sm" onclick="checkCase(2, true)">❌ Chưa đúng</button>
+                <button class="btn btn-outline btn-sm" onclick="checkCase(2, false)">Đúng mục đích</button>
+                <button class="btn btn-ghost btn-sm" onclick="checkCase(2, true)">Chưa đúng</button>
               </div>
               <div class="lms-u-31" id="case2-fb"></div>
             </div>
 
             <div class="case-card" id="case3">
               <div class="lms-u-28">Trường hợp 3: Bạn Khoa</div>
-              <p class="lms-u-29">Sử dụng công cụ AI để <strong>luyện phát âm tiếng Anh</strong> và <strong>tạo các câu
-                  hỏi trắc nghiệm</strong> tự ôn tập kiến thức.</p>
+              <p class="lms-u-29">Sử dụng công cụ AI để <strong>luyện phát âm tiếng Anh</strong>và <strong>tạo các câu
+                  hỏi trắc nghiệm</strong>tự ôn tập kiến thức.</p>
               <div class="lms-u-30">
-                <button class="btn btn-outline btn-sm" onclick="checkCase(3, true)">✅ Đúng mục đích</button>
-                <button class="btn btn-ghost btn-sm" onclick="checkCase(3, false)">❌ Chưa đúng</button>
+                <button class="btn btn-outline btn-sm" onclick="checkCase(3, true)">Đúng mục đích</button>
+                <button class="btn btn-ghost btn-sm" onclick="checkCase(3, false)">Chưa đúng</button>
               </div>
               <div class="lms-u-31" id="case3-fb"></div>
             </div>
@@ -2622,7 +2621,7 @@ Lộ trình 4 bước thực hiện trên LMS:
 
         <!-- 2.3 LMS Forum Simulator -->
         <div class="card">
-          <span class="section-badge badge-blue">💬 Diễn đàn Khởi động (LMS Forum – 5 phút)</span>
+          <span class="section-badge badge-blue">Diễn đàn Khởi động (LMS Forum – 5 phút)</span>
           <h2 class="card-title">CHỦ ĐỀ THẢO LUẬN: CÔNG CỤ AI HỖ TRỢ EM HỌC TẬP NHƯ THẾ NÀO?</h2>
 
           <div class="callout lms-u-19">
@@ -2636,14 +2635,14 @@ Lộ trình 4 bước thực hiện trên LMS:
                 nhờ công cụ đó giải thích là gì?</li>
             </ol>
             <p class="lms-u-33">
-              ⚠️ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và KHÔNG cung cấp thông tin cá nhân (họ tên đầy
+               Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và KHÔNG cung cấp thông tin cá nhân (họ tên đầy
               đủ, địa chỉ nhà, số điện thoại, mật khẩu). Đọc và phản hồi tích cực ít nhất 01 bài viết của bạn cùng lớp.
             </p>
           </div>
 
           <!-- Interactive Reply Form -->
           <div class="lms-u-34">
-            <h4 class="lms-u-35">✍️ Gửi bài phản hồi của em lên Diễn đàn</h4>
+            <h4 class="lms-u-35">Gửi bài phản hồi của em lên Diễn đàn</h4>
             <div class="grid-2 lms-u-36">
               <div>
                 <label class="field-label" for="forumNick">Biệt danh học tập (không dùng họ tên đầy đủ):</label>
@@ -2662,21 +2661,21 @@ Lộ trình 4 bước thực hiện trên LMS:
                 placeholder="Ví dụ: Em muốn hỏi AI vì sao bầu trời có màu xanh và vì sao có hiện tượng cầu vồng sau mưa..."></textarea>
             </div>
             <div class="lms-u-38" id="forumAlert"></div>
-            <button class="btn btn-primary" onclick="submitForumPost()">📨 Đăng phản hồi lên Diễn đàn</button>
+            <button class="btn btn-primary" onclick="submitForumPost()">Đăng phản hồi lên Diễn đàn</button>
           </div>
 
           <div id="forumUnlockMsg" class="callout callout-green lms-u-39">
-            <strong>🎉 Phản hồi tự động từ hệ thống LMS:</strong> “Cảm ơn chia sẻ của các em! Công cụ AI có thể trở
+            <strong>Phản hồi tự động từ hệ thống LMS:</strong>“Cảm ơn chia sẻ của các em! Công cụ AI có thể trở
             thành người hỗ trợ học tập hữu ích nếu chúng ta biết cách giao tiếp đúng. Hãy chuyển sang <strong>Hoạt động
-              2</strong> để khám phá bí kíp đặt câu lệnh nhé!”
+              2</strong>để khám phá bí kíp đặt câu lệnh nhé!”
             <div class="lms-u-40">
-              <button class="btn btn-success btn-sm" onclick="switchTab('mod3')">➡️ Sang Hoạt động 2: Infographic &
+              <button class="btn btn-success btn-sm" onclick="switchTab('mod3')">Sang Hoạt động 2: Infographic &
                 Video</button>
             </div>
           </div>
 
           <!-- Danh sách bài đăng thật của học sinh (không gắn bài đăng mẫu ảo) -->
-          <h4 class="lms-u-41">📌 Chia sẻ từ các bạn trong lớp:</h4>
+          <h4 class="lms-u-41">Chia sẻ từ các bạn trong lớp:</h4>
           <div id="forumList">
             <p id="forumEmptyNote" style="font-size:13.5px; color:#64748b; font-style:italic; margin:8px 0;">
               Chưa có bài đăng nào trên diễn đàn. Hãy nhập câu trả lời của em phía trên để gửi bài chia sẻ đầu tiên!
@@ -2707,12 +2706,12 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 3 • Thành phần 3 LMS</span>
           <span>Infographic chuẩn <strong>Hình 2.2 & Hình 2.3 SGK</strong>. Có thể tải trực tiếp dạng ảnh <strong>PNG
-              nét cao</strong> để up lên LMS!</span>
+              nét cao</strong>để up lên LMS!</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-success btn-sm" onclick="exportInfographicPNG()">🖼️ Tải ảnh Infographic
+          <button class="btn btn-success btn-sm" onclick="exportInfographicPNG()">Tải ảnh Infographic
             (.png)</button>
-          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod3-export')">📋 Copy HTML nhúng LMS</button>
+          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod3-export')">Copy HTML nhúng LMS</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod3')">⬇️ Tải file HTML độc
             lập</button>
         </div>
@@ -2722,22 +2721,21 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
         <div class="infographic-board">
           <div class="info-header">
             <div class="lms-u-46">
-              TIN HỌC 6 • CHỦ ĐỀ A • BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP
+              TIN HỌC 6 · CHỦ ĐỀ A · BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP
             </div>
-            <h3>✨ BÍ KÍP GIAO TIẾP VỚI TRÍ TUỆ NHÂN TẠO (AI) ✨</h3>
-            <p class="lms-u-47">Hiểu đúng 3 lợi ích – Nắm chắc công thức Prompt 3 thành phần – Tự chủ làm chủ công nghệ
+            <h3>BÍ KÍP GIAO TIẾP VỚI TRÍ TUỆ NHÂN TẠO (AI)</h3>
+            <p class="lms-u-47">Hiểu đúng 3 lợi ích – Nắm chắc công thức câu lệnh 3 thành phần – Tự chủ khi sử dụng công nghệ
             </p>
           </div>
 
           <div class="info-body">
             <!-- PART 1: 3 BENEFITS -->
             <div class="info-section-title">
-              <span>🌟</span>
               <span>PHẦN 1: 3 LỢI ÍCH CỦA AI KHI SỬ DỤNG ĐÚNG CÁCH (Hình 2.2 SGK)</span>
             </div>
 
             <div class="benefit-row">
-              <div class="benefit-icon lms-u-48">💡</div>
+              <div class="benefit-icon lms-u-48" style="font-size:15px;font-weight:800;color:#0369a1;">01</div>
               <div>
                 <h4 class="lms-u-49">1. Hỗ trợ học hỏi kiến thức mới</h4>
                 <p class="lms-u-50">Giải thích các khái niệm khó (như <em>Quang hợp, Vòng tuần hoàn nước...</em>) bằng
@@ -2746,7 +2744,7 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             </div>
 
             <div class="benefit-row">
-              <div class="benefit-icon lms-u-51">🎯</div>
+              <div class="benefit-icon lms-u-51" style="font-size:15px;font-weight:800;color:#047857;">02</div>
               <div>
                 <h4 class="lms-u-52">2. Rèn luyện kĩ năng học tập</h4>
                 <p class="lms-u-50">Luyện phát âm ngoại ngữ, nhận góp ý sửa lỗi chính tả, tạo bộ câu hỏi trắc nghiệm tự
@@ -2755,7 +2753,7 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             </div>
 
             <div class="benefit-row">
-              <div class="benefit-icon lms-u-53">🌍</div>
+              <div class="benefit-icon lms-u-53" style="font-size:15px;font-weight:800;color:#4338ca;">03</div>
               <div>
                 <h4 class="lms-u-54">3. Mở rộng hiểu biết và tư duy</h4>
                 <p class="lms-u-50">Khám phá thêm nhiều tri thức bổ ích về Khoa học, Lịch sử, Địa lí, Nghệ thuật và phát
@@ -2764,14 +2762,13 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             </div>
 
             <div class="callout callout-rose lms-u-55">
-              <strong>⚠️ Lưu ý quan trọng (SGK Bài 2):</strong> Không lạm dụng AI để làm thay toàn bộ bài tập hay sao
-              chép thụ động kết quả, vì điều đó làm giảm khả năng tư duy độc lập và sáng tạo của em!
+              <strong>Lưu ý quan trọng (SGK Bài 2):</strong>Không lạm dụng AI để làm thay toàn bộ bài tập hay sao
+              chép thụ động kết quả, vì điều đó làm giảm khả năng tư duy độc lập và sáng tạo của em.
             </div>
 
             <!-- PART 2: PROMPT FORMULA -->
             <div class="info-section-title">
-              <span>🧩</span>
-              <span>PHẦN 2: CÔNG THỨC VIẾT CÂU LỆNH (PROMPT) 3 KHỐI LẮP GHÉP (Hình 2.3 SGK)</span>
+              <span>PHẦN 2: CÔNG THỨC VIẾT CÂU LỆNH (PROMPT) 3 THÀNH PHẦN (Hình 2.3 SGK)</span>
             </div>
 
             <div class="prompt-puzzle">
@@ -2809,7 +2806,7 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
 
             <div class="example-highlight-box">
               <div class="lms-u-62">
-                ✨ Câu lệnh hoàn chỉnh mẫu (tô màu theo 3 thành phần):
+                Câu lệnh hoàn chỉnh mẫu (tô màu theo 3 thành phần):
               </div>
               “<span class="hl-ctx">Em là học sinh lớp 6.</span> <span class="hl-role">Hãy đóng vai một giáo viên Khoa
                 học tự nhiên,</span> <span class="hl-task">giải thích ngắn gọn quá trình tuần hoàn của nước trong 4 câu
@@ -2819,12 +2816,12 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             <!-- Comparison A vs B (SGK Activity 2) -->
             <div class="grid-2 lms-u-63">
               <div class="lms-u-64">
-                <div class="lms-u-65">❌ Câu lệnh chung chung (Chưa hiệu quả)</div>
+                <div class="lms-u-65">Câu lệnh chung chung (Chưa hiệu quả)</div>
                 <p class="lms-u-66"><em>“Nước tuần hoàn thế nào?”</em> → AI không biết người hỏi là học sinh lớp 6 nên
                   dễ giải thích quá dài hoặc dùng từ ngữ học thuật khó hiểu.</p>
               </div>
               <div class="lms-u-67">
-                <div class="lms-u-68">✅ Câu lệnh rõ ràng (Đạt chuẩn SGK)</div>
+                <div class="lms-u-68">Câu lệnh rõ ràng (Đạt chuẩn SGK)</div>
                 <p class="lms-u-66"><em>“Em là học sinh lớp 6. Hãy giải thích ngắn gọn quá trình tuần hoàn của nước
                     trong tự nhiên bằng ngôn ngữ dễ hiểu kèm một ví dụ thực tế.”</em></p>
               </div>
@@ -2833,17 +2830,17 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             <!-- 3-Step Safe Workflow from SGK -->
             <div class="lms-u-69">
               <div class="lms-u-70">
-                📌 Quy trình 3 bước sử dụng AI an toàn (SGK Tin học 6 – Bài 2)
+                Quy trình 3 bước sử dụng AI an toàn (SGK Tin học 6 – Bài 2)
               </div>
               <div class="grid-3 lms-u-71">
                 <div class="lms-u-72">
-                  <strong>Bước 1:</strong> Chọn công cụ AI phù hợp lứa tuổi dưới sự hướng dẫn của giáo viên hoặc cha mẹ.
+                  <strong>Bước 1:</strong>Chọn công cụ AI phù hợp lứa tuổi dưới sự hướng dẫn của giáo viên hoặc cha mẹ.
                 </div>
                 <div class="lms-u-72">
-                  <strong>Bước 2:</strong> Nhập câu lệnh rõ mục đích, đọc kĩ và kiểm tra lại nội dung phản hồi của AI.
+                  <strong>Bước 2:</strong>Nhập câu lệnh rõ mục đích, đọc kĩ và kiểm tra lại nội dung phản hồi của AI.
                 </div>
                 <div class="lms-u-72">
-                  <strong>Bước 3:</strong> Tự diễn đạt lại điều em vừa học thêm được bằng chính lời văn của bản thân.
+                  <strong>Bước 3:</strong>Tự diễn đạt lại điều em vừa học thêm được bằng chính lời văn của bản thân.
                 </div>
               </div>
             </div>
@@ -2863,16 +2860,16 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 4 • Thành phần 4a LMS (H5P / SCORM 1.2)</span>
-          <span>Video <strong>06:27</strong> có chế độ <strong>Ngăn tua nhanh</strong> + <strong>3 mốc trắc nghiệm neo
-              chặn</strong> (đạt ≥ 70/100đ). GV có thể nạp file MP4 thật hoặc chạy bài giảng tích hợp!</span>
+          <span>Video <strong>06:27</strong>có chế độ <strong>Ngăn tua nhanh</strong> + <strong>3 mốc trắc nghiệm neo
+              chặn</strong>(đạt ≥ 70/100đ). GV có thể nạp file MP4 thật hoặc chạy bài giảng tích hợp!</span>
         </div>
         <div class="toolbar-actions">
           <label class="btn btn-amber btn-sm lms-u-74">
-            📂 Nạp file Video (.mp4) của GV
+             Nạp file Video (.mp4) của GV
             <input class="is-hidden" type="file" id="customVideoFile" accept="video/*"
               onchange="loadCustomVideo(event)" />
           </label>
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod4-h5p-text')">📋 Copy 3 câu hỏi cấu hình
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod4-h5p-text')">Copy 3 câu hỏi cấu hình
             H5P</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod4')">⬇️ Tải file HTML độc
             lập</button>
@@ -2882,13 +2879,13 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="section-badge badge-blue">🎬 Video tương tác chuẩn H5P / SCORM 1.2 (06:27)</span>
+            <span class="section-badge badge-blue">Video tương tác chuẩn H5P / SCORM 1.2 (06:27)</span>
             <h2 class="card-title">Khám phá “Bí kíp giao tiếp với AI” & 3 Mốc trắc nghiệm neo chặn</h2>
           </div>
           <div class="lms-u-75">
             <span class="section-badge badge-green" id="videoScoreBadge">Điểm số: 0 / 100 (Cần ≥ 70đ)</span>
             <label class="lms-u-76">
-              <input type="checkbox" id="preventSkipToggle" checked /> 🔒 Ngăn tua nhanh
+              <input type="checkbox" id="preventSkipToggle" checked />Ngăn tua nhanh
             </label>
           </div>
         </div>
@@ -2901,19 +2898,19 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
             <!-- Built-in Animated Interactive Lesson Player (06:27) -->
             <div id="simVideoCanvas" class="sim-slide">
               <div class="lms-u-77">
-                <span class="sim-slide-badge" id="simChapterBadge">🎬 Đoạn 1/4 • Mở đầu & So sánh câu lệnh</span>
+                <span class="sim-slide-badge" id="simChapterBadge">Đoạn 1/4 • Mở đầu & So sánh câu lệnh</span>
                 <span class="lms-u-78">H5P Interactive Video • Prevent Skipping: ON</span>
               </div>
 
               <div class="sim-slide-main" id="simSlideContent">
                 <h3>Chào mừng em đến với Bài giảng Video tương tác (06:27)</h3>
-                <p>Nhấn nút <strong>▶ Phát bài giảng</strong> bên dưới để bắt đầu. Video sẽ tự động tạm dừng tại
-                  <strong>3 mốc câu hỏi trắc nghiệm neo chặn</strong> (01:45 • 03:40 • 05:30). Hãy đạt tối thiểu
-                  <strong>70/100 điểm</strong> để mở khóa Hoạt động 3 nhé!</p>
+                <p>Nhấn nút <strong>▶ Phát bài giảng</strong>bên dưới để bắt đầu. Video sẽ tự động tạm dừng tại
+                  <strong>3 mốc câu hỏi trắc nghiệm neo chặn</strong>(01:45 • 03:40 • 05:30). Hãy đạt tối thiểu
+                  <strong>70/100 điểm</strong>để mở khóa Hoạt động 3 nhé!</p>
               </div>
 
               <div class="lms-u-79">
-                <span>💡 Mẹo: Giáo viên có thể nhấn nút <strong>“Tua nhanh đến mốc câu hỏi”</strong> (khi tắt khóa tua)
+                <span>Mẹo: Giáo viên có thể nhấn nút <strong>“Tua nhanh đến mốc câu hỏi”</strong>(khi tắt khóa tua)
                   hoặc nạp file MP4 thật ở thanh công cụ phía trên.</span>
                 <span class="lms-u-80" id="simStatusLabel">Sẵn sàng</span>
               </div>
@@ -2972,23 +2969,23 @@ Lưu ý: Viết tiếng Việt có dấu, sử dụng ngôn từ lịch sự và
 
         <!-- Auto Completion Feedback (KHBD Bước 4) -->
         <div id="videoUnlockBanner" class="callout callout-green lms-u-96">
-          <h4 class="lms-u-97">🏆 Đạt chuẩn mở khóa Hoạt động 3 (<span id="finalVideoScore"></span>/100 điểm)</h4>
+          <h4 class="lms-u-97">Đạt chuẩn mở khóa Hoạt động 3 (<span id="finalVideoScore"></span>/100 điểm)</h4>
           <p>“Chúc mừng em đã nắm vững 3 lợi ích của AI và công thức viết câu lệnh: <strong>Bối cảnh (Ngữ cảnh) + Vai
               trò + Yêu cầu cụ thể</strong>. Hãy áp dụng ngay vào Hoạt động 3 nhé!”</p>
-          <button class="btn btn-success btn-sm lms-u-98" onclick="switchTab('mod5')">🔓 Mở khóa Hoạt động 3: Poster 4
+          <button class="btn btn-success btn-sm lms-u-98" onclick="switchTab('mod5')">Mở khóa Hoạt động 3: Poster 4
             KHÔNG & Thực hành →</button>
         </div>
 
         <div id="videoRetryBanner" class="callout callout-rose lms-u-96">
-          <h4 class="lms-u-99">📌 Em chưa đạt ngưỡng 70/100 điểm</h4>
-          <p>Đừng lo lắng! Hãy xem lại Infographic và nhấn <strong>Xem lại từ đầu</strong> để làm lại 3 câu hỏi neo chặn
+          <h4 class="lms-u-99">Em chưa đạt ngưỡng 70/100 điểm</h4>
+          <p>Đừng lo lắng! Hãy xem lại Infographic và nhấn <strong>Xem lại từ đầu</strong>để làm lại 3 câu hỏi neo chặn
             đạt từ 70 điểm trở lên nhé.</p>
         </div>
       </div>
 
       <!-- Extra Interactive Practice from SGK -->
       <div class="card">
-        <span class="section-badge badge-green">📝 Luyện tập củng cố theo SGK Bài 2</span>
+        <span class="section-badge badge-green">Luyện tập củng cố theo SGK Bài 2</span>
         <h2 class="card-title">Kiểm tra nhanh kiến thức SGK (Trước khi sang Thực hành)</h2>
 
         <div class="grid-2 lms-u-10">
@@ -3062,13 +3059,13 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 5 • Thành phần 4b LMS (Poster An toàn)</span>
-          <span>Hiển thị tại đầu <strong>Hoạt động 3</strong> để nhắc học sinh bảo vệ dữ liệu cá nhân (PII) trước khi
+          <span>Hiển thị tại đầu <strong>Hoạt động 3</strong>để nhắc học sinh bảo vệ dữ liệu cá nhân (PII) trước khi
             vào SchoolAI.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-danger btn-sm" onclick="exportPosterPNG()">🖼️ Tải ảnh Poster 4 KHÔNG (.png)</button>
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod5-text')">📝 Copy văn bản</button>
-          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod5-export')">📋 Copy HTML nhúng LMS</button>
+          <button class="btn btn-danger btn-sm" onclick="exportPosterPNG()">Tải ảnh Poster 4 KHÔNG (.png)</button>
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod5-text')">Copy văn bản</button>
+          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod5-export')">Copy HTML nhúng LMS</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod5')">⬇️ Tải file HTML độc
             lập</button>
         </div>
@@ -3078,7 +3075,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         <div class="poster-frame">
           <div class="poster-header">
             <div class="lms-u-108">
-              🛡️ AN TOÀN KHÔNG GIAN MẠNG • TIN HỌC 6 – BÀI 2
+               AN TOÀN KHÔNG GIAN MẠNG • TIN HỌC 6 – BÀI 2
             </div>
             <h2 class="lms-u-109">
               CẨM NANG “4 KHÔNG” KHI TƯƠNG TÁC VỚI AI
@@ -3088,40 +3085,40 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
           <div class="poster-grid">
             <div class="khong-card">
-              <div class="khong-num">🚫 KHÔNG SỐ 1</div>
-              <div class="lms-u-111">🪪</div>
+              <div class="khong-num">KHÔNG SỐ 1</div>
+              <div class="lms-u-111"></div>
               <h3 class="lms-u-112">KHÔNG nhập danh tính cá nhân</h3>
-              <p class="lms-u-50"><strong>KHÔNG</strong> nhập <strong>họ tên đầy đủ</strong> và <strong>ngày tháng năm
-                  sinh</strong> của bản thân hoặc người thân vào khung trò chuyện AI.</p>
+              <p class="lms-u-50"><strong>KHÔNG</strong>nhập <strong>họ tên đầy đủ</strong>và <strong>ngày tháng năm
+                  sinh</strong>của bản thân hoặc người thân vào khung trò chuyện AI.</p>
             </div>
 
             <div class="khong-card">
-              <div class="khong-num">🚫 KHÔNG SỐ 2</div>
-              <div class="lms-u-111">🏠</div>
+              <div class="khong-num">KHÔNG SỐ 2</div>
+              <div class="lms-u-111"></div>
               <h3 class="lms-u-112">KHÔNG cung cấp nơi ở & liên lạc</h3>
-              <p class="lms-u-50"><strong>KHÔNG</strong> cung cấp <strong>số điện thoại</strong>, <strong>địa chỉ nhà
-                  riêng</strong> hoặc <strong>tên trường, lớp</strong> đang học.</p>
+              <p class="lms-u-50"><strong>KHÔNG</strong>cung cấp <strong>số điện thoại</strong>, <strong>địa chỉ nhà
+                  riêng</strong>hoặc <strong>tên trường, lớp</strong>đang học.</p>
             </div>
 
             <div class="khong-card">
-              <div class="khong-num">🚫 KHÔNG SỐ 3</div>
-              <div class="lms-u-111">📸</div>
+              <div class="khong-num">KHÔNG SỐ 3</div>
+              <div class="lms-u-111"></div>
               <h3 class="lms-u-112">KHÔNG tải ảnh & bí mật riêng tư</h3>
-              <p class="lms-u-50"><strong>KHÔNG</strong> tải lên <strong>hình ảnh khuôn mặt riêng tư</strong> hoặc các
-                <strong>thông tin bí mật</strong> của gia đình.</p>
+              <p class="lms-u-50"><strong>KHÔNG</strong>tải lên <strong>hình ảnh khuôn mặt riêng tư</strong>hoặc các
+                <strong>thông tin bí mật</strong>của gia đình.</p>
             </div>
 
             <div class="khong-card">
-              <div class="khong-num">🚫 KHÔNG SỐ 4</div>
-              <div class="lms-u-111">🔐</div>
+              <div class="khong-num">KHÔNG SỐ 4</div>
+              <div class="lms-u-111"></div>
               <h3 class="lms-u-112">KHÔNG nhập mật khẩu tài khoản</h3>
-              <p class="lms-u-50"><strong>KHÔNG</strong> nhập <strong>mật khẩu tài khoản học tập</strong>, thư điện tử
+              <p class="lms-u-50"><strong>KHÔNG</strong>nhập <strong>mật khẩu tài khoản học tập</strong>, thư điện tử
                 (email) hoặc mạng xã hội vào ô trò chuyện AI.</p>
             </div>
           </div>
 
           <div class="lms-u-113">
-            ✅ Quy tắc vàng: Chỉ dùng thông tin học tập chung (ví dụ: <em>“Em là học sinh lớp 6”</em>) — Tuyệt đối bảo
+             Quy tắc vàng: Chỉ dùng thông tin học tập chung (ví dụ: <em>“Em là học sinh lớp 6”</em>) — Tuyệt đối bảo
             mật dữ liệu cá nhân!
           </div>
         </div>
@@ -3146,13 +3143,13 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 6 • Thành phần 4b LMS (HTML5 Tương tác & Assignment)</span>
-          <span>Ứng dụng <strong>TRẠM LUYỆN VIẾT CÂU LỆNH AI LỚP 6</strong> theo đúng mục 3.2 file Word + Hướng dẫn
+          <span>Ứng dụng <strong>TRẠM LUYỆN VIẾT CÂU LỆNH AI LỚP 6</strong>theo đúng mục 3.2 file Word + Hướng dẫn
             SchoolAI & Rubric 10đ.</span>
         </div>
         <div class="toolbar-actions">
           <button class="btn btn-success btn-sm" onclick="downloadStandalonePromptLab()">⬇️ Tải riêng ứng dụng HTML5
             (Trạm Prompt)</button>
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod6-assign-text')">📝 Copy đề Assignment
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod6-assign-text')">Copy đề Assignment
             LMS</button>
         </div>
       </div>
@@ -3161,27 +3158,27 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       <div class="prompt-lab-shell lms-u-114">
         <div class="lms-u-115">
           <div>
-            <span class="section-badge badge-blue">🧪 Ứng dụng tương tác HTML5 • Tin học 6 – Bài 2</span>
+            <span class="section-badge badge-blue">Ứng dụng tương tác HTML5 • Tin học 6 – Bài 2</span>
             <h2 class="lms-u-116">
               TRẠM LUYỆN VIẾT CÂU LỆNH AI LỚP 6
             </h2>
             <p class="lms-u-117">Lắp ghép đủ 3 thành phần câu lệnh, kiểm tra an toàn 4 KHÔNG rồi sao chép dán vào trạm
               AI thực hành của lớp.</p>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="clearPromptLab()">🧹 Xóa nhập lại</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearPromptLab()">Xóa nhập lại</button>
         </div>
 
         <!-- Quick Topic Presets (KHBD + SGK) -->
         <div class="lms-u-118">
-          <div class="lms-u-119">📌 Chọn nhanh chủ đề thực hành (hoặc tự nhập chủ đề lớp 6 của em):</div>
+          <div class="lms-u-119">Chọn nhanh chủ đề thực hành (hoặc tự nhập chủ đề lớp 6 của em):</div>
           <div class="lms-u-120">
-            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(1)">⚔️ Chủ đề 1: Chiến thắng Bạch Đằng 938
+            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(1)">Chủ đề 1: Chiến thắng Bạch Đằng 938
               (Lịch sử 6)</button>
-            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(2)">🌙 Chủ đề 2: Hình dạng Mặt Trăng (KHTN
+            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(2)">Chủ đề 2: Hình dạng Mặt Trăng (KHTN
               6)</button>
-            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(3)">🌍 Chủ đề 3: Hiện tượng Ngày & Đêm (Địa
+            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(3)">Chủ đề 3: Hiện tượng Ngày & Đêm (Địa
               lí 6)</button>
-            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(4)">📜 Vận dụng SGK: 5 câu tục ngữ đoàn kết
+            <button class="btn btn-outline btn-sm" onclick="fillPromptPreset(4)">Vận dụng SGK: 5 câu tục ngữ đoàn kết
               (Ngữ văn 6)</button>
           </div>
         </div>
@@ -3209,8 +3206,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         </div>
 
         <div class="lms-u-128">
-          <button class="btn btn-primary" onclick="buildAndCheckPrompt()">🔍 Ghép câu lệnh & Kiểm tra</button>
-          <button class="btn btn-success lms-u-129" id="btnCopyPrompt" onclick="copyBuiltPrompt()" disabled>📋 Sao chép
+          <button class="btn btn-primary" onclick="buildAndCheckPrompt()">Ghép câu lệnh & Kiểm tra</button>
+          <button class="btn btn-success lms-u-129" id="btnCopyPrompt" onclick="copyBuiltPrompt()" disabled>Sao chép
             câu lệnh</button>
         </div>
 
@@ -3220,22 +3217,22 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       <!-- SchoolAI Space & Assignment Submission Guide -->
       <div class="card">
-        <span class="section-badge badge-amber">🚀 Hoạt động 3: Thực hành “Hỏi đúng – Trúng đáp án” (15 phút)</span>
+        <span class="section-badge badge-amber">Hoạt động 3: Thực hành “Hỏi đúng – Trúng đáp án” (15 phút)</span>
         <h2 class="card-title">Hướng dẫn truy cập SchoolAI Space & Nộp minh chứng Assignment</h2>
 
         <div class="grid-2 lms-u-10">
           <div class="lms-u-131">
-            <h4 class="lms-u-132">🔑 Bước 1 & 2: Truy cập Trạm AI an toàn (Không cần tài khoản)</h4>
+            <h4 class="lms-u-132">Bước 1 & 2: Truy cập Trạm AI an toàn (Không cần tài khoản)</h4>
             <ol class="lms-u-133">
               <li>Phác thảo câu lệnh 3 thành phần vào khung trong SGK Bài 2 hoặc kiểm tra ở <strong>Trạm luyện viết câu
-                  lệnh</strong> bên trên.</li>
-              <li>Mở trang <strong>SchoolAI Space</strong> do giáo viên cung cấp và nhập <strong>Mã phòng học (Room
+                  lệnh</strong>bên trên.</li>
+              <li>Mở trang <strong>SchoolAI Space</strong>do giáo viên cung cấp và nhập <strong>Mã phòng học (Room
                   Code)</strong>:
                 <div class="lms-u-134">
                   <input class="lms-u-135" type="text" id="roomCodeInput" value=""
                     placeholder="Giáo viên nhập mã phòng SchoolAI thật..."
                     aria-label="Mã phòng học SchoolAI" />
-                  <button class="btn btn-outline btn-sm" onclick="copyRoomCode()">📋 Copy mã phòng</button>
+                  <button class="btn btn-outline btn-sm" onclick="copyRoomCode()">Copy mã phòng</button>
                 </div>
               </li>
               <li>Dán câu lệnh đã kiểm tra an toàn vào ô trò chuyện và quan sát phản hồi của AI.</li>
@@ -3243,14 +3240,14 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
           </div>
 
           <div class="lms-u-100">
-            <h4 class="lms-u-136">📸 Bước 3: Chụp ảnh màn hình & Đặt đúng tên tệp</h4>
+            <h4 class="lms-u-136">Bước 3: Chụp ảnh màn hình & Đặt đúng tên tệp</h4>
             <p class="lms-u-137">
               Chụp ảnh màn hình hiển thị trọn vẹn <strong>cả câu lệnh đã nhập và câu trả lời của AI</strong>, đặt tên
-              tệp đúng cú pháp <code>[HoTen]_[Lop]_Prompt.png</code> rồi tải lên mục <strong>Assignment</strong> trên
+              tệp đúng cú pháp <code>[HoTen]_[Lop]_Prompt.png</code>rồi tải lên mục <strong>Assignment</strong>trên
               LMS.
             </p>
             <div class="lms-u-138">
-              <div class="lms-u-139">🛠️ Trợ lý tạo tên tệp đúng chuẩn:</div>
+              <div class="lms-u-139">Trợ lý tạo tên tệp đúng chuẩn:</div>
               <div class="lms-u-140">
                 <input class="lms-u-141" type="text" id="fnName" placeholder="Nhập họ tên không dấu..."
                   oninput="updateFileNamePreview()" />
@@ -3267,7 +3264,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         </div>
 
         <!-- Rubric Activity 3 -->
-        <h3 class="lms-u-145">📊 Bảng Rubric đánh giá Hoạt động 3 (Thang điểm 10)</h3>
+        <h3 class="lms-u-145">Bảng Rubric đánh giá Hoạt động 3 (Thang điểm 10)</h3>
         <div class="table-wrap">
           <table>
             <thead>
@@ -3282,26 +3279,26 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
             <tbody>
               <tr>
                 <td><strong>1. Cấu trúc câu lệnh (Prompt)</strong><br /><span class="lms-u-151">(Trọng tâm)</span></td>
-                <td><strong>(5 điểm)</strong> Đầy đủ 3 yếu tố: 1. Bối cảnh (Ngữ cảnh); 2. Vai trò; 3. Yêu cầu và định
+                <td><strong>(5 điểm)</strong>Đầy đủ 3 yếu tố: 1. Bối cảnh (Ngữ cảnh); 2. Vai trò; 3. Yêu cầu và định
                   dạng cụ thể.</td>
-                <td><strong>(3 điểm)</strong> Thiếu 1 trong 3 yếu tố (thường thiếu Bối cảnh hoặc Vai trò).</td>
-                <td><strong>(1 điểm)</strong> Chỉ gồm từ khóa ngắn gọn hoặc hỏi chung chung.</td>
+                <td><strong>(3 điểm)</strong>Thiếu 1 trong 3 yếu tố (thường thiếu Bối cảnh hoặc Vai trò).</td>
+                <td><strong>(1 điểm)</strong>Chỉ gồm từ khóa ngắn gọn hoặc hỏi chung chung.</td>
                 <td><strong>5đ</strong></td>
               </tr>
               <tr>
                 <td><strong>2. Nội dung và Ngôn từ</strong></td>
-                <td><strong>(3 điểm)</strong> Chủ đề thuộc kiến thức lớp 6; ngôn từ lịch sự, tiếng Việt có dấu đầy đủ,
+                <td><strong>(3 điểm)</strong>Chủ đề thuộc kiến thức lớp 6; ngôn từ lịch sự, tiếng Việt có dấu đầy đủ,
                   không lộ dữ liệu cá nhân.</td>
-                <td><strong>(2 điểm)</strong> Đúng chủ đề học tập nhưng gõ thiếu dấu hoặc viết tắt nhiều.</td>
-                <td><strong>(0 điểm)</strong> Hỏi ngoài nội dung học tập hoặc vi phạm an toàn thông tin.</td>
+                <td><strong>(2 điểm)</strong>Đúng chủ đề học tập nhưng gõ thiếu dấu hoặc viết tắt nhiều.</td>
+                <td><strong>(0 điểm)</strong>Hỏi ngoài nội dung học tập hoặc vi phạm an toàn thông tin.</td>
                 <td><strong>3đ</strong></td>
               </tr>
               <tr>
                 <td><strong>3. Hình thức minh chứng</strong></td>
-                <td><strong>(2 điểm)</strong> Ảnh rõ nét, hiển thị đầy đủ cả câu lệnh và phản hồi của AI, đặt đúng tên
+                <td><strong>(2 điểm)</strong>Ảnh rõ nét, hiển thị đầy đủ cả câu lệnh và phản hồi của AI, đặt đúng tên
                   tệp.</td>
-                <td><strong>(1 điểm)</strong> Ảnh bị cắt xén một phần câu hỏi hoặc sai quy cách tên tệp.</td>
-                <td><strong>(0 điểm)</strong> Không nộp ảnh chụp màn hình hoặc nộp sai định dạng.</td>
+                <td><strong>(1 điểm)</strong>Ảnh bị cắt xén một phần câu hỏi hoặc sai quy cách tên tệp.</td>
+                <td><strong>(0 điểm)</strong>Không nộp ảnh chụp màn hình hoặc nộp sai định dạng.</td>
                 <td><strong>2đ</strong></td>
               </tr>
             </tbody>
@@ -3327,13 +3324,13 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Module 7 • Thành phần 5 LMS (Blog / Nhật ký học tập)</span>
-          <span>Hoạt động 4 (10 phút): Tóm tắt <strong>3–5 câu bằng lời văn cá nhân</strong> (chống copy-paste) +
+          <span>Hoạt động 4 (10 phút): Tóm tắt <strong>3–5 câu bằng lời văn cá nhân</strong>(chống copy-paste) +
             <strong>Đối chiếu SGK chuẩn bị Bài 3</strong>.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod7-blog-text')">📝 Copy đề bài Blog
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod7-blog-text')">Copy đề bài Blog
             LMS</button>
-          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod7-export')">📋 Copy HTML nhúng LMS</button>
+          <button class="btn btn-outline btn-sm" onclick="copyModuleHTML('mod7-export')">Copy HTML nhúng LMS</button>
           <button class="btn btn-primary btn-sm" onclick="downloadStandaloneModule('mod7')">⬇️ Tải file HTML độc
             lập</button>
         </div>
@@ -3341,18 +3338,18 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       <div id="mod7-export">
         <div class="card">
-          <span class="section-badge badge-green">📰 Hoạt động 4: Vận dụng – “Nhà báo nhí tổng hợp tin tức” (10
+          <span class="section-badge badge-green">Hoạt động 4: Vận dụng – “Nhà báo nhí tổng hợp tin tức” (10
             phút)</span>
           <h2 class="card-title">Nhật ký học tập cá nhân & Nhiệm vụ cầu nối chuẩn bị Bài 3</h2>
 
           <div class="callout callout-amber lms-u-19">
-            <strong>📋 Hướng dẫn thực hiện 2 nhiệm vụ:</strong>
+            <strong>Hướng dẫn thực hiện 2 nhiệm vụ:</strong>
             <ul class="lms-u-152">
-              <li><strong>Nhiệm vụ 1 – Viết bản tin “Nhà báo nhí”:</strong> Đọc kĩ câu trả lời của AI ở Hoạt động 3, sau
+              <li><strong>Nhiệm vụ 1 – Viết bản tin “Nhà báo nhí”:</strong>Đọc kĩ câu trả lời của AI ở Hoạt động 3, sau
                 đó <strong>đóng cửa sổ trò chuyện AI</strong>, tự suy nghĩ và viết tay nháp vào SGK rồi nhập đoạn văn
-                ngắn từ <strong>3 đến 5 câu</strong> bằng chính lời văn của em. <strong class="lms-u-153">Tuyệt đối
+                ngắn từ <strong>3 đến 5 câu</strong>bằng chính lời văn của em. <strong class="lms-u-153">Tuyệt đối
                   không sao chép (copy-paste) nguyên văn từ AI!</strong></li>
-              <li><strong>Nhiệm vụ 2 – Cầu nối sang Bài 3 (Thực chứng thông tin – Làm chủ AI):</strong> Mở Sách giáo
+              <li><strong>Nhiệm vụ 2 – Cầu nối sang Bài 3 (Thực chứng thông tin – Làm chủ AI):</strong>Mở Sách giáo
                 khoa Lịch sử và Địa lí 6 hoặc Khoa học tự nhiên 6 để đối chiếu lại các sự kiện, con số trong câu trả lời
                 của AI và ghi nhận xét đối chiếu ở cuối bài.</li>
             </ul>
@@ -3384,7 +3381,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
             <div class="lms-u-37">
               <div class="lms-u-156">
-                <label class="field-label lms-u-157" for="blogBody">✍️ Nội dung tóm tắt bằng lời văn của em (Mục tiêu:
+                <label class="field-label lms-u-157" for="blogBody">Nội dung tóm tắt bằng lời văn của em (Mục tiêu:
                   3–5 câu):</label>
                 <span id="sentenceCounter" class="section-badge badge-blue">Số câu hiện tại: 0 (Cần 3–5 câu)</span>
               </div>
@@ -3392,14 +3389,14 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
                 placeholder="Hãy gấp màn hình AI lại và tự diễn đạt 3–5 câu ngắn gọn, mạch lạc bằng lời văn của chính em..."
                 oninput="analyzeBlogDraft()" onpaste="warnBlogPaste(event)"></textarea>
               <div class="lms-u-158" id="blogPasteWarn">
-                ⚠️ Hệ thống phát hiện thao tác Dán (Paste)! Hãy nhớ quy tắc tự chủ: Không sao chép nguyên văn câu trả
+                 Hệ thống phát hiện thao tác Dán (Paste)! Hãy nhớ quy tắc tự chủ: Không sao chép nguyên văn câu trả
                 lời của AI mà hãy tự gõ lại bằng lời văn của em nhé!
               </div>
             </div>
 
             <!-- Bridge to Lesson 3 -->
             <div class="lms-u-159">
-              <h4 class="lms-u-160">🌉 Nhiệm vụ cầu nối chuẩn bị Bài 3: Đối chiếu Sách giáo khoa</h4>
+              <h4 class="lms-u-160">Nhiệm vụ cầu nối chuẩn bị Bài 3: Đối chiếu Sách giáo khoa</h4>
               <div class="grid-3 lms-u-161">
                 <div>
                   <label class="field-label" for="bridgeSubject">Sách giáo khoa môn:</label>
@@ -3430,9 +3427,9 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
             </div>
 
             <div class="lms-u-162">
-              <button class="btn btn-success" onclick="publishBlogPreview()">📰 Kiểm tra & Xuất bản lên Nhật ký
+              <button class="btn btn-success" onclick="publishBlogPreview()">Kiểm tra & Xuất bản lên Nhật ký
                 lớp</button>
-              <button class="btn btn-outline" onclick="copyCompleteBlog()">📋 Sao chép bài đăng để dán lên Blog
+              <button class="btn btn-outline" onclick="copyCompleteBlog()">Sao chép bài đăng để dán lên Blog
                 LMS</button>
             </div>
           </div>
@@ -3440,7 +3437,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
           <div class="lms-u-96" id="blogPublishedArea"></div>
 
           <!-- Rubric Activity 4 -->
-          <h3 class="lms-u-163">📊 Bảng Rubric đánh giá Hoạt động 4 (Thang điểm 10)</h3>
+          <h3 class="lms-u-163">Bảng Rubric đánh giá Hoạt động 4 (Thang điểm 10)</h3>
           <div class="table-wrap">
             <table>
               <thead>
@@ -3456,28 +3453,28 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
                 <tr>
                   <td><strong>1. Tính tự chủ (Không sao chép)</strong><br /><span class="lms-u-164">(Trọng tâm)</span>
                   </td>
-                  <td><strong>(5 điểm)</strong> Diễn đạt hoàn toàn bằng ngôn ngữ riêng của học sinh; tự chắt lọc và tóm
+                  <td><strong>(5 điểm)</strong>Diễn đạt hoàn toàn bằng ngôn ngữ riêng của học sinh; tự chắt lọc và tóm
                     tắt lại ý chính.</td>
-                  <td><strong>(3 điểm)</strong> Có chỉnh sửa diễn đạt nhưng vẫn sao chép nguyên văn một số câu từ phản
+                  <td><strong>(3 điểm)</strong>Có chỉnh sửa diễn đạt nhưng vẫn sao chép nguyên văn một số câu từ phản
                     hồi của AI.</td>
-                  <td><strong>(0 điểm)</strong> Sao chép nguyên văn (copy-paste) toàn bộ câu trả lời của AI.</td>
+                  <td><strong>(0 điểm)</strong>Sao chép nguyên văn (copy-paste) toàn bộ câu trả lời của AI.</td>
                   <td><strong>5đ</strong></td>
                 </tr>
                 <tr>
                   <td><strong>2. Dung lượng và Tính chính xác</strong></td>
-                  <td><strong>(3 điểm)</strong> Đảm bảo độ dài từ 3 đến 5 câu; tóm tắt đúng kiến thức và có ghi chú đối
+                  <td><strong>(3 điểm)</strong>Đảm bảo độ dài từ 3 đến 5 câu; tóm tắt đúng kiến thức và có ghi chú đối
                     chiếu sách giáo khoa.</td>
-                  <td><strong>(1.5 điểm)</strong> Viết ngắn hơn 3 câu hoặc thiếu dòng ghi chú đối chiếu sách giáo khoa.
+                  <td><strong>(1.5 điểm)</strong>Viết ngắn hơn 3 câu hoặc thiếu dòng ghi chú đối chiếu sách giáo khoa.
                   </td>
-                  <td><strong>(0 điểm)</strong> Nội dung sai lệch kiến thức trọng tâm hoặc lạc đề.</td>
+                  <td><strong>(0 điểm)</strong>Nội dung sai lệch kiến thức trọng tâm hoặc lạc đề.</td>
                   <td><strong>3đ</strong></td>
                 </tr>
                 <tr>
                   <td><strong>3. Trình bày và Chính tả</strong></td>
-                  <td><strong>(2 điểm)</strong> Câu văn mạch lạc, viết hoa đầu câu, sử dụng đúng dấu câu, không mắc lỗi
+                  <td><strong>(2 điểm)</strong>Câu văn mạch lạc, viết hoa đầu câu, sử dụng đúng dấu câu, không mắc lỗi
                     chính tả.</td>
-                  <td><strong>(1 điểm)</strong> Diễn đạt còn lủng củng hoặc mắc từ 2–3 lỗi chính tả, dấu câu.</td>
-                  <td><strong>(0 điểm)</strong> Mắc nhiều lỗi chính tả gây khó hiểu cho người đọc.</td>
+                  <td><strong>(1 điểm)</strong>Diễn đạt còn lủng củng hoặc mắc từ 2–3 lỗi chính tả, dấu câu.</td>
+                  <td><strong>(0 điểm)</strong>Mắc nhiều lỗi chính tả gây khó hiểu cho người đọc.</td>
                   <td><strong>2đ</strong></td>
                 </tr>
               </tbody>
@@ -3498,7 +3495,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     ========================================================== -->
     <section id="mod8" class="module-panel teacher-only">
       <div class="card">
-        <span class="section-badge badge-purple">⚙️ Dành cho Giáo viên • Mục 4.3 KHBD</span>
+        <span class="section-badge badge-purple">Dành cho Giáo viên • Mục 4.3 KHBD</span>
         <h2 class="card-title">Danh mục 5 Học liệu số & Cấu hình điều kiện mở khóa trên LMS</h2>
         <div class="table-wrap">
           <table>
@@ -3527,8 +3524,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
                 <td>Diễn đàn Khởi động</td>
                 <td>LMS Discussion Forum</td>
                 <td>Hoạt động 1 (5p)<br />(TP 2)</td>
-                <td>Cài đặt hoàn thành: <em>Require posts ≥ 1</em> để tự động mở khóa Hoạt động 2.</td>
-                <td><button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-forum-text')">📋 Copy
+                <td>Cài đặt hoàn thành: <em>Require posts ≥ 1</em>để tự động mở khóa Hoạt động 2.</td>
+                <td><button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-forum-text')">Copy
                     đề</button></td>
               </tr>
               <tr>
@@ -3538,7 +3535,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
                 <td>Hoạt động 2 (15p)<br />(TP 3 & 4a)</td>
                 <td>Bật <em>Prevent skipping forward</em>; điều kiện mở khóa HĐ 3: <em>Grade ≥ 70/100</em>.</td>
                 <td>
-                  <button class="btn btn-success btn-sm" onclick="exportInfographicPNG()">🖼️ PNG</button>
+                  <button class="btn btn-success btn-sm" onclick="exportInfographicPNG()">PNG</button>
                   <button class="btn btn-outline btn-sm" onclick="downloadStandaloneModule('mod4')">⬇️ Video
                     HTML</button>
                 </td>
@@ -3550,7 +3547,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
                 <td>Hoạt động 3 (15p)<br />(TP 4b)</td>
                 <td>Truy cập bằng Room Code (không PII); nộp ảnh màn hình chấm theo Rubric 10đ.</td>
                 <td>
-                  <button class="btn btn-danger btn-sm" onclick="exportPosterPNG()">🖼️ Poster</button>
+                  <button class="btn btn-danger btn-sm" onclick="exportPosterPNG()">Poster</button>
                   <button class="btn btn-primary btn-sm" onclick="downloadStandalonePromptLab()">⬇️ Trạm Prompt</button>
                 </td>
               </tr>
@@ -3570,7 +3567,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       <!-- Interactive Rubric Grader for Teacher -->
       <div class="card">
-        <span class="section-badge badge-green">🧮 Công cụ chấm Rubric nhanh & Sinh nhận xét LMS Gradebook</span>
+        <span class="section-badge badge-green">Công cụ chấm Rubric nhanh & Sinh nhận xét LMS Gradebook</span>
         <h2 class="card-title">Bấm chọn mức đạt của học sinh để tính điểm & copy nhận xét</h2>
 
         <div class="lms-u-165">
@@ -3588,7 +3585,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
               Tổng điểm: <span id="graderTotal">0</span> / 10 điểm
             </div>
             <button class="btn btn-primary btn-sm"
-              onclick="copyTextValue(document.getElementById('graderComment').value)">📋 Copy nhận xét dán vào
+              onclick="copyTextValue(document.getElementById('graderComment').value)">Copy nhận xét dán vào
               LMS</button>
           </div>
           <textarea class="lms-u-98" id="graderComment" rows="2"
@@ -3597,12 +3594,12 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       </div>
 
       <div class="card">
-        <span class="section-badge badge-blue">📚 Tài liệu tham khảo khoa học của bài dạy</span>
+        <span class="section-badge badge-blue">Tài liệu tham khảo khoa học của bài dạy</span>
         <ol class="lms-u-169">
           <li>UNESCO (2023). <em>Guidance for Generative AI in Education and Research</em>. Section 1.3:
             Prompt-engineering to generate desired outputs (pp. 11–12); Section 5.3.3 & 5.3.4: Generative AI as a 1:1
             coach for self-paced acquisition & inquiry learning (Table 5 & Table 6, pp. 32–33).</li>
-          <li>Bộ Giáo dục và Đào tạo (2020). <em>Công văn số 5512/BGDĐT-GDTrH</em> ngày 18/12/2020 về việc xây dựng và
+          <li>Bộ Giáo dục và Đào tạo (2020). <em>Công văn số 5512/BGDĐT-GDTrH</em>ngày 18/12/2020 về việc xây dựng và
             tổ chức thực hiện kế hoạch giáo dục của nhà trường.</li>
         </ol>
       </div>
@@ -3630,7 +3627,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       t.textContent = msg;
       t.classList.add('show');
       clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+      window.__toastTimer = setTimeout(() =>t.classList.remove('show'), 3200);
     }
 
     function setMode(mode) {
@@ -3640,12 +3637,12 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       if (mode === 'student' && document.getElementById('mod8').classList.contains('active')) {
         switchTab('mod1');
       }
-      showToast(mode === 'teacher' ? '👩‍🏫 Đã bật Chế độ Giáo viên (hiện nút xuất LMS)' : '🎒 Đã bật Chế độ Học sinh (giao diện học tập gọn gàng)');
+      showToast(mode === 'teacher' ? ' Đã bật Chế độ Giáo viên (hiện nút xuất LMS)' : ' Đã bật Chế độ Học sinh (giao diện học tập gọn gàng)');
     }
 
     function switchTab(tabId) {
-      document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.module-panel').forEach(p =>p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(b =>b.classList.remove('active'));
       const panel = document.getElementById(tabId);
       if (panel) panel.classList.add('active');
       const btn = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
@@ -3655,7 +3652,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
     function copyTextValue(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => showToast('✅ Đã sao chép vào bộ nhớ tạm!'));
+        navigator.clipboard.writeText(text).then(() =>showToast('Đã sao chép vào bộ nhớ tạm!'));
       } else {
         const ta = document.createElement('textarea');
         ta.value = text;
@@ -3663,7 +3660,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        showToast('✅ Đã sao chép vào bộ nhớ tạm!');
+        showToast('Đã sao chép vào bộ nhớ tạm!');
       }
     }
 
@@ -3679,7 +3676,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const styles = document.querySelector('style').innerHTML;
       const htmlSnippet = `<!-- Học liệu số LMS - Bài 2 Tin học 6 -->\n<style>\n${styles}\n</style>\n<div class="lms-embedded-module" style="font-family:'Be Vietnam Pro','Segoe UI',sans-serif; max-width:1100px; margin:0 auto;">\n${el.innerHTML}\n</div>`;
       copyTextValue(htmlSnippet);
-      showToast('📋 Đã sao chép mã HTML nhúng LMS! Bạn có thể dán trực tiếp vào trình soạn thảo HTML của Moodle/Canvas.');
+      showToast('Đã sao chép mã HTML nhúng LMS! Bạn có thể dán trực tiếp vào trình soạn thảo HTML của Moodle/Canvas.');
     }
 
     function downloadFile(filename, content, mimeType = 'text/html;charset=utf-8') {
@@ -3691,7 +3688,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setTimeout(() =>URL.revokeObjectURL(url), 1000);
     }
 
     /* ============================================================
@@ -3725,9 +3722,9 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     }
 
     function resetProgress() {
-      document.querySelectorAll('.step-checkbox').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.step-checkbox').forEach(cb =>cb.checked = false);
       updateRoadmapProgress();
-      showToast('🔄 Đã đặt lại tiến độ học tập 4 bước.');
+      showToast('Đã đặt lại tiến độ học tập 4 bước.');
     }
 
     /* ============================================================
@@ -3765,9 +3762,9 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       if (isRight) {
         card.classList.add('correct');
         const notes = {
-          1: '✅ Chính xác! Bạn An nhờ AI giải thích dễ hiểu rồi tự tóm tắt vào vở để thực sự hiểu bài.',
-          2: '✅ Chính xác! Bạn Minh chép nguyên văn mà không suy nghĩ là lạm dụng AI, không giúp tiến bộ.',
-          3: '✅ Chính xác! Bạn Khoa dùng AI luyện phát âm và tạo câu hỏi tự ôn tập rất hiệu quả.'
+          1: ' Chính xác! Bạn An nhờ AI giải thích dễ hiểu rồi tự tóm tắt vào vở để thực sự hiểu bài.',
+          2: ' Chính xác! Bạn Minh chép nguyên văn mà không suy nghĩ là lạm dụng AI, không giúp tiến bộ.',
+          3: ' Chính xác! Bạn Khoa dùng AI luyện phát âm và tạo câu hỏi tự ôn tập rất hiệu quả.'
         };
         fb.style.color = '#065f46';
         fb.textContent = notes[num];
@@ -3775,8 +3772,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         card.classList.add('wrong');
         fb.style.color = '#991b1b';
         fb.textContent = num === 2
-          ? '❌ Chưa đúng rồi! Chép nguyên văn lời giải của AI khiến mình không tự tư duy được.'
-          : '❌ Thử suy nghĩ lại nhé! Cách làm này giúp bạn ấy chủ động hiểu kiến thức và rèn luyện kĩ năng đấy.';
+          ? ' Chưa đúng rồi! Chép nguyên văn lời giải của AI khiến mình không tự tư duy được.'
+          : ' Thử suy nghĩ lại nhé! Cách làm này giúp bạn ấy chủ động hiểu kiến thức và rèn luyện kĩ năng đấy.';
       }
     }
 
@@ -3789,15 +3786,15 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       if (!nick || !q1 || !q2) {
         alertBox.style.display = 'block';
         alertBox.className = 'callout callout-amber';
-        alertBox.innerHTML = '⚠️ Em hãy điền đầy đủ biệt danh và câu trả lời cho cả 2 câu hỏi trước khi gửi nhé!';
+        alertBox.innerHTML = 'Em hãy điền đầy đủ biệt danh và câu trả lời cho cả 2 câu hỏi trước khi gửi nhé!';
         return;
       }
 
       const pii = detectPII(`${nick} ${q1} ${q2}`);
-      if (pii.length > 0) {
+      if (pii.length >0) {
         alertBox.style.display = 'block';
         alertBox.className = 'callout callout-rose';
-        alertBox.innerHTML = `🛡️ <strong>Cảnh báo an toàn thông tin!</strong> Bài viết có chứa dấu hiệu thông tin cá nhân: <strong>${pii.join(', ')}</strong>. Em hãy xóa bỏ thông tin riêng tư rồi đăng lại nhé!`;
+        alertBox.innerHTML = `<strong>Cảnh báo an toàn thông tin!</strong>Bài viết có chứa dấu hiệu thông tin cá nhân: <strong>${pii.join(', ')}</strong>. Em hãy xóa bỏ thông tin riêng tư rồi đăng lại nhé!`;
         return;
       }
 
@@ -3807,10 +3804,10 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const list = document.getElementById('forumList');
       const div = document.createElement('div');
       div.className = 'forum-post user-post';
-      const safe = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safe = s =>s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong>🎒 ${safe(nick)} (Bài đăng của em)</strong>
+          <strong> ${safe(nick)} (Bài đăng của em)</strong>
           <span style="font-size:12px; color:#0284c7; font-weight:700;">Đã ghi nhận LMS Log</span>
         </div>
         <p style="font-size:14px;"><strong>1.</strong> ${safe(q1)}<br/><strong>2.</strong> ${safe(q2)}</p>
@@ -3818,7 +3815,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       list.prepend(div);
       document.getElementById('forumUnlockMsg').style.display = 'block';
       markStepDone(1);
-      showToast('🎉 Đã gửi bài lên Diễn đàn Khởi động và mở khóa Hoạt động 2!');
+      showToast('Đã gửi bài lên Diễn đàn Khởi động và mở khóa Hoạt động 2!');
     }
 
     function likePost(btn) {
@@ -3828,7 +3825,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       btn.dataset.liked = '1';
       btn.style.background = '#e0f2fe';
       btn.style.color = '#0369a1';
-      showToast('👍 Em đã gửi phản hồi tích cực cho bạn cùng lớp!');
+      showToast('Em đã gửi phản hồi tích cực cho bạn cùng lớp!');
     }
 
     /* ============================================================
@@ -3880,25 +3877,25 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     const LESSON_SLIDES = [
       {
         from: 0, to: 105,
-        chapter: '🎬 Đoạn 1/4 (00:00 – 01:45) • 3 Lợi ích của AI & So sánh câu lệnh',
+        chapter: ' Đoạn 1/4 (00:00 – 01:45) • 3 Lợi ích của AI & So sánh câu lệnh',
         title: 'AI là “người hỗ trợ học tập 1:1” khi ta đặt câu lệnh rõ ràng',
         body: 'Khi dùng đúng mục đích, AI giúp em: (1) Học hỏi kiến thức mới dễ hiểu, (2) Rèn luyện kĩ năng ngoại ngữ/ôn tập, (3) Mở rộng hiểu biết. So sánh “Viết về măng” (quá chung chung) với “Viết 3 câu bán măng sạch” (rõ mục đích + số lượng) sẽ thấy kết quả khác biệt rõ rệt!'
       },
       {
         from: 105, to: 220,
-        chapter: '🎬 Đoạn 2/4 (01:45 – 03:40) • Công thức viết Prompt 3 thành phần',
+        chapter: ' Đoạn 2/4 (01:45 – 03:40) • Công thức viết Prompt 3 thành phần',
         title: 'Công thức vàng: Bối cảnh + Vai trò + Yêu cầu & định dạng cụ thể',
         body: 'Để AI hiểu đúng trình độ học sinh lớp 6, câu lệnh cần lắp ghép 3 khối: [1. Bối cảnh/Ngữ cảnh] em là ai, học môn gì → [2. Vai trò] AI đóng vai giáo viên/chuyên gia nào → [3. Yêu cầu & định dạng] làm nhiệm vụ gì, dài mấy câu hoặc mấy gạch đầu dòng.'
       },
       {
         from: 220, to: 330,
-        chapter: '🎬 Đoạn 3/4 (03:40 – 05:30) • Phân tích ví dụ thực hành mẫu',
+        chapter: ' Đoạn 3/4 (03:40 – 05:30) • Phân tích ví dụ thực hành mẫu',
         title: 'Nhận diện từng khối trong câu lệnh thực tế',
         body: 'Xét câu lệnh: “Tôi là nông dân mới trồng sâm. Hãy đóng vai một chuyên gia nông nghiệp. Viết 3 gạch đầu dòng những lưu ý quan trọng nhất về tưới nước cho cây sâm 1 năm tuổi.” — Hãy quan sát đâu là Bối cảnh, đâu là Vai trò và đâu là Yêu cầu cụ thể nhé!'
       },
       {
         from: 330, to: 387,
-        chapter: '🎬 Đoạn 4/4 (05:30 – 06:27) • Tổng kết & Quy trình 3 bước an toàn',
+        chapter: ' Đoạn 4/4 (05:30 – 06:27) • Tổng kết & Quy trình 3 bước an toàn',
         title: 'Chủ động học hỏi – Kiểm chứng thông tin – Tự diễn đạt lại',
         body: 'Ghi nhớ quy trình 3 bước: (1) Chọn công cụ AI phù hợp lứa tuổi dưới hướng dẫn GV/cha mẹ; (2) Nhập câu lệnh rõ mục đích & kiểm tra phản hồi; (3) Diễn đạt lại bằng lời của mình, không sao chép thụ động và bảo vệ dữ liệu cá nhân!'
       }
@@ -3935,16 +3932,16 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         if (!usingRealVideo) return;
         const dur = realVideo.duration || TOTAL_DURATION;
         vCurrent = realVideo.currentTime;
-        if (vCurrent > vMaxWatched + 1.5 && document.getElementById('preventSkipToggle').checked) {
+        if (vCurrent >vMaxWatched + 1.5 && document.getElementById('preventSkipToggle').checked) {
           realVideo.currentTime = vMaxWatched;
-          showToast('🔒 Chế độ ngăn tua nhanh đang bật! Em hãy xem tuần tự nhé.');
+          showToast('Chế độ ngăn tua nhanh đang bật! Em hãy xem tuần tự nhé.');
           return;
         }
         vMaxWatched = Math.max(vMaxWatched, vCurrent);
         updateVideoUI(dur);
         checkForCheckpointTrigger();
       };
-      showToast(`🎬 Đã nạp video "${file.name}" vào trình phát tương tác!`);
+      showToast(`Đã nạp video "${file.name}" vào trình phát tương tác!`);
     }
 
     function toggleVideoPlay() {
@@ -3987,7 +3984,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       document.getElementById('videoProgressFill').style.width = pct + '%';
 
       if (!usingRealVideo) {
-        const slide = LESSON_SLIDES.find(s => vCurrent >= s.from && vCurrent <= s.to) || LESSON_SLIDES[LESSON_SLIDES.length - 1];
+        const slide = LESSON_SLIDES.find(s =>vCurrent >= s.from && vCurrent <= s.to) || LESSON_SLIDES[LESSON_SLIDES.length - 1];
         document.getElementById('simChapterBadge').textContent = slide.chapter;
         document.getElementById('simSlideContent').innerHTML = `<h3>${slide.title}</h3><p>${slide.body}</p>`;
       }
@@ -3999,8 +3996,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const realVideo = document.getElementById('realVideoEl');
       const dur = usingRealVideo ? (realVideo.duration || TOTAL_DURATION) : TOTAL_DURATION;
       const target = ratio * dur;
-      if (document.getElementById('preventSkipToggle').checked && target > vMaxWatched + 2) {
-        showToast('🔒 Chế độ ngăn tua nhanh (Prevent skipping forward) đang bật!');
+      if (document.getElementById('preventSkipToggle').checked && target >vMaxWatched + 2) {
+        showToast('Chế độ ngăn tua nhanh (Prevent skipping forward) đang bật!');
         return;
       }
       vCurrent = target;
@@ -4009,8 +4006,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     }
 
     function jumpToCheckpoint(idx) {
-      if (document.getElementById('preventSkipToggle').checked && CHECKPOINTS[idx].time > vMaxWatched + 2 && cpResults[idx] === null) {
-        showToast('🔒 Tắt khóa “Ngăn tua nhanh” hoặc bấm nút “Trải nghiệm nhanh 3 mốc” ở góc dưới phải để mở ngay câu hỏi!');
+      if (document.getElementById('preventSkipToggle').checked && CHECKPOINTS[idx].time >vMaxWatched + 2 && cpResults[idx] === null) {
+        showToast('Tắt khóa “Ngăn tua nhanh” hoặc bấm nút “Trải nghiệm nhanh 3 mốc” ở góc dưới phải để mở ngay câu hỏi!');
         return;
       }
       triggerCheckpointDirect(idx);
@@ -4050,7 +4047,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         const btn = document.createElement('button');
         btn.className = 'quiz-option';
         btn.textContent = opt;
-        btn.onclick = () => answerCheckpoint(idx, oIdx, btn);
+        btn.onclick = () =>answerCheckpoint(idx, oIdx, btn);
         optBox.appendChild(btn);
       });
       document.getElementById('quizModalFeedback').style.display = 'none';
@@ -4061,7 +4058,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     function answerCheckpoint(cpIdx, chosenIdx, btnEl) {
       const cp = CHECKPOINTS[cpIdx];
       const allBtns = document.querySelectorAll('#quizModalOptions .quiz-option');
-      allBtns.forEach(b => b.disabled = true);
+      allBtns.forEach(b =>b.disabled = true);
       const fb = document.getElementById('quizModalFeedback');
       fb.style.display = 'block';
 
@@ -4071,14 +4068,14 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         document.getElementById('cpDot' + cpIdx).classList.add('passed');
         fb.style.background = '#d1fae5';
         fb.style.color = '#065f46';
-        fb.innerHTML = `✅ <strong>Chính xác (+${cp.points} điểm)!</strong> ${cp.explanation}`;
+        fb.innerHTML = `<strong>Chính xác (+${cp.points} điểm)!</strong> ${cp.explanation}`;
       } else {
         btnEl.classList.add('opt-wrong');
         allBtns[cp.correct].classList.add('opt-correct');
         cpResults[cpIdx] = 'wrong';
         fb.style.background = '#fee2e2';
         fb.style.color = '#991b1b';
-        fb.innerHTML = `❌ <strong>Chưa chính xác (0 điểm).</strong> Đáp án đúng là <strong>${cp.options[cp.correct]}</strong>.<br/>💡 ${cp.explanation}`;
+        fb.innerHTML = `<strong>Chưa chính xác (0 điểm).</strong>Đáp án đúng là <strong>${cp.options[cp.correct]}</strong>.<br/> ${cp.explanation}`;
       }
 
       updateVideoScore();
@@ -4093,7 +4090,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const badge = document.getElementById('videoScoreBadge');
       badge.textContent = `Điểm số: ${score} / 100 (Cần ≥ 70đ)`;
       badge.className = score >= 70 ? 'section-badge badge-green' : 'section-badge badge-amber';
-      if (cpResults.every(r => r !== null)) {
+      if (cpResults.every(r =>r !== null)) {
         evaluateVideoCompletion();
       }
       return score;
@@ -4151,10 +4148,10 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const fb = document.getElementById('sgkCheckFeedback');
       if (a && !b && c && d) {
         fb.style.color = '#065f46';
-        fb.textContent = '✅ Xuất sắc! Các cách (a), (c), (d) là dùng AI đúng mục đích học tập; cách (b) chép nguyên văn bài văn là sai mục đích.';
+        fb.textContent = 'Xuất sắc! Các cách (a), (c), (d) là dùng AI đúng mục đích học tập; cách (b) chép nguyên văn bài văn là sai mục đích.';
       } else {
         fb.style.color = '#b91c1c';
-        fb.textContent = '❌ Chưa chính xác hoàn toàn! Gợi ý: Có 3 cách đúng (a, c, d) và 1 cách sai là nhờ AI viết hộ rồi chép nộp (b).';
+        fb.textContent = 'Chưa chính xác hoàn toàn! Gợi ý: Có 3 cách đúng (a, c, d) và 1 cách sai là nhờ AI viết hộ rồi chép nộp (b).';
       }
     }
 
@@ -4167,12 +4164,12 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       if (choice === 'B') {
         btnB.classList.add('opt-correct');
         fb.style.color = '#065f46';
-        fb.textContent = '✅ Chính xác! Câu lệnh B nêu rõ đối tượng (lớp 6), chủ đề (Trường học), số lượng (5 từ) và yêu cầu cụ thể (nghĩa + ví dụ đơn giản).';
+        fb.textContent = 'Chính xác! Câu lệnh B nêu rõ đối tượng (lớp 6), chủ đề (Trường học), số lượng (5 từ) và yêu cầu cụ thể (nghĩa + ví dụ đơn giản).';
       } else {
         btnA.classList.add('opt-wrong');
         btnB.classList.add('opt-correct');
         fb.style.color = '#b91c1c';
-        fb.textContent = '❌ Câu lệnh A quá chung chung và mang tính nhờ AI làm hộ bài tập. Đáp án đúng là B!';
+        fb.textContent = 'Câu lệnh A quá chung chung và mang tính nhờ AI làm hộ bài tập. Đáp án đúng là B!';
       }
     }
 
@@ -4238,21 +4235,21 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       const combined = [c, r, t].filter(Boolean).join(' ');
       const pii = detectPII(combined);
-      const safe = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safe = s =>s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
       let html = '';
 
-      if (pii.length > 0) {
+      if (pii.length >0) {
         html += `<div class="callout callout-rose">
-          <strong>🚨 CẢNH BÁO VI PHẠM CẨM NANG 4 KHÔNG!</strong><br/>
+          <strong>CẢNH BÁO VI PHẠM CẨM NANG 4 KHÔNG!</strong><br/>
           Phát hiện thông tin nhạy cảm: <strong>${pii.join(', ')}</strong>.<br/>
           Em hãy xóa ngay dữ liệu cá nhân trước khi sao chép dán vào công cụ AI nhé!
         </div>`;
       }
 
-      if (missing.length > 0) {
+      if (missing.length >0) {
         html += `<div class="callout callout-amber">
-          <strong>⚠️ Câu lệnh chưa đủ 3 thành phần!</strong><br/>
+          <strong>Câu lệnh chưa đủ 3 thành phần!</strong><br/>
           Em còn thiếu: <strong>${missing.join(' • ')}</strong>.<br/>
           <em>(Theo Rubric HĐ 3: Đủ 3 thành phần đạt 5/5 điểm cấu trúc; thiếu 1 thành phần chỉ đạt 3/5 điểm).</em>
         </div>`;
@@ -4260,7 +4257,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       if (missing.length === 0 && pii.length === 0) {
         html += `<div class="callout callout-green">
-          <strong>🎉 Tuyệt vời! Câu lệnh đạt chuẩn 3 thành phần & An toàn 4 KHÔNG (Dự kiến 5/5 điểm Cấu trúc)!</strong>
+          <strong>Tuyệt vời! Câu lệnh đạt chuẩn 3 thành phần & An toàn 4 KHÔNG (Dự kiến 5/5 điểm Cấu trúc)!</strong>
         </div>`;
         markStepDone(3);
       }
@@ -4269,7 +4266,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         lastBuiltPrompt = combined;
         html += `<div class="prompt-output-box">
           <div style="font-size:12.5px; font-weight:800; color:var(--primary-dark); text-transform:uppercase; margin-bottom:8px;">
-            🧩 Câu lệnh hoàn chỉnh sau khi ghép:
+             Câu lệnh hoàn chỉnh sau khi ghép:
           </div>
           ${c ? `<span class="hl-ctx">${safe(c)}</span> ` : ''}
           ${r ? `<span class="hl-role">${safe(r)}</span> ` : ''}
@@ -4293,20 +4290,20 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     function copyBuiltPrompt() {
       if (!lastBuiltPrompt) return;
       copyTextValue(lastBuiltPrompt);
-      showToast('📋 Đã sao chép câu lệnh hoàn chỉnh! Em hãy dán vào trạm AI SchoolAI của lớp nhé.');
+      showToast('Đã sao chép câu lệnh hoàn chỉnh! Em hãy dán vào trạm AI SchoolAI của lớp nhé.');
     }
 
     function copyRoomCode() {
       const code = document.getElementById('roomCodeInput').value.trim();
       if (!code) {
-        showToast('⚠️ Giáo viên chưa nhập Mã phòng (Room Code) SchoolAI.');
+        showToast('Giáo viên chưa nhập Mã phòng (Room Code) SchoolAI.');
         return;
       }
       copyTextValue(code);
     }
 
     function updateFileNamePreview() {
-      const stripVN = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '');
+      const stripVN = str =>str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '');
       const name = stripVN(document.getElementById('fnName').value.trim()) || '[HoTen]';
       const cls = stripVN(document.getElementById('fnClass').value.trim()) || '[Lop]';
       document.getElementById('fnPreview').textContent = `${name}_${cls}_Prompt.png`;
@@ -4316,7 +4313,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
        MODULE 7: BLOG "NHÀ BÁO NHÍ" & BRIDGE TO LESSON 3
     ============================================================ */
     function countSentences(text) {
-      const parts = text.split(/[.!?…]+/).map(s => s.trim()).filter(s => s.length >= 6);
+      const parts = text.split(/[.!?…]+/).map(s =>s.trim()).filter(s =>s.length >= 6);
       return parts.length;
     }
 
@@ -4327,7 +4324,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       badge.textContent = `Số câu hiện tại: ${count} (Cần 3–5 câu)`;
       if (count >= 3 && count <= 5) {
         badge.className = 'section-badge badge-green';
-      } else if (count > 5) {
+      } else if (count >5) {
         badge.className = 'section-badge badge-amber';
       } else {
         badge.className = 'section-badge badge-blue';
@@ -4336,9 +4333,9 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
     function warnBlogPaste(e) {
       const pasted = (e.clipboardData || window.clipboardData).getData('text');
-      if (pasted && pasted.length > 35) {
+      if (pasted && pasted.length >35) {
         document.getElementById('blogPasteWarn').style.display = 'block';
-        showToast('⚠️ Nhắc nhở: Không copy-paste từ AI! Hãy tự diễn đạt bằng lời văn của em.');
+        showToast('Nhắc nhở: Không copy-paste từ AI! Hãy tự diễn đạt bằng lời văn của em.');
       }
     }
 
@@ -4365,41 +4362,41 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       const { title, body, bridgeLine } = buildBlogText();
       const count = countSentences(body);
       if (!body) {
-        showToast('⚠️ Em hãy viết đoạn tóm tắt 3–5 câu trước khi xuất bản nhé!');
+        showToast('Em hãy viết đoạn tóm tắt 3–5 câu trước khi xuất bản nhé!');
         return;
       }
       const pii = detectPII(body);
-      if (pii.length > 0) {
-        showToast('🚨 Bài viết có dấu hiệu chứa thông tin cá nhân (' + pii.join(', ') + '). Hãy kiểm tra lại!');
+      if (pii.length >0) {
+        showToast('Bài viết có dấu hiệu chứa thông tin cá nhân (' + pii.join(', ') + '). Hãy kiểm tra lại!');
         return;
       }
-      const safe = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safe = s =>s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const statusNote = (count >= 3 && count <= 5)
-        ? '✅ Đạt chuẩn dung lượng 3–5 câu!'
-        : `⚠️ Hiện có ${count} câu (khuyến nghị điều chỉnh về 3–5 câu theo Rubric).`;
+        ? ' Đạt chuẩn dung lượng 3–5 câu!'
+        : ` Hiện có ${count} câu (khuyến nghị điều chỉnh về 3–5 câu theo Rubric).`;
       const area = document.getElementById('blogPublishedArea');
       area.style.display = 'block';
       area.innerHTML = `
         <div style="background:#ffffff; border:2px solid #059669; border-radius:16px; padding:20px; box-shadow: 0 6px 20px rgba(5,150,105,0.1);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-            <span class="section-badge badge-green">📰 Bản tin đã sẵn sàng đăng lên Blog LMS</span>
+            <span class="section-badge badge-green">Bản tin đã sẵn sàng đăng lên Blog LMS</span>
             <span style="font-size:13px; font-weight:700; color:${count >= 3 && count <= 5 ? '#065f46' : '#b45309'};">${statusNote}</span>
           </div>
           <h3 style="font-size:18px; color:var(--slate-900); margin-bottom:8px;">${safe(title)}</h3>
           <p style="font-size:14.5px; color:var(--slate-700); white-space:pre-line; margin-bottom:12px;">${safe(body)}</p>
           <div style="background:#ecfdf5; border-left:4px solid #059669; padding:10px 14px; border-radius:8px; font-size:13.5px; color:#065f46;">
-            <strong>🌉 Ghi chú cầu nối Bài 3:</strong> ${safe(bridgeLine)}
+            <strong>Ghi chú cầu nối Bài 3:</strong> ${safe(bridgeLine)}
           </div>
         </div>
       `;
       markStepDone(4);
-      showToast('🎉 Đã hoàn thiện bản tin “Nhà báo nhí”! Em có thể sao chép để đăng lên Blog LMS.');
+      showToast('Đã hoàn thiện bản tin “Nhà báo nhí”! Em có thể sao chép để đăng lên Blog LMS.');
     }
 
     function copyCompleteBlog() {
       const { body, fullText } = buildBlogText();
       if (!body) {
-        showToast('⚠️ Em chưa nhập nội dung đoạn tóm tắt.');
+        showToast('Em chưa nhập nội dung đoạn tóm tắt.');
         return;
       }
       copyTextValue(fullText);
@@ -4540,7 +4537,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
 
       if (modKey === 'mod4') {
         const clone = document.getElementById('mod4').cloneNode(true);
-        clone.querySelectorAll('.teacher-toolbar').forEach(n => n.remove());
+        clone.querySelectorAll('.teacher-toolbar').forEach(n =>n.remove());
         const scriptTag = document.querySelector('script').innerHTML;
         const doc = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Video tương tác Bài 2 Tin học 6</title><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"><style>${styles} body{padding:20px;} .teacher-toolbar,.no-print{display:none!important;}</style></head><body class="student-mode"><div style="max-width:1040px;margin:0 auto;">${clone.innerHTML}</div><div id="toast" class="toast"></div><script>${scriptTag}<\/script></body></html>`;
         downloadFile(titles[modKey], doc);
@@ -4616,16 +4613,16 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
   <div class="wrap">
     <div class="head">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;color:#bae6fd;text-transform:uppercase;">TIN HỌC 6 • BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP</div>
-      <h1>🧪 TRẠM LUYỆN VIẾT CÂU LỆNH AI LỚP 6</h1>
+      <h1>TRẠM LUYỆN VIẾT CÂU LỆNH AI LỚP 6</h1>
       <p style="font-size:14px;color:#e0f2fe;margin-top:4px;">Ghép đủ 3 thành phần câu lệnh chuẩn (Bối cảnh + Vai trò + Yêu cầu cụ thể) & Kiểm tra an toàn trước khi dùng AI.</p>
     </div>
     <div class="body">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:#334155;">📌 Gợi ý chọn nhanh chủ đề lớp 6:</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:#334155;">Gợi ý chọn nhanh chủ đề lớp 6:</div>
       <div class="presets">
-        <button class="btn btn-outline" onclick="preset(1)">⚔️ Chiến thắng Bạch Đằng 938</button>
-        <button class="btn btn-outline" onclick="preset(2)">🌙 Hình dạng Mặt Trăng</button>
-        <button class="btn btn-outline" onclick="preset(3)">🌍 Ngày & Đêm trên Trái Đất</button>
-        <button class="btn btn-outline" onclick="preset(4)">📜 5 câu tục ngữ đoàn kết</button>
+        <button class="btn btn-outline" onclick="preset(1)">Chiến thắng Bạch Đằng 938</button>
+        <button class="btn btn-outline" onclick="preset(2)">Hình dạng Mặt Trăng</button>
+        <button class="btn btn-outline" onclick="preset(3)">Ngày & Đêm trên Trái Đất</button>
+        <button class="btn btn-outline" onclick="preset(4)">5 câu tục ngữ đoàn kết</button>
       </div>
       <div class="grid">
         <div class="box" style="border-top-color:#0284c7;">
@@ -4645,12 +4642,12 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
-        <button class="btn btn-primary" onclick="checkPrompt()">🔍 Ghép câu lệnh & Kiểm tra</button>
-        <button class="btn btn-success" id="btnCopy" onclick="copyOut()" disabled>📋 Sao chép câu lệnh</button>
+        <button class="btn btn-primary" onclick="checkPrompt()">Ghép câu lệnh & Kiểm tra</button>
+        <button class="btn btn-success" id="btnCopy" onclick="copyOut()" disabled>Sao chép câu lệnh</button>
       </div>
       <div id="result"></div>
       <div class="safety">
-        <strong>🛡️ Nhớ Cẩm nang 4 KHÔNG:</strong> KHÔNG nhập họ tên đầy đủ, ngày sinh, số điện thoại, địa chỉ nhà, tên trường lớp, ảnh khuôn mặt hay mật khẩu! • Mã phòng học (Room Code): <strong>${roomCode}</strong>
+        <strong>Nhớ Cẩm nang 4 KHÔNG:</strong>KHÔNG nhập họ tên đầy đủ, ngày sinh, số điện thoại, địa chỉ nhà, tên trường lớp, ảnh khuôn mặt hay mật khẩu! • Mã phòng học (Room Code): <strong>${roomCode}</strong>
       </div>
     </div>
   </div>
@@ -4684,16 +4681,16 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       if(/(0|\\+84)[0-9\\.\\-\\s]{8,11}\\d/.test(all) && !pii.includes('số điện thoại')) pii.push('số điện thoại');
       const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       let h='';
-      if(pii.length) h+='<div class="alert alert-err">🚨 <strong>Cảnh báo từ khóa nhạy cảm:</strong> Phát hiện '+pii.join(', ')+'. Vui lòng xóa ngay để bảo vệ dữ liệu cá nhân!</div>';
-      if(missing.length) h+='<div class="alert alert-warn">⚠️ <strong>Thiếu thành phần:</strong> Em cần bổ sung '+missing.join(', ')+'.</div>';
-      if(!pii.length && !missing.length) h+='<div class="alert alert-ok">✅ <strong>Đạt chuẩn 3 thành phần & An toàn!</strong> Em hãy bấm Sao chép câu lệnh để dán vào trạm AI của lớp.</div>';
+      if(pii.length) h+='<div class="alert alert-err"> <strong>Cảnh báo từ khóa nhạy cảm:</strong>Phát hiện '+pii.join(', ')+'. Vui lòng xóa ngay để bảo vệ dữ liệu cá nhân!</div>';
+      if(missing.length) h+='<div class="alert alert-warn"> <strong>Thiếu thành phần:</strong>Em cần bổ sung '+missing.join(', ')+'.</div>';
+      if(!pii.length && !missing.length) h+='<div class="alert alert-ok"> <strong>Đạt chuẩn 3 thành phần & An toàn!</strong>Em hãy bấm Sao chép câu lệnh để dán vào trạm AI của lớp.</div>';
       if(all) h+='<div class="out">'+(a?'<span class="c1">'+esc(a)+'</span> ':'')+(b?'<span class="c2">'+esc(b)+'</span> ':'')+(c?'<span class="c3">'+esc(c)+'</span>':'')+'</div>';
       result.innerHTML=h;
       built=all;
       btnCopy.disabled = !(all && !pii.length);
     }
     function copyOut(){
-      navigator.clipboard.writeText(built).then(()=>alert('✅ Đã sao chép câu lệnh thành công!'));
+      navigator.clipboard.writeText(built).then(()=>alert(' Đã sao chép câu lệnh thành công!'));
     }
   <\/script>
 </body>
@@ -4721,7 +4718,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       let cy = y;
       for (let i = 0; i < words.length; i++) {
         const test = line + words[i] + ' ';
-        if (ctx.measureText(test).width > maxWidth && i > 0) {
+        if (ctx.measureText(test).width >maxWidth && i >0) {
           ctx.fillText(line.trim(), x, cy);
           line = words[i] + ' ';
           cy += lineHeight;
@@ -4897,13 +4894,13 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       ];
       ctx.fillStyle = '#ffffff';
       ctx.font = '600 23px "Be Vietnam Pro", "Segoe UI", sans-serif';
-      steps.forEach((s, i) => ctx.fillText(s, 116, 1554 + i * 44));
+      steps.forEach((s, i) =>ctx.fillText(s, 116, 1554 + i * 44));
 
       const link = document.createElement('a');
       link.download = 'Infographic_BiKipGiaoTiepAI_TinHoc6_Bai2.png';
       link.href = c.toDataURL('image/png');
       link.click();
-      showToast('🖼️ Đã xuất ảnh Infographic nét cao (1600×1760px)!');
+      showToast('Đã xuất ảnh Infographic nét cao (1600×1760px)!');
     }
 
     function exportPosterPNG() {
@@ -5016,7 +5013,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       link.download = 'Poster_CamNang_4KHONG_TinHoc6_Bai2.png';
       link.href = c.toDataURL('image/png');
       link.click();
-      showToast('🖼️ Đã xuất ảnh Poster 4 KHÔNG nét cao (1600×1480px)!');
+      showToast('Đã xuất ảnh Poster 4 KHÔNG nét cao (1600×1480px)!');
     }
 
     // Init on load

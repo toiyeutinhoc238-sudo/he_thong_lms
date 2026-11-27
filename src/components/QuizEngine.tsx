@@ -364,8 +364,8 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({ activity, courseId, onFi
                     }`}>
                       <span className="font-extrabold">
                         {isPickedCorrect
-                          ? `✓ Phản hồi cho lựa chọn ${String.fromCharCode(65 + pickedIdx)}:`
-                          : `💡 Phản hồi riêng cho lựa chọn ${String.fromCharCode(65 + pickedIdx)} của bạn:`}
+                          ? `Phản hồi cho lựa chọn ${String.fromCharCode(65 + pickedIdx)}:`
+                          : `Phản hồi cho lựa chọn ${String.fromCharCode(65 + pickedIdx)} của bạn:`}
                       </span>
                       <p className="leading-relaxed">{pickedFb}</p>
                     </div>

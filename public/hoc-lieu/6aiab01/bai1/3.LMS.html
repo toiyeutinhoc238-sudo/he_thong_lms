@@ -835,12 +835,12 @@
        SCOPED INFOGRAPHIC 1: HẬU TRƯỜNG CỦA AI (ig1-*)
     ============================================================ */
     .ig1-board {
-      border-radius: 22px;
+      border-radius: 16px;
       overflow: hidden;
-      border: 2.5px solid #0284c7;
-      box-shadow: var(--shadow-lg);
-      background: linear-gradient(135deg, #fff0f3 0%, #f4fbf7 50%, #e8f8fd 100%);
-      padding: 24px 26px 20px;
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+      background: #ffffff;
+      padding: 22px 24px 18px;
     }
 
     .ig1-header {
@@ -849,9 +849,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 14px;
-      margin-bottom: 20px;
-      border-bottom: 2px dashed #cbd5e1;
-      padding-bottom: 14px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
     }
 
     .ig1-tag {
@@ -871,27 +871,6 @@
       font-size: clamp(19px, 2.5vw, 25px);
       font-weight: 800;
       color: #0f172a;
-    }
-
-    .ig1-chars {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .ig1-char-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      padding: 6px 13px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e2e8f0;
-      font-size: 13px;
-      font-weight: 700;
-      color: #334155;
     }
 
     .ig1-pipeline {
@@ -2034,15 +2013,15 @@
   </style>
 </head>
 
-<body>
+<body class="student-mode">
 
-  <!-- TOP LMS STUDIO HEADER -->
+  <!-- TOP LMS HEADER -->
   <header class="studio-header">
     <div class="studio-header-inner">
       <div class="brand-group">
-        <div class="brand-logo" aria-hidden="true">🤖</div>
+        <div class="brand-logo" aria-hidden="true" style="font-size:16px;font-weight:800;letter-spacing:-0.02em;">B1</div>
         <div>
-          <div class="brand-meta">Tin học 6 • Chủ đề A: Tư duy lấy con người làm trung tâm • 02 Tiết (90 phút)</div>
+          <div class="brand-meta">Tin học 6 · Chủ đề A: Tư duy lấy con người làm trung tâm · 02 Tiết (90 phút)</div>
           <h1 class="brand-title">BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH</h1>
         </div>
       </div>
@@ -2055,49 +2034,49 @@
           </div>
         </div>
 
-        <div class="mode-switch" role="group" aria-label="Chế độ hiển thị">
-          <button class="mode-btn active" id="btnTeacherMode" onclick="setMode('teacher')">👩‍🏫 Chế độ GV</button>
-          <button class="mode-btn" id="btnStudentMode" onclick="setMode('student')">🎒 Chế độ Học sinh</button>
+        <div class="mode-switch" role="group" aria-label="Chế độ hiển thị" style="display:none;">
+          <button class="mode-btn" id="btnTeacherMode" onclick="setMode('teacher')">Chế độ GV</button>
+          <button class="mode-btn active" id="btnStudentMode" onclick="setMode('student')">Chế độ Học sinh</button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- NAVIGATION TABS (PHÂN TÁCH RÕ TIẾT 1 ONLINE & TIẾT 2 TRỰC TIẾP) -->
-  <nav class="nav-shell" aria-label="Các module học liệu số Bài 1">
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-shell" aria-label="Các phần học Bài 1">
     <div class="nav-tabs">
       <!-- TIẾT 1: TRỰC TUYẾN TRÊN LMS (45 PHÚT) -->
       <button class="nav-tab active" data-tab="mod1" onclick="switchTab('mod1')">
-        <span class="tab-badge">T1 • TP1</span> 📘 Sổ tay học tập
+        <span class="tab-badge">Tiết 1</span>Hướng dẫn học tập
       </button>
       <button class="nav-tab" data-tab="mod2" onclick="switchTab('mod2')">
-        <span class="tab-badge">T1 • TP2</span> 🚀 Kiến thức nền & Khởi động
+        <span class="tab-badge">Tiết 1</span>Khởi động
       </button>
       <button class="nav-tab" data-tab="mod3" onclick="switchTab('mod3')">
-        <span class="tab-badge">T1 • TP3</span> 🎨 Infographic & Video AI
+        <span class="tab-badge">Tiết 1</span>Nội dung &amp; Video
       </button>
       <button class="nav-tab" data-tab="mod4" onclick="switchTab('mod4')">
-        <span class="tab-badge">T1 • TP4–5</span> 🎯 Chốt chặn 5 câu & Cầu nối
+        <span class="tab-badge">Tiết 1</span>Kiểm tra &amp; Cầu nối
       </button>
 
       <div class="nav-divider" aria-hidden="true"></div>
 
       <!-- TIẾT 2: TRỰC TIẾP TẠI LỚP (45 PHÚT) -->
       <button class="nav-tab tab-t2" data-tab="mod5" onclick="switchTab('mod5')">
-        <span class="tab-badge">T2 • HĐ4</span> 🚲 Xe đạp điện vs Rô-bốt
+        <span class="tab-badge">Tiết 2</span>Quyền quyết định
       </button>
       <button class="nav-tab tab-t2" data-tab="mod6" onclick="switchTab('mod6')">
-        <span class="tab-badge">T2 • HĐ5</span> 🚴‍♂️ Game Người cầm lái & Thảo luận
+        <span class="tab-badge">Tiết 2</span>Luyện tập &amp; Thảo luận
       </button>
       <button class="nav-tab tab-t2" data-tab="mod7" onclick="switchTab('mod7')">
-        <span class="tab-badge">T2 • HĐ6</span> 📜 Tuyên ngôn AI & Rubric
+        <span class="tab-badge">Tiết 2</span>Vận dụng
       </button>
 
       <div class="nav-divider teacher-only" aria-hidden="true"></div>
 
       <!-- GÓC GIÁO VIÊN -->
       <button class="nav-tab teacher-only" data-tab="mod8" onclick="switchTab('mod8')">
-        <span class="tab-badge">GV</span> ⚙️ Cấu hình LMS & Chấm Rubric
+        <span class="tab-badge">GV</span>Cấu hình &amp; Rubric
       </button>
     </div>
   </nav>
@@ -2115,21 +2094,21 @@
           <span>Sổ tay hướng dẫn học tập (Study Guide) 4 bước cho 45 phút tự học trực tuyến trên LMS.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod1-plain-text')">📝 Copy văn bản Study Guide</button>
-          <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ In trang</button>
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod1-plain-text')">Copy văn bản Study Guide</button>
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">In trang</button>
         </div>
       </div>
 
       <div class="hero-banner">
         <div class="hero-meta-row">
-          <span class="hero-chip">⏱️ Tổng thời lượng: 02 tiết (90 phút)</span>
-          <span class="hero-chip">💻 Tiết 1: Trực tuyến trên LMS (45 phút)</span>
-          <span class="hero-chip">🏫 Tiết 2: Trực tiếp tại lớp (45 phút)</span>
-          <span class="hero-chip">🎯 Yêu cầu cần đạt: 6.A1.1 & 6.A1.2</span>
+          <span class="hero-chip">Thời lượng: 02 tiết (90 phút)</span>
+          <span class="hero-chip">Tiết 1: Trực tuyến trên LMS (45 phút)</span>
+          <span class="hero-chip">Tiết 2: Trực tiếp tại lớp (45 phút)</span>
+          <span class="hero-chip">Yêu cầu cần đạt: 6.A1.1 &amp; 6.A1.2</span>
         </div>
-        <h2 class="hero-title">📘 SỔ TAY HƯỚNG DẪN HỌC TẬP BÀI 1 (STUDY GUIDE)</h2>
+        <h2 class="hero-title">SỔ TAY HƯỚNG DẪN HỌC TẬP BÀI 1</h2>
         <p class="hero-desc">
-          <strong>Mục tiêu Tiết 1 (6.A1.1):</strong> Giải thích được Trí tuệ nhân tạo (AI) là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; nêu được ví dụ về một số công cụ AI quen thuộc trong đời sống hằng ngày và chỉ ra vai trò của con người trong việc tạo ra chúng.
+          <strong>Mục tiêu Tiết 1 (6.A1.1):</strong>Giải thích được Trí tuệ nhân tạo (AI) là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; nêu được ví dụ về một số công cụ AI quen thuộc trong đời sống hằng ngày và chỉ ra vai trò của con người trong việc tạo ra chúng.
         </p>
       </div>
 
@@ -2139,7 +2118,7 @@
             <span class="section-badge badge-blue">Lộ trình học tập trực tuyến 45 phút (Tiết 1)</span>
             <h2 class="card-title">4 bước chinh phục Tiết 1 trên hệ thống LMS</h2>
           </div>
-          <button class="btn btn-ghost btn-sm no-print" onclick="resetRoadmapProgress()">🔄 Đặt lại tiến độ</button>
+          <button class="btn btn-ghost btn-sm no-print" onclick="resetRoadmapProgress()">Đặt lại tiến độ</button>
         </div>
 
         <div class="grid-4">
@@ -2150,11 +2129,11 @@
                 <span class="step-time">⏱️ 5 phút</span>
               </div>
               <div class="step-title">Khởi động</div>
-              <p class="step-desc">Đọc phần <strong>Kết nối kiến thức nền</strong> (Tin học 6), xem tình huống ba bạn <strong>An – Minh – Khoa</strong> trong SGK và hoàn thành <strong>02 câu hỏi khảo sát</strong> nhanh.</p>
+              <p class="step-desc">Đọc phần <strong>Kết nối kiến thức nền</strong>(Tin học 6), xem tình huống ba bạn <strong>An – Minh – Khoa</strong>trong SGK và hoàn thành <strong>02 câu hỏi khảo sát</strong>nhanh.</p>
             </div>
             <div class="step-footer">
               <label class="step-check-label">
-                <input type="checkbox" class="step-checkbox" data-step="1" onchange="updateRoadmapProgress()" /> Đã xong
+                <input type="checkbox" class="step-checkbox" data-step="1" onchange="updateRoadmapProgress()" />Đã xong
               </label>
               <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod2')">Vào Bước 1 →</button>
             </div>
@@ -2167,11 +2146,11 @@
                 <span class="step-time">⏱️ 25 phút</span>
               </div>
               <div class="step-title">Khám phá kiến thức mới</div>
-              <p class="step-desc"><strong>(2.1)</strong> Đọc <strong>Infographic 1 “Hậu trường của AI”</strong> & xem Video hoạt hình ngắn (3–4 phút); <strong>(2.2)</strong> Đọc <strong>Infographic 2 “AI quanh ta”</strong> phân biệt AI và thiết bị thường.</p>
+              <p class="step-desc"><strong>(2.1)</strong>Đọc <strong>Infographic 1 “Hậu trường của AI”</strong> & xem Video hoạt hình ngắn (3–4 phút); <strong>(2.2)</strong>Đọc <strong>Infographic 2 “AI quanh ta”</strong>phân biệt AI và thiết bị thường.</p>
             </div>
             <div class="step-footer">
               <label class="step-check-label">
-                <input type="checkbox" class="step-checkbox" data-step="2" onchange="updateRoadmapProgress()" /> Đã xong
+                <input type="checkbox" class="step-checkbox" data-step="2" onchange="updateRoadmapProgress()" />Đã xong
               </label>
               <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod3')">Vào Bước 2 →</button>
             </div>
@@ -2184,11 +2163,11 @@
                 <span class="step-time">⏱️ 10 phút</span>
               </div>
               <div class="step-title">Chốt chặn kiểm tra</div>
-              <p class="step-desc">Hoàn thành bài kiểm tra tương tác <strong>5 câu</strong> (kéo–thả phân loại 6 thiết bị & trắc nghiệm). Điều kiện bắt buộc: đạt tối thiểu <strong>8/10 điểm</strong> để mở khóa Bước 4.</p>
+              <p class="step-desc">Hoàn thành bài kiểm tra tương tác <strong>5 câu</strong>(kéo–thả phân loại 6 thiết bị & trắc nghiệm). Điều kiện bắt buộc: đạt tối thiểu <strong>8/10 điểm</strong>để mở khóa Bước 4.</p>
             </div>
             <div class="step-footer">
               <label class="step-check-label">
-                <input type="checkbox" class="step-checkbox" data-step="3" onchange="updateRoadmapProgress()" /> Đã xong
+                <input type="checkbox" class="step-checkbox" data-step="3" onchange="updateRoadmapProgress()" />Đã xong
               </label>
               <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod4')">Vào Bước 3 →</button>
             </div>
@@ -2201,11 +2180,11 @@
                 <span class="step-time">⏱️ 5 phút</span>
               </div>
               <div class="step-title">Nhiệm vụ cầu nối Tiết 2</div>
-              <p class="step-desc">Đọc tình huống của bạn <strong>Minh</strong> dùng AI làm bài Lịch sử bị sai năm sinh và trả lời câu hỏi ngắn chuẩn bị cho <strong>Tiết 2 học trực tiếp tại lớp</strong>.</p>
+              <p class="step-desc">Đọc tình huống của bạn <strong>Minh</strong>dùng AI làm bài Lịch sử bị sai năm sinh và trả lời câu hỏi ngắn chuẩn bị cho <strong>Tiết 2 học trực tiếp tại lớp</strong>.</p>
             </div>
             <div class="step-footer">
               <label class="step-check-label">
-                <input type="checkbox" class="step-checkbox" data-step="4" onchange="updateRoadmapProgress()" /> Đã xong
+                <input type="checkbox" class="step-checkbox" data-step="4" onchange="updateRoadmapProgress()" />Đã xong
               </label>
               <button class="btn btn-outline btn-sm no-print" onclick="switchTab('mod4'); setTimeout(()=>document.getElementById('bridgeSection').scrollIntoView({behavior:'smooth'}),150)">Vào Bước 4 →</button>
             </div>
@@ -2215,28 +2194,28 @@
 
       <div class="grid-2">
         <div class="card" style="margin-bottom:0;">
-          <span class="section-badge badge-green">🎯 Sau bài học này em sẽ</span>
+          <span class="section-badge badge-green">Sau bài học này em sẽ</span>
           <h3 style="margin:10px 0 12px; font-size:17px; color:var(--slate-900);">Yêu cầu cần đạt & Năng lực (SGK Bài 1)</h3>
           <ul style="padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14px; color:var(--slate-700);">
-            <li><strong>Kiến thức (6.A1.1):</strong> Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển; không tự sinh ra và không hoạt động độc lập; nêu ví dụ công cụ AI quen thuộc.</li>
-            <li><strong>Kiến thức (6.A1.2):</strong> Trình bày được vai trò của AI chỉ là công cụ hỗ trợ; con người đưa ra quyết định cuối cùng và chịu trách nhiệm khi sử dụng AI.</li>
-            <li><strong>Năng lực AI (NLa):</strong> Tư duy lấy con người làm trung tâm – hiểu rõ vai trò giám sát và trách nhiệm của người sử dụng.</li>
-            <li><strong>Phẩm chất:</strong> Tinh thần trách nhiệm, tự chủ trong học tập, không đổ lỗi cho công cụ máy móc.</li>
+            <li><strong>Kiến thức (6.A1.1):</strong>Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển; không tự sinh ra và không hoạt động độc lập; nêu ví dụ công cụ AI quen thuộc.</li>
+            <li><strong>Kiến thức (6.A1.2):</strong>Trình bày được vai trò của AI chỉ là công cụ hỗ trợ; con người đưa ra quyết định cuối cùng và chịu trách nhiệm khi sử dụng AI.</li>
+            <li><strong>Năng lực AI (NLa):</strong>Tư duy lấy con người làm trung tâm – hiểu rõ vai trò giám sát và trách nhiệm của người sử dụng.</li>
+            <li><strong>Phẩm chất:</strong>Tinh thần trách nhiệm, tự chủ trong học tập, không đổ lỗi cho công cụ máy móc.</li>
           </ul>
         </div>
 
         <div class="card" style="margin-bottom:0;">
-          <span class="section-badge badge-amber">📖 Giải thích thuật ngữ (SGK Bài 1)</span>
+          <span class="section-badge badge-amber">Giải thích thuật ngữ (SGK Bài 1)</span>
           <h3 style="margin:10px 0 12px; font-size:17px; color:var(--slate-900);">3 khái niệm cốt lõi cần ghi nhớ</h3>
           <div style="display:flex; flex-direction:column; gap:9px; font-size:13.8px;">
             <div style="background:#f8fafc; padding:11px 14px; border-radius:10px; border:1px solid var(--slate-200);">
-              <strong>🔹 Trí tuệ nhân tạo (AI):</strong> Công nghệ do con người tạo ra, lập trình và điều khiển giúp máy tính thực hiện các nhiệm vụ cần đến sự thông minh như nhận dạng, dự đoán, hỗ trợ ra quyết định.
+              <strong>Trí tuệ nhân tạo (AI):</strong>Công nghệ do con người tạo ra, lập trình và điều khiển giúp máy tính thực hiện các nhiệm vụ cần đến sự thông minh như nhận dạng, dự đoán, hỗ trợ ra quyết định.
             </div>
             <div style="background:#f8fafc; padding:11px 14px; border-radius:10px; border:1px solid var(--slate-200);">
-              <strong>🔹 Con người trong vòng lặp (Humans in the Loop):</strong> Nguyên tắc khẳng định con người luôn giữ vai trò trung tâm, chủ động kiểm soát và đưa ra quyết định cuối cùng trong quá trình làm việc với AI.
+              <strong>Con người trong vòng lặp (Humans in the Loop):</strong>Nguyên tắc khẳng định con người luôn giữ vai trò trung tâm, chủ động kiểm soát và đưa ra quyết định cuối cùng trong quá trình làm việc với AI.
             </div>
             <div style="background:#f8fafc; padding:11px 14px; border-radius:10px; border:1px solid var(--slate-200);">
-              <strong>🔹 Giám sát bởi con người (Human Oversight):</strong> Việc con người theo dõi, kiểm tra hoạt động và kết quả của hệ thống AI để kịp thời phát hiện và ngăn chặn sai sót.
+              <strong>Giám sát bởi con người (Human Oversight):</strong>Việc con người theo dõi, kiểm tra hoạt động và kết quả của hệ thống AI để kịp thời phát hiện và ngăn chặn sai sót.
             </div>
           </div>
         </div>
@@ -2258,28 +2237,28 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Tiết 1 Online • Thành phần 2 LMS</span>
-          <span>Gồm <strong>Khung Kết nối kiến thức nền</strong> (Tin học 6), <strong>Tình huống An – Minh – Khoa</strong> và <strong>Khảo sát Khởi động 2 câu</strong> (5 phút).</span>
+          <span>Gồm <strong>Khung Kết nối kiến thức nền</strong>(Tin học 6), <strong>Tình huống An – Minh – Khoa</strong>và <strong>Khảo sát Khởi động 2 câu</strong>(5 phút).</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-prereq-text')">📝 Copy Kiến thức nền</button>
-          <button class="btn btn-ghost btn-sm" onclick="SurveyApp.reset()">🔄 Xóa dữ liệu khảo sát mẫu</button>
+          <button class="btn btn-outline btn-sm" onclick="copyPlainText('mod2-prereq-text')">Copy Kiến thức nền</button>
+          <button class="btn btn-ghost btn-sm" onclick="SurveyApp.reset()">Xóa dữ liệu khảo sát mẫu</button>
         </div>
       </div>
 
       <!-- 2.1 Khung Kết nối kiến thức nền -->
       <div class="card">
-        <span class="section-badge badge-purple">🔗 Kết nối kiến thức nền (Prerequisites)</span>
+        <span class="section-badge badge-purple">Kết nối kiến thức nền (Prerequisites)</span>
         <h2 class="card-title">Kiến thức nền cần nhớ trước khi học Bài 1</h2>
         <div class="grid-2 mt-16">
           <div style="background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:14px; padding:18px;">
-            <div style="font-size:24px; margin-bottom:6px;">💻</div>
+            <div style="font-size:24px; margin-bottom:6px;"></div>
             <h4 style="color:#0369a1; margin-bottom:6px;">Liên thông môn Tin học 6 (Chủ đề 1 & Chủ đề 6)</h4>
             <p style="font-size:14px; color:var(--slate-700);">
-              Em đã biết máy tính xử lí thông tin dựa trên <strong>dữ liệu đầu vào</strong> và thực hiện công việc theo <strong>chương trình máy tính (mô tả thuật toán)</strong> do con người thiết kế và viết ra. Máy tính không thể tự suy nghĩ nếu không có con người lập trình!
+              Em đã biết máy tính xử lí thông tin dựa trên <strong>dữ liệu đầu vào</strong>và thực hiện công việc theo <strong>chương trình máy tính (mô tả thuật toán)</strong>do con người thiết kế và viết ra. Máy tính không thể tự suy nghĩ nếu không có con người lập trình!
             </p>
           </div>
           <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:14px; padding:18px;">
-            <div style="font-size:24px; margin-bottom:6px;">❓</div>
+            <div style="font-size:24px; margin-bottom:6px;"></div>
             <h4 style="color:#92400e; margin-bottom:6px;">Câu hỏi định hướng</h4>
             <p style="font-size:14px; color:var(--slate-700);">
               <em>Khác với các bộ phim khoa học viễn tưởng, Trí tuệ nhân tạo (AI) ngoài đời thực có tự sinh ra được không, hay cũng do con người thu thập dữ liệu, lập trình và điều khiển giống như các chương trình máy tính?</em>
@@ -2290,7 +2269,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- 2.2 Tình huống Khởi động SGK (Hình 1.1) -->
       <div class="card">
-        <span class="section-badge badge-amber">📖 Tình huống Khởi động (SGK Bài 1 – Hình 1.1)</span>
+        <span class="section-badge badge-amber">Tình huống Khởi động (SGK Bài 1 – Hình 1.1)</span>
         <h2 class="card-title">Cuộc trò chuyện của ba bạn An, Minh và Khoa sau giờ Tin học</h2>
 
         <div class="comic-scene">
@@ -2346,15 +2325,15 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
               <div class="dialogue-list">
                 <div class="dialogue-bubble">
                   <div class="avatar-circle" style="background:#0284c7;">An</div>
-                  <div><strong>An:</strong> “Trong phim tối qua, chú rô-bốt AI bỗng dưng tự thức tỉnh và quyết định làm mọi thứ mà không cần ai điều khiển. Ngoài đời thật, AI có thể tự sinh ra như vậy không nhỉ?”</div>
+                  <div><strong>An:</strong>“Trong phim tối qua, chú rô-bốt AI bỗng dưng tự thức tỉnh và quyết định làm mọi thứ mà không cần ai điều khiển. Ngoài đời thật, AI có thể tự sinh ra như vậy không nhỉ?”</div>
                 </div>
                 <div class="dialogue-bubble">
                   <div class="avatar-circle" style="background:#d97706;">Mi</div>
-                  <div><strong>Minh:</strong> “Tớ cũng thắc mắc giống An! Hằng ngày tớ thấy YouTube tự gợi ý đúng bài hát tớ thích, điện thoại của mẹ thì tự nhận diện khuôn mặt để mở khóa. Không biết ai đã dạy chúng làm được như vậy?”</div>
+                  <div><strong>Minh:</strong>“Tớ cũng thắc mắc giống An! Hằng ngày tớ thấy YouTube tự gợi ý đúng bài hát tớ thích, điện thoại của mẹ thì tự nhận diện khuôn mặt để mở khóa. Không biết ai đã dạy chúng làm được như vậy?”</div>
                 </div>
                 <div class="dialogue-bubble">
                   <div class="avatar-circle" style="background:#059669;">Kh</div>
-                  <div><strong>Khoa:</strong> “Thật ra AI ngoài đời không hề giống trên phim đâu! Chúng ta cùng tìm hiểu xem AI thực sự đến từ đâu và ai mới là người nắm quyền điều khiển nhé!”</div>
+                  <div><strong>Khoa:</strong>“Thật ra AI ngoài đời không hề giống trên phim đâu! Chúng ta cùng tìm hiểu xem AI thực sự đến từ đâu và ai mới là người nắm quyền điều khiển nhé!”</div>
                 </div>
               </div>
             </div>
@@ -2364,7 +2343,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- 2.3 Hoạt động 1: Khảo sát Khởi động 2 câu -->
       <div class="card">
-        <span class="section-badge badge-blue">🚀 Hoạt động 1: Khảo sát Khởi động trên LMS (5 phút)</span>
+        <span class="section-badge badge-blue">Hoạt động 1: Khảo sát Khởi động trên LMS (5 phút)</span>
         <h2 class="card-title">Trả lời nhanh 2 câu hỏi kết nối tình huống An, Minh, Khoa</h2>
 
         <div class="grid-2 mt-16 mb-12">
@@ -2385,43 +2364,43 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
         <div style="background:#f8fafc; border:1.5px solid var(--slate-200); border-radius:16px; padding:18px; margin-bottom:14px;">
           <div style="font-weight:800; font-size:15.5px; color:var(--slate-900); margin-bottom:12px;">
-            ❓ Câu 1 (Trắc nghiệm 1 lựa chọn): Giống như thắc mắc của bạn An trong SGK Bài 1, theo em Trí tuệ nhân tạo (AI) ngoài đời thực tự sinh ra trong máy tính hay do con người tạo ra?
+             Câu 1 (Trắc nghiệm 1 lựa chọn): Giống như thắc mắc của bạn An trong SGK Bài 1, theo em Trí tuệ nhân tạo (AI) ngoài đời thực tự sinh ra trong máy tính hay do con người tạo ra?
           </div>
           <button type="button" class="poll-choice-btn" id="svOptA" onclick="SurveyApp.pick('A')">
-            <span><strong>A.</strong> Tự sinh ra từ hệ thống vi mạch và linh kiện điện tử.</span>
-            <span style="font-size:18px;">🤖❓</span>
+            <span><strong>A.</strong>Tự sinh ra từ hệ thống vi mạch và linh kiện điện tử.</span>
+            
           </button>
           <button type="button" class="poll-choice-btn" id="svOptB" onclick="SurveyApp.pick('B')">
-            <span><strong>B.</strong> Do con người thu thập dữ liệu, lập trình thuật toán và điều khiển.</span>
-            <span style="font-size:18px;">👨‍💻✨</span>
+            <span><strong>B.</strong>Do con người thu thập dữ liệu, lập trình thuật toán và điều khiển.</span>
+            
           </button>
 
           <div style="font-weight:800; font-size:15.5px; color:var(--slate-900); margin:16px 0 8px;">
-            ❓ Câu 2 (Trả lời ngắn): Em hãy kể tên 01 ứng dụng hoặc thiết bị có sử dụng Trí tuệ nhân tạo (AI) mà em hoặc gia đình từng sử dụng:
+             Câu 2 (Trả lời ngắn): Em hãy kể tên 01 ứng dụng hoặc thiết bị có sử dụng Trí tuệ nhân tạo (AI) mà em hoặc gia đình từng sử dụng:
           </div>
           <input type="text" id="svAppInput" placeholder="Ví dụ: Face ID trên điện thoại của mẹ, YouTube gợi ý nhạc, Google Dịch..." />
 
           <div class="flex-row mt-16">
-            <button type="button" class="btn btn-primary" onclick="SurveyApp.submit()">📨 Nộp khảo sát Khởi động</button>
-            <span id="svSavedBadge" class="section-badge badge-green is-hidden">✅ Đã lưu trạng thái trên thiết bị</span>
+            <button type="button" class="btn btn-primary" onclick="SurveyApp.submit()">Nộp khảo sát Khởi động</button>
+            <span id="svSavedBadge" class="section-badge badge-green is-hidden">Đã lưu trạng thái trên thiết bị</span>
           </div>
         </div>
 
         <!-- Phản hồi tự động ngay sau khi nộp -->
         <div id="svFeedbackBox" class="callout callout-green is-hidden">
-          <strong>🎉 Thông điệp phản hồi tự động từ hệ thống LMS:</strong>
+          <strong>Thông điệp phản hồi tự động từ hệ thống LMS:</strong>
           <p class="mt-12" style="margin-top:6px;">
-            “Cảm ơn ý kiến của em! Khác với phim khoa học viễn tưởng, mọi hệ thống AI ngoài đời thực đều là sản phẩm do con người tạo ra và dẫn dắt. Hãy bước sang <strong>Hoạt động 2</strong> để khám phá hậu trường tạo ra AI nhé!”
+            “Cảm ơn ý kiến của em! Khác với phim khoa học viễn tưởng, mọi hệ thống AI ngoài đời thực đều là sản phẩm do con người tạo ra và dẫn dắt. Hãy bước sang <strong>Hoạt động 2</strong>để khám phá hậu trường tạo ra AI nhé!”
           </p>
           <div class="mt-12">
-            <button type="button" class="btn btn-success btn-sm" onclick="switchTab('mod3')">➡️ Sang Hoạt động 2: Infographic & Video AI</button>
+            <button type="button" class="btn btn-success btn-sm" onclick="switchTab('mod3')">Sang Hoạt động 2: Infographic & Video AI</button>
           </div>
         </div>
 
         <!-- Biểu đồ thống kê tự động lớp học (KHBD Bước 3 — chỉ tính từ dữ liệu phản hồi thật) -->
         <div id="svStatsBox" style="background:#f8fafc; border:1.5px solid var(--slate-200); border-radius:16px; padding:18px; margin-top:14px;">
           <div class="flex-between mb-12">
-            <h4 style="color:var(--slate-900);">📊 Bảng thống kê tự động của lớp trên LMS</h4>
+            <h4 style="color:var(--slate-900);">Bảng thống kê tự động của lớp trên LMS</h4>
             <span class="section-badge badge-blue" id="svTotalVotes">Tổng phản hồi: 0 học sinh</span>
           </div>
           <div class="stat-bar-row">
@@ -2443,7 +2422,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             </div>
           </div>
           <div style="margin-top:14px; font-size:13.5px; font-weight:700; color:var(--slate-700);">
-            🏷️ Danh sách các ứng dụng / thiết bị AI lớp đã kể tên:
+             Danh sách các ứng dụng / thiết bị AI lớp đã kể tên:
           </div>
           <div class="tag-cloud" id="svTagCloud"></div>
         </div>
@@ -2461,11 +2440,11 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Tiết 1 Online • Thành phần 3 LMS (25 phút)</span>
-          <span><strong>HĐ 2.1:</strong> Infographic 1 + Video YouTube ngắn (3–4p) kèm 3 câu hỏi định hướng • <strong>HĐ 2.2:</strong> Infographic 2 + Khung chốt kiến thức.</span>
+          <span><strong>HĐ 2.1:</strong>Infographic 1 + Video YouTube ngắn (3–4p) kèm 3 câu hỏi định hướng • <strong>HĐ 2.2:</strong>Infographic 2 + Khung chốt kiến thức.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ In Infographic</button>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('mod8')">⚙️ Đổi link Video YouTube</button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()">In Infographic</button>
+          <button class="btn btn-primary btn-sm" onclick="switchTab('mod8')">Đổi link Video YouTube</button>
         </div>
       </div>
 
@@ -2473,50 +2452,22 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="section-badge badge-blue">Hoạt động 2.1 (15 phút) • Hình 1.2 SGK</span>
-            <h2 class="card-title">📊 Infographic 1: Hậu trường của AI – Vai trò của con người</h2>
+            <span class="section-badge badge-blue">Hoạt động 2.1 (15 phút) · Hình 1.2 SGK</span>
+            <h2 class="card-title">Infographic 1: Hậu trường của AI – Vai trò của con người</h2>
           </div>
-          <span class="section-badge badge-green" id="ig1StatusBadge">👀 Đọc kĩ 3 bước bên dưới</span>
+          <span class="section-badge badge-green" id="ig1StatusBadge">Đọc kỹ 3 bước bên dưới</span>
         </div>
 
         <div class="callout callout-amber" style="margin-top:0;">
-          <strong>🔍 Gợi ý từ Hoạt động 1 SGK:</strong> Khi bạn Minh mở điện thoại thông minh của mẹ, màn hình tự động mở khóa ngay khi nhận diện đúng khuôn mặt của mẹ, còn khi Minh đưa mặt mình vào thì không mở khóa. Hãy quan sát Infographic 1 để khám phá <strong>3 bước con người đã tạo ra sự “thông minh” đó!</strong>
+          <strong>Gợi ý từ Hoạt động 1 SGK:</strong>Khi bạn Minh mở điện thoại thông minh của mẹ, màn hình tự động mở khóa ngay khi nhận diện đúng khuôn mặt của mẹ, còn khi Minh đưa mặt mình vào thì không mở khóa. Hãy quan sát sơ đồ dưới đây để tìm hiểu <strong>3 bước con người tạo ra một hệ thống AI.</strong>
         </div>
 
-        <!-- Infographic 1 Embedded Directly -->
+        <!-- Infographic 1 Embedded Directly (clean, no decorative mascots) -->
         <div class="ig1-board mt-12">
           <div class="ig1-header">
             <div>
               <div class="ig1-tag">TIN HỌC 6 – CHUYÊN ĐỀ TRÍ TUỆ NHÂN TẠO (BÀI 1)</div>
               <h3 class="ig1-title">HẬU TRƯỜNG CỦA AI – AI DO AI TẠO RA?</h3>
-            </div>
-            <div class="ig1-chars">
-              <div class="ig1-char-badge">
-                <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
-                  <ellipse cx="20" cy="22" rx="14" ry="16" fill="#a06cd5" />
-                  <ellipse cx="20" cy="24" rx="9" ry="11" fill="#ffffff" />
-                  <polygon points="10,10 16,14 12,18" fill="#a06cd5" />
-                  <polygon points="30,10 24,14 28,18" fill="#a06cd5" />
-                  <circle cx="15" cy="18" r="5" fill="#ffe5d9" stroke="#ffb703" stroke-width="2" />
-                  <circle cx="25" cy="18" r="5" fill="#ffe5d9" stroke="#ffb703" stroke-width="2" />
-                  <circle cx="15" cy="18" r="2" fill="#0f172a" />
-                  <circle cx="25" cy="18" r="2" fill="#0f172a" />
-                  <polygon points="20,21 17,25 23,25" fill="#ff8500" />
-                </svg>
-                <span>Cú Tri Thức</span>
-              </div>
-              <div class="ig1-char-badge">
-                <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
-                  <rect x="10" y="12" width="20" height="18" rx="6" fill="#90e0ef" stroke="#0077b6" stroke-width="2" />
-                  <line x1="20" y1="12" x2="20" y2="6" stroke="#0077b6" stroke-width="2" />
-                  <circle cx="20" cy="5" r="3" fill="#ff758f" />
-                  <rect x="14" y="16" width="12" height="7" rx="3" fill="#0f172a" />
-                  <circle cx="17" cy="19.5" r="1.5" fill="#b5e48c" />
-                  <circle cx="23" cy="19.5" r="1.5" fill="#b5e48c" />
-                  <path d="M17 25 Q20 28 23 25" stroke="#0077b6" stroke-width="2" fill="none" stroke-linecap="round" />
-                </svg>
-                <span>Rô-bốt AI</span>
-              </div>
             </div>
           </div>
 
@@ -2524,41 +2475,40 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <div class="ig1-step ig1-step-1">
               <div class="ig1-step-top">
                 <span class="ig1-pill">BƯỚC 1</span>
-                <div class="ig1-icon">📂✋</div>
+                <div class="ig1-icon" style="font-size:15px;font-weight:800;color:#065f46;">01</div>
               </div>
               <h4 class="ig1-headline">THU THẬP &amp; XỬ LÍ DỮ LIỆU</h4>
-              <p class="ig1-desc">Con người lựa chọn, thu thập, phân loại và làm sạch lượng lớn dữ liệu (hình ảnh, âm thanh, văn bản,...) để <strong>“dạy”</strong> cho máy tính học.</p>
-              <div class="ig1-example">💡 <em>Ví dụ:</em> Cung cấp hàng nghìn bức ảnh các loài mèo khác nhau để AI học cách nhận diện con mèo.</div>
+              <p class="ig1-desc">Con người lựa chọn, thu thập, phân loại và làm sạch lượng lớn dữ liệu (hình ảnh, âm thanh, văn bản,...) để <strong>“dạy”</strong>cho máy tính học.</p>
+              <div class="ig1-example"><em>Ví dụ:</em>Cung cấp hàng nghìn bức ảnh các loài mèo khác nhau để AI học cách nhận diện con mèo.</div>
             </div>
 
-            <div class="ig1-arrow" aria-hidden="true">➜</div>
+            <div class="ig1-arrow" aria-hidden="true">→</div>
 
             <div class="ig1-step ig1-step-2">
               <div class="ig1-step-top">
                 <span class="ig1-pill">BƯỚC 2</span>
-                <div class="ig1-icon">💻⚙️</div>
+                <div class="ig1-icon" style="font-size:15px;font-weight:800;color:#0369a1;">02</div>
               </div>
               <h4 class="ig1-headline">THIẾT KẾ THUẬT TOÁN &amp; LẬP TRÌNH</h4>
               <p class="ig1-desc">Các kĩ sư viết chương trình máy tính và thiết kế thuật toán hướng dẫn máy tính cách tìm quy luật, nhận diện mẫu từ dữ liệu để đưa ra kết quả.</p>
-              <div class="ig1-example">💡 <em>Bản chất:</em> Máy tính học theo thuật toán thông minh do chuyên gia con người lập trình.</div>
+              <div class="ig1-example"><em>Bản chất:</em>Máy tính học theo thuật toán do chuyên gia con người lập trình.</div>
             </div>
 
-            <div class="ig1-arrow" aria-hidden="true">➜</div>
+            <div class="ig1-arrow" aria-hidden="true">→</div>
 
             <div class="ig1-step ig1-step-3">
               <div class="ig1-step-top">
                 <span class="ig1-pill">BƯỚC 3</span>
-                <div class="ig1-icon">📱🎛️</div>
+                <div class="ig1-icon" style="font-size:15px;font-weight:800;color:#9f1239;">03</div>
               </div>
               <h4 class="ig1-headline">TRIỂN KHAI, ĐIỀU KHIỂN &amp; SỬ DỤNG</h4>
               <p class="ig1-desc">Con người xác định mục đích, cài đặt AI vào thiết bị (điện thoại, máy tính, rô-bốt), trực tiếp bật/tắt, kiểm tra và cập nhật khi có sai sót.</p>
-              <div class="ig1-example">💡 <em>Thực tế:</em> Con người giám sát độ chính xác của Face ID, Siri, Google Dịch trong quá trình dùng.</div>
+              <div class="ig1-example"><em>Thực tế:</em>Con người giám sát độ chính xác của Face ID, Siri, Google Dịch trong quá trình dùng.</div>
             </div>
           </div>
 
           <div class="ig1-footer">
-            <span style="font-size:20px;">🎯</span>
-            <div class="ig1-slogan">AI KHÔNG TỰ SINH RA VÀ KHÔNG HOẠT ĐỘNG ĐỘC LẬP – CON NGƯỜI TẠO RA, LẬP TRÌNH VÀ ĐIỀU KHIỂN AI!</div>
+            <div class="ig1-slogan">AI KHÔNG TỰ SINH RA VÀ KHÔNG HOẠT ĐỘNG ĐỘC LẬP – CON NGƯỜI TẠO RA, LẬP TRÌNH VÀ ĐIỀU KHIỂN AI.</div>
           </div>
         </div>
       </div>
@@ -2568,21 +2518,21 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="card-header">
           <div>
             <span class="section-badge badge-purple">Hoạt động 2.1 (Tiếp) • Microlearning (3–4 phút)</span>
-            <h2 class="card-title">🎥 Video hoạt hình ngắn: “AI là gì? Vì sao gọi là Trí tuệ NHÂN TẠO?”</h2>
+            <h2 class="card-title">Video hoạt hình ngắn: “AI là gì? Vì sao gọi là Trí tuệ NHÂN TẠO?”</h2>
           </div>
           <div class="flex-row">
-            <button type="button" class="btn btn-primary btn-sm" id="btnModeSimVid" onclick="VideoApp.setSource('sim')">🎬 Bài giảng tích hợp (Offline)</button>
+            <button type="button" class="btn btn-primary btn-sm" id="btnModeSimVid" onclick="VideoApp.setSource('sim')">Bài giảng tích hợp (Offline)</button>
             <button type="button" class="btn btn-outline btn-sm" id="btnModeYtVid" onclick="VideoApp.setSource('yt')">▶️ Nhúng Video YouTube</button>
           </div>
         </div>
 
         <!-- 3 Câu hỏi định hướng bắt buộc theo 2.HocLieuSo.docx -->
         <div class="callout callout-indigo" style="margin-top:0;">
-          <strong>🧭 3 Câu hỏi định hướng trước khi xem Video (để không xem thụ động):</strong>
+          <strong>3 Câu hỏi định hướng trước khi xem Video (để không xem thụ động):</strong>
           <ol style="padding-left:20px; margin-top:6px; font-size:14.2px; color:var(--slate-800); display:flex; flex-direction:column; gap:4px;">
-            <li>Vì sao công nghệ này được gọi là Trí tuệ <strong>“Nhân tạo”</strong> (Artificial)?</li>
+            <li>Vì sao công nghệ này được gọi là Trí tuệ <strong>“Nhân tạo”</strong>(Artificial)?</li>
             <li>Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?</li>
-            <li>Hãy ghi chú <strong>3 bước con người tạo ra AI</strong> vào Sách giáo khoa Bài 1.</li>
+            <li>Hãy ghi chú <strong>3 bước con người tạo ra AI</strong>vào Sách giáo khoa Bài 1.</li>
           </ol>
         </div>
 
@@ -2595,7 +2545,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <button type="button" class="btn btn-primary btn-sm" onclick="VideoApp.loadYouTube()">▶️ Tải Video YouTube</button>
           </div>
           <p style="font-size:12.5px; color:var(--slate-600); margin-top:6px;">
-            💡 <strong>Gợi ý tìm YouTube (3–4 phút, chuẩn THCS):</strong> <em>“What is AI? Code.org”</em> (có phụ đề tiếng Việt), <em>“How AI Works: Introduction to AI”</em>, <em>“Trí tuệ nhân tạo AI là gì cho học sinh”</em>. Mặc định đang gán clip chuẩn <strong>Code.org – How AI Works</strong>; nếu lớp không có mạng, bấm <strong>“Bài giảng tích hợp (Offline)”</strong>.
+             <strong>Gợi ý tìm YouTube (3–4 phút, chuẩn THCS):</strong> <em>“What is AI? Code.org”</em>(có phụ đề tiếng Việt), <em>“How AI Works: Introduction to AI”</em>, <em>“Trí tuệ nhân tạo AI là gì cho học sinh”</em>. Mặc định đang gán clip chuẩn <strong>Code.org – How AI Works</strong>; nếu lớp không có mạng, bấm <strong>“Bài giảng tích hợp (Offline)”</strong>.
           </p>
         </div>
 
@@ -2604,7 +2554,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           <!-- Offline Animated Microlearning Slides -->
           <div id="vidSimWrap">
             <div class="vid-screen">
-              <div id="vidSceneIcon" style="font-size:58px; margin-bottom:10px;">🤖💡</div>
+              <div id="vidSceneIcon" style="display:none;"></div>
               <div id="vidSceneTitle" style="font-size:clamp(18px, 2.2vw, 24px); font-weight:800; color:#fde047; margin-bottom:10px;">
                 PHÂN CẢNH 1: TỰ THỨC TỈNH HAY “NHÂN TẠO”?
               </div>
@@ -2641,8 +2591,8 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="section-badge badge-green">Hoạt động 2.2 (10 phút) • Hình 1.3 SGK</span>
-            <h2 class="card-title">💡 Infographic 2: AI quanh ta – Phân biệt công cụ AI và thiết bị thường</h2>
+            <span class="section-badge badge-green">Hoạt động 2.2 (10 phút) · Hình 1.3 SGK</span>
+            <h2 class="card-title">Infographic 2: AI quanh ta – Phân biệt công cụ AI và thiết bị thường</h2>
           </div>
         </div>
 
@@ -2657,7 +2607,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <!-- Cột trái: Công cụ AI -->
             <div class="ig2-col ig2-col-ai">
               <div class="ig2-col-head">
-                <div class="ig2-col-icon">🤖✨</div>
+                <div class="ig2-col-icon" style="font-size:14px;font-weight:800;color:#065f46;">AI</div>
                 <div>
                   <h4 style="font-size:16.5px; font-weight:800; color:#065f46;">CÔNG CỤ CÓ ỨNG DỤNG AI</h4>
                   <p style="font-size:12.5px; font-weight:600; color:#334155;">Học từ dữ liệu để nhận dạng, dự đoán, dịch thuật &amp; gợi ý thông minh</p>
@@ -2666,28 +2616,28 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
               <div class="ig2-item">
                 <div class="ig2-num">1</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">👤 Mở khóa bằng khuôn mặt (Face ID)</div>
+                  <div style="font-weight:800; font-size:14.5px;">Mở khóa bằng khuôn mặt (Face ID)</div>
                   <div style="font-size:13px; color:var(--slate-600);">Phân tích đặc điểm khuôn mặt từ dữ liệu để nhận diện đúng chủ nhân.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">2</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">🎵 Hệ thống gợi ý video YouTube / âm nhạc</div>
+                  <div style="font-weight:800; font-size:14.5px;">Hệ thống gợi ý video YouTube / âm nhạc</div>
                   <div style="font-size:13px; color:var(--slate-600);">Phân tích thói quen xem/nghe để đề xuất nội dung phù hợp sở thích từng người.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">3</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">🌐 Ứng dụng dịch ngôn ngữ tự động (Google Dịch)</div>
+                  <div style="font-weight:800; font-size:14.5px;">Ứng dụng dịch ngôn ngữ tự động (Google Dịch)</div>
                   <div style="font-size:13px; color:var(--slate-600);">Nhận diện văn bản, giọng nói, chữ trên ảnh và dịch linh hoạt theo ngữ cảnh.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">4</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">🎙️ Trợ lý ảo bằng giọng nói (Siri, Google Assistant)</div>
+                  <div style="font-weight:800; font-size:14.5px;">Trợ lý ảo bằng giọng nói (Siri, Google Assistant)</div>
                   <div style="font-size:13px; color:var(--slate-600);">Nghe hiểu câu lệnh giọng nói của con người để tìm kiếm, đặt báo thức.</div>
                 </div>
               </div>
@@ -2696,7 +2646,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <!-- Cột phải: Thiết bị thông thường -->
             <div class="ig2-col ig2-col-normal">
               <div class="ig2-col-head">
-                <div class="ig2-col-icon">🔌⚙️</div>
+                <div class="ig2-col-icon" style="font-size:13px;font-weight:800;color:#881337;">TB</div>
                 <div>
                   <h4 style="font-size:16.5px; font-weight:800; color:#881337;">THIẾT BỊ ĐIỆN TỬ THÔNG THƯỜNG</h4>
                   <p style="font-size:12.5px; font-weight:600; color:#334155;">Chỉ chạy cố định theo công tắc, rơ-le nhiệt hoặc công thức cài sẵn</p>
@@ -2705,28 +2655,28 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
               <div class="ig2-item">
                 <div class="ig2-num">1</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">🌀 Quạt điện cơ bấm nút</div>
+                  <div style="font-weight:800; font-size:14.5px;">Quạt điện cơ bấm nút</div>
                   <div style="font-size:13px; color:var(--slate-600);">Chỉ quay theo đúng tốc độ các nút bấm số 1, 2, 3, không nhận biết người dùng.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">2</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">🔢 Máy tính bỏ túi thông thường</div>
+                  <div style="font-weight:800; font-size:14.5px;">Máy tính bỏ túi thông thường</div>
                   <div style="font-size:13px; color:var(--slate-600);">Tính toán thuần túy theo mạch điện tử lập trình cố định, không tự học thêm.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">3</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">💡 Đèn bàn học / Đèn pin</div>
+                  <div style="font-weight:800; font-size:14.5px;">Đèn bàn học / Đèn pin</div>
                   <div style="font-size:13px; color:var(--slate-600);">Bật sáng hoặc tắt nhờ công tắc cơ học đóng/ngắt dòng điện.</div>
                 </div>
               </div>
               <div class="ig2-item">
                 <div class="ig2-num">4</div>
                 <div>
-                  <div style="font-weight:800; font-size:14.5px;">⏰ Đồng hồ treo tường chạy pin / Nồi cơm điện cơ</div>
+                  <div style="font-weight:800; font-size:14.5px;">Đồng hồ treo tường chạy pin / Nồi cơm điện cơ</div>
                   <div style="font-size:13px; color:var(--slate-600);">Hoạt động theo cơ chế cơ học hoặc rơ-le nhiệt cố định, không có trí tuệ nhân tạo.</div>
                 </div>
               </div>
@@ -2735,12 +2685,10 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
           <div class="ig2-summary">
             <div class="ig2-pill" style="background:#ecfdf5; color:#065f46; border:1px solid #6ee7b7;">
-              <span style="font-size:20px;">💡</span>
-              <span><strong>Dấu hiệu AI:</strong> Có dữ liệu mẫu ➜ Huấn luyện thuật toán ➜ Nhận dạng, gợi ý và thích ứng.</span>
+              <span><strong>Dấu hiệu AI:</strong>Có dữ liệu mẫu → Huấn luyện thuật toán → Nhận dạng, gợi ý và thích ứng.</span>
             </div>
             <div class="ig2-pill" style="background:#fff1f2; color:#881337; border:1px solid #fda4af;">
-              <span style="font-size:20px;">⚠️</span>
-              <span><strong>Thiết bị thường:</strong> Không học từ dữ liệu ➜ Hoạt động theo mạch điện hoặc công thức cố định.</span>
+              <span><strong>Thiết bị thường:</strong>Không học từ dữ liệu → Hoạt động theo mạch điện hoặc công thức cố định.</span>
             </div>
           </div>
         </div>
@@ -2749,15 +2697,15 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div style="background:linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%); color:#ffffff; border-radius:16px; padding:20px 24px; margin-top:20px;">
           <div class="flex-between">
             <div>
-              <div style="font-size:12px; font-weight:800; letter-spacing:0.08em; color:#7dd3fc; text-transform:uppercase; margin-bottom:6px;">
-                📌 KHUNG CHỐT KIẾN THỨC TRỌNG TÂM – HOẠT ĐỘNG 2 (6.A1.1)
+              <div style="font-size:12px; font-weight:800; letter-spacing:0.06em; color:#bae6fd; text-transform:uppercase; margin-bottom:6px;">
+                KIẾN THỨC TRỌNG TÂM – HOẠT ĐỘNG 2 (6.A1.1)
               </div>
               <p style="font-size:15.5px; font-weight:700; line-height:1.6;">
                 “Ghi nhớ: AI không tự sinh ra. Con người giữ vai trò quyết định ở cả 3 khâu: <span style="color:#fde047;">Dữ liệu – Thuật toán – Điều khiển</span>. Không phải mọi thiết bị điện tử đều là AI.”
               </p>
             </div>
             <button type="button" class="btn btn-success no-print" onclick="markStepDone(2); switchTab('mod4');">
-              ✅ Đã hiểu – Sang Bài kiểm tra Chốt chặn →
+              Đã hiểu – Sang Bài kiểm tra →
             </button>
           </div>
         </div>
@@ -2771,11 +2719,11 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag">Tiết 1 Online • Thành phần 4 &amp; 5 LMS (15 phút)</span>
-          <span><strong>Mục A:</strong> Bài kiểm tra chốt chặn 5 câu (điều kiện ≥ 8/10 điểm mở khóa Mục B) • <strong>Mục B:</strong> Nhiệm vụ cầu nối chuẩn bị Tiết 2.</span>
+          <span><strong>Mục A:</strong>Bài kiểm tra chốt chặn 5 câu (điều kiện ≥ 8/10 điểm mở khóa Mục B) • <strong>Mục B:</strong>Nhiệm vụ cầu nối chuẩn bị Tiết 2.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="QuizApp.teacherUnlockPreview()">🔓 Mở khóa xem trước Mục B (GV)</button>
-          <button class="btn btn-ghost btn-sm" onclick="QuizApp.resetAll()">🔄 Làm lại từ đầu</button>
+          <button class="btn btn-outline btn-sm" onclick="QuizApp.teacherUnlockPreview()">Mở khóa xem trước Mục B (GV)</button>
+          <button class="btn btn-ghost btn-sm" onclick="QuizApp.resetAll()">Làm lại từ đầu</button>
         </div>
       </div>
 
@@ -2784,7 +2732,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="card-header">
           <div>
             <span class="section-badge badge-blue">Hoạt động 3 – Mục A (10 phút) • Kiểm tra mức Hiểu (6.A1.1)</span>
-            <h2 class="card-title">📝 Bài kiểm tra chốt chặn 5 câu (Thang điểm 10)</h2>
+            <h2 class="card-title">Bài kiểm tra chốt chặn 5 câu (Thang điểm 10)</h2>
           </div>
           <div class="qz-live-score">
             Điểm số: <span id="qzScoreDisplay" style="color:var(--primary);">Chưa chấm</span>
@@ -2792,7 +2740,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         </div>
 
         <div class="qz-condition-banner">
-          <span>🔒 <strong>Điều kiện mở khóa tự động trên LMS:</strong> Em cần đạt tối thiểu <strong style="color:var(--primary-dark);">8/10 điểm</strong> để mở khóa <strong>Mục B – Nhiệm vụ cầu nối chuẩn bị Tiết 2</strong>. Nếu chưa đạt, em xem giải thích từng câu và làm lại ngay!</span>
+          <span> <strong>Điều kiện mở khóa tự động trên LMS:</strong>Em cần đạt tối thiểu <strong style="color:var(--primary-dark);">8/10 điểm</strong>để mở khóa <strong>Mục B – Nhiệm vụ cầu nối chuẩn bị Tiết 2</strong>. Nếu chưa đạt, em xem giải thích từng câu và làm lại ngay!</span>
         </div>
 
         <!-- CÂU 1 (2 ĐIỂM): KÉO THẢ / CHẠM PHÂN LOẠI 6 THIẾT BỊ -->
@@ -2802,37 +2750,37 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <span>Phân loại 6 thiết bị / ứng dụng vào đúng 2 nhóm “Có dùng AI” và “Không dùng AI”</span>
           </div>
           <p style="font-size:13.5px; color:var(--slate-600); margin-bottom:10px;">
-            💡 <strong>Cách làm:</strong> Trên máy tính, em kéo–thả từng thẻ vào ô tương ứng. Trên điện thoại/máy tính bảng, em <strong>chạm chọn 1 thẻ</strong> rồi <strong>chạm vào ô nhóm</strong> để đặt thẻ vào!
+             <strong>Cách làm:</strong>Trên máy tính, em kéo–thả từng thẻ vào ô tương ứng. Trên điện thoại/máy tính bảng, em <strong>chạm chọn 1 thẻ</strong>rồi <strong>chạm vào ô nhóm</strong>để đặt thẻ vào!
           </p>
 
           <div class="qz-pool" id="qzPool" ondragover="QuizApp.allowDrop(event)" ondrop="QuizApp.drop(event, 'qzPool')" onclick="QuizApp.tapZone('qzPool')">
             <div class="qz-drag-tag" id="qzItem1" draggable="true" data-type="ai" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem1')">
-              👤 Mở khóa bằng khuôn mặt (Face ID)
+               Mở khóa bằng khuôn mặt (Face ID)
             </div>
             <div class="qz-drag-tag" id="qzItem2" draggable="true" data-type="normal" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem2')">
-              🌀 Quạt điện cơ nút bấm 1, 2, 3
+               Quạt điện cơ nút bấm 1, 2, 3
             </div>
             <div class="qz-drag-tag" id="qzItem3" draggable="true" data-type="ai" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem3')">
-              🌐 Google Dịch bằng giọng nói &amp; ảnh
+               Google Dịch bằng giọng nói &amp; ảnh
             </div>
             <div class="qz-drag-tag" id="qzItem4" draggable="true" data-type="normal" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem4')">
-              🔢 Máy tính bỏ túi (+, −, ×, ÷)
+               Máy tính bỏ túi (+, −, ×, ÷)
             </div>
             <div class="qz-drag-tag" id="qzItem5" draggable="true" data-type="ai" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem5')">
-              🎵 Hệ thống gợi ý video trên YouTube
+               Hệ thống gợi ý video trên YouTube
             </div>
             <div class="qz-drag-tag" id="qzItem6" draggable="true" data-type="normal" ondragstart="QuizApp.drag(event)" onclick="QuizApp.tapTag(event, 'qzItem6')">
-              🔦 Đèn pin chiếu sáng công tắc gạt
+               Đèn pin chiếu sáng công tắc gạt
             </div>
           </div>
 
           <div class="qz-drop-grid">
             <div class="qz-zone qz-zone-ai" id="qzZoneAI" ondragover="QuizApp.allowDrop(event)" ondragleave="QuizApp.leaveDrop(event)" ondrop="QuizApp.drop(event, 'qzZoneAIItems')" onclick="QuizApp.tapZone('qzZoneAIItems')">
-              <div style="font-weight:800; font-size:14px; color:#065f46;">🤖 NHÓM 1: CÓ DÙNG AI (Học từ dữ liệu, nhận dạng, gợi ý)</div>
+              <div style="font-weight:800; font-size:14px; color:#065f46;">NHÓM 1: CÓ DÙNG AI (Học từ dữ liệu, nhận dạng, gợi ý)</div>
               <div class="qz-zone-items" id="qzZoneAIItems"></div>
             </div>
             <div class="qz-zone qz-zone-normal" id="qzZoneNormal" ondragover="QuizApp.allowDrop(event)" ondragleave="QuizApp.leaveDrop(event)" ondrop="QuizApp.drop(event, 'qzZoneNormalItems')" onclick="QuizApp.tapZone('qzZoneNormalItems')">
-              <div style="font-weight:800; font-size:14px; color:#881337;">🔌 NHÓM 2: KHÔNG DÙNG AI (Thiết bị điện tử thường)</div>
+              <div style="font-weight:800; font-size:14px; color:#881337;">NHÓM 2: KHÔNG DÙNG AI (Thiết bị điện tử thường)</div>
               <div class="qz-zone-items" id="qzZoneNormalItems"></div>
             </div>
           </div>
@@ -2950,7 +2898,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <!-- Nút nộp bài & làm lại -->
         <div class="flex-row mt-16">
           <button type="button" class="btn btn-primary" style="padding:13px 24px; font-size:15px;" onclick="QuizApp.evaluate()">
-            📊 Nộp bài &amp; Chấm điểm Chốt chặn
+             Nộp bài &amp; Chấm điểm Chốt chặn
           </button>
           <button type="button" class="btn btn-ghost" onclick="QuizApp.resetAll()">
             ↺ Làm lại bài kiểm tra
@@ -2963,23 +2911,23 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <!-- MỤC B: NHIỆM VỤ CẦU NỐI CHUẨN BỊ TIẾT 2 -->
       <div class="card" id="bridgeSection">
         <div id="bridgeLockBanner" class="callout callout-amber" style="margin-top:0;">
-          🔒 <strong>Mục B đang bị khóa!</strong> Em cần đạt tối thiểu <strong>8/10 điểm</strong> ở Bài kiểm tra chốt chặn (Mục A) phía trên để tự động mở khóa Nhiệm vụ cầu nối chuẩn bị Tiết 2.
+           <strong>Mục B đang bị khóa!</strong>Em cần đạt tối thiểu <strong>8/10 điểm</strong>ở Bài kiểm tra chốt chặn (Mục A) phía trên để tự động mở khóa Nhiệm vụ cầu nối chuẩn bị Tiết 2.
         </div>
 
         <div class="bridge-card-wrap locked" id="bridgeCardWrap">
           <div class="card-header" style="margin-bottom:14px;">
             <div>
               <span class="section-badge badge-rose">Hoạt động 3 – Mục B (5 phút) • Thành phần 5 LMS</span>
-              <h2 class="card-title">🌉 Nhiệm vụ cầu nối chuẩn bị Tiết 2: Tình huống của bạn Minh</h2>
+              <h2 class="card-title">Nhiệm vụ cầu nối chuẩn bị Tiết 2: Tình huống của bạn Minh</h2>
             </div>
             <a id="bridgeGFormBtn" href="#" target="_blank" rel="noopener" class="btn btn-outline btn-sm is-hidden">
-              🔗 Mở biểu mẫu Google Form của GV
+               Mở biểu mẫu Google Form của GV
             </a>
           </div>
 
           <div class="callout callout-rose" style="margin-top:0;">
-            <strong>📖 Tình huống (trích Luyện tập 3 – SGK Bài 1):</strong><br />
-            Trong giờ học Lịch sử, bạn <strong>Minh</strong> nhờ một công cụ AI tóm tắt thông tin về một nhân vật lịch sử và <strong>chép nguyên văn vào bài nộp mà không kiểm tra lại với sách giáo khoa</strong>. Kết quả là bài làm của Minh bị <strong>sai năm sinh của nhân vật đó</strong>.
+            <strong>Tình huống (trích Luyện tập 3 – SGK Bài 1):</strong><br />
+            Trong giờ học Lịch sử, bạn <strong>Minh</strong>nhờ một công cụ AI tóm tắt thông tin về một nhân vật lịch sử và <strong>chép nguyên văn vào bài nộp mà không kiểm tra lại với sách giáo khoa</strong>. Kết quả là bài làm của Minh bị <strong>sai năm sinh của nhân vật đó</strong>.
           </div>
 
           <div class="grid-2 mt-12 mb-12">
@@ -3000,22 +2948,22 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
           <div class="mb-12">
             <label class="field-label" for="brAnswer">
-              ✍️ Câu hỏi cầu nối: Nếu là bạn Minh, em sẽ làm gì trước khi nộp bài cho cô giáo? Theo em, khi bài nộp bị sai thông tin như vậy thì ai là người phải chịu trách nhiệm?
+               Câu hỏi cầu nối: Nếu là bạn Minh, em sẽ làm gì trước khi nộp bài cho cô giáo? Theo em, khi bài nộp bị sai thông tin như vậy thì ai là người phải chịu trách nhiệm?
             </label>
             <textarea id="brAnswer" rows="4"
               placeholder="Ví dụ: Nếu là Minh, em sẽ đọc kĩ lại bản tóm tắt của AI và mở SGK Lịch sử để đối chiếu năm sinh nhân vật trước khi nộp. Nếu nộp bài sai, người chịu trách nhiệm là bạn Minh vì..."></textarea>
           </div>
 
           <div class="flex-row">
-            <button type="button" class="btn btn-success" onclick="QuizApp.submitBridge()">📤 Gửi câu trả lời cầu nối lên LMS</button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="QuizApp.copyBridge()">📋 Sao chép câu trả lời</button>
+            <button type="button" class="btn btn-success" onclick="QuizApp.submitBridge()">Gửi câu trả lời cầu nối lên LMS</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="QuizApp.copyBridge()">Sao chép câu trả lời</button>
           </div>
 
           <div id="brFeedback" class="callout callout-green is-hidden" style="margin-top:14px;">
-            <strong>🎉 Chúc mừng em đã hoàn thành trọn vẹn Tiết 1 trực tuyến của Bài 1!</strong><br />
-            Thầy/Cô sẽ tổng hợp các ý kiến hay nhất để cùng cả lớp thảo luận mở đầu trong <strong>Tiết 2 trực tiếp tại lớp</strong> nhé!
+            <strong>Chúc mừng em đã hoàn thành trọn vẹn Tiết 1 trực tuyến của Bài 1!</strong><br />
+            Thầy/Cô sẽ tổng hợp các ý kiến hay nhất để cùng cả lớp thảo luận mở đầu trong <strong>Tiết 2 trực tiếp tại lớp</strong>nhé!
             <div class="mt-12">
-              <button type="button" class="btn btn-indigo btn-sm" onclick="switchTab('mod5')">🏫 Xem trước nội dung Tiết 2 tại lớp →</button>
+              <button type="button" class="btn btn-indigo btn-sm" onclick="switchTab('mod5')">Xem trước nội dung Tiết 2 tại lớp →</button>
             </div>
           </div>
         </div>
@@ -3029,42 +2977,42 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag t2-tag">Tiết 2 Trực tiếp • Hoạt động 4 (12 phút)</span>
-          <span>Slide đối chiếu trực quan <strong>Xe đạp điện vs Rô-bốt hút bụi</strong> (Hình 1.4 SGK), 3 câu hỏi vấn đáp &amp; nguyên tắc <strong>Humans in the Loop / EU AI Act 2024</strong>.</span>
+          <span>Slide đối chiếu trực quan <strong>Xe đạp điện vs Rô-bốt hút bụi</strong>(Hình 1.4 SGK), 3 câu hỏi vấn đáp &amp; nguyên tắc <strong>Humans in the Loop / EU AI Act 2024</strong>.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-indigo btn-sm" onclick="ClassTools.toggleAllQa()">👁️ Hiện/Ẩn tất cả gợi ý chốt đáp án</button>
+          <button class="btn btn-indigo btn-sm" onclick="ClassTools.toggleAllQa()">Hiện/Ẩn tất cả gợi ý chốt đáp án</button>
         </div>
       </div>
 
       <div class="hero-banner hero-t2">
         <div class="hero-meta-row">
-          <span class="hero-chip">🏫 TIẾT 2: TRỰC TIẾP TẠI LỚP (45 PHÚT)</span>
-          <span class="hero-chip">🎯 Yêu cầu cần đạt: 6.A1.2 (Mức Vận dụng)</span>
+          <span class="hero-chip">TIẾT 2: TRỰC TIẾP TẠI LỚP (45 PHÚT)</span>
+          <span class="hero-chip">Yêu cầu cần đạt: 6.A1.2 (Mức Vận dụng)</span>
         </div>
-        <h2 class="hero-title">🚲 QUYỀN QUYẾT ĐỊNH VÀ TRÁCH NHIỆM CỦA CON NGƯỜI</h2>
+        <h2 class="hero-title">QUYỀN QUYẾT ĐỊNH VÀ TRÁCH NHIỆM CỦA CON NGƯỜI</h2>
         <p class="hero-desc">
-          AI chỉ là <strong>công cụ hỗ trợ</strong> hoạt động của con người; <strong>con người luôn giám sát, đưa ra quyết định cuối cùng và chịu trách nhiệm 100%</strong> khi sử dụng AI.
+          AI chỉ là <strong>công cụ hỗ trợ</strong>hoạt động của con người; <strong>con người luôn giám sát, đưa ra quyết định cuối cùng và chịu trách nhiệm 100%</strong>khi sử dụng AI.
         </p>
       </div>
 
       <!-- Kết nối kết quả Tiết 1 (Slide 2) -->
       <div class="card">
-        <span class="section-badge badge-indigo">🔗 Kết nối Nhiệm vụ cầu nối từ Tiết 1 (Slide 2)</span>
+        <span class="section-badge badge-indigo">Kết nối Nhiệm vụ cầu nối từ Tiết 1 (Slide 2)</span>
         <h2 class="card-title">Trích chiếu ý kiến học sinh về tình huống bạn Minh nộp bài Lịch sử sai năm sinh</h2>
         <div id="t2BridgeShowcase" class="callout callout-indigo mt-12"></div>
       </div>
 
       <!-- Đối chiếu trực quan Xe đạp điện vs Rô-bốt hút bụi (Slide 3) -->
       <div class="card">
-        <span class="section-badge badge-green">🔍 Hoạt động 4 (Hình 1.4 SGK &amp; U.S. Dept. of Education, 2023)</span>
+        <span class="section-badge badge-green">Hoạt động 4 (Hình 1.4 SGK &amp; U.S. Dept. of Education, 2023)</span>
         <h2 class="card-title">Khung đối chiếu trực quan: Xe đạp điện vs Rô-bốt hút bụi</h2>
 
         <div class="grid-2 mt-16">
           <!-- Bên trái: Xe đạp điện (Humans in the Loop) -->
           <div class="vs-card vs-bike">
             <div class="flex-between">
-              <span class="section-badge badge-green">✅ MÔ HÌNH CHUẨN: CON NGƯỜI LÀM CHỦ</span>
-              <span style="font-size:24px;">🚲</span>
+              <span class="section-badge badge-green">MÔ HÌNH CHUẨN: CON NGƯỜI LÀM CHỦ</span>
+              <span style="font-size:24px;"></span>
             </div>
             <h3 style="font-size:19px; color:#065f46;">XE ĐẠP ĐIỆN (CON NGƯỜI TRONG VÒNG LẶP)</h3>
 
@@ -3101,17 +3049,17 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             </svg>
 
             <ul style="padding-left:18px; font-size:14px; color:var(--slate-700); display:flex; flex-direction:column; gap:6px;">
-              <li><strong>Động cơ điện (AI):</strong> Trợ lực giúp đạp xe nhẹ nhàng hơn, đi nhanh hơn, tăng sức mạnh cho người lái.</li>
-              <li><strong>Người cầm lái (Con người):</strong> Luôn mở mắt quan sát đường, giữ chắc tay lái, quyết định khi nào rẽ, khi nào phanh trước đèn đỏ.</li>
-              <li><strong>Kết luận:</strong> Con người luôn ở <strong>trong vòng lặp (Humans in the Loop)</strong> — làm chủ hoàn toàn công cụ!</li>
+              <li><strong>Động cơ điện (AI):</strong>Trợ lực giúp đạp xe nhẹ nhàng hơn, đi nhanh hơn, tăng sức mạnh cho người lái.</li>
+              <li><strong>Người cầm lái (Con người):</strong>Luôn mở mắt quan sát đường, giữ chắc tay lái, quyết định khi nào rẽ, khi nào phanh trước đèn đỏ.</li>
+              <li><strong>Kết luận:</strong>Con người luôn ở <strong>trong vòng lặp (Humans in the Loop)</strong> — làm chủ hoàn toàn công cụ!</li>
             </ul>
           </div>
 
           <!-- Bên phải: Rô-bốt hút bụi (Phó mặc hoàn toàn) -->
           <div class="vs-card vs-vacuum">
             <div class="flex-between">
-              <span class="section-badge badge-rose">⚠️ CẢNH BÁO: KHÔNG ĐƯỢC PHÓ MẶC</span>
-              <span style="font-size:24px;">🤖</span>
+              <span class="section-badge badge-rose">CẢNH BÁO: KHÔNG ĐƯỢC PHÓ MẶC</span>
+              <span style="font-size:24px;"></span>
             </div>
             <h3 style="font-size:19px; color:#991b1b;">RÔ-BỐT HÚT BỤI (TỰ CHẠY KHÔNG CẦM LÁI)</h3>
 
@@ -3137,20 +3085,20 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             </svg>
 
             <ul style="padding-left:18px; font-size:14px; color:var(--slate-700); display:flex; flex-direction:column; gap:6px;">
-              <li><strong>Cách vận hành:</strong> Bấm nút rồi để rô-bốt tự xoay chuyển trên sàn mà người dùng không trực tiếp điều khiển.</li>
-              <li><strong>Rủi ro khi áp dụng vào học tập:</strong> Nếu coi AI như “rô-bốt tự chạy” — bấm lệnh rồi chép nguyên văn không kiểm tra — rất dễ mắc sai sót nghiêm trọng (như bạn Minh sai năm sinh nhân vật lịch sử).</li>
-              <li><strong>Kết luận:</strong> Trong học tập và đời sống, <strong>KHÔNG phó mặc hoàn toàn cho AI</strong>!</li>
+              <li><strong>Cách vận hành:</strong>Bấm nút rồi để rô-bốt tự xoay chuyển trên sàn mà người dùng không trực tiếp điều khiển.</li>
+              <li><strong>Rủi ro khi áp dụng vào học tập:</strong>Nếu coi AI như “rô-bốt tự chạy” — bấm lệnh rồi chép nguyên văn không kiểm tra — rất dễ mắc sai sót nghiêm trọng (như bạn Minh sai năm sinh nhân vật lịch sử).</li>
+              <li><strong>Kết luận:</strong>Trong học tập và đời sống, <strong>KHÔNG phó mặc hoàn toàn cho AI</strong>!</li>
             </ul>
           </div>
         </div>
 
         <!-- 3 Câu hỏi vấn đáp gợi mở (KHBD HĐ 4) -->
-        <h3 style="margin:22px 0 12px; font-size:17px; color:var(--slate-900);">🎤 Chuỗi 3 câu hỏi vấn đáp trên lớp (Bấm để hiện gợi ý chốt đáp án)</h3>
+        <h3 style="margin:22px 0 12px; font-size:17px; color:var(--slate-900);">Chuỗi 3 câu hỏi vấn đáp trên lớp (Bấm để hiện gợi ý chốt đáp án)</h3>
 
         <div class="qa-accordion">
           <div class="flex-between">
             <strong>Câu 1: Khi đi xe đạp điện, động cơ giúp ích gì cho em? Nếu em buông tay lái và nhắm mắt lại thì chuyện gì xảy ra?</strong>
-            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa1')">💡 Xem gợi ý</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa1')">Xem gợi ý</button>
           </div>
           <div class="qa-answer" id="qa1">
             Động cơ điện giúp đạp nhẹ và đi nhanh hơn. Nhưng nếu nhắm mắt buông tay lái, xe sẽ mất kiểm soát, đâm vào chướng ngại vật hoặc vượt đèn đỏ gây tai nạn nguy hiểm.
@@ -3160,7 +3108,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="qa-accordion">
           <div class="flex-between">
             <strong>Câu 2: Dùng công cụ AI hỗ trợ học tập giống việc đi xe đạp điện ở điểm nào?</strong>
-            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa2')">💡 Xem gợi ý</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa2')">Xem gợi ý</button>
           </div>
           <div class="qa-answer" id="qa2">
             AI đóng vai trò như động cơ trợ lực giúp tra cứu nhanh, gợi ý ý tưởng; còn học sinh là người cầm lái phải luôn tỉnh táo quan sát, kiểm tra lại kết quả và quyết định hướng đi đúng.
@@ -3170,7 +3118,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="qa-accordion">
           <div class="flex-between">
             <strong>Câu 3: Khi AI gợi ý đáp án sai như trường hợp của bạn Minh (sai năm sinh nhân vật lịch sử), ai là người phải chịu trách nhiệm? Vì sao?</strong>
-            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa3')">💡 Xem gợi ý</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('qa3')">Xem gợi ý</button>
           </div>
           <div class="qa-answer" id="qa3">
             Bạn Minh phải chịu trách nhiệm 100%, vì AI chỉ là công cụ phần mềm hỗ trợ (có thể sai sót), còn Minh là người quyết định chép và nộp bài mà không kiểm chứng lại với sách giáo khoa.
@@ -3180,29 +3128,29 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- Slide 4: Kiến thức trọng tâm & Cơ sở pháp lí EU AI Act 2024 -->
       <div class="card">
-        <span class="section-badge badge-amber">📌 Kiến thức trọng tâm &amp; Cơ sở pháp lí (Slide 4 – SGK Mục 2)</span>
+        <span class="section-badge badge-amber">Kiến thức trọng tâm &amp; Cơ sở pháp lí (Slide 4 – SGK Mục 2)</span>
         <h2 class="card-title">3 Vai trò cốt lõi của con người &amp; Nguyên tắc Giám sát (EU AI Act 2024)</h2>
 
         <div class="grid-3 mt-16">
           <div style="background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:14px; padding:18px;">
-            <div style="font-size:26px; margin-bottom:6px;">👁️</div>
+            <div style="font-size:26px; margin-bottom:6px;"></div>
             <h4 style="color:#0c4a6e; margin-bottom:6px;">1. Luôn giám sát hoạt động</h4>
             <p style="font-size:13.8px; color:var(--slate-700);">AI có thể mắc lỗi, hiểu nhầm yêu cầu hoặc đưa ra thông tin sai lệch. Con người không được phó mặc mà phải luôn theo dõi, kiểm tra lại kết quả trước khi dùng.</p>
           </div>
           <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:14px; padding:18px;">
-            <div style="font-size:26px; margin-bottom:6px;">🧭</div>
+            <div style="font-size:26px; margin-bottom:6px;"></div>
             <h4 style="color:#065f46; margin-bottom:6px;">2. Đưa ra quyết định cuối cùng</h4>
             <p style="font-size:13.8px; color:var(--slate-700);">AI chỉ đưa ra các phương án gợi ý (bản đồ gợi ý đường đi, AI gợi ý dàn ý). Con người mới là người cân nhắc thực tế để chọn phương án phù hợp nhất.</p>
           </div>
           <div style="background:#fef3c7; border:1.5px solid #fde68a; border-radius:14px; padding:18px;">
-            <div style="font-size:26px; margin-bottom:6px;">🛡️</div>
+            <div style="font-size:26px; margin-bottom:6px;"></div>
             <h4 style="color:#92400e; margin-bottom:6px;">3. Chịu trách nhiệm 100%</h4>
             <p style="font-size:13.8px; color:var(--slate-700);">Mọi quyết định sử dụng kết quả từ AI đều thuộc về con người. Nếu xảy ra sai sót, con người phải chịu trách nhiệm chứ không thể đổ lỗi cho công cụ AI (UNESCO, 2024).</p>
           </div>
         </div>
 
         <div class="callout callout-amber mt-16">
-          <strong>💡 EM CÓ BIẾT? – Đạo luật Trí tuệ nhân tạo của Liên minh châu Âu (EU AI Act, 2024 – Điều 14):</strong><br />
+          <strong>EM CÓ BIẾT? – Đạo luật Trí tuệ nhân tạo của Liên minh châu Âu (EU AI Act, 2024 – Điều 14):</strong><br />
           Để đảm bảo an toàn cho xã hội, Đạo luật về Trí tuệ nhân tạo của Liên minh châu Âu (<strong>Regulation (EU) 2024/1689</strong>) quy định rõ: các hệ thống AI có mức độ rủi ro cao bắt buộc phải được thiết kế sao cho con người có thể <strong>giám sát hiệu quả trong suốt quá trình sử dụng (Human Oversight)</strong>, nhằm kịp thời phát hiện và ngăn chặn các sai sót.
         </div>
 
@@ -3219,10 +3167,10 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag t2-tag">Tiết 2 Trực tiếp • Hoạt động 5 (20 phút)</span>
-          <span><strong>Chặng 1 (10p):</strong> Game HTML5 “Người cầm lái thông thái” (phím tắt 1 &amp; 2) • <strong>Chặng 2 (10p):</strong> Phiếu thảo luận cặp đôi 2 tình huống SGK.</span>
+          <span><strong>Chặng 1 (10p):</strong>Game HTML5 “Người cầm lái thông thái” (phím tắt 1 &amp; 2) • <strong>Chặng 2 (10p):</strong>Phiếu thảo luận cặp đôi 2 tình huống SGK.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-indigo btn-sm" onclick="GameApp.toggleFullscreen()">⛶ Chiếu Game toàn màn hình</button>
+          <button class="btn btn-indigo btn-sm" onclick="GameApp.toggleFullscreen()">Chiếu Game toàn màn hình</button>
         </div>
       </div>
 
@@ -3231,10 +3179,10 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="flex-between mb-12">
           <div>
             <span class="section-badge badge-indigo">Chặng 1 (10 phút) • Trò chơi tương tác lớp học</span>
-            <h2 class="card-title">🚴‍♂️ Game: Người cầm lái thông thái – Con người trong vòng lặp</h2>
+            <h2 class="card-title">Game: Người cầm lái thông thái – Con người trong vòng lặp</h2>
           </div>
           <span style="font-size:13px; color:var(--slate-600); font-weight:700;">
-            Quy ước lớp học: ☝️ 1 ngón tay = Phím 1 (AI hỗ trợ) • ✌️ 2 ngón tay = Phím 2 (Con người quyết định)
+            Quy ước lớp học:  1 ngón tay = Phím 1 (AI hỗ trợ) •  2 ngón tay = Phím 2 (Con người quyết định)
           </span>
         </div>
 
@@ -3243,15 +3191,15 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
           <div class="ncl-header">
             <div class="ncl-title">
-              <span>🚴‍♂️ NGƯỜI CẦM LÁI THÔNG THÁI</span>
+              <span>NGƯỜI CẦM LÁI THÔNG THÁI</span>
               <span class="ncl-badge">TIN HỌC 6 – BÀI 1</span>
             </div>
             <div class="flex-row">
               <button type="button" class="ncl-ctrl-btn" id="nclSoundBtn" onclick="GameApp.toggleSound()">
-                <span id="nclSoundIcon">🔊</span> <span id="nclSoundText">Bật tiếng</span>
+                <span id="nclSoundIcon"></span> <span id="nclSoundText">Bật tiếng</span>
               </button>
-              <button type="button" class="ncl-ctrl-btn" onclick="GameApp.restart()">🔄 Chơi lại</button>
-              <button type="button" class="ncl-ctrl-btn" onclick="GameApp.toggleFullscreen()">⛶ Toàn màn hình</button>
+              <button type="button" class="ncl-ctrl-btn" onclick="GameApp.restart()">Chơi lại</button>
+              <button type="button" class="ncl-ctrl-btn" onclick="GameApp.toggleFullscreen()">Toàn màn hình</button>
             </div>
           </div>
 
@@ -3261,7 +3209,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <div class="ncl-cloud ncl-cloud-1"></div>
             <div class="ncl-cloud ncl-cloud-2"></div>
             <div class="ncl-trees" aria-hidden="true">
-              <span>🌳</span><span>🌲</span><span>🏡</span><span>🌳</span><span>🌲</span><span>🏫</span><span>🌳</span>
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
             </div>
 
             <div class="ncl-marker active" id="ncl-m1"><div class="ncl-flag">Trạm 1</div><div class="ncl-pin"></div></div>
@@ -3271,7 +3219,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <div class="ncl-marker" id="ncl-m5"><div class="ncl-flag">Trạm 5</div><div class="ncl-pin"></div></div>
 
             <div class="ncl-finish">
-              <div class="ncl-finish-banner">🏁 ĐÍCH</div>
+              <div class="ncl-finish-banner">ĐÍCH</div>
               <div class="ncl-finish-pole"></div>
             </div>
 
@@ -3328,21 +3276,21 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           <!-- Main Play Area -->
           <div class="ncl-play-area">
             <div>
-              <span class="section-badge badge-purple" id="nclStationBadge">📍 TRẠM 1 / 5 – TÌNH HUỐNG THỰC TẾ</span>
+              <span class="section-badge badge-purple" id="nclStationBadge">TRẠM 1 / 5 – TÌNH HUỐNG THỰC TẾ</span>
             </div>
 
             <div class="ncl-q-box">
               <div class="ncl-q-title" id="nclQuestion"></div>
               <div style="margin-top:8px; font-size:12.5px; color:var(--slate-500);">
-                💡 Phím tắt nhanh trên lớp: bấm phím <strong>[1]</strong> hoặc <strong>[2]</strong> để chọn đáp án, bấm <strong>[Enter]</strong> để sang trạm kế tiếp.
+                 Phím tắt nhanh trên lớp: bấm phím <strong>[1]</strong>hoặc <strong>[2]</strong>để chọn đáp án, bấm <strong>[Enter]</strong>để sang trạm kế tiếp.
               </div>
             </div>
 
             <div class="ncl-answers">
               <button type="button" class="ncl-btn-ans ncl-btn-1" onclick="GameApp.answer(1)">
                 <div class="flex-between" style="width:100%;">
-                  <span style="background:rgba(255,255,255,0.85); padding:2px 9px; border-radius:8px; font-size:12px; font-weight:800;">PHÍM 1 • Giơ 1 ngón tay ☝️</span>
-                  <span style="font-size:22px;">🤖</span>
+                  <span style="background:rgba(255,255,255,0.85); padding:2px 9px; border-radius:8px; font-size:12px; font-weight:800;">PHÍM 1 • Giơ 1 ngón tay </span>
+                  <span style="font-size:22px;"></span>
                 </div>
                 <div style="font-size:17px; font-weight:800;" id="nclOpt1Label">AI HỖ TRỢ</div>
                 <div style="font-size:13px; font-weight:600; opacity:0.9;" id="nclOpt1Desc">(Công việc AI gợi ý, xử lí bước đầu)</div>
@@ -3350,8 +3298,8 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
               <button type="button" class="ncl-btn-ans ncl-btn-2" onclick="GameApp.answer(2)">
                 <div class="flex-between" style="width:100%;">
-                  <span style="background:rgba(255,255,255,0.85); padding:2px 9px; border-radius:8px; font-size:12px; font-weight:800;">PHÍM 2 • Giơ 2 ngón tay ✌️</span>
-                  <span style="font-size:22px;">🧠</span>
+                  <span style="background:rgba(255,255,255,0.85); padding:2px 9px; border-radius:8px; font-size:12px; font-weight:800;">PHÍM 2 • Giơ 2 ngón tay </span>
+                  <span style="font-size:22px;"></span>
                 </div>
                 <div style="font-size:17px; font-weight:800;" id="nclOpt2Label">CON NGƯỜI QUYẾT ĐỊNH &amp; KIỂM TRA</div>
                 <div style="font-size:13px; font-weight:600; opacity:0.9;" id="nclOpt2Desc">(Công việc con người giám sát, lựa chọn và chịu trách nhiệm)</div>
@@ -3364,27 +3312,27 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
                 <span id="nclFbIcon"></span>
               </div>
               <div id="nclFbText" style="font-size:14.2px; font-weight:600;"></div>
-              <button type="button" class="btn btn-primary btn-sm mt-12" id="nclNextBtn" onclick="GameApp.next()">Tiến tới Trạm tiếp theo ➜</button>
+              <button type="button" class="btn btn-primary btn-sm mt-12" id="nclNextBtn" onclick="GameApp.next()">Tiến tới Trạm tiếp theo </button>
             </div>
           </div>
 
           <!-- Victory Overlay -->
           <div class="ncl-summary-overlay" id="nclSummaryModal">
             <div class="ncl-summary-card">
-              <div style="font-size:52px; line-height:1;">🏆</div>
+              <div style="font-size:52px; line-height:1;"></div>
               <h3 style="font-size:23px; font-weight:800; color:var(--slate-900); margin-top:6px;">XUẤT SẮC VỀ ĐÍCH AN TOÀN!</h3>
               <div style="display:inline-block; background:linear-gradient(90deg, #0284c7, #10b981); color:#fff; font-weight:800; font-size:14px; padding:6px 16px; border-radius:999px; margin:10px 0;">
-                🎖️ TAY LÁI VÀNG LÀM CHỦ AI 🎖️
+                 TAY LÁI VÀNG LÀM CHỦ AI 
               </div>
               <p id="nclSummaryScore" style="font-size:14.5px; color:var(--slate-700); margin-bottom:14px;"></p>
               <div style="background:#f8fafc; border-radius:14px; padding:12px 16px; text-align:left; font-size:13.5px; color:var(--slate-700); margin-bottom:16px; border:1px solid var(--slate-200);">
-                <strong>📌 BÀI HỌC CỐT LÕI:</strong>
+                <strong>BÀI HỌC CỐT LÕI:</strong>
                 <ul style="margin-left:18px; margin-top:6px; display:flex; flex-direction:column; gap:4px;">
-                  <li><strong>AI hỗ trợ:</strong> Xử lí dữ liệu nhanh, gợi ý lộ trình, dàn ý, bản dịch bước đầu.</li>
-                  <li><strong>Con người làm chủ:</strong> Luôn quan sát thực tế, kiểm tra sai sót, quyết định cuối cùng và chịu trách nhiệm 100%.</li>
+                  <li><strong>AI hỗ trợ:</strong>Xử lí dữ liệu nhanh, gợi ý lộ trình, dàn ý, bản dịch bước đầu.</li>
+                  <li><strong>Con người làm chủ:</strong>Luôn quan sát thực tế, kiểm tra sai sót, quyết định cuối cùng và chịu trách nhiệm 100%.</li>
                 </ul>
               </div>
-              <button type="button" class="btn btn-primary" onclick="GameApp.restart()">🔄 Chơi lại từ đầu</button>
+              <button type="button" class="btn btn-primary" onclick="GameApp.restart()">Chơi lại từ đầu</button>
             </div>
           </div>
         </div>
@@ -3395,7 +3343,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="card-header">
           <div>
             <span class="section-badge badge-amber">Chặng 2 (10 phút) • Thảo luận cặp đôi (2 bạn cùng bàn)</span>
-            <h2 class="card-title">🤝 Phiếu thảo luận cặp đôi: Phân tích trách nhiệm khi sử dụng AI</h2>
+            <h2 class="card-title">Phiếu thảo luận cặp đôi: Phân tích trách nhiệm khi sử dụng AI</h2>
           </div>
           <div class="flex-row no-print">
             <div class="timer-pill" id="pairTimerDisplay">⏱️ 04:00</div>
@@ -3413,14 +3361,14 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
               Trong giờ học Lịch sử, Minh nhờ một công cụ AI tóm tắt thông tin về một nhân vật lịch sử và chép nguyên văn vào bài nộp mà không kiểm tra lại với sách giáo khoa. Kết quả là bài làm của Minh bị sai năm sinh của nhân vật đó.
             </p>
             <p style="font-size:14px; font-weight:800; color:var(--primary-deep); margin-bottom:8px;">
-              ❓ Câu hỏi: Theo em, ai là người phải chịu trách nhiệm về lỗi sai này? Vì sao?
+               Câu hỏi: Theo em, ai là người phải chịu trách nhiệm về lỗi sai này? Vì sao?
             </p>
             <textarea id="pairNote1" rows="3" placeholder="Ghi nhanh ý kiến thảo luận của cặp đôi em (hoặc viết vào SGK)..."></textarea>
             <div class="mt-12">
-              <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('pairAns1')">💡 Xem / Ẩn đáp án định hướng</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('pairAns1')">Xem / Ẩn đáp án định hướng</button>
             </div>
             <div class="qa-answer" id="pairAns1">
-              <strong>Đáp án định hướng:</strong> Trách nhiệm thuộc về <strong>bạn Minh (con người sử dụng)</strong>, vì AI chỉ tạo bản nháp hỗ trợ và có thể sai sót; Minh là người quyết định nộp bài mà thiếu bước kiểm chứng lại với sách giáo khoa.
+              <strong>Đáp án định hướng:</strong>Trách nhiệm thuộc về <strong>bạn Minh (con người sử dụng)</strong>, vì AI chỉ tạo bản nháp hỗ trợ và có thể sai sót; Minh là người quyết định nộp bài mà thiếu bước kiểm chứng lại với sách giáo khoa.
             </div>
           </div>
 
@@ -3432,21 +3380,21 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
               Một chiếc ô tô có tích hợp tính năng AI hỗ trợ lái tự động. Người lái xe đã bật chế độ tự lái rồi <strong>bỏ tay khỏi vô-lăng để chơi trò chơi trên điện thoại</strong>, dẫn đến việc xe không kịp phanh khi gặp chướng ngại vật bất ngờ.
             </p>
             <p style="font-size:14px; font-weight:800; color:#991b1b; margin-bottom:8px;">
-              ❓ Câu hỏi: Nếu là hội đồng phân xử, em kết luận trách nhiệm thuộc về ai và rút ra bài học gì khi sử dụng AI?
+               Câu hỏi: Nếu là hội đồng phân xử, em kết luận trách nhiệm thuộc về ai và rút ra bài học gì khi sử dụng AI?
             </p>
             <textarea id="pairNote2" rows="3" placeholder="Ghi kết luận phân xử và bài học rút ra của cặp đôi em..."></textarea>
             <div class="mt-12">
-              <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('pairAns2')">💡 Xem / Ẩn đáp án định hướng</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="ClassTools.toggleQa('pairAns2')">Xem / Ẩn đáp án định hướng</button>
             </div>
             <div class="qa-answer" id="pairAns2">
-              <strong>Đáp án định hướng:</strong> Trách nhiệm thuộc về <strong>người lái xe</strong> vì đã phó mặc hoàn toàn cho hệ thống hỗ trợ, vi phạm nguyên tắc <strong>Giám sát bởi con người (Human Oversight – Điều 14 EU AI Act, 2024)</strong>.<br />
-              <strong>Bài học:</strong> Luôn duy trì sự giám sát và sẵn sàng kiểm soát khi sử dụng mọi công cụ AI.
+              <strong>Đáp án định hướng:</strong>Trách nhiệm thuộc về <strong>người lái xe</strong>vì đã phó mặc hoàn toàn cho hệ thống hỗ trợ, vi phạm nguyên tắc <strong>Giám sát bởi con người (Human Oversight – Điều 14 EU AI Act, 2024)</strong>.<br />
+              <strong>Bài học:</strong>Luôn duy trì sự giám sát và sẵn sàng kiểm soát khi sử dụng mọi công cụ AI.
             </div>
           </div>
         </div>
 
         <div class="callout callout-green mt-16">
-          <strong>📌 Chốt Hoạt động 5:</strong> Máy móc không có tư cách pháp lí hay đạo đức để chịu phạt; người sử dụng AI thiếu kiểm tra và giám sát phải chịu trách nhiệm về hậu quả xảy ra.
+          <strong>Chốt Hoạt động 5:</strong>Máy móc không có tư cách pháp lí hay đạo đức để chịu phạt; người sử dụng AI thiếu kiểm tra và giám sát phải chịu trách nhiệm về hậu quả xảy ra.
         </div>
 
         <div style="text-align:right;" class="no-print">
@@ -3462,10 +3410,10 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       <div class="teacher-toolbar">
         <div class="toolbar-info">
           <span class="toolbar-tag t2-tag">Tiết 2 Trực tiếp • Hoạt động 6 (13 phút)</span>
-          <span>Khung ghi chú cá nhân <strong>“Tuyên ngôn làm chủ AI” (NÊN / KHÔNG NÊN)</strong> theo Vận dụng 2 SGK + <strong>Bảng Rubric đánh giá 10 điểm</strong>.</span>
+          <span>Khung ghi chú cá nhân <strong>“Tuyên ngôn làm chủ AI” (NÊN / KHÔNG NÊN)</strong>theo Vận dụng 2 SGK + <strong>Bảng Rubric đánh giá 10 điểm</strong>.</span>
         </div>
         <div class="toolbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="switchTab('mod8')">🧮 Mở Công cụ chấm Rubric nhanh (GV)</button>
+          <button class="btn btn-outline btn-sm" onclick="switchTab('mod8')">Mở Công cụ chấm Rubric nhanh (GV)</button>
         </div>
       </div>
 
@@ -3474,7 +3422,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         <div class="card-header">
           <div>
             <span class="section-badge badge-green">Hoạt động 6 – Vận dụng 2 (SGK Bài 1)</span>
-            <h2 class="card-title">📜 Góc ghi chú cá nhân: Tuyên ngôn làm chủ AI trong học tập</h2>
+            <h2 class="card-title">Góc ghi chú cá nhân: Tuyên ngôn làm chủ AI trong học tập</h2>
           </div>
           <div class="flex-row no-print">
             <div class="timer-pill" id="manTimerDisplay">⏱️ 04:00</div>
@@ -3484,14 +3432,14 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         </div>
 
         <p style="font-size:14.5px; color:var(--slate-700); margin-bottom:14px;">
-          Em hãy chọn <strong>01 công việc học tập hằng ngày</strong> của bản thân, sau đó viết rõ <strong>01 điều NÊN làm</strong> (tận dụng AI hỗ trợ đúng cách) và <strong>01 điều KHÔNG NÊN làm</strong> (giữ quyền quyết định và tính trung thực):
+          Em hãy chọn <strong>01 công việc học tập hằng ngày</strong>của bản thân, sau đó viết rõ <strong>01 điều NÊN làm</strong>(tận dụng AI hỗ trợ đúng cách) và <strong>01 điều KHÔNG NÊN làm</strong>(giữ quyền quyết định và tính trung thực):
         </p>
 
         <div class="flex-row mb-12 no-print">
-          <span style="font-size:13px; font-weight:700; color:var(--slate-600);">📌 Gợi ý chọn nhanh:</span>
+          <span style="font-size:13px; font-weight:700; color:var(--slate-600);">Gợi ý chọn nhanh:</span>
           <button type="button" class="btn btn-outline btn-sm" onclick="ManifestoApp.preset(1)">🇬🇧 Học từ vựng Tiếng Anh</button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="ManifestoApp.preset(2)">🎨 Tìm ý tưởng vẽ tranh / thuyết trình</button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="ManifestoApp.preset(3)">📚 Tóm tắt ôn tập Lịch sử / KHTN</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="ManifestoApp.preset(2)">Tìm ý tưởng vẽ tranh / thuyết trình</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="ManifestoApp.preset(3)">Tóm tắt ôn tập Lịch sử / KHTN</button>
         </div>
 
         <div style="background:#f8fafc; border:1.5px solid var(--slate-200); border-radius:16px; padding:20px;">
@@ -3512,19 +3460,19 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
           <div class="grid-2 mb-12">
             <div>
-              <label class="field-label" for="manDo" style="color:#065f46;">✅ 1. Điều em NÊN làm (tận dụng AI hỗ trợ đúng cách):</label>
+              <label class="field-label" for="manDo" style="color:#065f46;">1. Điều em NÊN làm (tận dụng AI hỗ trợ đúng cách):</label>
               <textarea id="manDo" rows="3" placeholder="VD: Nên nhờ AI gợi ý 5 từ vựng kèm câu ví dụ và luyện phát âm để tự ôn bài..."></textarea>
             </div>
             <div>
-              <label class="field-label" for="manDont" style="color:#991b1b;">⛔ 2. Điều em KHÔNG NÊN làm (giữ quyền quyết định &amp; tính trung thực):</label>
+              <label class="field-label" for="manDont" style="color:#991b1b;">2. Điều em KHÔNG NÊN làm (giữ quyền quyết định &amp; tính trung thực):</label>
               <textarea id="manDont" rows="3" placeholder="VD: Không nên sao chép nguyên văn bài làm của AI mà không tự suy nghĩ, kiểm chứng lại với SGK và chịu trách nhiệm..."></textarea>
             </div>
           </div>
 
           <div class="flex-row no-print">
-            <button type="button" class="btn btn-success" onclick="ManifestoApp.publish()">✨ Tạo &amp; Lưu Thẻ Tuyên ngôn của em</button>
-            <button type="button" class="btn btn-outline" onclick="ManifestoApp.copyText()">📋 Sao chép nội dung</button>
-            <button type="button" class="btn btn-ghost" onclick="ManifestoApp.clear()">🗑️ Xóa nháp</button>
+            <button type="button" class="btn btn-success" onclick="ManifestoApp.publish()">Tạo &amp; Lưu Thẻ Tuyên ngôn của em</button>
+            <button type="button" class="btn btn-outline" onclick="ManifestoApp.copyText()">Sao chép nội dung</button>
+            <button type="button" class="btn btn-ghost" onclick="ManifestoApp.clear()">Xóa nháp</button>
           </div>
         </div>
 
@@ -3534,7 +3482,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- Bảng Rubric đánh giá nhanh Hoạt động 6 (Thang điểm 10) -->
       <div class="card">
-        <span class="section-badge badge-purple">📊 Bảng Rubric đánh giá nhanh Hoạt động 6 (Thang điểm 10)</span>
+        <span class="section-badge badge-purple">Bảng Rubric đánh giá nhanh Hoạt động 6 (Thang điểm 10)</span>
         <h2 class="card-title">Tiêu chí đánh giá “Tuyên ngôn làm chủ AI”</h2>
 
         <div class="table-wrap">
@@ -3551,23 +3499,23 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             <tbody>
               <tr>
                 <td><strong>1. Phân định rõ vai trò hỗ trợ của AI</strong><br /><span style="color:var(--emerald); font-size:12px;">(Quy tắc NÊN)</span></td>
-                <td><strong>(4 điểm)</strong> Gắn với 01 việc học cụ thể; nêu rõ bước AI có thể hỗ trợ hợp lí (tra cứu, gợi ý ý tưởng, luyện tập) mà không làm thay.</td>
-                <td><strong>(2.5 điểm)</strong> Nêu được quy tắc NÊN hợp lí nhưng còn chung chung, chưa gắn với một việc học cụ thể.</td>
-                <td><strong>(1 điểm)</strong> Nêu quy tắc chưa đúng vai trò hỗ trợ của AI hoặc để AI làm thay bài tập.</td>
+                <td><strong>(4 điểm)</strong>Gắn với 01 việc học cụ thể; nêu rõ bước AI có thể hỗ trợ hợp lí (tra cứu, gợi ý ý tưởng, luyện tập) mà không làm thay.</td>
+                <td><strong>(2.5 điểm)</strong>Nêu được quy tắc NÊN hợp lí nhưng còn chung chung, chưa gắn với một việc học cụ thể.</td>
+                <td><strong>(1 điểm)</strong>Nêu quy tắc chưa đúng vai trò hỗ trợ của AI hoặc để AI làm thay bài tập.</td>
                 <td><strong>4 điểm</strong></td>
               </tr>
               <tr>
                 <td><strong>2. Thể hiện quyền quyết định &amp; trách nhiệm</strong><br /><span style="color:var(--rose); font-size:12px;">(Quy tắc KHÔNG NÊN)</span></td>
-                <td><strong>(4 điểm)</strong> Nêu rõ hành vi cần tránh (không sao chép nguyên văn, không bỏ qua bước kiểm tra, không đổ lỗi cho AI), thể hiện rõ trách nhiệm cá nhân.</td>
-                <td><strong>(2.5 điểm)</strong> Nêu đúng định hướng nhưng diễn đạt còn sơ lược, chưa nhấn mạnh trách nhiệm kiểm chứng.</td>
-                <td><strong>(1 điểm)</strong> Thiếu quy tắc KHÔNG NÊN hoặc không liên quan đến trách nhiệm khi dùng AI.</td>
+                <td><strong>(4 điểm)</strong>Nêu rõ hành vi cần tránh (không sao chép nguyên văn, không bỏ qua bước kiểm tra, không đổ lỗi cho AI), thể hiện rõ trách nhiệm cá nhân.</td>
+                <td><strong>(2.5 điểm)</strong>Nêu đúng định hướng nhưng diễn đạt còn sơ lược, chưa nhấn mạnh trách nhiệm kiểm chứng.</td>
+                <td><strong>(1 điểm)</strong>Thiếu quy tắc KHÔNG NÊN hoặc không liên quan đến trách nhiệm khi dùng AI.</td>
                 <td><strong>4 điểm</strong></td>
               </tr>
               <tr>
                 <td><strong>3. Trình bày và Tính thực tiễn</strong></td>
-                <td><strong>(2 điểm)</strong> Viết gọn gàng, đúng chính tả trong SGK/vở; quy tắc thiết thực, áp dụng được ngay vào việc học hằng ngày.</td>
-                <td><strong>(1 điểm)</strong> Hoàn thành bài viết nhưng còn vài lỗi chính tả hoặc diễn đạt chưa mạch lạc.</td>
-                <td><strong>(0 điểm)</strong> Không hoàn thành khung Tuyên ngôn làm chủ AI.</td>
+                <td><strong>(2 điểm)</strong>Viết gọn gàng, đúng chính tả trong SGK/vở; quy tắc thiết thực, áp dụng được ngay vào việc học hằng ngày.</td>
+                <td><strong>(1 điểm)</strong>Hoàn thành bài viết nhưng còn vài lỗi chính tả hoặc diễn đạt chưa mạch lạc.</td>
+                <td><strong>(0 điểm)</strong>Không hoàn thành khung Tuyên ngôn làm chủ AI.</td>
                 <td><strong>2 điểm</strong></td>
               </tr>
             </tbody>
@@ -3575,7 +3523,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         </div>
 
         <div style="background:linear-gradient(135deg, #0c4a6e 0%, #4f46e5 100%); color:#ffffff; border-radius:16px; padding:20px 24px; margin-top:20px; text-align:center;">
-          <div style="font-size:12.5px; font-weight:800; letter-spacing:0.08em; color:#bae6fd; text-transform:uppercase;">🌟 THÔNG ĐIỆP TỔNG KẾT BÀI 1</div>
+          <div style="font-size:12.5px; font-weight:800; letter-spacing:0.08em; color:#bae6fd; text-transform:uppercase;">THÔNG ĐIỆP TỔNG KẾT BÀI 1</div>
           <h3 style="font-size:clamp(18px, 2.4vw, 22px); font-weight:800; margin:8px 0; color:#fde047;">
             “Con người sáng tạo ra AI, làm chủ AI và chịu trách nhiệm về mọi quyết định của mình!”
           </h3>
@@ -3591,7 +3539,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
     ========================================================================== -->
     <section id="mod8" class="module-panel teacher-only">
       <div class="card">
-        <span class="section-badge badge-purple">⚙️ Dành cho Giáo viên • Danh mục học liệu số Bài 1</span>
+        <span class="section-badge badge-purple">Dành cho Giáo viên • Danh mục học liệu số Bài 1</span>
         <h2 class="card-title">Tổng hợp 7 học liệu &amp; Cấu hình triển khai trên LMS / Lớp học</h2>
 
         <div class="table-wrap">
@@ -3631,7 +3579,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
                 <td><strong>6</strong></td>
                 <td>Bài Quiz chốt chặn 5 câu &amp; Nhiệm vụ cầu nối</td>
                 <td>Tiết 1 • TP 4–5 (15p)</td>
-                <td>Kéo–thả 6 thiết bị + 4 câu trắc nghiệm (10đ); đạt <strong>≥ 8/10</strong> tự động mở khóa tình huống bạn Minh.</td>
+                <td>Kéo–thả 6 thiết bị + 4 câu trắc nghiệm (10đ); đạt <strong>≥ 8/10</strong>tự động mở khóa tình huống bạn Minh.</td>
                 <td><button class="btn btn-outline btn-sm" onclick="switchTab('mod4')">Mở TP 4–5</button></td>
               </tr>
               <tr>
@@ -3648,7 +3596,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- Cấu hình nhanh liên kết YouTube & Google Form -->
       <div class="card">
-        <span class="section-badge badge-blue">🔗 Tùy chỉnh liên kết lớp học (Lưu cục bộ trên trình duyệt GV)</span>
+        <span class="section-badge badge-blue">Tùy chỉnh liên kết lớp học (Lưu cục bộ trên trình duyệt GV)</span>
         <h2 class="card-title">Gắn liên kết Video YouTube &amp; Google Form (nếu sử dụng)</h2>
         <div class="grid-2 mt-16">
           <div>
@@ -3661,14 +3609,14 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           </div>
         </div>
         <div class="flex-row mt-12">
-          <button type="button" class="btn btn-primary btn-sm" onclick="TeacherCfg.save()">💾 Lưu cấu hình liên kết</button>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="TeacherCfg.clear()">🗑️ Xóa cấu hình</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="TeacherCfg.save()">Lưu cấu hình liên kết</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="TeacherCfg.clear()">Xóa cấu hình</button>
         </div>
       </div>
 
       <!-- Công cụ chấm Rubric nhanh HĐ 6 (Đồng bộ BAI2/3.LMS.html) -->
       <div class="card">
-        <span class="section-badge badge-green">🧮 Công cụ chấm Rubric nhanh HĐ 6 &amp; Sinh nhận xét LMS Gradebook</span>
+        <span class="section-badge badge-green">Công cụ chấm Rubric nhanh HĐ 6 &amp; Sinh nhận xét LMS Gradebook</span>
         <h2 class="card-title">Bấm chọn mức đạt của học sinh để tính điểm &amp; copy nhận xét</h2>
 
         <div id="graderContainer"></div>
@@ -3680,7 +3628,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             </div>
             <div class="flex-row">
               <button type="button" class="btn btn-ghost btn-sm" onclick="RubricApp.reset()">↺ Đặt lại</button>
-              <button type="button" class="btn btn-primary btn-sm" onclick="copyTextValue(document.getElementById('graderComment').value)">📋 Copy nhận xét dán vào LMS</button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="copyTextValue(document.getElementById('graderComment').value)">Copy nhận xét dán vào LMS</button>
             </div>
           </div>
           <textarea class="mt-12" id="graderComment" rows="2" readonly>Hãy bấm chọn mức điểm ở từng tiêu chí phía trên để tự động sinh nhận xét...</textarea>
@@ -3689,7 +3637,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       <!-- Tài liệu tham khảo khoa học -->
       <div class="card">
-        <span class="section-badge badge-blue">📚 Cơ sở khoa học và pháp lí sử dụng thiết kế Bài 1</span>
+        <span class="section-badge badge-blue">Cơ sở khoa học và pháp lí sử dụng thiết kế Bài 1</span>
         <ol style="padding-left:20px; margin-top:10px; font-size:13.8px; color:var(--slate-700); display:flex; flex-direction:column; gap:6px;">
           <li><strong>UNESCO (2024).</strong> <em>AI Competency Framework for Teachers</em>. Section 2.1 (p. 16 – Debunking AI hype: AI is human-led); Section 2.2 (p. 17 – human-accountable use of AI); Section 3.3.1 (p. 25); Table 2 &amp; Table 5 (pp. 28, 30, 50).</li>
           <li><strong>U.S. Department of Education, Office of Educational Technology (2023).</strong> <em>Artificial Intelligence and the Future of Teaching and Learning</em>. Recommendation #1: Emphasize Humans in the Loop (p. 53 – electric bike vs robot vacuum analogy).</li>
@@ -3742,7 +3690,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       t.textContent = msg;
       t.classList.add('show');
       clearTimeout(window.__bai1ToastTimer);
-      window.__bai1ToastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+      window.__bai1ToastTimer = setTimeout(() =>t.classList.remove('show'), 3200);
     }
 
     function setMode(mode) {
@@ -3752,12 +3700,12 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       if (mode === 'student' && document.getElementById('mod8').classList.contains('active')) {
         switchTab('mod1');
       }
-      showToast(mode === 'teacher' ? '👩‍🏫 Đã bật Chế độ Giáo viên (hiện thanh công cụ & Rubric)' : '🎒 Đã bật Chế độ Học sinh (giao diện tự học gọn gàng)');
+      showToast(mode === 'teacher' ? ' Đã bật Chế độ Giáo viên (hiện thanh công cụ & Rubric)' : ' Đã bật Chế độ Học sinh (giao diện tự học gọn gàng)');
     }
 
     function switchTab(tabId) {
-      document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.module-panel').forEach(p =>p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(b =>b.classList.remove('active'));
       const panel = document.getElementById(tabId);
       if (panel) panel.classList.add('active');
       const btn = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
@@ -3768,7 +3716,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
     function copyTextValue(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => showToast('✅ Đã sao chép vào bộ nhớ tạm!'));
+        navigator.clipboard.writeText(text).then(() =>showToast('Đã sao chép vào bộ nhớ tạm!'));
       } else {
         const ta = document.createElement('textarea');
         ta.value = text;
@@ -3776,7 +3724,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        showToast('✅ Đã sao chép vào bộ nhớ tạm!');
+        showToast('Đã sao chép vào bộ nhớ tạm!');
       }
     }
 
@@ -3816,9 +3764,9 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
     }
 
     function resetRoadmapProgress() {
-      document.querySelectorAll('.step-checkbox').forEach(cb => (cb.checked = false));
+      document.querySelectorAll('.step-checkbox').forEach(cb =>(cb.checked = false));
       updateRoadmapProgress();
-      showToast('🔄 Đã đặt lại tiến độ 4 bước Tiết 1.');
+      showToast('Đã đặt lại tiến độ 4 bước Tiết 1.');
     }
 
     /* ============================================================
@@ -3837,8 +3785,8 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const extraA = state.survey && state.survey.choice === 'A' ? 1 : 0;
         const extraB = state.survey && state.survey.choice === 'B' ? 1 : 0;
         const total = extraA + extraB;
-        const pctA = total > 0 ? Math.round((extraA / total) * 100) : 0;
-        const pctB = total > 0 ? (100 - pctA) : 0;
+        const pctA = total >0 ? Math.round((extraA / total) * 100) : 0;
+        const pctB = total >0 ? (100 - pctA) : 0;
 
         document.getElementById('svTotalVotes').textContent = `Tổng phản hồi: ${total} học sinh`;
         document.getElementById('svPctA').textContent = `${pctA}%`;
@@ -3851,7 +3799,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         if (state.survey && state.survey.app) {
           const sp = document.createElement('span');
           sp.className = 'ai-chip user-chip';
-          sp.textContent = `✨ ${state.survey.app} (${state.survey.name || 'Học sinh'})`;
+          sp.textContent = `${state.survey.app} (${state.survey.name || 'Học sinh'})`;
           cloud.appendChild(sp);
         } else {
           const empty = document.createElement('span');
@@ -3867,11 +3815,11 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const app = document.getElementById('svAppInput').value.trim();
 
         if (!pickedChoice) {
-          showToast('⚠️ Em hãy chọn đáp án A hoặc B cho Câu 1 trước nhé!');
+          showToast('Em hãy chọn đáp án A hoặc B cho Câu 1 trước nhé!');
           return;
         }
         if (!app) {
-          showToast('⚠️ Em hãy kể tên 1 ứng dụng hoặc thiết bị có AI ở Câu 2 nhé!');
+          showToast('Em hãy kể tên 1 ứng dụng hoặc thiết bị có AI ở Câu 2 nhé!');
           document.getElementById('svAppInput').focus();
           return;
         }
@@ -3883,7 +3831,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('svSavedBadge').classList.remove('is-hidden');
         renderStats(next);
         markStepDone(1);
-        showToast('🎉 Đã nộp Khảo sát Khởi động và lưu trạng thái thành công!');
+        showToast('Đã nộp Khảo sát Khởi động và lưu trạng thái thành công!');
       }
 
       function restore() {
@@ -3908,7 +3856,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('svSavedBadge').classList.add('is-hidden');
         const next = saveState({ survey: null });
         renderStats(next);
-        showToast('🔄 Đã đặt lại Khảo sát Khởi động.');
+        showToast('Đã đặt lại Khảo sát Khởi động.');
       }
 
       return { pick, submit, restore, reset };
@@ -3920,25 +3868,25 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
     const VideoApp = (() => {
       const scenes = [
         {
-          icon: '🤖💡',
+          icon: '',
           title: 'PHÂN CẢNH 1: TỰ THỨC TỈNH HAY “NHÂN TẠO”?',
           desc: 'Trên phim ảnh viễn tưởng, rô-bốt có thể tự thức tỉnh. Nhưng ngoài đời thực, AI mang chữ “Nhân tạo” (Artificial) vì 100% do bàn tay và trí tuệ con người tạo ra!',
           time: 'Phân cảnh 1 / 4 (0:45 / 3:00)'
         },
         {
-          icon: '📂✋',
+          icon: '',
           title: 'PHÂN CẢNH 2: BƯỚC 1 – THU THẬP & XỬ LÍ DỮ LIỆU',
           desc: 'Để AI nhận diện được con mèo hay khuôn mặt chủ nhân, kĩ sư con người phải thu thập, phân loại và làm sạch hàng nghìn dữ liệu mẫu để “dạy” máy tính học.',
           time: 'Phân cảnh 2 / 4 (1:30 / 3:00)'
         },
         {
-          icon: '💻⚙️',
+          icon: '',
           title: 'PHÂN CẢNH 3: BƯỚC 2 – THIẾT KẾ THUẬT TOÁN & LẬP TRÌNH',
           desc: 'Các kĩ sư viết câu lệnh và thuật toán giúp máy tính tìm ra quy luật từ dữ liệu. Máy tính không tự có ý thức mà luôn vận hành theo chương trình con người lập trình!',
           time: 'Phân cảnh 3 / 4 (2:15 / 3:00)'
         },
         {
-          icon: '📱🎛️',
+          icon: '',
           title: 'PHÂN CẢNH 4: BƯỚC 3 – TRIỂN KHAI, ĐIỀU KHIỂN & SỬ DỤNG',
           desc: 'Con người cài đặt AI vào điện thoại, máy tính, bật/tắt, kiểm tra và điều chỉnh khi có sai sót. Không phải mọi thiết bị chạy điện đều là AI!',
           time: 'Phân cảnh 4 / 4 (3:00 / 3:00)'
@@ -3955,7 +3903,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('vidSceneTitle').textContent = s.title;
         document.getElementById('vidSceneDesc').textContent = s.desc;
         document.getElementById('vidTimeline').textContent = s.time;
-        document.querySelectorAll('#vidDots .vid-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        document.querySelectorAll('#vidDots .vid-dot').forEach((d, i) =>d.classList.toggle('active', i === idx));
       }
 
       function go(i) {
@@ -4002,7 +3950,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const url = document.getElementById('ytUrlInput').value.trim();
         const vidId = extractYtId(url);
         if (!vidId) {
-          showToast('⚠️ Đường dẫn YouTube chưa hợp lệ! Hãy dán link dạng https://www.youtube.com/watch?v=...');
+          showToast('Đường dẫn YouTube chưa hợp lệ! Hãy dán link dạng https://www.youtube.com/watch?v=...');
           return;
         }
         document.getElementById('vidYtIframe').src = `https://www.youtube.com/embed/${vidId}?rel=0&cc_load_policy=1&hl=vi`;
@@ -4035,14 +3983,14 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       function drop(ev, targetId) {
         ev.preventDefault();
-        document.querySelectorAll('.qz-zone, .qz-pool').forEach(z => z.classList.remove('drag-over'));
+        document.querySelectorAll('.qz-zone, .qz-pool').forEach(z =>z.classList.remove('drag-over'));
         const id = ev.dataTransfer.getData('text/plain');
         moveTag(id, targetId);
       }
 
       function tapTag(ev, id) {
         ev.stopPropagation();
-        document.querySelectorAll('.qz-drag-tag').forEach(el => el.classList.remove('tap-selected'));
+        document.querySelectorAll('.qz-drag-tag').forEach(el =>el.classList.remove('tap-selected'));
         if (selectedTapId === id) {
           selectedTapId = null;
           return;
@@ -4112,7 +4060,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           t.classList.add(ok ? 'tag-ok' : 'tag-err');
           if (ok) q1Correct++;
         });
-        poolTags.forEach(t => t.classList.remove('tag-ok', 'tag-err'));
+        poolTags.forEach(t =>t.classList.remove('tag-ok', 'tag-err'));
 
         const q1Score = q1Correct === 6 ? 2 : Math.round((q1Correct / 6) * 2 * 10) / 10;
         totalScore += q1Score;
@@ -4120,8 +4068,8 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           'qzExp1',
           q1Correct === 6,
           q1Correct === 6
-            ? `✅ <strong>Chính xác hoàn toàn (+2/2đ)!</strong> Nhóm AI gồm: Face ID, Google Dịch, Gợi ý YouTube (học từ dữ liệu để nhận dạng/gợi ý). Nhóm Không dùng AI gồm: Quạt điện cơ, Máy tính bỏ túi, Đèn pin (chạy theo mạch điện/công thức cố định).`
-            : `❌ <strong>Em phân loại đúng ${q1Correct}/6 thẻ (+${q1Score}/2đ).</strong> Gợi ý: Face ID, Google Dịch, Gợi ý YouTube là <strong>Có dùng AI</strong>; Quạt điện cơ, Máy tính bỏ túi, Đèn pin là <strong>Không dùng AI</strong>.`
+            ? ` <strong>Chính xác hoàn toàn (+2/2đ)!</strong>Nhóm AI gồm: Face ID, Google Dịch, Gợi ý YouTube (học từ dữ liệu để nhận dạng/gợi ý). Nhóm Không dùng AI gồm: Quạt điện cơ, Máy tính bỏ túi, Đèn pin (chạy theo mạch điện/công thức cố định).`
+            : ` <strong>Em phân loại đúng ${q1Correct}/6 thẻ (+${q1Score}/2đ).</strong>Gợi ý: Face ID, Google Dịch, Gợi ý YouTube là <strong>Có dùng AI</strong>; Quạt điện cơ, Máy tính bỏ túi, Đèn pin là <strong>Không dùng AI</strong>.`
         );
 
         // Câu 2 – 5 (2 điểm mỗi câu)
@@ -4130,29 +4078,29 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             name: 'q2',
             ans: 'C',
             expId: 'qzExp2',
-            okMsg: '✅ <strong>Rất tốt (+2đ)!</strong> Máy tính bỏ túi thông thường chỉ thực hiện công thức cài sẵn cố định, không học từ dữ liệu.',
-            errMsg: '❌ <strong>Chưa chính xác (0đ).</strong> Đáp án đúng là <strong>C</strong>: Máy tính bỏ túi chỉ tính theo mạch lập trình cố định, không phải AI.'
+            okMsg: ' <strong>Rất tốt (+2đ)!</strong>Máy tính bỏ túi thông thường chỉ thực hiện công thức cài sẵn cố định, không học từ dữ liệu.',
+            errMsg: ' <strong>Chưa chính xác (0đ).</strong>Đáp án đúng là <strong>C</strong>: Máy tính bỏ túi chỉ tính theo mạch lập trình cố định, không phải AI.'
           },
           {
             name: 'q3',
             ans: 'B',
             expId: 'qzExp3',
-            okMsg: '✅ <strong>Chính xác (+2đ)!</strong> Thu thập, phân loại và làm sạch dữ liệu mẫu là bước nền tảng đầu tiên do con người thực hiện (UNESCO, 2024).',
-            errMsg: '❌ <strong>Chưa chính xác (0đ).</strong> Đáp án đúng là <strong>B</strong>: Con người phải thu thập, làm sạch hàng nghìn ảnh mẫu để dạy máy học.'
+            okMsg: ' <strong>Chính xác (+2đ)!</strong>Thu thập, phân loại và làm sạch dữ liệu mẫu là bước nền tảng đầu tiên do con người thực hiện (UNESCO, 2024).',
+            errMsg: ' <strong>Chưa chính xác (0đ).</strong>Đáp án đúng là <strong>B</strong>: Con người phải thu thập, làm sạch hàng nghìn ảnh mẫu để dạy máy học.'
           },
           {
             name: 'q4',
             ans: 'A',
             expId: 'qzExp4',
-            okMsg: '✅ <strong>Chính xác (+2đ)!</strong> Con người viết chương trình và thiết kế thuật toán để dẫn dắt cách AI xử lí dữ liệu.',
-            errMsg: '❌ <strong>Chưa chính xác (0đ).</strong> Đáp án đúng là <strong>A</strong>: Thiết kế thuật toán và lập trình.'
+            okMsg: ' <strong>Chính xác (+2đ)!</strong>Con người viết chương trình và thiết kế thuật toán để dẫn dắt cách AI xử lí dữ liệu.',
+            errMsg: ' <strong>Chưa chính xác (0đ).</strong>Đáp án đúng là <strong>A</strong>: Thiết kế thuật toán và lập trình.'
           },
           {
             name: 'q5',
             ans: 'B',
             expId: 'qzExp5',
-            okMsg: '✅ <strong>Xuất sắc (+2đ)!</strong> AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể (6.A1.1).',
-            errMsg: '❌ <strong>Chưa chính xác (0đ).</strong> Đáp án đúng là <strong>B</strong>: AI không tự sinh ra và không hoạt động độc lập tách rời con người.'
+            okMsg: ' <strong>Xuất sắc (+2đ)!</strong>AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể (6.A1.1).',
+            errMsg: ' <strong>Chưa chính xác (0đ).</strong>Đáp án đúng là <strong>B</strong>: AI không tự sinh ra và không hoạt động độc lập tách rời con người.'
           }
         ];
 
@@ -4181,17 +4129,17 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
         if (totalScore >= 8) {
           banner.classList.add('callout-green');
-          banner.innerHTML = `<strong>🎉 XUẤT SẮC! EM ĐẠT ${totalScore}/10 ĐIỂM (ĐẠT CHUẨN ≥ 8/10)!</strong><br/>Mục B – <strong>Nhiệm vụ cầu nối chuẩn bị Tiết 2</strong> phía dưới đã tự động mở khóa. Hãy hoàn thành câu hỏi tình huống của bạn Minh nhé!`;
+          banner.innerHTML = `<strong>XUẤT SẮC! EM ĐẠT ${totalScore}/10 ĐIỂM (ĐẠT CHUẨN ≥ 8/10)!</strong><br/>Mục B – <strong>Nhiệm vụ cầu nối chuẩn bị Tiết 2</strong>phía dưới đã tự động mở khóa. Hãy hoàn thành câu hỏi tình huống của bạn Minh nhé!`;
           unlockBridge(true);
           markStepDone(3);
           saveState({ quizPassed: true, quizScore: totalScore });
-          showToast(`🔓 Đạt ${totalScore}/10 điểm – Đã mở khóa Mục B!`);
-          setTimeout(() => document.getElementById('bridgeSection').scrollIntoView({ behavior: 'smooth' }), 300);
+          showToast(`Đạt ${totalScore}/10 điểm – Đã mở khóa Mục B!`);
+          setTimeout(() =>document.getElementById('bridgeSection').scrollIntoView({ behavior: 'smooth' }), 300);
         } else {
           banner.classList.add('callout-rose');
-          banner.innerHTML = `<strong>⚠️ ĐIỂM SỐ HIỆN TẠI: ${totalScore}/10 ĐIỂM (CHƯA ĐẠT ĐIỀU KIỆN ≥ 8/10)</strong><br/>Em hãy đọc kĩ phần giải thích màu đỏ/xanh ở từng câu phía trên, sau đó chỉnh lại đáp án hoặc bấm <strong>“Làm lại bài kiểm tra”</strong> để đạt từ 8 điểm trở lên nhé!`;
+          banner.innerHTML = `<strong>ĐIỂM SỐ HIỆN TẠI: ${totalScore}/10 ĐIỂM (CHƯA ĐẠT ĐIỀU KIỆN ≥ 8/10)</strong><br/>Em hãy đọc kĩ phần giải thích màu đỏ/xanh ở từng câu phía trên, sau đó chỉnh lại đáp án hoặc bấm <strong>“Làm lại bài kiểm tra”</strong>để đạt từ 8 điểm trở lên nhé!`;
           saveState({ quizScore: totalScore });
-          showToast(`📌 Hiện đạt ${totalScore}/10 điểm – Hãy xem giải thích và thử lại nhé!`);
+          showToast(`Hiện đạt ${totalScore}/10 điểm – Hãy xem giải thích và thử lại nhé!`);
         }
       }
 
@@ -4223,12 +4171,12 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('qzResultBanner').classList.add('is-hidden');
         unlockBridge(false);
         saveState({ quizPassed: false, quizScore: null });
-        showToast('🔄 Đã làm mới bài kiểm tra chốt chặn 5 câu!');
+        showToast('Đã làm mới bài kiểm tra chốt chặn 5 câu!');
       }
 
       function teacherUnlockPreview() {
         unlockBridge(true);
-        showToast('🔓 Đã mở khóa xem trước Mục B (Chế độ Giáo viên).');
+        showToast('Đã mở khóa xem trước Mục B (Chế độ Giáo viên).');
         document.getElementById('bridgeSection').scrollIntoView({ behavior: 'smooth' });
       }
 
@@ -4237,7 +4185,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const cls = document.getElementById('brClass').value;
         const ans = document.getElementById('brAnswer').value.trim();
         if (!ans) {
-          showToast('⚠️ Em hãy nhập câu trả lời cho tình huống bạn Minh trước khi gửi nhé!');
+          showToast('Em hãy nhập câu trả lời cho tình huống bạn Minh trước khi gửi nhé!');
           document.getElementById('brAnswer').focus();
           return;
         }
@@ -4247,7 +4195,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('brFeedback').classList.remove('is-hidden');
         markStepDone(4);
         renderBridgeShowcase();
-        showToast('🎉 Đã gửi Nhiệm vụ cầu nối! Hoàn thành 100% Tiết 1!');
+        showToast('Đã gửi Nhiệm vụ cầu nối! Hoàn thành 100% Tiết 1!');
       }
 
       function copyBridge() {
@@ -4255,7 +4203,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const cls = document.getElementById('brClass').value;
         const ans = document.getElementById('brAnswer').value.trim();
         if (!ans) {
-          showToast('⚠️ Chưa có nội dung câu trả lời để sao chép.');
+          showToast('Chưa có nội dung câu trả lời để sao chép.');
           return;
         }
         copyTextValue(`Họ tên: ${name} (${cls})\nTrả lời Nhiệm vụ cầu nối Bài 1:\n${ans}`);
@@ -4289,13 +4237,13 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       const st = loadState();
       if (st.bridge && st.bridge.answer) {
         box.innerHTML = `
-          <strong>📌 Ý kiến vừa ghi nhận từ Nhiệm vụ cầu nối Tiết 1 (${escapeHtml(st.bridge.name)} – ${escapeHtml(st.bridge.cls)}):</strong>
+          <strong>Ý kiến vừa ghi nhận từ Nhiệm vụ cầu nối Tiết 1 (${escapeHtml(st.bridge.name)} – ${escapeHtml(st.bridge.cls)}):</strong>
           <p style="margin-top:6px; font-style:italic; color:var(--slate-800);">“${escapeHtml(st.bridge.answer)}”</p>
-          <p style="margin-top:6px; font-size:13px; color:#3730a3;">💡 Giáo viên khen ngợi lớp hoàn thành tốt Tiết 1 và dẫn dắt vào khung đối chiếu Xe đạp điện vs Rô-bốt hút bụi bên dưới.</p>
+          <p style="margin-top:6px; font-size:13px; color:#3730a3;">Giáo viên khen ngợi lớp hoàn thành tốt Tiết 1 và dẫn dắt vào khung đối chiếu Xe đạp điện vs Rô-bốt hút bụi bên dưới.</p>
         `;
       } else {
         box.innerHTML = `
-          <strong>📌 Mở đầu Tiết 2 từ tình huống bạn Minh (Tiết 1):</strong>
+          <strong>Mở đầu Tiết 2 từ tình huống bạn Minh (Tiết 1):</strong>
           <p style="margin-top:6px;">Ở cuối Tiết 1, các em đã phân tích tình huống bạn Minh dùng AI tóm tắt bài Lịch sử bị sai năm sinh nhân vật mà không đối chiếu SGK. (Khi học sinh nộp Mục B ở tab <em>Chốt chặn &amp; Cầu nối</em>, câu trả lời sẽ tự động hiển thị tại đây để trình chiếu trên lớp!)</p>
         `;
       }
@@ -4310,8 +4258,8 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       }
 
       function toggleAllQa() {
-        const els = ['qa1', 'qa2', 'qa3'].map(id => document.getElementById(id));
-        const anyClosed = els.some(e => e && !e.classList.contains('open'));
+        const els = ['qa1', 'qa2', 'qa3'].map(id =>document.getElementById(id));
+        const anyClosed = els.some(e =>e && !e.classList.contains('open'));
         els.forEach(e => {
           if (e) e.classList.toggle('open', anyClosed);
         });
@@ -4344,7 +4292,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             clearInterval(t.handle);
             t.handle = null;
             btn.textContent = '▶ Bắt đầu lại';
-            showToast('🔔 Hết thời gian 4 phút! Mời các em chia sẻ kết quả.');
+            showToast('Hết thời gian 4 phút! Mời các em chia sẻ kết quả.');
             GameApp.playTone('correct');
           }
         }, 1000);
@@ -4512,7 +4460,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
       function toggleSound() {
         audioEnabled = !audioEnabled;
-        document.getElementById('nclSoundIcon').textContent = audioEnabled ? '🔊' : '🔇';
+        document.getElementById('nclSoundIcon').textContent = audioEnabled ? '' : '';
         document.getElementById('nclSoundText').textContent = audioEnabled ? 'Bật tiếng' : 'Tắt tiếng';
         if (audioEnabled) playTone('correct');
       }
@@ -4529,7 +4477,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       function load(i, silent) {
         isAnswered = false;
         const d = scenarios[i];
-        document.getElementById('nclStationBadge').textContent = `📍 TRẠM ${d.id} / 5 – ${d.stationName}`;
+        document.getElementById('nclStationBadge').textContent = `TRẠM ${d.id} / 5 – ${d.stationName}`;
         document.getElementById('nclQuestion').textContent = d.question;
         document.getElementById('nclOpt1Label').textContent = d.opt1Label;
         document.getElementById('nclOpt1Desc').textContent = d.opt1Desc;
@@ -4572,22 +4520,22 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           gameScore++;
           document.getElementById('nclScore').textContent = gameScore;
           fb.className = 'ncl-feedback correct';
-          document.getElementById('nclFbTitle').textContent = '🎉 CHÍNH XÁC! TAY LÁI VỮNG VÀNG!';
-          document.getElementById('nclFbIcon').textContent = '✅';
+          document.getElementById('nclFbTitle').textContent = 'CHÍNH XÁC! TAY LÁI VỮNG VÀNG!';
+          document.getElementById('nclFbIcon').textContent = '';
           document.getElementById('nclFbText').innerHTML = `<strong>Đúng rồi!</strong> ${d.explanation}`;
           bike.className = 'ncl-success';
           playTone('correct');
         } else {
           fb.className = 'ncl-feedback wrong';
-          document.getElementById('nclFbTitle').textContent = '⚠️ BIỂN BÁO NHẮC NHỞ! HÃY KIỂM TRA LẠI!';
-          document.getElementById('nclFbIcon').textContent = '⛔';
+          document.getElementById('nclFbTitle').textContent = 'BIỂN BÁO NHẮC NHỞ! HÃY KIỂM TRA LẠI!';
+          document.getElementById('nclFbIcon').textContent = '';
           document.getElementById('nclFbText').innerHTML = `<strong>Cần lưu ý:</strong> ${d.explanation}`;
           bike.className = 'ncl-brake';
           playTone('wrong');
         }
 
         document.getElementById('nclNextBtn').textContent =
-          currentIdx === scenarios.length - 1 ? '🏆 Xem Bảng Tổng Kết Điểm Số' : 'Tiến tới Trạm tiếp theo ➜';
+          currentIdx === scenarios.length - 1 ? ' Xem Bảng Tổng Kết Điểm Số' : 'Tiến tới Trạm tiếp theo ';
       }
 
       function next() {
@@ -4623,7 +4571,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         canvas.width = canvas.parentElement.clientWidth || 800;
         canvas.height = canvas.parentElement.clientHeight || 500;
         const colors = ['#0284c7', '#10b981', '#f59e0b', '#f43f5e', '#7c3aed', '#38bdf8'];
-        particles = Array.from({ length: 85 }, () => ({
+        particles = Array.from({ length: 85 }, () =>({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height - canvas.height,
           s: Math.random() * 7 + 5,
@@ -4640,7 +4588,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
             p.x += p.vx;
             p.y += p.vy;
             p.r += p.vr;
-            if (p.y > canvas.height) {
+            if (p.y >canvas.height) {
               p.y = -10;
               p.x = Math.random() * canvas.width;
             }
@@ -4728,7 +4676,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('manTask').value = p.task;
         document.getElementById('manDo').value = p.doText;
         document.getElementById('manDont').value = p.dontText;
-        showToast('💡 Đã điền gợi ý mẫu! Em có thể chỉnh sửa lại theo ý của riêng mình.');
+        showToast('Đã điền gợi ý mẫu! Em có thể chỉnh sửa lại theo ý của riêng mình.');
       }
 
       function publish() {
@@ -4739,13 +4687,13 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const dontText = document.getElementById('manDont').value.trim();
 
         if (!task || !doText || !dontText) {
-          showToast('⚠️ Em hãy điền đủ Công việc học tập, Điều NÊN làm và Điều KHÔNG NÊN làm nhé!');
+          showToast('Em hãy điền đủ Công việc học tập, Điều NÊN làm và Điều KHÔNG NÊN làm nhé!');
           return;
         }
 
         saveState({ manifesto: { name, cls, task, doText, dontText } });
         renderPreview({ name, cls, task, doText, dontText });
-        showToast('📜 Đã tạo và lưu Thẻ Tuyên ngôn làm chủ AI của em!');
+        showToast('Đã tạo và lưu Thẻ Tuyên ngôn làm chủ AI của em!');
       }
 
       function renderPreview(m) {
@@ -4753,7 +4701,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         box.style.display = 'block';
         box.innerHTML = `
           <div style="text-align:center; border-bottom:2px dashed #bae6fd; padding-bottom:12px; margin-bottom:14px;">
-            <span class="section-badge badge-blue">📜 TUYÊN NGÔN LÀM CHỦ AI TRONG HỌC TẬP • TIN HỌC 6</span>
+            <span class="section-badge badge-blue">TUYÊN NGÔN LÀM CHỦ AI TRONG HỌC TẬP • TIN HỌC 6</span>
             <h3 style="font-size:20px; color:var(--primary-deep); margin-top:8px;">
               Học sinh: ${escapeHtml(m.name)} — Lớp: ${escapeHtml(m.cls)}
             </h3>
@@ -4763,11 +4711,11 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           </div>
           <div class="grid-2">
             <div style="background:#ecfdf5; border:1.5px solid #6ee7b7; border-radius:14px; padding:14px;">
-              <div style="font-weight:800; color:#065f46; margin-bottom:6px;">✅ ĐIỀU EM NÊN LÀM (AI hỗ trợ đúng cách)</div>
+              <div style="font-weight:800; color:#065f46; margin-bottom:6px;">ĐIỀU EM NÊN LÀM (AI hỗ trợ đúng cách)</div>
               <p style="font-size:14.2px; color:var(--slate-800);">${escapeHtml(m.doText)}</p>
             </div>
             <div style="background:#fff1f2; border:1.5px solid #fda4af; border-radius:14px; padding:14px;">
-              <div style="font-weight:800; color:#991b1b; margin-bottom:6px;">⛔ ĐIỀU EM KHÔNG NÊN LÀM (Giữ quyền quyết định &amp; trung thực)</div>
+              <div style="font-weight:800; color:#991b1b; margin-bottom:6px;">ĐIỀU EM KHÔNG NÊN LÀM (Giữ quyền quyết định &amp; trung thực)</div>
               <p style="font-size:14.2px; color:var(--slate-800);">${escapeHtml(m.dontText)}</p>
             </div>
           </div>
@@ -4784,7 +4732,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const doText = document.getElementById('manDo').value.trim();
         const dontText = document.getElementById('manDont').value.trim();
         if (!task && !doText && !dontText) {
-          showToast('⚠️ Chưa có nội dung Tuyên ngôn để sao chép.');
+          showToast('Chưa có nội dung Tuyên ngôn để sao chép.');
           return;
         }
         copyTextValue(
@@ -4793,10 +4741,10 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       }
 
       function clear() {
-        ['manName', 'manClass', 'manTask', 'manDo', 'manDont'].forEach(id => (document.getElementById(id).value = ''));
+        ['manName', 'manClass', 'manTask', 'manDo', 'manDont'].forEach(id =>(document.getElementById(id).value = ''));
         document.getElementById('manPreview').style.display = 'none';
         saveState({ manifesto: null });
-        showToast('🗑️ Đã xóa nháp Tuyên ngôn.');
+        showToast('Đã xóa nháp Tuyên ngôn.');
       }
 
       function restore() {
@@ -4840,7 +4788,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         const cfg = { ytLink, gFormLink };
         saveState({ teacherCfg: cfg });
         apply(cfg);
-        showToast('💾 Đã lưu cấu hình link YouTube & Google Form!');
+        showToast('Đã lưu cấu hình link YouTube & Google Form!');
       }
 
       function clear() {
@@ -4848,7 +4796,7 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
         document.getElementById('cfgGFormLink').value = '';
         saveState({ teacherCfg: {} });
         apply({});
-        showToast('🗑️ Đã xóa cấu hình liên kết tùy chỉnh.');
+        showToast('Đã xóa cấu hình liên kết tùy chỉnh.');
       }
 
       function restore() {

@@ -624,7 +624,7 @@ export const ActivityViewer: React.FC = () => {
               <div className="rounded-2xl overflow-hidden border border-sky-200 bg-white shadow-xs">
                 <div className="px-4 py-2.5 bg-gradient-to-r from-[#0f2942] to-[#0374b5] text-white flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="font-bold flex items-center gap-2">
-                    <span>🔬 Học liệu tương tác HTML5 chạy trực tiếp trên trình duyệt (Không cần cài đặt)</span>
+                    <span>Học liệu tương tác HTML5 (Chạy trực tiếp trên trình duyệt)</span>
                   </span>
                   <div className="flex items-center gap-2">
                     <a
