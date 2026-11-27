@@ -793,12 +793,15 @@ async function saveProgress(courseId, userId, activityId, patch, userEmail = '')
 
 async function removeProgress(filter) {
   if (isMongoConnected) {
-    await ProgressModel.deleteMany(filter);
-    return;
+    const r = await ProgressModel.deleteMany(filter);
+    return r?.deletedCount || 0;
   }
   const db = readDb();
-  db.progress = (db.progress || []).filter(p => !Object.entries(filter).every(([k, v]) => p[k] === v));
-  writeDb(db);
+  const prev = db.progress || [];
+  db.progress = prev.filter(p => !Object.entries(filter).every(([k, v]) => p[k] === v));
+  const deletedCount = prev.length - db.progress.length;
+  if (deletedCount > 0) writeDb(db);
+  return deletedCount;
 }
 
 async function loadCourseObj(id) {
@@ -1391,7 +1394,7 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v14-video-neo-chan-khoa-tua';
+const AI6_BAI12_REVISION = 'v15-reset-video-clean-no-seek';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -3350,37 +3353,55 @@ function mergeAi6Bai12IntoCourse(courseObj) {
   courseObj.totalActivities = courseObj.modules.reduce((s, m) => s + (m.activities || []).length, 0);
 }
 
-// Bỏ trạng thái "hoàn thành" của video có neo chặn nếu học sinh chưa vượt qua đủ neo chặn
-// (ví dụ: đã xem 80% video Bài 1 từ trước khi video được gắn neo chặn). Giữ nguyên số giây đã xem.
-async function revokeStaleVideoCompletion(courseObj) {
+// Reset trắng (xóa bản ghi tiến độ) các video có neo chặn nhưng dữ liệu cũ chưa vượt qua neo chặn hợp lệ
+// (ví dụ: dữ liệu 82% từ trước khi bật neo chặn hoặc khi học sinh tua qua mốc neo chặn).
+async function resetStaleVideoProgress(courseObj) {
   const videos = (courseObj.modules || []).flatMap(m => m.activities || [])
     .filter(a => a && a.type === 'video' && Array.isArray(a.videoCheckpoints) && a.videoCheckpoints.length > 0);
-  let revoked = 0;
+  let resetCount = 0;
   for (const act of videos) {
-    const cleared = p => act.videoCheckpoints.every(cp => {
+    const sortedCps = [...act.videoCheckpoints].sort((a, b) => (Number(a.timeSeconds) || 0) - (Number(b.timeSeconds) || 0));
+    const findFirstBlockingCp = p => sortedCps.find(cp => {
       const r = p?.videoProgress?.checkpointResults?.[cp.id];
-      return r && (cp.requireCorrect !== false ? !!r.isCorrect : true);
+      return !(r && (cp.requireCorrect !== false ? !!r.isCorrect : true));
     });
+    const shouldResetRecord = p => {
+      const firstBlockingCp = findFirstBlockingCp(p);
+      if (!firstBlockingCp) return false;
+      const vp = p?.videoProgress || {};
+      const watched = Number(vp.watchedSeconds || p?.watchedSeconds || 0);
+      const pct = Number(vp.progressPercent || 0);
+      const cpPassed = Number(vp.checkpointsPassed || 0);
+      const cpTotal = Number(vp.checkpointsTotal || 0);
+      const blockTime = Number(firstBlockingCp.timeSeconds || 0);
+      return Boolean(
+        p.isCompleted ||
+        !cpTotal ||
+        (cpPassed === 0 && (watched > 0 || pct > 0)) ||
+        watched > blockTime + 1 ||
+        pct >= 80
+      );
+    };
     if (isMongoConnected) {
-      const recs = await ProgressModel.find({ courseId: courseObj.id, activityId: act.id, isCompleted: true }).lean();
+      const recs = await ProgressModel.find({ courseId: courseObj.id, activityId: act.id }).lean();
       for (const p of recs) {
-        if (cleared(p)) continue;
-        await ProgressModel.updateOne({ _id: p._id }, { $set: { isCompleted: false, completedAt: '', updatedAt: new Date().toISOString() } });
-        revoked++;
+        if (!shouldResetRecord(p)) continue;
+        await ProgressModel.deleteOne({ _id: p._id });
+        resetCount++;
       }
     } else {
       const db = readDb();
-      let changed = false;
-      (db.progress || []).forEach(p => {
-        if (p.courseId === courseObj.id && p.activityId === act.id && p.isCompleted && !cleared(p)) {
-          p.isCompleted = false; p.completedAt = ''; p.updatedAt = new Date().toISOString(); changed = true; revoked++;
-        }
-      });
-      if (changed) writeDb(db);
+      const beforeLen = (db.progress || []).length;
+      db.progress = (db.progress || []).filter(p => !(p.courseId === courseObj.id && p.activityId === act.id && shouldResetRecord(p)));
+      const diff = beforeLen - db.progress.length;
+      if (diff > 0) {
+        writeDb(db);
+        resetCount += diff;
+      }
     }
   }
-  if (revoked) console.log(`Đã bỏ ${revoked} trạng thái hoàn thành video chưa vượt qua đủ neo chặn (${courseObj.id})`);
-  return revoked;
+  if (resetCount) console.log(`🧹 Đã reset trắng ${resetCount} tiến độ video chưa vượt qua neo chặn (${courseObj.id})`);
+  return resetCount;
 }
 
 // Đồng bộ 1 lần toàn bộ học liệu Bài 1 & Bài 2 (từ thư mục BAI1 & BAI2) vào khóa 6AIAB01 mà không làm mất dữ liệu giáo viên hay học sinh
@@ -3396,7 +3417,7 @@ async function ensureAi6Bai12Content() {
       course.markModified('files');
       course.markModified('syllabus');
       await course.save();
-      await revokeStaleVideoCompletion(course.toObject ? course.toObject() : course);
+      await resetStaleVideoProgress(course.toObject ? course.toObject() : course);
       await SettingModel.findOneAndUpdate(
         { key: 'seededAi6Bai12' },
         { $set: { value: { seeded: true, revision: AI6_BAI12_REVISION }, updatedAt: new Date().toISOString() } },
@@ -3414,7 +3435,7 @@ async function ensureAi6Bai12Content() {
     mergeAi6Bai12IntoCourse(course);
     db.settings.ai6Bai12Revision = AI6_BAI12_REVISION;
     writeDb(db);
-    await revokeStaleVideoCompletion(course);
+    await resetStaleVideoProgress(course);
   }
 }
 
@@ -4735,7 +4756,7 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
   const existing = await getOneProgress(ctx.course.id, req.user.id, ctx.activity.id);
   const prevVp = existing?.videoProgress || {};
 
-  const currentPos = Math.max(0, Math.floor(Number(req.body.watchedSeconds) || 0));
+  let currentPos = Math.max(0, Math.floor(Number(req.body.watchedSeconds) || 0));
   const incomingTotal = Math.max(0, Math.floor(Number(req.body.totalSeconds) || 0));
   const totalSeconds = Math.max(incomingTotal, prevVp.totalSeconds || 0);
   const deltaSeconds = Math.min(120, Math.max(0, Math.floor(Number(req.body.deltaSeconds) || 0)));
@@ -4770,10 +4791,37 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
     return cp.requireCorrect !== false ? !!r.isCorrect : true;
   }).length;
 
+  // Chặn tua vượt quá neo chặn chưa mở ở tầng server (kể cả qua API hoặc dữ liệu cũ còn sót lại)
+  const sortedCheckpoints = [...checkpoints].sort((a, b) => (Number(a.timeSeconds) || 0) - (Number(b.timeSeconds) || 0));
+  const firstBlockingCp = sortedCheckpoints.find(cp => {
+    const r = mergedCpResults[cp.id];
+    if (!r) return true;
+    return cp.requireCorrect !== false ? !r.isCorrect : false;
+  });
+  let baseWatchedSeconds = prevVp.watchedSeconds || 0;
+  let baseProgressPercent = prevVp.progressPercent || 0;
+  const staffOverride = isStaff(req.user) && req.body?.staffForceComplete === true;
+  if (!staffOverride && firstBlockingCp) {
+    const capSec = Math.max(0, Math.floor(Number(firstBlockingCp.timeSeconds) || 0));
+    if (currentPos > capSec) currentPos = capSec;
+    if (baseWatchedSeconds > capSec) baseWatchedSeconds = capSec;
+    if (totalSeconds > 0) {
+      const capPct = Math.min(99, Math.round((capSec / totalSeconds) * 100));
+      incomingPercent = Math.min(incomingPercent, capPct);
+      baseProgressPercent = Math.min(baseProgressPercent, capPct);
+    } else if (capSec === 0) {
+      incomingPercent = 0;
+      baseProgressPercent = 0;
+    } else {
+      incomingPercent = Math.min(incomingPercent, 79);
+      baseProgressPercent = Math.min(baseProgressPercent, 79);
+    }
+  }
+
   // Bảo toàn mốc tiến độ cao nhất (high-water mark) để học sinh tua lại xem không bị mất % đã đạt
-  const maxWatchedSeconds = Math.max(prevVp.watchedSeconds || 0, currentPos);
-  const maxProgressPercent = Math.min(100, Math.max(prevVp.progressPercent || 0, incomingPercent));
-  const allCheckpointsCleared = checkpointsTotal === 0 || checkpointsPassed >= checkpointsTotal;
+  const maxWatchedSeconds = Math.max(baseWatchedSeconds, currentPos);
+  const maxProgressPercent = Math.min(100, Math.max(baseProgressPercent, incomingPercent));
+  const allCheckpointsCleared = checkpointsTotal === 0 || checkpointsPassed >= checkpointsTotal || staffOverride;
   // Video có neo chặn chỉ được tính hoàn thành khi đã vượt qua đủ neo chặn; trạng thái hoàn thành cũ (trước khi gắn neo chặn) không được giữ lại
   const isCompleted = allCheckpointsCleared && (!!existing?.isCompleted || maxProgressPercent >= 80);
   const now = nowVN();
@@ -4815,6 +4863,32 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
     videoProgress,
     overallCourseProgress: await courseProgressOf(ctx.course, req.user.id),
     certificateIssued: !!cert
+  });
+});
+
+// 6.2 Activities: Reset trắng tiến độ của 1 hoạt động (về 0%, xóa kết quả neo chặn/điểm xem cũ)
+app.delete('/api/courses/:id/activities/:actId/progress', requireAuth, async (req, res) => {
+  const ctx = await learningContext(req, res);
+  if (!ctx) return;
+
+  const scope = String(req.query?.scope || '').trim();
+  const requestedStudentId = String(req.query?.studentId || '').trim();
+  const targetUserId = requestedStudentId || req.user.id;
+
+  if ((scope === 'all' || (requestedStudentId && requestedStudentId !== req.user.id)) && !isStaff(req.user)) {
+    return res.status(403).json({ message: 'Chỉ giảng viên hoặc quản trị viên mới có quyền reset tiến độ của học viên khác' });
+  }
+
+  const filter = scope === 'all'
+    ? { courseId: ctx.course.id, activityId: ctx.activity.id }
+    : { courseId: ctx.course.id, activityId: ctx.activity.id, userId: targetUserId };
+
+  const removedCount = await removeProgress(filter);
+  const overallCourseProgress = scope === 'all' ? undefined : await courseProgressOf(ctx.course, targetUserId);
+  res.json({
+    success: true,
+    removedCount,
+    overallCourseProgress
   });
 });
 

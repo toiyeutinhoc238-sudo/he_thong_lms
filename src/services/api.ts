@@ -246,11 +246,20 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(data)
       }),
-    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number; deltaSeconds?: number; checkpointResults?: Record<string, any> }) =>
+    updateVideoProgress: (courseId: string, activityId: string, data: { watchedSeconds: number; totalSeconds: number; progressPercent: number; deltaSeconds?: number; checkpointResults?: Record<string, any>; staffForceComplete?: boolean }) =>
       this.request<{ success: boolean; isCompleted: boolean; videoProgress: any; overallCourseProgress?: number }>(`/courses/${courseId}/activities/${activityId}/video-progress`, {
         method: 'POST',
         body: JSON.stringify(data)
       }),
+    resetProgress: (courseId: string, activityId: string, params?: { studentId?: string; scope?: 'all' }) => {
+      const qs = new URLSearchParams();
+      if (params?.studentId) qs.set('studentId', params.studentId);
+      if (params?.scope) qs.set('scope', params.scope);
+      const q = qs.toString();
+      return this.request<{ success: boolean; removedCount?: number; overallCourseProgress?: number }>(`/courses/${courseId}/activities/${activityId}/progress${q ? `?${q}` : ''}`, {
+        method: 'DELETE'
+      });
+    },
     submitAssignment: (courseId: string, activityId: string, data: { fileName: string; fileSize?: string; fileUrl?: string; textSubmission?: string }) =>
       this.request<{ success: boolean; submission: any }>(`/courses/${courseId}/activities/${activityId}/submit`, {
         method: 'POST',

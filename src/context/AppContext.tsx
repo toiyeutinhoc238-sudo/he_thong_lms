@@ -36,6 +36,7 @@ interface AppContextType {
   createForumTopic: (courseId: string, title: string, content: string) => Promise<boolean>;
   markActivityCompleted: (courseId: string, activityId: string) => void;
   updateLocalVideoProgress: (courseId: string, activityId: string, videoProgress: NonNullable<Activity['videoProgress']>, isCompleted: boolean) => void;
+  resetActivityProgress: (courseId: string, activityId: string, params?: { studentId?: string; scope?: 'all' }) => Promise<void>;
   submitAssignment: (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => void;
   gradeAssignment: (courseId: string, activityId: string, studentId: string, grade: number, feedback: string) => Promise<void>;
   submitQuiz: (courseId: string, activityId: string, answers: Record<string, number>, durationSeconds?: number) => Promise<{ result: NonNullable<Activity['quizResult']>; questions?: QuizQuestion[] } | null>;
@@ -482,6 +483,30 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
     }));
   }, []);
 
+  const resetActivityProgress = useCallback(async (courseId: string, activityId: string, params?: { studentId?: string; scope?: 'all' }) => {
+    await api.activities.resetProgress(courseId, activityId, params);
+    if (!params?.studentId || params?.scope === 'all') {
+      setCourses(prev => prev.map(course => {
+        if (course.id !== courseId) return course;
+        const updatedModules = (course.modules || []).map(module => ({
+          ...module,
+          activities: (module.activities || []).map(act => {
+            if (act.id !== activityId) return act;
+            return {
+              ...act,
+              isCompleted: false,
+              watchedSeconds: 0,
+              score: undefined,
+              timeSpentSeconds: 0,
+              videoProgress: undefined
+            };
+          })
+        }));
+        return calculateCourseProgress({ ...course, modules: updatedModules });
+      }));
+    }
+  }, []);
+
   const submitAssignment = (courseId: string, activityId: string, fileName: string, textSubmission?: string, fileSize?: string, fileUrl?: string) => {
     setCourses(prev => prev.map(course => {
       if (course.id !== courseId) return course;
@@ -914,6 +939,7 @@ ${err?.message || 'Vui lòng kiểm tra kết nối và thử lại.'}`);
         createForumTopic,
         markActivityCompleted,
         updateLocalVideoProgress,
+        resetActivityProgress,
         submitAssignment,
         gradeAssignment,
         submitQuiz,

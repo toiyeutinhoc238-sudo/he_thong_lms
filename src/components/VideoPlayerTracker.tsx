@@ -5,6 +5,12 @@ import api, { API_BASE_URL, resolveBackendUrl } from '../services/api';
 import { FormattedContent } from './FormattedContent';
 import {
   Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  RefreshCw,
   CheckCircle2,
   Clock,
   Check,
@@ -66,10 +72,12 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   courseId,
   onCompleted
 }) => {
-  const { updateLocalVideoProgress, currentUser, activeRole } = useApp();
+  const { updateLocalVideoProgress, resetActivityProgress, currentUser, activeRole } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
   const ytContainerRef = useRef<HTMLDivElement>(null);
   const ytPlayerRef = useRef<any>(null);
+  const playerWrapperRef = useRef<HTMLDivElement>(null);
+  const seekBarRef = useRef<HTMLDivElement>(null);
 
   const canManage = Boolean(
     currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
@@ -84,7 +92,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     return [...(activity.videoCheckpoints || [])].sort((a, b) => (a.timeSeconds || 0) - (b.timeSeconds || 0));
   }, [activity.videoCheckpoints]);
 
-  const preventSkip = Boolean(activity.preventVideoSkip && checkpoints.length > 0) || Boolean(activity.preventVideoSkip);
+  const preventSkip = Boolean(activity.preventVideoSkip);
+  const hasAntiSkipFeature = preventSkip || checkpoints.length > 0;
 
   const savedVp = activity.videoProgress;
   const initialMaxWatched = savedVp?.watchedSeconds ?? activity.watchedSeconds ?? 0;
@@ -100,6 +109,11 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   const [progressPercent, setProgressPercent] = useState<number>(initialMaxPercent);
   const [isCompleted, setIsCompleted] = useState<boolean>(activity.isCompleted || (initialMaxPercent >= 80 && checkpoints.length === 0));
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
   const [ytApiActive, setYtApiActive] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncText, setLastSyncText] = useState<string>('');
@@ -115,6 +129,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   const [skipWarning, setSkipWarning] = useState<string | null>(null);
   const [teacherBypass, setTeacherBypass] = useState<boolean>(false);
 
+  const enforceAntiSkip = hasAntiSkipFeature && !teacherBypass;
+
   const lastSyncMsRef = useRef<number>(0);
   const unsyncedDeltaRef = useRef<number>(0);
   const maxPctRef = useRef<number>(initialMaxPercent);
@@ -125,6 +141,9 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   const cpResultsRef = useRef<Record<string, VideoCheckpointResult>>(checkpointResults);
   const activeCpRef = useRef<VideoCheckpoint | null>(activeCheckpoint);
   const teacherBypassRef = useRef<boolean>(teacherBypass);
+  const hasAntiSkipRef = useRef<boolean>(hasAntiSkipFeature);
+  const enforceAntiSkipRef = useRef<boolean>(enforceAntiSkip);
+  const preventSkipRef = useRef<boolean>(preventSkip);
 
   isCompletedRef.current = isCompleted;
   maxPctRef.current = progressPercent;
@@ -134,6 +153,9 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   cpResultsRef.current = checkpointResults;
   activeCpRef.current = activeCheckpoint;
   teacherBypassRef.current = teacherBypass;
+  hasAntiSkipRef.current = hasAntiSkipFeature;
+  enforceAntiSkipRef.current = enforceAntiSkip;
+  preventSkipRef.current = preventSkip;
 
   const ytVideoId = extractYouTubeId(activity.videoUrl);
 
@@ -165,9 +187,38 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     setPickedOption(null);
     setCpFeedback(null);
     setIsCompleted(activity.isCompleted || (pct >= 80 && checkpoints.length === 0));
+    setHasStarted(false);
+    setTeacherBypass(false);
+    setPlaybackRate(1);
     setShowResumeBanner(lastP > 10 && dur > 0 && lastP < dur - 10);
+    maxWatchedRef.current = maxW;
+    maxPctRef.current = pct;
+    latestPosRef.current = lastP;
+    latestDurRef.current = dur;
+    cpResultsRef.current = vp?.checkpointResults || {};
+    activeCpRef.current = null;
     unsyncedDeltaRef.current = 0;
   }, [activity.id, checkpoints.length]);
+
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement && playerWrapperRef.current && document.fullscreenElement === playerWrapperRef.current));
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  const skipWarningTimerRef = useRef<number | null>(null);
+  const flashSkipWarning = useCallback((msg: string) => {
+    setSkipWarning(msg);
+    if (skipWarningTimerRef.current !== null) {
+      window.clearTimeout(skipWarningTimerRef.current);
+    }
+    skipWarningTimerRef.current = window.setTimeout(() => {
+      setSkipWarning(null);
+      skipWarningTimerRef.current = null;
+    }, 3800);
+  }, []);
 
   const formatTime = (secs: number) => {
     if (!Number.isFinite(secs) || secs < 0) return '00:00';
@@ -244,18 +295,32 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       return true;
     }
 
-    // 2. Chống tua nhanh vượt quá mốc đã xem (chỉ khi giáo viên bật preventVideoSkip)
-    if (preventSkip && exactPos > maxWatchedRef.current + 6) {
+    // 2. Chống tua nhanh vượt quá mốc đã xem (chặt chẽ 1.5s, áp dụng khi preventSkip hoặc có neo chặn)
+    if ((preventSkipRef.current || checkpoints.length > 0) && exactPos > maxWatchedRef.current + 1.5) {
       const snapTo = Math.max(0, Math.round(maxWatchedRef.current * 1000) / 1000);
       seekPlayer(snapTo);
+      latestPosRef.current = snapTo;
       setCurrentTime(snapTo);
-      setSkipWarning('Giáo viên đã bật chống tua nhanh — vui lòng xem lần lượt video và vượt qua các neo chặn!');
-      window.setTimeout(() => setSkipWarning(null), 4000);
+      flashSkipWarning('Video đang khóa tua nhanh — vui lòng xem lần lượt và vượt qua các neo chặn!');
       return true;
     }
 
     return false;
-  }, [checkpoints, isCheckpointCleared, pausePlayer, preventSkip, seekPlayer]);
+  }, [checkpoints, flashSkipWarning, isCheckpointCleared, pausePlayer, seekPlayer]);
+
+  // Nếu GV tắt chế độ "GV xem thử không bị chặn", ép tốc độ về 1x và kéo lại vị trí hợp lệ nếu đang vượt mốc
+  useEffect(() => {
+    if (!teacherBypass && hasAntiSkipFeature) {
+      try {
+        if (videoRef.current && videoRef.current.playbackRate !== 1) videoRef.current.playbackRate = 1;
+        if (ytPlayerRef.current?.setPlaybackRate && ytPlayerRef.current.getPlaybackRate?.() !== 1) {
+          ytPlayerRef.current.setPlaybackRate(1);
+        }
+      } catch {}
+      setPlaybackRate(1);
+      checkCheckpointsAndAntiSkip(latestPosRef.current);
+    }
+  }, [teacherBypass, hasAntiSkipFeature, checkCheckpointsAndAntiSkip]);
 
   // Đồng bộ tiến độ video + kết quả neo chặn lên server LMS
   const syncProgressToServer = useCallback(async (
@@ -263,9 +328,12 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     totalSecs: number,
     pct: number,
     force = false,
-    overrideCpResults?: Record<string, VideoCheckpointResult>
+    overrideCpResults?: Record<string, VideoCheckpointResult>,
+    staffForceComplete = false
   ) => {
     if (!currentUser?.id) return;
+    // Khi GV bật "xem thử không bị chặn", không tự động lưu vị trí tua thử làm sai lệch tiến độ học
+    if (teacherBypassRef.current && !staffForceComplete) return;
     const now = Date.now();
     if (!force && now - lastSyncMsRef.current < 4500) return;
     lastSyncMsRef.current = now;
@@ -284,7 +352,8 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
         totalSeconds: Math.floor(totalSecs),
         progressPercent: highPct,
         deltaSeconds: delta,
-        checkpointResults: resultsToSave
+        checkpointResults: resultsToSave,
+        ...(staffForceComplete ? { staffForceComplete: true } : {})
       });
 
       const serverVp = res?.videoProgress || {
@@ -297,8 +366,11 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       const passedCount = checkpoints.filter(cp => isCheckpointCleared(cp, resultsToSave)).length;
       const done = Boolean(res?.isCompleted || isCompletedRef.current || (highPct >= 80 && passedCount >= checkpoints.length));
 
-      setProgressPercent(Math.max(maxPctRef.current, serverVp.progressPercent));
-      setMaxWatchedSeconds(Math.max(maxWatchedRef.current, serverVp.watchedSeconds));
+      // Không để tiến độ trên UI vượt mốc thực tế server đã chuẩn hóa
+      setProgressPercent(serverVp.progressPercent);
+      setMaxWatchedSeconds(serverVp.watchedSeconds);
+      maxPctRef.current = serverVp.progressPercent;
+      maxWatchedRef.current = serverVp.watchedSeconds;
       if (done && !isCompletedRef.current) {
         setIsCompleted(true);
         if (onCompleted) onCompleted();
@@ -324,7 +396,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
 
   useEffect(() => {
     const flushOnLeave = () => {
-      if (!currentUser?.id) return;
+      if (!currentUser?.id || teacherBypassRef.current) return;
       if (unsyncedDeltaRef.current <= 0 && latestPosRef.current <= 0) return;
       const delta = Math.round(unsyncedDeltaRef.current);
       unsyncedDeltaRef.current = 0;
@@ -389,6 +461,18 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       if (destroyed) return;
       const p = ytPlayerRef.current;
       if (!p || typeof p.getCurrentTime !== 'function') return;
+
+      // Ép giữ tốc độ 1x khi đang bật khóa tua (tránh tăng tốc độ phát để lách thời gian xem)
+      if (enforceAntiSkipRef.current) {
+        try {
+          const rate = Number(p.getPlaybackRate?.() || 1);
+          if (rate !== 1) {
+            p.setPlaybackRate?.(1);
+            setPlaybackRate(1);
+          }
+        } catch {}
+      }
+
       const rawCur = Number(p.getCurrentTime() || 0);
       const exactCur = Math.max(0, Math.round(rawCur * 1000) / 1000);
       const rawDur = Number(p.getDuration?.() || latestDurRef.current || 0);
@@ -401,6 +485,19 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       }
 
       const nowPerf = performance.now();
+
+      // Khi GV bật chế độ xem thử không bị chặn, chỉ cập nhật đồng hồ phát tại chỗ, KHÔNG ghi nhận tiến độ
+      if (teacherBypassRef.current) {
+        latestPosRef.current = exactCur;
+        if (exactDur > 0) latestDurRef.current = exactDur;
+        if (nowPerf - lastUiUpdateMs >= 66) {
+          lastUiUpdateMs = nowPerf;
+          setCurrentTime(exactCur);
+          if (exactDur > 0) setDuration(exactDur);
+        }
+        return;
+      }
+
       if (lastPerfMs > 0) {
         const dt = (nowPerf - lastPerfMs) / 1000;
         if (dt > 0 && dt < 2) unsyncedDeltaRef.current += dt;
@@ -466,6 +563,13 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           rel: 0,
           modestbranding: 1,
           enablejsapi: 1,
+          playsinline: 1,
+          controls: hasAntiSkipFeature ? 0 : 1,
+          disablekb: hasAntiSkipFeature ? 1 : 0,
+          fs: hasAntiSkipFeature ? 0 : 1,
+          iv_load_policy: 3,
+          cc_load_policy: 1,
+          cc_lang_pref: 'vi',
           origin: window.location.origin
         },
         events: {
@@ -474,6 +578,12 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             setYtApiActive(true);
             const dur = Math.max(0, Math.round((Number(ev.target.getDuration?.() || 0)) * 1000) / 1000);
             if (dur > 0) setDuration(dur);
+            try {
+              setIsMuted(Boolean(ev.target.isMuted?.()));
+              if (enforceAntiSkipRef.current && ev.target.getPlaybackRate?.() !== 1) {
+                ev.target.setPlaybackRate?.(1);
+              }
+            } catch {}
           },
           onStateChange: (ev: any) => {
             if (destroyed) return;
@@ -492,12 +602,18 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                 ev.target.pauseVideo?.();
                 return;
               }
+              if (checkCpRef.current(cur)) return;
+              setHasStarted(true);
               setIsPlaying(true);
               setShowResumeBanner(false);
               startYtLoops();
             } else {
               setIsPlaying(false);
               stopYtLoops();
+              if (teacherBypassRef.current) {
+                setCurrentTime(cur);
+                return;
+              }
               if (state === YT.PlayerState.ENDED) {
                 const finalDur = dur || latestDurRef.current || 1;
                 if (checkCpRef.current(finalDur)) return;
@@ -526,7 +642,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       try { ytPlayerRef.current?.destroy?.(); } catch {}
       ytPlayerRef.current = null;
     };
-  }, [ytVideoId]);
+  }, [ytVideoId, hasAntiSkipFeature]);
 
   // Theo dõi HTML5 <video> bằng requestAnimationFrame (~16ms/khung hình) để dừng chính xác từng mili giây tại neo chặn
   useEffect(() => {
@@ -555,11 +671,23 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
   const handleHtml5TimeUpdate = () => {
     const el = videoRef.current;
     if (!el) return;
+    if (enforceAntiSkipRef.current && el.playbackRate !== 1) {
+      el.playbackRate = 1;
+      setPlaybackRate(1);
+    }
     const cur = Math.max(0, Math.round(el.currentTime * 1000) / 1000);
     const dur = Number.isFinite(el.duration) && el.duration > 0 ? Math.round(el.duration * 1000) / 1000 : duration;
     if (!dur) return;
 
     if (checkCheckpointsAndAntiSkip(cur)) return;
+
+    if (teacherBypassRef.current) {
+      setCurrentTime(cur);
+      setDuration(dur);
+      latestPosRef.current = cur;
+      latestDurRef.current = dur;
+      return;
+    }
 
     const nowMs = Date.now();
     if (!el.paused && lastHtml5TickRef.current > 0) {
@@ -651,15 +779,151 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
     setMaxWatchedSeconds(finalDur);
     setProgressPercent(100);
     setIsCompleted(true);
-    syncProgressToServer(finalDur, finalDur, 100, true);
+    maxWatchedRef.current = finalDur;
+    maxPctRef.current = 100;
+    isCompletedRef.current = true;
+    syncProgressToServer(finalDur, finalDur, 100, true, undefined, canManage);
+  };
+
+  const handleTogglePlay = () => {
+    if (activeCpRef.current) {
+      pausePlayer();
+      return;
+    }
+    if (isPlaying) {
+      pausePlayer();
+    } else {
+      if (!checkCheckpointsAndAntiSkip(latestPosRef.current)) {
+        playPlayer();
+      }
+    }
+  };
+
+  const handleRewind10 = () => {
+    const target = Math.max(0, Math.round(Math.max(0, latestPosRef.current - 10) * 1000) / 1000);
+    seekPlayer(target);
+    latestPosRef.current = target;
+    setCurrentTime(target);
+  };
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    try {
+      if (videoRef.current) videoRef.current.muted = nextMuted;
+      if (ytPlayerRef.current) {
+        if (nextMuted) ytPlayerRef.current.mute?.();
+        else ytPlayerRef.current.unMute?.();
+      }
+    } catch {}
+  };
+
+  const handleSpeedChange = (rate: number) => {
+    if (enforceAntiSkipRef.current) {
+      flashSkipWarning('Đang bật khóa tua nhanh — tốc độ phát được cố định ở 1x!');
+      return;
+    }
+    setPlaybackRate(rate);
+    try {
+      if (videoRef.current) videoRef.current.playbackRate = rate;
+      ytPlayerRef.current?.setPlaybackRate?.(rate);
+    } catch {}
+  };
+
+  const handleToggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (playerWrapperRef.current?.requestFullscreen) {
+        await playerWrapperRef.current.requestFullscreen();
+      }
+    } catch {}
+  };
+
+  const handleSeekBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (activeCpRef.current) {
+      flashSkipWarning('Vui lòng trả lời câu hỏi neo chặn trước khi tiếp tục xem!');
+      return;
+    }
+    const dur = duration || latestDurRef.current;
+    if (!dur || dur <= 0 || !seekBarRef.current) return;
+    const rect = seekBarRef.current.getBoundingClientRect();
+    if (!rect.width) return;
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const targetSec = Math.round(ratio * dur * 1000) / 1000;
+
+    if (enforceAntiSkipRef.current) {
+      const firstBlockingCp = checkpoints.find(cp => !isCheckpointCleared(cp, cpResultsRef.current));
+      const cpLimit = firstBlockingCp ? Math.max(0, (Number(firstBlockingCp.timeSeconds) || 0) - 0.5) : dur;
+      const allowedMax = Math.min(maxWatchedRef.current, cpLimit);
+      if (targetSec > allowedMax + 0.25) {
+        flashSkipWarning('Video đang khóa tua vượt mốc đã xem — bạn chỉ có thể tua lại đoạn đã xem!');
+        return;
+      }
+    }
+
+    seekPlayer(targetSec);
+    latestPosRef.current = targetSec;
+    setCurrentTime(targetSec);
+  };
+
+  const handleResetProgress = async () => {
+    if (isResetting) return;
+    setIsResetting(true);
+    pausePlayer();
+    try {
+      await resetActivityProgress(courseId, activity.id);
+      seekPlayer(0);
+      setCurrentTime(0);
+      setMaxWatchedSeconds(0);
+      setProgressPercent(0);
+      setCheckpointResults({});
+      setActiveCheckpoint(null);
+      setPickedOption(null);
+      setCpFeedback(null);
+      setIsCompleted(false);
+      setHasStarted(false);
+      setShowResumeBanner(false);
+      setIsPlaying(false);
+      maxWatchedRef.current = 0;
+      maxPctRef.current = 0;
+      latestPosRef.current = 0;
+      cpResultsRef.current = {};
+      activeCpRef.current = null;
+      isCompletedRef.current = false;
+      unsyncedDeltaRef.current = 0;
+      setLastSyncText(`Đã reset trắng về 0% lúc ${new Date().toLocaleTimeString('vi-VN')}`);
+    } catch {
+      flashSkipWarning('Không thể reset tiến độ lúc này — vui lòng thử lại!');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handlePlayerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!enforceAntiSkipRef.current) return;
+    const blockedKeys = ['ArrowRight', 'ArrowLeft', 'l', 'L', 'j', 'J', 'k', 'K', '>', '<', 'MediaTrackNext', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    if (blockedKeys.includes(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (['ArrowRight', 'l', 'L', '>'].includes(e.key)) {
+        flashSkipWarning('Video đang khóa phím tua nhanh!');
+      }
+    }
   };
 
   const activeCpIndex = activeCheckpoint ? checkpoints.findIndex(c => c.id === activeCheckpoint.id) : -1;
+  const playheadPct = duration > 0 ? Math.min(100, Math.max(0, Math.round((currentTime / duration) * 1000) / 10)) : 0;
 
   return (
     <div className="space-y-5">
       {/* Khung phát Video chính */}
-      <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800">
+      <div
+        ref={playerWrapperRef}
+        tabIndex={hasAntiSkipFeature ? 0 : undefined}
+        onKeyDown={handlePlayerKeyDown}
+        className={`bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800 flex flex-col focus:outline-none ${isFullscreen ? 'w-screen h-screen rounded-none' : ''}`}
+      >
         {/* Banner tiếp tục xem */}
         {showResumeBanner && (
           <div className="px-4 py-2.5 bg-sky-950/90 border-b border-sky-800/70 flex items-center justify-between gap-3 text-xs text-sky-100">
@@ -686,54 +950,131 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           </div>
         )}
 
-        <div className="relative aspect-video w-full bg-slate-900 flex items-center justify-center">
+        <div className={`relative w-full bg-slate-900 flex items-center justify-center ${isFullscreen ? 'flex-1 min-h-0' : 'aspect-video'}`}>
           {ytVideoId ? (
-            <div ref={ytContainerRef} className="w-full h-full" />
+            <>
+              <div ref={ytContainerRef} className="w-full h-full" />
+              {/* Lớp chắn chặn tua / chặn thẻ gợi ý / chặn nhấn đúp trên YouTube IFrame khi bật khóa tua hoặc có neo chặn */}
+              {hasAntiSkipFeature && !activeCheckpoint && (
+                <>
+                  {/* Chặn thanh tiêu đề & nút chia sẻ phía trên từ lúc mới tải */}
+                  <div
+                    className="absolute inset-x-0 top-0 h-14 z-20"
+                    onClick={(e) => e.stopPropagation()}
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                  {!hasStarted ? (
+                    /* Trước khi bấm Play lần đầu: giữ nguyên nút Play giữa màn hình cho iOS Safari, nhưng che phần dưới (link / logo YouTube) */
+                    <div
+                      className="absolute inset-x-0 bottom-0 h-14 z-20"
+                      onClick={(e) => e.stopPropagation()}
+                      onContextMenu={(e) => e.preventDefault()}
+                    />
+                  ) : (
+                    /* Sau khi đã bắt đầu phát: che toàn khung phát để chỉ Play/Pause qua LMS, chặn tua ±10s, chặn card video gợi ý khi Pause */
+                    <div
+                      role="button"
+                      tabIndex={-1}
+                      aria-label={isPlaying ? 'Tạm dừng video' : 'Tiếp tục phát video'}
+                      onClick={handleTogglePlay}
+                      onDoubleClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (enforceAntiSkip) flashSkipWarning('Đã khóa thao tác nhấn đúp tua nhanh!');
+                      }}
+                      onContextMenu={(e) => e.preventDefault()}
+                      className={`absolute inset-0 z-20 cursor-pointer flex items-center justify-center transition-colors ${
+                        !isPlaying ? 'bg-slate-950/55 backdrop-blur-[1px]' : 'bg-transparent'
+                      }`}
+                    >
+                      {!isPlaying && (
+                        <span className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-sky-500/95 hover:bg-sky-400 text-slate-950 font-extrabold text-sm shadow-2xl border border-white/30">
+                          <Play className="w-5 h-5 fill-current" />
+                          <span>Tiếp tục phát</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
           ) : activity.videoUrl ? (
-            <video
-              ref={videoRef}
-              controls
-              src={resolveBackendUrl(activity.videoUrl)}
-              className="w-full h-full object-contain"
-              onLoadedMetadata={() => {
-                if (videoRef.current && Number.isFinite(videoRef.current.duration)) {
-                  setDuration(videoRef.current.duration);
-                }
-              }}
-              onPlay={() => {
-                if (activeCpRef.current) {
-                  videoRef.current?.pause();
-                  return;
-                }
-                setIsPlaying(true);
-                setShowResumeBanner(false);
-                lastHtml5TickRef.current = Date.now();
-              }}
-              onPause={() => {
-                setIsPlaying(false);
-                lastHtml5TickRef.current = 0;
-                syncProgressToServer(currentTime, duration, progressPercent, true);
-              }}
-              onTimeUpdate={handleHtml5TimeUpdate}
-              onSeeking={() => {
-                if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
-              }}
-              onSeeked={() => {
-                if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
-              }}
-              onEnded={() => {
-                setIsPlaying(false);
-                const dur = videoRef.current?.duration || duration || 1;
-                if (checkCheckpointsAndAntiSkip(dur)) return;
-                setCurrentTime(dur);
-                setMaxWatchedSeconds(dur);
-                setProgressPercent(100);
-                if (checkpoints.every(cp => isCheckpointCleared(cp, cpResultsRef.current))) {
-                  setIsCompleted(true);
-                }
-                syncProgressToServer(dur, dur, 100, true);
-              }}
-            />
+            <>
+              <video
+                ref={videoRef}
+                controls={!hasAntiSkipFeature}
+                controlsList={hasAntiSkipFeature ? 'nodownload noplaybackrate' : undefined}
+                disablePictureInPicture={hasAntiSkipFeature}
+                tabIndex={hasAntiSkipFeature ? -1 : 0}
+                src={resolveBackendUrl(activity.videoUrl)}
+                className="w-full h-full object-contain"
+                onLoadedMetadata={() => {
+                  if (videoRef.current && Number.isFinite(videoRef.current.duration)) {
+                    setDuration(videoRef.current.duration);
+                  }
+                }}
+                onRateChange={() => {
+                  if (enforceAntiSkipRef.current && videoRef.current && videoRef.current.playbackRate !== 1) {
+                    videoRef.current.playbackRate = 1;
+                    setPlaybackRate(1);
+                  }
+                }}
+                onPlay={() => {
+                  if (activeCpRef.current) {
+                    videoRef.current?.pause();
+                    return;
+                  }
+                  setHasStarted(true);
+                  setIsPlaying(true);
+                  setShowResumeBanner(false);
+                  lastHtml5TickRef.current = Date.now();
+                }}
+                onPause={() => {
+                  setIsPlaying(false);
+                  lastHtml5TickRef.current = 0;
+                  if (!teacherBypassRef.current) {
+                    syncProgressToServer(currentTime, duration, progressPercent, true);
+                  }
+                }}
+                onTimeUpdate={handleHtml5TimeUpdate}
+                onSeeking={() => {
+                  if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
+                }}
+                onSeeked={() => {
+                  if (videoRef.current) checkCheckpointsAndAntiSkip(videoRef.current.currentTime);
+                }}
+                onEnded={() => {
+                  setIsPlaying(false);
+                  if (teacherBypassRef.current) return;
+                  const dur = videoRef.current?.duration || duration || 1;
+                  if (checkCheckpointsAndAntiSkip(dur)) return;
+                  setCurrentTime(dur);
+                  setMaxWatchedSeconds(dur);
+                  setProgressPercent(100);
+                  if (checkpoints.every(cp => isCheckpointCleared(cp, cpResultsRef.current))) {
+                    setIsCompleted(true);
+                  }
+                  syncProgressToServer(dur, dur, 100, true);
+                }}
+              />
+              {hasAntiSkipFeature && !activeCheckpoint && (
+                <div
+                  role="button"
+                  tabIndex={-1}
+                  aria-label={isPlaying ? 'Tạm dừng video' : 'Phát video'}
+                  onClick={handleTogglePlay}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="absolute inset-0 z-20 cursor-pointer flex items-center justify-center"
+                >
+                  {!isPlaying && (
+                    <span className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-sky-500/95 hover:bg-sky-400 text-slate-950 font-extrabold text-sm shadow-2xl border border-white/30">
+                      <Play className="w-5 h-5 fill-current" />
+                      <span>{hasStarted ? 'Tiếp tục phát' : 'Phát video'}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center p-8 text-slate-400 space-y-2">
               <Play className="w-12 h-12 mx-auto text-slate-600" />
@@ -833,6 +1174,84 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           )}
         </div>
 
+        {/* Thanh điều khiển LMS thay thế điều khiển gốc (ẩn thanh tua đỏ YouTube khi bật khóa tua / neo chặn) */}
+        {hasAntiSkipFeature && (ytVideoId || activity.videoUrl) && (
+          <div className="px-4 py-2 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between gap-3 flex-wrap text-slate-200">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleTogglePlay}
+                disabled={Boolean(activeCheckpoint)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 text-xs font-extrabold transition-colors"
+                title={isPlaying ? 'Tạm dừng' : 'Phát video'}
+              >
+                {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                <span>{isPlaying ? 'Tạm dừng' : 'Phát'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRewind10}
+                disabled={Boolean(activeCheckpoint)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 border border-slate-700 text-xs font-bold transition-colors"
+                title="Tua lùi 10 giây (chỉ cho phép xem lại)"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>-10s</span>
+              </button>
+
+              <span className="text-xs font-mono text-slate-300 px-1.5">
+                {formatTime(currentTime)}{duration > 0 ? ` / ${formatTime(duration)}` : ''}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleToggleMute}
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+                title={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}
+              >
+                {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+
+              {enforceAntiSkip ? (
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700 text-[11px] font-bold text-amber-300 select-none"
+                  title="Tốc độ phát bị khóa ở 1x khi đang bật chống tua"
+                >
+                  <Lock className="w-3 h-3" />
+                  <span>1x Khóa tua</span>
+                </span>
+              ) : (
+                <div className="inline-flex items-center gap-0.5 bg-slate-800 border border-slate-700 rounded-lg p-0.5">
+                  {[1, 1.25, 1.5, 2].map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => handleSpeedChange(r)}
+                      className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
+                        playbackRate === r ? 'bg-sky-500 text-slate-950' : 'text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      {r}x
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleToggleFullscreen}
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+                title={isFullscreen ? 'Thu nhỏ màn hình' : 'Toàn màn hình (giữ nguyên neo chặn)'}
+              >
+                {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Thanh giám sát tiến độ + vạch Neo chặn */}
         <div className="p-4 bg-slate-900 border-t border-slate-800 text-white space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -860,7 +1279,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {canManage && checkpoints.length > 0 && (
+              {canManage && hasAntiSkipFeature && (
                 <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[11px] text-slate-200 cursor-pointer">
                   <input
                     type="checkbox"
@@ -870,6 +1289,19 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
                   />
                   <span>GV xem thử không bị chặn</span>
                 </label>
+              )}
+
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={handleResetProgress}
+                  disabled={isResetting || (progressPercent === 0 && maxWatchedSeconds === 0 && checkpointsPassedCount === 0 && !isCompleted)}
+                  title="Xóa trắng tiến độ video hiện tại về 0%"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 disabled:opacity-40 text-rose-300 border border-rose-500/30 text-[11px] font-bold transition-colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isResetting ? 'animate-spin' : ''}`} />
+                  <span>Reset 0%</span>
+                </button>
               )}
 
               {isCompleted ? (
@@ -901,17 +1333,38 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
             </div>
           </div>
 
-          {/* Thanh tiến độ có vạch 80% và chốt Neo chặn */}
-          <div className="relative w-full bg-slate-800 rounded-full h-3 overflow-visible">
+          {/* Thanh tiến độ tương tác: tua trong vùng đã mở khóa, hiển thị vạch 80% & chốt Neo chặn */}
+          <div
+            ref={seekBarRef}
+            onClick={handleSeekBarClick}
+            title={
+              enforceAntiSkip
+                ? 'Nhấp để tua lại trong đoạn đã xem (bị chặn tua vượt mốc)'
+                : 'Nhấp để chọn vị trí phát video'
+            }
+            className="relative w-full bg-slate-800 rounded-full h-3.5 overflow-visible cursor-pointer select-none group"
+          >
+            {/* Vùng đã xem (high-water mark) */}
             <div
-              className={`h-full rounded-full transition-all duration-300 ${
+              className="h-full rounded-full transition-all duration-150 bg-sky-500/35"
+              style={{ width: `${progressPercent}%` }}
+            />
+            {/* Vị trí phát hiện tại */}
+            <div
+              className={`absolute top-0 left-0 h-full rounded-full transition-all duration-75 ${
                 isCompleted
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
                   : 'bg-gradient-to-r from-sky-500 to-blue-500'
               }`}
-              style={{ width: `${progressPercent}%` }}
+              style={{ width: `${playheadPct}%` }}
             />
-            <div className="absolute top-0 bottom-0 w-0.5 bg-amber-300/70" style={{ left: '80%' }} title="Mốc hoàn thành 80%" />
+            {duration > 0 && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow border-2 border-sky-400 pointer-events-none transition-transform group-hover:scale-125"
+                style={{ left: `${playheadPct}%` }}
+              />
+            )}
+            <div className="absolute top-0 bottom-0 w-0.5 bg-amber-300/70 pointer-events-none" style={{ left: '80%' }} title="Mốc hoàn thành 80%" />
 
             {duration > 0 && checkpoints.map((cp, idx) => {
               const leftPct = Math.min(98, Math.max(2, (cp.timeSeconds / duration) * 100));
@@ -958,7 +1411,7 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
             <span>
               Vị trí đang phát: <strong className="text-slate-200 font-mono">{formatTimeMs(currentTime)}</strong>
-              {preventSkip ? ' • Chống tua nhanh: Đang bật' : ''}
+              {enforceAntiSkip ? ' • Đã khóa thanh tua & tốc độ 1x' : teacherBypass ? ' • GV xem thử: tự do tua (không lưu tiến độ)' : ''}
             </span>
             <div className="text-[10px]">
               {isSyncing ? (
