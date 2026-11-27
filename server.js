@@ -84,7 +84,7 @@ if (fs.existsSync(envPath)) {
   } catch (e) { }
 }
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
 const app = express();
@@ -438,7 +438,7 @@ if (MONGODB_URI && process.env.DISABLE_MONGO !== '1') {
         await ensureAi6Bai12Content();
         // Khởi tạo 1 lần khóa học thực tế Tin học 12 KNTT – Bài 12: Tạo biểu mẫu (kèm Học liệu tương tác A2.3) nếu chưa có
         await ensureTin12B12Course();
-        console.log('🧹 Đã đồng bộ khóa học 6AIAB01 (Bài 1 & Bài 2) & Tin học 12 Bài 12 (A2.3).');
+        console.log('🧹 Đã đồng bộ khóa học 6AIAB01 (trọn bộ 8 bài) & Tin học 12 Bài 12 (A2.3).');
       } catch (cleanErr) {
         console.warn('Thông báo dọn dẹp dữ liệu cũ:', cleanErr.message);
       }
@@ -6388,12 +6388,20 @@ if (fs.existsSync(distPath)) {
 }
 
 // Start Server on all interfaces (0.0.0.0) for Render compatibility
-app.listen(PORT, '0.0.0.0', () => {
+const httpServer = app.listen(PORT, '0.0.0.0', (err) => {
+  if (err) {
+    console.error('❌ Server listen error:', err);
+    process.exit(1);
+  }
+  const addr = httpServer.address();
+  const bound = typeof addr === 'object' && addr ? `${addr.address}:${addr.port}` : `0.0.0.0:${PORT}`;
   console.log(`\n======================================================`);
-  console.log(`🚀 LMS Nhóm 2 Full-Stack Server is running!`);
-  console.log(`👉 http://localhost:${PORT}`);
+  console.log(`LMS Nhóm 2 Full-Stack Server is running!`);
+  console.log(`Bound: http://${bound}`);
   console.log(`API Base URL: http://localhost:${PORT}/api`);
   console.log(`Database Mode: ${isMongoConnected ? 'MongoDB Atlas' : 'Local JSON DB'}`);
-  console.log(`Dữ liệu: HOÀN TOÀN TRỐNG (Không có dữ liệu ảo)`);
   console.log(`======================================================\n`);
 });
+// Render recommended timeouts to prevent intermittent 502 / proxy & port-scan drops
+httpServer.keepAliveTimeout = 120000;
+httpServer.headersTimeout = 120000;
