@@ -14,7 +14,7 @@ export const OFFICIAL_AI_GRADE6_LESSONS = [
 
 // Mỗi lần bạn sửa/xóa hoạt động bên dưới, hãy đổi số phiên bản này (vd: v16, v17...)
 // rồi khởi động lại server để hệ thống tự động cập nhật vào MongoDB / db.json
-export const AI6_BAI12_REVISION = 'v15-bai1-tongquan';
+export const AI6_BAI12_REVISION = 'v16-restore-bai1';
 
 export function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -36,6 +36,202 @@ export function buildAi6Bai12SeedData() {
         isRequired: true,
         fileUrl: '/hoc-lieu/6aiab01/bai1/0.GioiThieuTongQuan.html',
         description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 1: Nguồn gốc của AI và quyền quyết định (YCCĐ 6.A1.1 & 6.A1.2 · 02 tiết Blended).'
+      },
+      {
+        id: 'ai6-b1-act-2',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 1 (Khởi động): Tình huống ba bạn An, Minh, Khoa & Khảo sát nguồn gốc AI',
+        type: 'forum',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem sơ đồ trực quan & Video có 3 câu neo chặn 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\nKIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
+      },
+      {
+        id: 'ai6-b1-act-3',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 2.1 (Video – Code.org): How AI Works – AI hoạt động như thế nào? (01:30 · 3 câu neo chặn)',
+        type: 'video',
+        durationMinutes: 4,
+        isCompleted: false,
+        isRequired: true,
+        videoUrl: 'https://www.youtube.com/watch?v=Ok-xpKjKp2g',
+        videoDuration: 90,
+        preventVideoSkip: true,
+        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.\nVideo sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được và không tua nhanh qua đoạn chưa xem.',
+        videoCheckpoints: [
+          {
+            id: 'b1-cp1',
+            timeSeconds: 18,
+            question: 'Theo video, AI đang có mặt ở đâu trong đời sống?',
+            options: [
+              'Chỉ có trong phim khoa học viễn tưởng.',
+              'Chỉ có trong phòng thí nghiệm, học sinh chưa từng dùng.',
+              'Trong y tế, giáo dục, lớp học, nhà ở – em đã và đang dùng nhiều ứng dụng AI hằng ngày.'
+            ],
+            correctAnswer: 2,
+            explanation: 'AI đã có mặt quanh em: gợi ý video, dịch ngôn ngữ, trợ lý ảo, mở khóa bằng khuôn mặt… Đó đều là công cụ do con người tạo ra.',
+            requireCorrect: true
+          },
+          {
+            id: 'b1-cp2',
+            timeSeconds: 42,
+            question: 'Theo video, nhờ đâu máy tính có thể học cách nhận ra đồ vật?',
+            options: [
+              'Con người dùng dữ liệu để huấn luyện máy tính và lập trình cách máy tính học.',
+              'Máy tính tự sinh ra trí thông minh mà không cần con người.',
+              'Máy tính chỉ cần được cắm điện là tự biết.'
+            ],
+            correctAnswer: 0,
+            explanation: 'AI không tự sinh ra: con người thu thập dữ liệu, thiết kế thuật toán để huấn luyện máy tính, rồi điều khiển nó (6.A1.1).',
+            requireCorrect: true
+          },
+          {
+            id: 'b1-cp3',
+            timeSeconds: 69,
+            question: 'Video nhắc chúng ta cần đặt ra câu hỏi khó nào khi dùng AI?',
+            options: [
+              'Máy tính có thể chạy nhanh đến mức nào?',
+              'Không chỉ máy tính làm được gì, mà máy tính NÊN làm gì.',
+              'Làm sao để AI tự quyết định thay con người?'
+            ],
+            correctAnswer: 1,
+            explanation: 'Con người quyết định AI nên được dùng vào việc gì, giám sát và chịu trách nhiệm về kết quả – AI chỉ là công cụ hỗ trợ (6.A1.2).',
+            requireCorrect: true
+          }
+        ]
+      },
+      {
+        id: 'ai6-b1-act-4',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 3A (Chốt chặn kiểm tra ≥ 8/10đ): Phân loại công cụ AI & Vai trò con người (5 câu · 10 phút)',
+        type: 'quiz',
+        durationMinutes: 10,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        passScore: 8,
+        timeLimitMinutes: 10,
+        shuffleQuestions: false,
+        description: 'Bài kiểm tra chốt chặn Tiết 1 (5 câu, thang 10 điểm, điều kiện đạt ≥ 8/10 điểm theo KHBD Bài 1). Sau khi nộp bài, hệ thống chấm tự động và hiển thị phản hồi riêng cho từng phương án em chọn.',
+        quizQuestions: [
+          {
+            id: 'ai6-b1-q1',
+            question: 'Câu 1 (Phân loại công cụ AI): Trong các thiết bị và ứng dụng sau, công cụ nào CÓ ứng dụng Trí tuệ nhân tạo (AI)?',
+            options: [
+              'Chiếc quạt điện có điều khiển hẹn giờ tự tắt theo số phút cài sẵn',
+              'Ứng dụng dịch ngôn ngữ qua giọng nói và chữ trên hình ảnh (như Google Dịch)',
+              'Chiếc máy tính bỏ túi khoa học thực hiện nhanh các phép tính công thức cố định',
+              'Chiếc nồi cơm điện tử tự chuyển sang chế độ giữ ấm khi cảm biến đủ nhiệt độ'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'Quạt hẹn giờ chỉ đếm lùi thời gian theo bộ đếm cố định chứ không học từ dữ liệu — không phải AI.',
+              'Chính xác! Ứng dụng dịch ngôn ngữ dùng AI để học từ dữ liệu ngôn ngữ, nhận diện giọng nói, mặt chữ và dịch nghĩa theo ngữ cảnh.',
+              'Rất dễ nhầm! Máy tính bỏ túi dù tính rất nhanh nhưng chỉ chạy theo công thức cài sẵn cố định, không học từ dữ liệu.',
+              'Nồi cơm điện chỉ hoạt động theo cảm biến/rơ-le nhiệt lập trình sẵn mức nhiệt cố định, không phải AI.'
+            ],
+            explanation: 'Theo Infographic 2 (Hình 1.3 SGK Bài 1): Công cụ AI có khả năng học từ dữ liệu để nhận dạng, dự đoán, dịch thuật hoặc gợi ý thông minh.'
+          },
+          {
+            id: 'ai6-b1-q2',
+            question: 'Câu 2 (Phân loại thiết bị thông thường): Thiết bị hoặc tính năng nào dưới đây KHÔNG phải là công cụ ứng dụng Trí tuệ nhân tạo (AI)?',
+            options: [
+              'Tính năng mở khóa điện thoại bằng nhận diện khuôn mặt chủ nhân (Face ID)',
+              'Hệ thống tự động đề xuất video trên YouTube dựa theo lịch sử xem',
+              'Chiếc máy tính bỏ túi cầm tay thực hiện phép cộng, trừ, nhân, chia cơ bản',
+              'Trợ lý ảo nghe hiểu câu lệnh giọng nói (Google Assistant, Siri) để tìm kiếm thông tin'
+            ],
+            correctAnswer: 2,
+            optionFeedback: [
+              'Face ID có ứng dụng AI để học và phân tích đặc điểm khuôn mặt nhằm nhận diện đúng chủ nhân.',
+              'Hệ thống gợi ý YouTube sử dụng AI phân tích lịch sử xem để dự đoán nội dung phù hợp.',
+              'Chính xác! Máy tính bỏ túi thông thường chỉ hoạt động theo mạch điện tử và công thức cố định, không học từ dữ liệu.',
+              'Trợ lý ảo giọng nói ứng dụng AI để nhận dạng âm thanh và hiểu ngôn ngữ tự nhiên.'
+            ],
+            explanation: 'Không phải mọi thiết bị điện tử đều là AI: máy tính bỏ túi, quạt cơ, đèn pin chỉ thực hiện thao tác cố định.'
+          },
+          {
+            id: 'ai6-b1-q3',
+            question: 'Câu 3 (Vai trò con người – Dữ liệu): Để một hệ thống AI có thể nhận diện chính xác hình ảnh con mèo, bước đầu tiên các kĩ sư con người phải thực hiện là gì?',
+            options: [
+              'Cài đặt công cụ AI lên điện thoại rồi chờ máy tính tự chụp và tự suy ra hình ảnh con mèo',
+              'Thu thập, phân loại và làm sạch hàng nghìn bức ảnh mẫu về các loài mèo để dạy máy tính học',
+              'Chỉ cần viết một câu lệnh điều kiện kiểm tra kích thước tệp ảnh mà không cần ảnh mẫu',
+              'Bật nguồn máy tính và để hệ thống AI tự sinh ra cơ sở dữ liệu mẫu trong bộ nhớ'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'AI không thể tự biết con mèo là gì nếu chưa được con người cung cấp dữ liệu mẫu để huấn luyện trước.',
+              'Chính xác! Thu thập và xử lí dữ liệu là bước nền tảng đầu tiên do con người thực hiện (Hình 1.2 SGK Bài 1, UNESCO 2024).',
+              'Kích thước tệp ảnh không thể giúp máy tính phân biệt được con mèo với các vật thể khác.',
+              'Máy tính không thể tự sinh ra dữ liệu chuẩn nếu không có con người lựa chọn và làm sạch.'
+            ],
+            explanation: 'Bước 1 trong 3 bước tạo ra AI: Con người lựa chọn, thu thập và làm sạch lượng lớn dữ liệu làm nguồn học cho máy tính.'
+          },
+          {
+            id: 'ai6-b1-q4',
+            question: 'Câu 4 (Vai trò con người – Thuật toán): Trong quy trình phát triển công cụ AI, công việc “viết chương trình máy tính và hướng dẫn máy tính cách học từ dữ liệu, nhận diện mẫu” thuộc bước nào?',
+            options: [
+              'Thiết kế thuật toán và lập trình',
+              'Thu thập và làm sạch dữ liệu đầu vào',
+              'Triển khai, bật tắt và vận hành thiết bị cuối',
+              'Giám sát đạo đức sau khi người dùng sử dụng'
+            ],
+            correctAnswer: 0,
+            optionFeedback: [
+              'Chính xác! Con người thiết kế thuật toán và viết chương trình để dẫn dắt cách máy tính học từ dữ liệu.',
+              'Thu thập và làm sạch dữ liệu là Bước 1 (chuẩn bị nguồn học), chưa phải bước viết thuật toán lập trình.',
+              'Triển khai và điều khiển là Bước 3 (đưa AI vào thiết bị, bật/tắt, cập nhật khi có sai sót).',
+              'Giám sát trong quá trình sử dụng thuộc vai trò người dùng vận hành AI ở bước triển khai.'
+            ],
+            explanation: 'Theo Hình 1.2 SGK Bài 1: Bước 2 là Thiết kế thuật toán và lập trình do các kĩ sư thực hiện.'
+          },
+          {
+            id: 'ai6-b1-q5',
+            question: 'Câu 5 (Bản chất nguồn gốc & Quyền quyết định): Phát biểu nào sau đây là CHÍNH XÁC nhất về nguồn gốc và vai trò của Trí tuệ nhân tạo (AI)?',
+            options: [
+              'AI có ý thức độc lập sau khi được huấn luyện xong và có thể tự chịu trách nhiệm nếu đưa kết quả sai',
+              'AI là sản phẩm do con người tạo ra, lập trình và điều khiển; con người luôn giữ quyền quyết định cuối cùng',
+              'Mọi thiết bị điện tử thông minh chạy bằng điện trong gia đình đều là hệ thống Trí tuệ nhân tạo',
+              'AI do con người tạo ra nhưng một khi đã cài đặt vào thiết bị thì con người không thể kiểm soát hay điều chỉnh nữa'
+            ],
+            correctAnswer: 1,
+            optionFeedback: [
+              'AI chỉ là phần mềm/công cụ, không có ý thức riêng và không có tư cách pháp lí để chịu trách nhiệm thay con người.',
+              'Xuất sắc! Em đã nắm vững yêu cầu 6.A1.1 & 6.A1.2: Con người tạo ra, dẫn dắt, giám sát và chịu trách nhiệm 100% khi dùng AI.',
+              'Nhiều thiết bị chạy điện như quạt cơ, đèn bàn, máy tính bỏ túi hoạt động cố định, không phải AI.',
+              'Ở Bước 3 (Triển khai & điều khiển), con người luôn trực tiếp bật, tắt, kiểm tra và cập nhật khi AI sai sót.'
+            ],
+            explanation: 'Kiến thức trọng tâm Bài 1: AI do con người tạo ra, lập trình và điều khiển; AI chỉ là công cụ hỗ trợ — con người luôn ở trong vòng lặp (Humans in the Loop).'
+          }
+        ]
+      },
+      {
+        id: 'ai6-b1-act-5',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 3B (Nhiệm vụ cầu nối chuẩn bị Tiết 2): Tình huống bạn Minh nộp bài Lịch sử sai năm sinh',
+        type: 'assignment',
+        durationMinutes: 5,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Nhiệm vụ cầu nối cuối Tiết 1 chuẩn bị cho Tiết 2 trực tiếp tại lớp (trích Luyện tập 3 SGK Bài 1).',
+        assignmentPrompt: 'NHIỆM VỤ CẦU NỐI CHUẨN BỊ TIẾT 2 (Luyện tập 3 – SGK Bài 1)\n\nTình huống: Trong giờ học Lịch sử, bạn Minh nhờ một công cụ AI tóm tắt thông tin về một nhân vật lịch sử và chép nguyên văn vào bài nộp mà không kiểm tra lại với sách giáo khoa. Kết quả là bài làm của Minh bị sai năm sinh của nhân vật đó.\n\nEm hãy trả lời ngắn gọn (nhập trực tiếp bên dưới):\n1. Nếu là bạn Minh, em sẽ làm gì trước khi nộp bài cho cô giáo?\n2. Theo em, khi bài nộp bị sai thông tin như vậy thì ai là người phải chịu trách nhiệm? Vì sao?\n\n(Thầy/Cô sẽ tổng hợp các ý kiến tiêu biểu để cả lớp thảo luận mở đầu Tiết 2!)'
+      },
+      {
+        id: 'ai6-b1-act-6',
+        moduleId: 'module-lesson-1',
+        title: 'Hoạt động 5 & 6 (Tiết 2 – Vận dụng): Tòa án công nghệ giả định & Lập “Tuyên ngôn làm chủ AI” (Rubric 10đ)',
+        type: 'assignment',
+        durationMinutes: 15,
+        isCompleted: false,
+        isRequired: true,
+        maxScore: 10,
+        programmingLanguage: 'Tài liệu & Dự án',
+        description: 'Hoàn thành tình huống Vận dụng 1 (Tòa án công nghệ giả định) và Vận dụng 2 (Tuyên ngôn làm chủ AI: 1 điều NÊN – 1 điều KHÔNG NÊN) kèm Rubric 10 điểm.',
+        assignmentPrompt: 'NHIỆM VỤ VẬN DỤNG TIẾT 2 (SGK BÀI 1)\n\nPhần 1 – Tình huống “Tòa án công nghệ giả định” (Vận dụng 1):\nMột chiếc ô tô có tích hợp tính năng AI hỗ trợ lái tự động. Người lái xe đã bật chế độ tự lái rồi bỏ tay khỏi vô-lăng để chơi trò chơi trên điện thoại, dẫn đến việc xe không kịp phanh khi gặp chướng ngại vật bất ngờ.\n→ Nếu là thành viên hội đồng phân xử, em kết luận trách nhiệm thuộc về ai và rút ra bài học gì về nguyên tắc “Con người trong vòng lặp” (Humans in the Loop / EU AI Act 2024)?\n\nPhần 2 – Lập “Tuyên ngôn làm chủ AI” (Vận dụng 2):\nHãy chọn 01 công việc học tập hằng ngày của em (VD: học từ vựng Tiếng Anh, lập dàn ý bài văn, tìm ý tưởng vẽ tranh...) và viết rõ:\n• Công việc học tập em chọn:\n• 1 điều em NÊN làm (tận dụng AI hỗ trợ đúng cách):\n• 1 điều em KHÔNG NÊN làm (giữ quyền quyết định, bước kiểm chứng và tính trung thực):\n\nTIÊU CHÍ CHẤM ĐIỂM (RUBRIC 10 ĐIỂM – KHBD BÀI 1):\n- Phân định rõ vai trò hỗ trợ của AI – Quy tắc NÊN (4,0đ)\n- Thể hiện quyền quyết định & trách nhiệm – Quy tắc KHÔNG NÊN (4,0đ)\n- Trình bày mạch lạc, chính tả chuẩn và tính thực tiễn (2,0đ)'
       }
     ]
   };
