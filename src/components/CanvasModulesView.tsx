@@ -203,23 +203,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
     setCollapsedModules(newCollapsedMap);
   };
 
-  const getActivityIcon = (type: Activity['type']) => {
-    switch (type) {
-      case 'video':
-        return <Play className="w-4 h-4 text-blue-600 fill-blue-600/10" />;
-      case 'document':
-        return <Link2 className="w-4 h-4 text-emerald-600" />;
-      case 'assignment':
-        return <Upload className="w-4 h-4 text-purple-600" />;
-      case 'quiz':
-        return <HelpCircle className="w-4 h-4 text-amber-600" />;
-      case 'forum':
-        return <MessageSquare className="w-4 h-4 text-teal-600" />;
-      default:
-        return <FileText className="w-4 h-4 text-slate-500" />;
-    }
-  };
-
   // 1. Submit Tạo Mô-đun
   const handleSaveModule = (e: React.FormEvent) => {
     e.preventDefault();
@@ -831,14 +814,11 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                             key={act.id}
                             className={`px-4 py-3 flex items-center justify-between border-b border-slate-200 last:border-b-0 hover:bg-slate-50/80 transition-colors group select-none ${act.isHidden ? 'bg-amber-50/40' : ''}`}
                           >
-                            {/* Left: Icon & Info (Click to open detail popup) */}
+                            {/* Left: Info (Click to open detail popup) */}
                             <div 
                               onClick={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
-                              className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                              className="flex items-center min-w-0 flex-1 cursor-pointer"
                             >
-                              <span className="shrink-0 p-1.5 rounded-md bg-slate-100 group-hover:bg-sky-50 transition-colors">
-                                {getActivityIcon(act.type)}
-                              </span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <p className="text-xs sm:text-sm font-medium text-slate-800 group-hover:text-[#0374b5] group-hover:underline truncate">
@@ -875,17 +855,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                                     </>
                                   )}
                                 </div>
-                                <p className="text-[11px] text-slate-400 mt-0.5 truncate flex items-center gap-2">
-                                  <span>{act.description || (act.type === 'document' ? 'Xem trang' : act.type === 'video' ? 'Video bài giảng' : 'Làm bài tập')}</span>
-                                  {act.dueDate && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="text-rose-500 font-semibold flex items-center gap-1">
-                                        <Clock className="w-3 h-3" /> Hạn nộp: {act.dueDate}
-                                      </span>
-                                    </>
-                                  )}
-                                </p>
+
                                 {/* Huy hiệu tiến độ học tập trực tiếp ngay trên từng học liệu */}
                                 {canManage && activityStatsMap[act.id] ? (
                                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
@@ -1079,18 +1049,13 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="p-2 rounded-xl bg-slate-100 shrink-0 mt-0.5">
-                  {getActivityIcon(previewActivity.activity.type)}
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
-                    {previewActivity.moduleTitle}
-                  </span>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug mt-0.5">
-                    {previewActivity.activity.title}
-                  </h3>
-                </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                  {previewActivity.moduleTitle}
+                </span>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug mt-0.5">
+                  {previewActivity.activity.title}
+                </h3>
               </div>
               <button
                 type="button"
