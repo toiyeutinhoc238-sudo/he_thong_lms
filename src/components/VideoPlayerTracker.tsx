@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Activity, VideoCheckpoint, VideoCheckpointResult } from '../types';
 import { useApp } from '../context/AppContext';
 import api, { API_BASE_URL, resolveBackendUrl } from '../services/api';
+import { FormattedContent } from './FormattedContent';
 import {
   Play,
   CheckCircle2,
@@ -973,13 +974,13 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
       </div>
 
       {/* Thông tin mô tả bài giảng */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-3">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-lg font-bold text-slate-800">{activity.title}</h2>
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap border-b border-slate-100 pb-3.5">
+          <h2 className="text-lg font-extrabold text-slate-900 leading-snug">{activity.title}</h2>
           <div className="flex items-center gap-2">
             {checkpoints.length > 0 && (
               <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
-                🚧 {checkpoints.length} neo chặn tương tác
+                {checkpoints.length} câu hỏi neo chặn
               </span>
             )}
             <span className="px-3 py-1 bg-sky-50 text-[#0374b5] text-xs font-bold rounded-full">
@@ -988,9 +989,10 @@ export const VideoPlayerTracker: React.FC<VideoPlayerTrackerProps> = ({
           </div>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          {activity.description || 'Bài giảng video trực tuyến cung cấp kiến thức trọng tâm của bài học.'}
-        </p>
+        <FormattedContent
+          text={activity.description}
+          fallback="Bài giảng video trực tuyến cung cấp kiến thức trọng tâm của bài học."
+        />
 
         {activity.videoUrl && (
           <div className="text-xs text-slate-500 flex items-center gap-2 pt-2 border-t border-slate-100">

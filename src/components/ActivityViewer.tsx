@@ -4,6 +4,7 @@ import { QuizEngine } from './QuizEngine';
 import { AssignmentSubmitter } from './AssignmentSubmitter';
 import { VideoPlayerTracker } from './VideoPlayerTracker';
 import { ShareExportModal } from './ShareExportModal';
+import { FormattedContent } from './FormattedContent';
 import api, { StudentSubmission, resolveBackendUrl } from '../services/api';
 import { Activity, QuizQuestion } from '../types';
 import {
@@ -582,12 +583,14 @@ export const ActivityViewer: React.FC = () => {
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-800">
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">
                     {activeActivity.title}
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {activeActivity.description || 'Tài liệu học tập chính thức của khóa học'}
+                  <p className="text-xs sm:text-[13px] text-slate-500 mt-1 leading-relaxed">
+                    {!resolvedDocUrl && activeActivity.description && activeActivity.description.length > 120
+                      ? 'Tài liệu đọc & Kiến thức trọng tâm của bài học'
+                      : (activeActivity.description || 'Tài liệu học tập chính thức của khóa học')}
                   </p>
                 </div>
               </div>
@@ -669,16 +672,14 @@ export const ActivityViewer: React.FC = () => {
                 />
               </div>
             ) : !resolvedDocUrl && activeActivity.description && activeActivity.description.length > 120 ? (
-              <div className="bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 space-y-4">
-                <div className="flex items-center gap-2.5 text-emerald-700 border-b border-slate-200 pb-3">
+              <div className="bg-slate-50/70 rounded-2xl p-5 sm:p-6 border border-slate-200/90 space-y-4">
+                <div className="flex items-center gap-2.5 text-[#0374b5] border-b border-slate-200 pb-3">
                   <FileText className="w-5 h-5 shrink-0" />
                   <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
-                    Nội dung bài đọc / Tóm tắt kiến thức trọng tâm
+                    Nội dung bài đọc &amp; Kiến thức trọng tâm
                   </h3>
                 </div>
-                <div className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-medium">
-                  {activeActivity.description}
-                </div>
+                <FormattedContent text={activeActivity.description} />
               </div>
             ) : (
               <div className="bg-slate-50 rounded-2xl p-6 sm:p-10 border border-slate-200 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
@@ -722,13 +723,23 @@ export const ActivityViewer: React.FC = () => {
 
       {/* 5. FORUM TYPE */}
       {activeActivity.type === 'forum' && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">{activeActivity.title}</h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                {activeActivity.description || 'Tham gia trao đổi, chia sẻ ý kiến cùng bạn học và giáo viên trong chủ đề này.'}
-              </p>
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5">
+          {/* Header gọn gàng: Tiêu đề bên trái, nút thao tác bên phải — không ép nội dung mô tả */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-4">
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-sky-50 text-[#0374b5] border border-sky-200/80 text-[11px] font-bold uppercase tracking-wider">
+                  Diễn đàn thảo luận
+                </span>
+                {activeActivity.durationMinutes ? (
+                  <span className="text-xs text-slate-500 font-medium">
+                    Thời lượng gợi ý: {activeActivity.durationMinutes} phút
+                  </span>
+                ) : null}
+              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
+                {activeActivity.title}
+              </h2>
             </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <button
@@ -755,6 +766,12 @@ export const ActivityViewer: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Nội dung hướng dẫn & câu hỏi thảo luận trình bày tách khối rõ ràng, toàn chiều rộng */}
+          <FormattedContent
+            text={activeActivity.description}
+            fallback="Tham gia trao đổi, chia sẻ ý kiến cùng bạn học và giáo viên trong chủ đề này."
+          />
 
           {/* Gửi ý kiến thảo luận trực tiếp từ hoạt động */}
           <form
