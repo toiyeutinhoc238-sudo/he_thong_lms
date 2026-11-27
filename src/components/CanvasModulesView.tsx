@@ -5,10 +5,7 @@ import {
   ChevronDown, 
   ChevronRight, 
   Lock, 
-  CheckCircle2, 
-  Circle, 
   Link2, 
-  FileText, 
   Play, 
   Upload, 
   HelpCircle, 
@@ -19,14 +16,9 @@ import {
   Layers,
   ExternalLink,
   Video,
-  Clock,
-  Sparkles,
-  Award,
-  Code2,
   UploadCloud,
   Paperclip,
   Loader2,
-  Users,
   BarChart3,
   ArrowLeft,
   Share2,
@@ -37,12 +29,13 @@ import {
   ArrowDown,
   Shuffle,
   Target,
-  UserCheck,
-  X
+  UserCheck
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion, VideoCheckpoint } from '../types';
 import { VideoCheckpointEditor } from './VideoCheckpointEditor';
 import { ShareExportModal } from './ShareExportModal';
+import { ModuleActivityRow } from './ModuleActivityRow';
+import { ModulePreviewModals } from './ModulePreviewModals';
 import { parseBulkQuizText } from '../utils/aikenParser';
 
 function formatDueDateFromIso(iso: string): string {
@@ -84,7 +77,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
   const [isImportingPkg, setIsImportingPkg] = useState(false);
 
   // Phân quyền: Học viên tuyệt đối KHÔNG được thêm/sửa/xóa học liệu hoặc mô-đun
-  // Chỉ Quản trị viên (phanphiphu04@gmail.com / admin) hoặc Giáo viên mới có quyền toàn quyền thêm/xóa/sửa
   const canManage = Boolean(
     currentUser?.email?.toLowerCase().trim() === 'phanphiphu04@gmail.com' ||
     currentUser?.role === 'admin' || 
@@ -399,7 +391,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {/* Nút Chia sẻ Link & Xuất sang LMS khác */}
           {canManage && !isEmbedMode && (
             <button
               type="button"
@@ -412,7 +403,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             </button>
           )}
 
-          {/* Nút Nhập gói học liệu (.json) */}
           {canManage && !isEmbedMode && (
             <label
               className={`flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-md text-xs font-bold transition-colors shadow-2xs cursor-pointer ${isImportingPkg ? 'opacity-60 pointer-events-none' : ''}`}
@@ -429,7 +419,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             </label>
           )}
 
-          {/* Nút Thu gọn / Mở rộng tất cả (chỉ hiện khi đang xem nhiều bài) */}
           {!focusedModule && (
             <button
               onClick={toggleAll}
@@ -439,7 +428,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
             </button>
           )}
 
-          {/* Nút + Thêm Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
           {canManage && !focusedModule && !isEmbedMode && (
             <button
               onClick={() => setIsAddModuleOpen(true)}
@@ -660,10 +648,9 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                     )}
                     <Lock className="w-4 h-4 text-slate-600" />
 
-                    {/* Hành động quản trị Mô-đun (Chỉ Giáo viên / Quản trị viên) */}
+                    {/* Hành động quản trị Mô-đun */}
                     {canManage && !isEmbedMode && (
                       <>
-                        {/* Đảo thứ tự mô-đun lên / xuống khi xem tất cả */}
                         {!focusedModule && modules.length > 1 && (
                           <div className="hidden sm:flex items-center">
                             <button
@@ -687,7 +674,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           </div>
                         )}
 
-                        {/* Ẩn / Hiện Mô-đun với học sinh (Nháp / Công bố) */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -700,7 +686,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           {mod.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
 
-                        {/* Chia sẻ Link & Xuất Mô-đun sang LMS khác */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -713,7 +698,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           <Share2 className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Sửa Mô-đun */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -730,7 +714,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Xóa Mô-đun */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -745,7 +728,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Thêm bài học vào mô-đun */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -808,174 +790,28 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                         )}
                       </div>
                     ) : (
-                      activities.map((act, actIdx) => {
-                        return (
-                          <div
-                            key={act.id}
-                            className={`px-4 py-3 flex items-center justify-between border-b border-slate-200 last:border-b-0 hover:bg-slate-50/80 transition-colors group select-none ${act.isHidden ? 'bg-amber-50/40' : ''}`}
-                          >
-                            {/* Left: Info (Click to open detail popup) */}
-                            <div 
-                              onClick={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
-                              className="flex items-center min-w-0 flex-1 cursor-pointer"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="text-xs sm:text-sm font-medium text-slate-800 group-hover:text-[#0374b5] group-hover:underline truncate">
-                                    {act.title}
-                                  </p>
-                                  {act.isHidden && (
-                                    <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black rounded">
-                                      Đang ẩn (Nháp)
-                                    </span>
-                                  )}
-                                  {act.type === 'video' && act.videoUrl && (
-                                    <span className="px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[10px] font-bold rounded">
-                                      Video
-                                    </span>
-                                  )}
-                                  {act.type === 'video' && (act.videoCheckpoints?.length || 0) > 0 && (
-                                    <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-800 text-[10px] font-bold rounded">
-                                      {act.videoCheckpoints?.length} neo chặn
-                                    </span>
-                                  )}
-                                  {act.type === 'assignment' && (
-                                    <span className="px-1.5 py-0.2 bg-purple-100 text-purple-800 text-[10px] font-bold rounded">
-                                      Bài tập
-                                    </span>
-                                  )}
-                                  {act.type === 'quiz' && (
-                                    <>
-                                      <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">
-                                        Trắc nghiệm
-                                      </span>
-                                      <span className="px-1.5 py-0.2 bg-slate-100 text-slate-700 text-[10px] font-bold rounded">
-                                        {act.timeLimitMinutes || 15} phút
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-
-                                {/* Huy hiệu tiến độ học tập trực tiếp ngay trên từng học liệu */}
-                                {canManage && activityStatsMap[act.id] ? (
-                                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-[10px] font-bold">
-                                      <Users className="w-3 h-3" />
-                                      {activityStatsMap[act.id].completedCount}/{classStudentCount} HS xong ({activityStatsMap[act.id].completionRate}%)
-                                    </span>
-                                    {act.type === 'video' && (
-                                      <span className="px-2 py-0.5 rounded-md bg-sky-50 text-[#0374b5] text-[10px] font-bold">
-                                        TB xem: {activityStatsMap[act.id].avgVideoPercent}%
-                                      </span>
-                                    )}
-                                    {activityStatsMap[act.id].avgScore !== null && activityStatsMap[act.id].avgScore !== undefined && (
-                                      <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold">
-                                        TB điểm: {activityStatsMap[act.id].avgScore}/10
-                                      </span>
-                                    )}
-                                    {(activityStatsMap[act.id].pendingGradingCount || 0) > 0 && (
-                                      <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-black">
-                                        {activityStatsMap[act.id].pendingGradingCount} bài chờ chấm
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : !canManage && act.type === 'video' && (act.videoProgress?.progressPercent || 0) > 0 && !act.isCompleted ? (
-                                  <div className="mt-1 flex items-center gap-2">
-                                    <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                      <div className="h-full bg-amber-400" style={{ width: `${act.videoProgress?.progressPercent || 0}%` }} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-amber-700">Đã xem {act.videoProgress?.progressPercent}%</span>
-                                  </div>
-                                ) : null}
-                              </div>
-                            </div>
-
-                            {/* Right: Actions (Chỉ Giáo viên / Quản trị viên mới được Sắp xếp / Ẩn-Hiện / Chia sẻ / Sửa / Xóa) */}
-                            <div className="flex items-center gap-1.5 shrink-0 pl-3">
-                              {canManage && !isEmbedMode && (
-                                <>
-                                  {activities.length > 1 && (
-                                    <div className="hidden sm:flex items-center">
-                                      <button
-                                        type="button"
-                                        disabled={actIdx === 0}
-                                        onClick={() => moveActivity(act.id, -1)}
-                                        className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-25 opacity-70 group-hover:opacity-100"
-                                        title="Di chuyển lên trên"
-                                      >
-                                        <ArrowUp className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        disabled={actIdx === activities.length - 1}
-                                        onClick={() => moveActivity(act.id, 1)}
-                                        className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-25 opacity-70 group-hover:opacity-100"
-                                        title="Di chuyển xuống dưới"
-                                      >
-                                        <ArrowDown className="w-3.5 h-3.5" />
-                                      </button>
-                                    </div>
-                                  )}
-
-                                  {/* Hide / Publish Activity Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => updateCourseActivity(activeCourse.id, act.id, { isHidden: !act.isHidden })}
-                                    className={`p-1 rounded transition-colors ${act.isHidden ? 'text-amber-700 bg-amber-100 hover:bg-amber-200' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-200 opacity-70 group-hover:opacity-100'}`}
-                                    title={act.isHidden ? 'Đang ẩn với học sinh — Bấm để Công bố' : 'Đang hiện với học sinh — Bấm để Ẩn (Nháp)'}
-                                  >
-                                    {act.isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                  </button>
-
-                                  {/* Share / Export Activity Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => setShareTarget({ module: mod, activity: act })}
-                                    className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors opacity-75 group-hover:opacity-100"
-                                    title="Chia sẻ link, mã nhúng iframe hoặc xuất SCORM/Quiz sang LMS khác"
-                                  >
-                                    <Share2 className="w-3.5 h-3.5" />
-                                  </button>
-
-                                  {/* Edit Activity Button */}
-                                  <button
-                                    onClick={() => setEditingActivity(act)}
-                                    className="p-1 rounded text-slate-400 hover:text-[#0374b5] hover:bg-slate-200 transition-colors opacity-70 group-hover:opacity-100"
-                                    title="Chỉnh sửa học liệu"
-                                  >
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </button>
-
-                                  {/* Delete Activity Button */}
-                                  <button
-                                    onClick={() => {
-                                      if (confirm(`Bạn có chắc chắn muốn xóa bài học "${act.title}"?`)) {
-                                        deleteCourseActivity(activeCourse.id, act.id);
-                                      }
-                                    }}
-                                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
-                                    title="Xóa học liệu này"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </>
-                              )}
-
-                              {/* Status circle */}
-                              <div 
-                                onClick={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
-                                className="cursor-pointer pl-1"
-                              >
-                                {act.isCompleted ? (
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                ) : (
-                                  <Circle className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
+                      activities.map((act, actIdx) => (
+                        <ModuleActivityRow
+                          key={act.id}
+                          act={act}
+                          actIdx={actIdx}
+                          totalActivities={activities.length}
+                          canManage={canManage}
+                          isEmbedMode={isEmbedMode}
+                          activityStats={activityStatsMap[act.id]}
+                          classStudentCount={classStudentCount}
+                          onPreview={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
+                          onMove={(delta) => moveActivity(act.id, delta)}
+                          onToggleHidden={() => updateCourseActivity(activeCourse.id, act.id, { isHidden: !act.isHidden })}
+                          onShare={() => setShareTarget({ module: mod, activity: act })}
+                          onEdit={() => setEditingActivity(act)}
+                          onDelete={() => {
+                            if (confirm(`Bạn có chắc chắn muốn xóa bài học "${act.title}"?`)) {
+                              deleteCourseActivity(activeCourse.id, act.id);
+                            }
+                          }}
+                        />
+                      ))
                     )}
                   </div>
                 )}
@@ -985,1351 +821,1166 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
         </div>
       )}
 
-      {/* POPUP XEM CHI TIẾT MỤC TIÊU BÀI HỌC */}
-      {objectivesModalModule && (
-        <div
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4"
-          onClick={() => setObjectivesModalModule(null)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#0374b5] flex items-center justify-center shrink-0">
-                  <Target className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0374b5] block">
-                    Mục tiêu bài học
-                  </span>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    {objectivesModalModule.title}
-                  </h3>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setObjectivesModalModule(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
-                title="Đóng"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="bg-sky-50/60 border border-sky-100 rounded-xl p-4 max-h-[60vh] overflow-y-auto">
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                {objectivesModalModule.learningObjectives}
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={() => setObjectivesModalModule(null)}
-                className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-xs transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* POPUP XEM CHI TIẾT HOẠT ĐỘNG / HỌC LIỆU */}
-      {previewActivity && (
-        <div
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4"
-          onClick={() => setPreviewActivity(null)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
-              <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
-                  {previewActivity.moduleTitle}
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug mt-0.5">
-                  {previewActivity.activity.title}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewActivity(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
-                title="Đóng"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Các huy hiệu thông tin nhanh */}
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
-              {previewActivity.activity.isCompleted ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Đã hoàn thành
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                  <Circle className="w-3.5 h-3.5" /> Chưa hoàn thành
-                </span>
-              )}
-
-              {previewActivity.activity.type === 'video' && (
-                <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                  Video bài giảng
-                </span>
-              )}
-              {previewActivity.activity.type === 'video' && (previewActivity.activity.videoCheckpoints?.length || 0) > 0 && (
-                <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  {previewActivity.activity.videoCheckpoints?.length} câu neo chặn
-                </span>
-              )}
-              {previewActivity.activity.type === 'document' && (
-                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Tài liệu học tập
-                </span>
-              )}
-              {previewActivity.activity.type === 'assignment' && (
-                <span className="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                  Bài tập
-                </span>
-              )}
-              {previewActivity.activity.type === 'quiz' && (
-                <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  Trắc nghiệm • {previewActivity.activity.timeLimitMinutes || 15} phút
-                </span>
-              )}
-              {previewActivity.activity.dueDate && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  <Clock className="w-3.5 h-3.5" /> Hạn nộp: {previewActivity.activity.dueDate}
-                </span>
-              )}
-            </div>
-
-            {/* Mô tả chi tiết */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-[50vh] overflow-y-auto space-y-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
-                Mô tả chi tiết
-              </span>
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                {previewActivity.activity.description || 'Nhấn nút bên dưới để mở và bắt đầu thực hiện học liệu này.'}
-              </p>
-              {previewActivity.activity.assignmentPrompt && (
-                <div className="pt-2 mt-2 border-t border-slate-200">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 block mb-1">
-                    Yêu cầu bài tập
-                  </span>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                    {previewActivity.activity.assignmentPrompt}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setPreviewActivity(null)}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                Đóng
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = previewActivity.activity.id;
-                  setPreviewActivity(null);
-                  onSelectActivity(id);
-                }}
-                className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
-              >
-                <span>Mở học liệu / Bắt đầu học</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 2 POPUP XEM CHI TIẾT MỤC TIÊU BÀI HỌC & HOẠT ĐỘNG */}
+      <ModulePreviewModals
+        objectivesModalModule={objectivesModalModule}
+        onCloseObjectives={() => setObjectivesModalModule(null)}
+        previewActivity={previewActivity}
+        onClosePreview={() => setPreviewActivity(null)}
+        onOpenActivity={onSelectActivity}
+      />
 
       {/* CÁC MODAL QUẢN TRỊ HỌC LIỆU (CHỈ DÀNH CHO GIÁO VIÊN / ADMIN) */}
       {canManage && (
         <>
           {/* MODAL 1: THÊM MÔ-ĐUN */}
-      {isAddModuleOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
-              Thêm Mô-đun mới
-            </h3>
-            <form onSubmit={handleSaveModule} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tên Mô-đun *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: BÀI 1: TỔNG QUAN HỌC PHẦN"
-                  value={moduleTitle}
-                  onChange={(e) => setModuleTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  autoFocus
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mô tả / Điều kiện tiên quyết (Tùy chọn)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Hoàn thành Bài trước đó"
-                  value={modulePrereq}
-                  onChange={(e) => setModulePrereq(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Thành viên phụ trách bài học (BT4 — Tùy chọn)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Nguyễn Văn A (Phụ trách Bài 1)"
-                  value={moduleOwner}
-                  onChange={(e) => setModuleOwner(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mục tiêu bài học (Hiển thị đầu mô-đun để đối chiếu sư phạm)
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder={"• Hiểu được khái niệm và vai trò của...\n• Vận dụng kiến thức để giải quyết bài tập..."}
-                  value={moduleObjectives}
-                  onChange={(e) => setModuleObjectives(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModuleOpen(false)}
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
-                >
-                  Tạo Mô-đun
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: SỬA MÔ-ĐUN */}
-      {editingModule && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
-              Chỉnh sửa Mô-đun
-            </h3>
-            <form onSubmit={handleSaveEditModule} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tên Mô-đun *
-                </label>
-                <input
-                  type="text"
-                  value={editModTitle}
-                  onChange={(e) => setEditModTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mô tả / Điều kiện tiên quyết
-                </label>
-                <input
-                  type="text"
-                  value={editModPrereq}
-                  onChange={(e) => setEditModPrereq(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Thành viên phụ trách bài học (BT4)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Nguyễn Văn A"
-                  value={editModOwner}
-                  onChange={(e) => setEditModOwner(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mục tiêu bài học (Hiển thị ngay đầu bài)
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder={"• Nêu được...\n• Thực hành được..."}
-                  value={editModObjectives}
-                  onChange={(e) => setEditModObjectives(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingModule(null)}
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
-                >
-                  Lưu thay đổi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: THÊM HỌC LIỆU / HOẠT ĐỘNG (ĐẦY ĐỦ TÍNH NĂNG LMS NHÓM 2) */}
-      {isAddActivityOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[#0374b5]" />
-              <span>Thêm Học Liệu Mới Vào Mô-đun (LMS Nhóm 2)</span>
-            </h3>
-
-            {/* Chọn loại học liệu */}
-            <div className="grid grid-cols-5 gap-1.5 p-1 bg-slate-100 rounded-xl">
-              <button
-                type="button"
-                onClick={() => setActType('video')}
-                className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                  actType === 'video'
-                    ? 'bg-white text-[#0374b5] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Play className="w-4 h-4" />
-                <span>Video</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActType('document')}
-                className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                  actType === 'document'
-                    ? 'bg-white text-[#0374b5] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Link2 className="w-4 h-4" />
-                <span>Link/Tài liệu</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActType('assignment')}
-                className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                  actType === 'assignment'
-                    ? 'bg-white text-[#0374b5] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                <span>Bài tập</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActType('quiz')}
-                className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                  actType === 'quiz'
-                    ? 'bg-white text-[#0374b5] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <HelpCircle className="w-4 h-4" />
-                <span>Trắc nghiệm</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActType('forum')}
-                className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                  actType === 'forum'
-                    ? 'bg-white text-[#0374b5] shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Thảo luận</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveActivity} className="space-y-3.5">
-              {/* Tiêu đề */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tiêu đề bài học / học liệu *
-                </label>
-                <input
-                  type="text"
-                  placeholder={
-                    actType === 'video' ? 'Ví dụ: Video tương tác: Bản chất của AI' :
-                    actType === 'assignment' ? 'Ví dụ: Bài tập thu hoạch số 1' :
-                    actType === 'quiz' ? 'Ví dụ: Trắc nghiệm đánh giá kiến thức' :
-                    'Ví dụ: Khảo sát nhận thức ban đầu: Trí tuệ nhân tạo (AI)'
-                  }
-                  value={actTitle}
-                  onChange={(e) => setActTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  autoFocus
-                  required
-                />
-              </div>
-
-              {/* Mô tả phụ */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Phụ đề / Ghi chú hiển thị
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Xem trang, Video 10 phút, Điểm tối đa 10..."
-                  value={actDesc}
-                  onChange={(e) => setActDesc(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              {/* Trường riêng cho VIDEO + Neo chặn tương tác */}
-              {actType === 'video' && (
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200/60 space-y-2">
-                    <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                      <Video className="w-4 h-4 text-blue-600" />
-                      <span>Đường dẫn Video (YouTube URL hoặc Direct MP4 Link) *</span>
+          {isAddModuleOpen && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
+                  Thêm Mô-đun mới
+                </h3>
+                <form onSubmit={handleSaveModule} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tên Mô-đun *
                     </label>
                     <input
-                      type="url"
-                      placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
-                      value={actVideoUrl}
-                      onChange={(e) => setActVideoUrl(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                    />
-                    <p className="text-[11px] text-slate-500">
-                      Hỗ trợ nhúng trực tiếp video YouTube hoặc file MP4, tự động đo % xem và tạm dừng tại các neo chặn bên dưới.
-                    </p>
-                  </div>
-
-                  <VideoCheckpointEditor
-                    checkpoints={actVideoCheckpoints}
-                    onChange={setActVideoCheckpoints}
-                    preventSkip={actPreventVideoSkip}
-                    onPreventSkipChange={setActPreventVideoSkip}
-                    idPrefix="add"
-                  />
-                </div>
-              )}
-
-              {/* Trường riêng cho LINK / DOCUMENT */}
-              {actType === 'document' && (
-                <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200/60 space-y-2">
-                  <label className="block text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-                    <ExternalLink className="w-4 h-4 text-emerald-600" />
-                    <span>Đường dẫn liên kết / Tài liệu trực tuyến (URL)</span>
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://docs.google.com/... hoặc link website ngoài"
-                    value={actFileUrl}
-                    onChange={(e) => setActFileUrl(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  />
-                </div>
-              )}
-
-              {/* Tải tệp trực tiếp từ máy tính (Hỗ trợ tùy ý mọi tệp cho Bài học / Học liệu) */}
-              {(actType === 'document' || actType === 'video' || actType === 'assignment') && (
-                <div className="p-3 bg-sky-50/60 rounded-xl border border-sky-200/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
-                      <UploadCloud className="w-4 h-4 text-[#0374b5]" />
-                      <span>Hoặc tải tệp trực tiếp từ máy tính lên hệ thống (Tùy ý mọi tệp)</span>
-                    </label>
-                    {isUploadingActFile && (
-                      <span className="text-[11px] text-[#0374b5] font-bold flex items-center gap-1">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang tải...
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    Hỗ trợ tệp PDF, Word, PowerPoint, Excel, Video MP4, Audio MP3, ZIP, Code... (Tối đa 100MB)
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <label className="px-3 py-1.5 bg-white hover:bg-sky-50 text-[#0374b5] border border-[#0374b5] rounded-lg text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-2xs">
-                      <Paperclip className="w-3.5 h-3.5" />
-                      <span>{uploadedActFileName ? 'Đổi tệp khác' : 'Chọn tệp từ máy tính...'}</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        disabled={isUploadingActFile}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setIsUploadingActFile(true);
-                          try {
-                            const targetMod = modules.find(m => m.id === targetModuleId);
-                            const saved = await uploadCourseFile(activeCourse.id, file, '', targetMod?.title || '', targetMod?.id || '');
-                            if (saved) {
-                              setUploadedActFileName(file.name);
-                              setActFileUrl(saved.url);
-                              if (!actTitle) setActTitle(file.name.replace(/\.[^/.]+$/, ''));
-                              if (saved.fileType === 'video') {
-                                setActVideoUrl(saved.url);
-                              }
-                            }
-                          } catch (err: any) {
-                            alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
-                          } finally {
-                            setIsUploadingActFile(false);
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                    </label>
-                    {uploadedActFileName && (
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 truncate max-w-xs">
-                        ✓ {uploadedActFileName}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Trường riêng cho BÀI TẬP */}
-              {actType === 'assignment' && (
-                <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-200/60 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-purple-900 mb-1">
-                        Dạng bài / Ngôn ngữ
-                      </label>
-                      <select
-                        value={actProgLang}
-                        onChange={(e) => setActProgLang(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
-                      >
-                        <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
-                        <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
-                        <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
-                        <option value="C++">⚡ Lập trình C++ / Pascal</option>
-                        <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án (.pdf, .docx, .zip)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-purple-900 mb-1">
-                        Thang điểm
-                      </label>
-                      <input
-                        type="number"
-                        value={actMaxScore}
-                        onChange={(e) => setActMaxScore(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Yêu cầu / Đề bài bài tập *
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Nhập đề bài, các yêu cầu cần học sinh hoàn thành và nộp..."
-                      value={actPrompt}
-                      onChange={(e) => setActPrompt(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      type="text"
+                      placeholder="Ví dụ: BÀI 1: TỔNG QUAN HỌC PHẦN"
+                      value={moduleTitle}
+                      onChange={(e) => setModuleTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      autoFocus
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Khung mã nguồn mẫu / Starter Code (Tùy chọn)
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Mô tả / Điều kiện tiên quyết (Tùy chọn)
                     </label>
-                    <textarea
-                      rows={3}
-                      placeholder="# Gõ khung code mẫu hoặc gợi ý khởi tạo cho học sinh..."
-                      value={actStarterCode}
-                      onChange={(e) => setActStarterCode(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Hoàn thành Bài trước đó"
+                      value={modulePrereq}
+                      onChange={(e) => setModulePrereq(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Hạn nộp bài (Deadline — tự động gắn nhãn "Nộp trễ" nếu quá hạn)
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Thành viên phụ trách bài học (BT4 — Tùy chọn)
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input
-                        type="datetime-local"
-                        value={actDueDateIso}
-                        onChange={(e) => {
-                          setActDueDateIso(e.target.value);
-                          if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
-                        }}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Hoặc ghi chú hạn nộp (VD: 30/11 23:59)"
-                        value={actDueDate}
-                        onChange={(e) => setActDueDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Nguyễn Văn A (Phụ trách Bài 1)"
+                      value={moduleOwner}
+                      onChange={(e) => setModuleOwner(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Mục tiêu bài học (Hiển thị đầu mô-đun để đối chiếu sư phạm)
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder={"• Hiểu được khái niệm và vai trò của...\n• Vận dụng kiến thức để giải quyết bài tập..."}
+                      value={moduleObjectives}
+                      onChange={(e) => setModuleObjectives(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddModuleOpen(false)}
+                      className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
+                    >
+                      Tạo Mô-đun
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 2: SỬA MÔ-ĐUN */}
+          {editingModule && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2">
+                  Chỉnh sửa Mô-đun
+                </h3>
+                <form onSubmit={handleSaveEditModule} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tên Mô-đun *
+                    </label>
+                    <input
+                      type="text"
+                      value={editModTitle}
+                      onChange={(e) => setEditModTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Mô tả / Điều kiện tiên quyết
+                    </label>
+                    <input
+                      type="text"
+                      value={editModPrereq}
+                      onChange={(e) => setEditModPrereq(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Thành viên phụ trách bài học (BT4)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Nguyễn Văn A"
+                      value={editModOwner}
+                      onChange={(e) => setEditModOwner(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Mục tiêu bài học (Hiển thị ngay đầu bài)
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder={"• Nêu được...\n• Thực hành được..."}
+                      value={editModObjectives}
+                      onChange={(e) => setEditModObjectives(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setEditingModule(null)}
+                      className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
+                    >
+                      Lưu thay đổi
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 3: THÊM HỌC LIỆU / HOẠT ĐỘNG */}
+          {isAddActivityOpen && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-[#0374b5]" />
+                  <span>Thêm Học Liệu Mới Vào Mô-đun (LMS Nhóm 2)</span>
+                </h3>
+
+                {/* Chọn loại học liệu */}
+                <div className="grid grid-cols-5 gap-1.5 p-1 bg-slate-100 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setActType('video')}
+                    className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      actType === 'video' ? 'bg-white text-[#0374b5] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Video</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActType('document')}
+                    className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      actType === 'document' ? 'bg-white text-[#0374b5] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Link2 className="w-4 h-4" />
+                    <span>Link/Tài liệu</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActType('assignment')}
+                    className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      actType === 'assignment' ? 'bg-white text-[#0374b5] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Bài tập</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActType('quiz')}
+                    className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      actType === 'quiz' ? 'bg-white text-[#0374b5] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                    <span>Trắc nghiệm</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActType('forum')}
+                    className={`py-2 px-1 rounded-lg text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      actType === 'forum' ? 'bg-white text-[#0374b5] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Thảo luận</span>
+                  </button>
                 </div>
-              )}
 
-              {/* Trường riêng cho TRẮC NGHIỆM (kèm cài thời gian, điểm đạt, xáo trộn, giới hạn lần làm & nhập nhanh Aiken) */}
-              {actType === 'quiz' && (
-                <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3 max-h-96 overflow-y-auto">
-                  {/* Cài đặt thời gian, điểm đạt, số lần làm & hạn nộp */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Thời gian (phút) *
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={180}
-                        value={actTimeLimit}
-                        onChange={(e) => setActTimeLimit(Math.max(1, Number(e.target.value) || 1))}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Điểm đạt (0-10)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min={0}
-                        max={10}
-                        value={actPassScore}
-                        onChange={(e) => setActPassScore(Math.min(10, Math.max(0, Number(e.target.value) || 0)))}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1" title="0 = Không giới hạn số lượt làm lại">
-                        Số lượt tối đa
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={50}
-                        value={actMaxAttempts}
-                        onChange={(e) => setActMaxAttempts(Math.max(0, Number(e.target.value) || 0))}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
-                        placeholder="0 = không giới hạn"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Hạn làm bài
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={actDueDateIso}
-                        onChange={(e) => {
-                          setActDueDateIso(e.target.value);
-                          if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
-                        }}
-                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900 focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                    <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
-                      <input
-                        type="checkbox"
-                        checked={actShuffleQuestions}
-                        onChange={(e) => setActShuffleQuestions(e.target.checked)}
-                        className="accent-amber-600 w-3.5 h-3.5"
-                      />
-                      <Shuffle className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh (chống nhìn bài nhau) • Số lượt = 0 là không giới hạn</span>
+                <form onSubmit={handleSaveActivity} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tiêu đề bài học / học liệu *
                     </label>
+                    <input
+                      type="text"
+                      placeholder={
+                        actType === 'video' ? 'Ví dụ: Video tương tác: Bản chất của AI' :
+                        actType === 'assignment' ? 'Ví dụ: Bài tập thu hoạch số 1' :
+                        actType === 'quiz' ? 'Ví dụ: Trắc nghiệm đánh giá kiến thức' :
+                        'Ví dụ: Khảo sát nhận thức ban đầu: Trí tuệ nhân tạo (AI)'
+                      }
+                      value={actTitle}
+                      onChange={(e) => setActTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      autoFocus
+                      required
+                    />
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 backdrop-blur-xs z-10">
-                    <span className="text-xs font-bold text-amber-900">
-                      Soạn câu hỏi trắc nghiệm ({quizQuestions.length} câu)
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setIsBulkQuizOpen(v => !v)}
-                        className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
-                      >
-                        ⚡ Nhập nhanh (Aiken / Dán đề)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setQuizQuestions(prev => [
-                          ...prev, 
-                          {
-                            id: `q${Date.now()}`,
-                            question: `Câu hỏi ${prev.length + 1}?`,
-                            options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
-                            correctAnswer: 0
-                          }
-                        ])}
-                        className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
-                      >
-                        + Thêm câu hỏi
-                      </button>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Phụ đề / Ghi chú hiển thị
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Xem trang, Video 10 phút, Điểm tối đa 10..."
+                      value={actDesc}
+                      onChange={(e) => setActDesc(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  {actType === 'video' && (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-200/60 space-y-2">
+                        <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                          <Video className="w-4 h-4 text-blue-600" />
+                          <span>Đường dẫn Video (YouTube URL hoặc Direct MP4 Link) *</span>
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://www.youtube.com/watch?v=... hoặc https://.../video.mp4"
+                          value={actVideoUrl}
+                          onChange={(e) => setActVideoUrl(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                        />
+                        <p className="text-[11px] text-slate-500">
+                          Hỗ trợ nhúng trực tiếp video YouTube hoặc file MP4, tự động đo % xem và tạm dừng tại các neo chặn bên dưới.
+                        </p>
+                      </div>
+
+                      <VideoCheckpointEditor
+                        checkpoints={actVideoCheckpoints}
+                        onChange={setActVideoCheckpoints}
+                        preventSkip={actPreventVideoSkip}
+                        onPreventSkipChange={setActPreventVideoSkip}
+                        idPrefix="add"
+                      />
                     </div>
-                  </div>
+                  )}
 
-                  {/* Khung dán nhanh hàng loạt câu hỏi chuẩn Aiken / Word */}
-                  {isBulkQuizOpen && (
-                    <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-amber-950">Dán hàng loạt câu hỏi hoặc chọn file Aiken (.txt):</span>
-                        <label className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold cursor-pointer">
-                          📂 Chọn file .txt
+                  {actType === 'document' && (
+                    <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200/60 space-y-2">
+                      <label className="block text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                        <ExternalLink className="w-4 h-4 text-emerald-600" />
+                        <span>Đường dẫn liên kết / Tài liệu trực tuyến (URL)</span>
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://docs.google.com/... hoặc link website ngoài"
+                        value={actFileUrl}
+                        onChange={(e) => setActFileUrl(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      />
+                    </div>
+                  )}
+
+                  {(actType === 'document' || actType === 'video' || actType === 'assignment') && (
+                    <div className="p-3 bg-sky-50/60 rounded-xl border border-sky-200/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+                          <UploadCloud className="w-4 h-4 text-[#0374b5]" />
+                          <span>Hoặc tải tệp trực tiếp từ máy tính lên hệ thống (Tùy ý mọi tệp)</span>
+                        </label>
+                        {isUploadingActFile && (
+                          <span className="text-[11px] text-[#0374b5] font-bold flex items-center gap-1">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang tải...
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Hỗ trợ tệp PDF, Word, PowerPoint, Excel, Video MP4, Audio MP3, ZIP, Code... (Tối đa 100MB)
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <label className="px-3 py-1.5 bg-white hover:bg-sky-50 text-[#0374b5] border border-[#0374b5] rounded-lg text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-2xs">
+                          <Paperclip className="w-3.5 h-3.5" />
+                          <span>{uploadedActFileName ? 'Đổi tệp khác' : 'Chọn tệp từ máy tính...'}</span>
                           <input
                             type="file"
-                            accept=".txt,text/plain"
                             className="hidden"
+                            disabled={isUploadingActFile}
                             onChange={async (e) => {
-                              const f = e.target.files?.[0];
-                              e.target.value = '';
-                              if (f) setBulkQuizText(await f.text());
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setIsUploadingActFile(true);
+                              try {
+                                const targetMod = modules.find(m => m.id === targetModuleId);
+                                const saved = await uploadCourseFile(activeCourse.id, file, '', targetMod?.title || '', targetMod?.id || '');
+                                if (saved) {
+                                  setUploadedActFileName(file.name);
+                                  setActFileUrl(saved.url);
+                                  if (!actTitle) setActTitle(file.name.replace(/\.[^/.]+$/, ''));
+                                  if (saved.fileType === 'video') {
+                                    setActVideoUrl(saved.url);
+                                  }
+                                }
+                              } catch (err: any) {
+                                alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
+                              } finally {
+                                setIsUploadingActFile(false);
+                                e.target.value = '';
+                              }
+                            }}
+                          />
+                        </label>
+                        {uploadedActFileName && (
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 truncate max-w-xs">
+                            ✓ {uploadedActFileName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {actType === 'assignment' && (
+                    <div className="p-3 bg-purple-50/50 rounded-xl border border-purple-200/60 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-purple-900 mb-1">
+                            Dạng bài / Ngôn ngữ
+                          </label>
+                          <select
+                            value={actProgLang}
+                            onChange={(e) => setActProgLang(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                          >
+                            <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
+                            <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
+                            <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
+                            <option value="C++">⚡ Lập trình C++ / Pascal</option>
+                            <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án (.pdf, .docx, .zip)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-purple-900 mb-1">
+                            Thang điểm
+                          </label>
+                          <input
+                            type="number"
+                            value={actMaxScore}
+                            onChange={(e) => setActMaxScore(Number(e.target.value))}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Yêu cầu / Đề bài bài tập *
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="Nhập đề bài, các yêu cầu cần học sinh hoàn thành và nộp..."
+                          value={actPrompt}
+                          onChange={(e) => setActPrompt(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Khung mã nguồn mẫu / Starter Code (Tùy chọn)
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="# Gõ khung code mẫu hoặc gợi ý khởi tạo cho học sinh..."
+                          value={actStarterCode}
+                          onChange={(e) => setActStarterCode(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Hạn nộp bài (Deadline — tự động gắn nhãn "Nộp trễ" nếu quá hạn)
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="datetime-local"
+                            value={actDueDateIso}
+                            onChange={(e) => {
+                              setActDueDateIso(e.target.value);
+                              if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
+                            }}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Hoặc ghi chú hạn nộp (VD: 30/11 23:59)"
+                            value={actDueDate}
+                            onChange={(e) => setActDueDate(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {actType === 'quiz' && (
+                    <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3 max-h-96 overflow-y-auto">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Thời gian (phút) *
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={180}
+                            value={actTimeLimit}
+                            onChange={(e) => setActTimeLimit(Math.max(1, Number(e.target.value) || 1))}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Điểm đạt (0-10)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min={0}
+                            max={10}
+                            value={actPassScore}
+                            onChange={(e) => setActPassScore(Math.min(10, Math.max(0, Number(e.target.value) || 0)))}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1" title="0 = Không giới hạn số lượt làm lại">
+                            Số lượt tối đa
+                          </label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={50}
+                            value={actMaxAttempts}
+                            onChange={(e) => setActMaxAttempts(Math.max(0, Number(e.target.value) || 0))}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                            placeholder="0 = không giới hạn"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Hạn làm bài
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={actDueDateIso}
+                            onChange={(e) => {
+                              setActDueDateIso(e.target.value);
+                              if (e.target.value) setActDueDate(formatDueDateFromIso(e.target.value));
+                            }}
+                            className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900 focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                        <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
+                          <input
+                            type="checkbox"
+                            checked={actShuffleQuestions}
+                            onChange={(e) => setActShuffleQuestions(e.target.checked)}
+                            className="accent-amber-600 w-3.5 h-3.5"
+                          />
+                          <Shuffle className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh (chống nhìn bài nhau) • Số lượt = 0 là không giới hạn</span>
+                        </label>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 backdrop-blur-xs z-10">
+                        <span className="text-xs font-bold text-amber-900">
+                          Soạn câu hỏi trắc nghiệm ({quizQuestions.length} câu)
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setIsBulkQuizOpen(v => !v)}
+                            className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
+                          >
+                            ⚡ Nhập nhanh (Aiken / Dán đề)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuizQuestions(prev => [
+                              ...prev, 
+                              {
+                                id: `q${Date.now()}`,
+                                question: `Câu hỏi ${prev.length + 1}?`,
+                                options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+                                correctAnswer: 0
+                              }
+                            ])}
+                            className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
+                          >
+                            + Thêm câu hỏi
+                          </button>
+                        </div>
+                      </div>
+
+                      {isBulkQuizOpen && (
+                        <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-amber-950">Dán hàng loạt câu hỏi hoặc chọn file Aiken (.txt):</span>
+                            <label className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold cursor-pointer">
+                              📂 Chọn file .txt
+                              <input
+                                type="file"
+                                accept=".txt,text/plain"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const f = e.target.files?.[0];
+                                  e.target.value = '';
+                                  if (f) setBulkQuizText(await f.text());
+                                }}
+                              />
+                            </label>
+                          </div>
+                          <textarea
+                            rows={5}
+                            value={bulkQuizText}
+                            onChange={(e) => setBulkQuizText(e.target.value)}
+                            placeholder={"Câu 1: AI học từ yếu tố nào?\nA. Dữ liệu huấn luyện\nB. Màn hình\nC. Bàn phím\nD. Chuột\nANSWER: A\n\nCâu 2: Đâu là ứng dụng AI?\n*A. Dịch ngôn ngữ tự động\nB. Quạt máy cơ"}
+                            className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setIsBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">Đóng</button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const parsed = parseBulkQuizText(bulkQuizText);
+                                if (parsed.length === 0) {
+                                  alert('Không nhận diện được câu hỏi nào. Hãy đảm bảo mỗi câu có các phương án A. B. C. D. và dòng ANSWER: A (hoặc Đáp án: A hoặc *A.).');
+                                  return;
+                                }
+                                setQuizQuestions(prev => [...prev, ...parsed]);
+                                setBulkQuizText('');
+                                setIsBulkQuizOpen(false);
+                                alert(`✅ Đã nhập nhanh thành công ${parsed.length} câu hỏi!`);
+                              }}
+                              className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                            >
+                              Phân tích & Thêm vào đề
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {quizQuestions.map((q, qIdx) => (
+                        <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-xs text-amber-950">
+                              Câu {qIdx + 1}
+                            </span>
+                            {quizQuestions.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setQuizQuestions(prev => prev.filter((_, idx) => idx !== qIdx))}
+                                className="text-rose-500 hover:text-rose-700 p-1"
+                                title="Xóa câu hỏi này"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          <input
+                            type="text"
+                            placeholder="Nội dung câu hỏi..."
+                            value={q.question}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, question: val } : item));
+                            }}
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                            required
+                          />
+
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
+                              4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
+                            </label>
+                            {q.options.map((opt, oIdx) => (
+                              <div key={oIdx} className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name={`correct_add_${q.id || qIdx}`}
+                                  checked={q.correctAnswer === oIdx}
+                                  onChange={() => {
+                                    setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, correctAnswer: oIdx } : item));
+                                  }}
+                                  className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
+                                  title="Đánh dấu đáp án ĐÚNG"
+                                />
+                                <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
+                                  {['A', 'B', 'C', 'D'][oIdx]}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={opt}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setQuizQuestions(prev => prev.map((item, idx) => {
+                                      if (idx !== qIdx) return item;
+                                      const newOpts = [...item.options];
+                                      newOpts[oIdx] = val;
+                                      return { ...item, options: newOpts };
+                                    }));
+                                  }}
+                                  className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
+                                    q.correctAnswer === oIdx 
+                                      ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
+                                      : 'border-slate-300 bg-white text-slate-700'
+                                  }`}
+                                  placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <input
+                            type="text"
+                            placeholder="💡 Giải thích / Phản hồi sư phạm sau khi học sinh nộp bài (Tùy chọn)..."
+                            value={q.explanation || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, explanation: val } : item));
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-sky-50/50 border border-sky-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddActivityOpen(false)}
+                      className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
+                    >
+                      Thêm Vào Mô-đun
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 4: SỬA HỌC LIỆU / HOẠT ĐỘNG */}
+          {editingActivity && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                  <Pencil className="w-4 h-4 text-[#0374b5]" />
+                  <span>Chỉnh sửa học liệu: {editingActivity.title}</span>
+                </h3>
+
+                <form onSubmit={handleSaveEditActivity} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Tiêu đề *
+                    </label>
+                    <input
+                      type="text"
+                      value={editingActivity.title}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Phụ đề / Mô tả
+                    </label>
+                    <input
+                      type="text"
+                      value={editingActivity.description || ''}
+                      onChange={(e) => setEditingActivity({ ...editingActivity, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                    />
+                  </div>
+
+                  {editingActivity.type === 'video' && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-bold text-blue-900 mb-1">
+                          Link Video (YouTube hoặc MP4)
+                        </label>
+                        <input
+                          type="url"
+                          value={editingActivity.videoUrl || ''}
+                          onChange={(e) => setEditingActivity({ ...editingActivity, videoUrl: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                      </div>
+                      <VideoCheckpointEditor
+                        checkpoints={editingActivity.videoCheckpoints || []}
+                        onChange={(next) => setEditingActivity({ ...editingActivity, videoCheckpoints: next })}
+                        preventSkip={editingActivity.preventVideoSkip ?? true}
+                        onPreventSkipChange={(val) => setEditingActivity({ ...editingActivity, preventVideoSkip: val })}
+                        idPrefix="edit"
+                      />
+                    </div>
+                  )}
+
+                  {editingActivity.type === 'document' && (
+                    <div>
+                      <label className="block text-xs font-bold text-emerald-900 mb-1">
+                        Đường dẫn liên kết / Tài liệu (URL)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingActivity.fileUrl || ''}
+                        onChange={(e) => setEditingActivity({ ...editingActivity, fileUrl: e.target.value })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                      />
+                      <div className="pt-2">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-[#0374b5] hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                          <Paperclip className="w-3.5 h-3.5" />
+                          <span>{isUploadingActFile ? 'Đang tải tệp lên...' : 'Tải tệp mới từ máy tính'}</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            disabled={isUploadingActFile}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setIsUploadingActFile(true);
+                              try {
+                                const targetMod = modules.find(m => m.id === (editingActivity?.moduleId || targetModuleId));
+                                const saved = await uploadCourseFile(activeCourse.id, file, '', targetMod?.title || '', targetMod?.id || '');
+                                if (saved) {
+                                  setEditingActivity({ ...editingActivity, fileUrl: saved.url });
+                                }
+                              } catch (err: any) {
+                                alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
+                              } finally {
+                                setIsUploadingActFile(false);
+                                e.target.value = '';
+                              }
                             }}
                           />
                         </label>
                       </div>
-                      <textarea
-                        rows={5}
-                        value={bulkQuizText}
-                        onChange={(e) => setBulkQuizText(e.target.value)}
-                        placeholder={"Câu 1: AI học từ yếu tố nào?\nA. Dữ liệu huấn luyện\nB. Màn hình\nC. Bàn phím\nD. Chuột\nANSWER: A\n\nCâu 2: Đâu là ứng dụng AI?\n*A. Dịch ngôn ngữ tự động\nB. Quạt máy cơ"}
-                        className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button type="button" onClick={() => setIsBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">Đóng</button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const parsed = parseBulkQuizText(bulkQuizText);
-                            if (parsed.length === 0) {
-                              alert('Không nhận diện được câu hỏi nào. Hãy đảm bảo mỗi câu có các phương án A. B. C. D. và dòng ANSWER: A (hoặc Đáp án: A hoặc *A.).');
-                              return;
-                            }
-                            setQuizQuestions(prev => [...prev, ...parsed]);
-                            setBulkQuizText('');
-                            setIsBulkQuizOpen(false);
-                            alert(`✅ Đã nhập nhanh thành công ${parsed.length} câu hỏi!`);
-                          }}
-                          className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold"
-                        >
-                          Phân tích & Thêm vào đề
-                        </button>
+                    </div>
+                  )}
+
+                  {editingActivity.type === 'assignment' && (
+                    <div className="space-y-3 p-3 bg-purple-50/50 rounded-xl border border-purple-200">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-purple-900 mb-1">
+                            Dạng bài / Ngôn ngữ
+                          </label>
+                          <select
+                            value={editingActivity.programmingLanguage || 'Python'}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, programmingLanguage: e.target.value })}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                          >
+                            <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
+                            <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
+                            <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
+                            <option value="C++">⚡ Lập trình C++ / Pascal</option>
+                            <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-purple-900 mb-1">
+                            Thang điểm
+                          </label>
+                          <input
+                            type="number"
+                            value={editingActivity.maxScore || 10}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, maxScore: Number(e.target.value) })}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Yêu cầu / Đề bài
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={editingActivity.assignmentPrompt || ''}
+                          onChange={(e) => setEditingActivity({ ...editingActivity, assignmentPrompt: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Khung mã nguồn gợi ý / Starter Code (Tùy chọn)
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={editingActivity.starterCode || ''}
+                          onChange={(e) => setEditingActivity({ ...editingActivity, starterCode: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-purple-900 mb-1">
+                          Hạn nộp (Deadline)
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="datetime-local"
+                            value={editingActivity.dueDateIso || ''}
+                            onChange={(e) => setEditingActivity({
+                              ...editingActivity,
+                              dueDateIso: e.target.value,
+                              dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
+                            })}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                          <input
+                            type="text"
+                            value={editingActivity.dueDate || ''}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {quizQuestions.map((q, qIdx) => (
-                    <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-xs text-amber-950">
-                          Câu {qIdx + 1}
+                  {editingActivity.type === 'quiz' && (
+                    <div className="space-y-3 p-3 bg-amber-50/50 rounded-xl border border-amber-200 max-h-96 overflow-y-auto">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Thời gian (phút) *
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={180}
+                            value={editingActivity.timeLimitMinutes || 15}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, timeLimitMinutes: Math.max(1, Number(e.target.value) || 1) })}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Điểm đạt (0-10)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min={0}
+                            max={10}
+                            value={editingActivity.passScore ?? 5}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, passScore: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Số lượt tối đa
+                          </label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={50}
+                            value={editingActivity.maxAttempts ?? 0}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, maxAttempts: Math.max(0, Number(e.target.value) || 0) })}
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
+                            Hạn làm bài
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={editingActivity.dueDateIso || ''}
+                            onChange={(e) => setEditingActivity({
+                              ...editingActivity,
+                              dueDateIso: e.target.value,
+                              dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
+                            })}
+                            className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900"
+                          />
+                        </div>
+                        <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(editingActivity.shuffleQuestions)}
+                            onChange={(e) => setEditingActivity({ ...editingActivity, shuffleQuestions: e.target.checked })}
+                            className="accent-amber-600 w-3.5 h-3.5"
+                          />
+                          <Shuffle className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh</span>
+                        </label>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 z-10">
+                        <span className="text-xs font-bold text-amber-900">
+                          Soạn câu hỏi trắc nghiệm ({(editingActivity.quizQuestions || []).length} câu)
                         </span>
-                        {quizQuestions.length > 1 && (
+                        <div className="flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={() => setQuizQuestions(prev => prev.filter((_, idx) => idx !== qIdx))}
-                            className="text-rose-500 hover:text-rose-700 p-1"
-                            title="Xóa câu hỏi này"
+                            onClick={() => setIsEditBulkQuizOpen(v => !v)}
+                            className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            ⚡ Nhập nhanh Aiken
                           </button>
-                        )}
-                      </div>
-
-                      <input
-                        type="text"
-                        placeholder="Nội dung câu hỏi..."
-                        value={q.question}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, question: val } : item));
-                        }}
-                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
-                        required
-                      />
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
-                          4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
-                        </label>
-                        {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              name={`correct_add_${q.id || qIdx}`}
-                              checked={q.correctAnswer === oIdx}
-                              onChange={() => {
-                                setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, correctAnswer: oIdx } : item));
-                              }}
-                              className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
-                              title="Đánh dấu đáp án ĐÚNG"
-                            />
-                            <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
-                              {['A', 'B', 'C', 'D'][oIdx]}
-                            </span>
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setQuizQuestions(prev => prev.map((item, idx) => {
-                                  if (idx !== qIdx) return item;
-                                  const newOpts = [...item.options];
-                                  newOpts[oIdx] = val;
-                                  return { ...item, options: newOpts };
-                                }));
-                              }}
-                              className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
-                                q.correctAnswer === oIdx 
-                                  ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
-                                  : 'border-slate-300 bg-white text-slate-700'
-                              }`}
-                              placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      <input
-                        type="text"
-                        placeholder="💡 Giải thích / Phản hồi sư phạm sau khi học sinh nộp bài (Tùy chọn)..."
-                        value={q.explanation || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setQuizQuestions(prev => prev.map((item, idx) => idx === qIdx ? { ...item, explanation: val } : item));
-                        }}
-                        className="w-full px-2.5 py-1.5 bg-sky-50/50 border border-sky-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:border-[#0374b5] focus:bg-white"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddActivityOpen(false)}
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
-                >
-                  Thêm Vào Mô-đun
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 4: SỬA HỌC LIỆU / HOẠT ĐỘNG */}
-      {editingActivity && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
-              <Pencil className="w-4 h-4 text-[#0374b5]" />
-              <span>Chỉnh sửa học liệu: {editingActivity.title}</span>
-            </h3>
-
-            <form onSubmit={handleSaveEditActivity} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tiêu đề *
-                </label>
-                <input
-                  type="text"
-                  value={editingActivity.title}
-                  onChange={(e) => setEditingActivity({ ...editingActivity, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Phụ đề / Mô tả
-                </label>
-                <input
-                  type="text"
-                  value={editingActivity.description || ''}
-                  onChange={(e) => setEditingActivity({ ...editingActivity, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                />
-              </div>
-
-              {/* Sửa Video URL & Neo chặn */}
-              {editingActivity.type === 'video' && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-blue-900 mb-1">
-                      Link Video (YouTube hoặc MP4)
-                    </label>
-                    <input
-                      type="url"
-                      value={editingActivity.videoUrl || ''}
-                      onChange={(e) => setEditingActivity({ ...editingActivity, videoUrl: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                      placeholder="https://www.youtube.com/watch?v=..."
-                    />
-                  </div>
-                  <VideoCheckpointEditor
-                    checkpoints={editingActivity.videoCheckpoints || []}
-                    onChange={(next) => setEditingActivity({ ...editingActivity, videoCheckpoints: next })}
-                    preventSkip={editingActivity.preventVideoSkip ?? true}
-                    onPreventSkipChange={(val) => setEditingActivity({ ...editingActivity, preventVideoSkip: val })}
-                    idPrefix="edit"
-                  />
-                </div>
-              )}
-
-              {/* Sửa Link / File URL */}
-              {editingActivity.type === 'document' && (
-                <div>
-                  <label className="block text-xs font-bold text-emerald-900 mb-1">
-                    Đường dẫn liên kết / Tài liệu (URL)
-                  </label>
-                  <input
-                    type="url"
-                    value={editingActivity.fileUrl || ''}
-                    onChange={(e) => setEditingActivity({ ...editingActivity, fileUrl: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                  />
-                  <div className="pt-2">
-                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-[#0374b5] hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-2xs">
-                      <Paperclip className="w-3.5 h-3.5" />
-                      <span>{isUploadingActFile ? 'Đang tải tệp lên...' : 'Tải tệp mới từ máy tính'}</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        disabled={isUploadingActFile}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setIsUploadingActFile(true);
-                          try {
-                            const targetMod = modules.find(m => m.id === (editingActivity?.moduleId || targetModuleId));
-                            const saved = await uploadCourseFile(activeCourse.id, file, '', targetMod?.title || '', targetMod?.id || '');
-                            if (saved) {
-                              setEditingActivity({ ...editingActivity, fileUrl: saved.url });
-                            }
-                          } catch (err: any) {
-                            alert('Lỗi tải tệp: ' + (err.message || 'Không thể tải'));
-                          } finally {
-                            setIsUploadingActFile(false);
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {/* Sửa Hạn nộp & Đề bài BÀI TẬP */}
-              {editingActivity.type === 'assignment' && (
-                <div className="space-y-3 p-3 bg-purple-50/50 rounded-xl border border-purple-200">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-purple-900 mb-1">
-                        Dạng bài / Ngôn ngữ
-                      </label>
-                      <select
-                        value={editingActivity.programmingLanguage || 'Python'}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, programmingLanguage: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
-                      >
-                        <option value="Python">🐍 Lập trình Python (AI & Thuật toán)</option>
-                        <option value="Scratch">🐱 Lập trình Scratch (Khối 3-9)</option>
-                        <option value="Web HTML/CSS">🌐 Lập trình Web (HTML / CSS / JS)</option>
-                        <option value="C++">⚡ Lập trình C++ / Pascal</option>
-                        <option value="Tài liệu & Dự án">📄 Nộp file Báo cáo / Dự án</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-purple-900 mb-1">
-                        Thang điểm
-                      </label>
-                      <input
-                        type="number"
-                        value={editingActivity.maxScore || 10}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, maxScore: Number(e.target.value) })}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Yêu cầu / Đề bài
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={editingActivity.assignmentPrompt || ''}
-                      onChange={(e) => setEditingActivity({ ...editingActivity, assignmentPrompt: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#0374b5]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Khung mã nguồn gợi ý / Starter Code (Tùy chọn)
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={editingActivity.starterCode || ''}
-                      onChange={(e) => setEditingActivity({ ...editingActivity, starterCode: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 text-sky-300 font-mono text-xs rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-[#0374b5]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-purple-900 mb-1">
-                      Hạn nộp (Deadline)
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input
-                        type="datetime-local"
-                        value={editingActivity.dueDateIso || ''}
-                        onChange={(e) => setEditingActivity({
-                          ...editingActivity,
-                          dueDateIso: e.target.value,
-                          dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
-                        })}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                      <input
-                        type="text"
-                        value={editingActivity.dueDate || ''}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, dueDate: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-[#0374b5]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Sửa TRẮC NGHIỆM (kèm cài thời gian, điểm đạt, xáo trộn, giới hạn lần làm & nhập nhanh Aiken) */}
-              {editingActivity.type === 'quiz' && (
-                <div className="space-y-3 p-3 bg-amber-50/50 rounded-xl border border-amber-200 max-h-96 overflow-y-auto">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-white rounded-xl border border-amber-200">
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Thời gian (phút) *
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={180}
-                        value={editingActivity.timeLimitMinutes || 15}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, timeLimitMinutes: Math.max(1, Number(e.target.value) || 1) })}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Điểm đạt (0-10)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min={0}
-                        max={10}
-                        value={editingActivity.passScore ?? 5}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, passScore: Math.min(10, Math.max(0, Number(e.target.value) || 0)) })}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Số lượt tối đa
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={50}
-                        value={editingActivity.maxAttempts ?? 0}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, maxAttempts: Math.max(0, Number(e.target.value) || 0) })}
-                        className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-amber-950 uppercase mb-1">
-                        Hạn làm bài
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={editingActivity.dueDateIso || ''}
-                        onChange={(e) => setEditingActivity({
-                          ...editingActivity,
-                          dueDateIso: e.target.value,
-                          dueDate: e.target.value ? formatDueDateFromIso(e.target.value) : editingActivity.dueDate
-                        })}
-                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-[11px] text-slate-900"
-                      />
-                    </div>
-                    <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-amber-950 cursor-pointer pt-1 border-t border-amber-100">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(editingActivity.shuffleQuestions)}
-                        onChange={(e) => setEditingActivity({ ...editingActivity, shuffleQuestions: e.target.checked })}
-                        className="accent-amber-600 w-3.5 h-3.5"
-                      />
-                      <Shuffle className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Tự động xáo trộn thứ tự câu hỏi cho mỗi học sinh</span>
-                    </label>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 sticky top-0 bg-amber-50/95 py-1 z-10">
-                    <span className="text-xs font-bold text-amber-900">
-                      Soạn câu hỏi trắc nghiệm ({(editingActivity.quizQuestions || []).length} câu)
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setIsEditBulkQuizOpen(v => !v)}
-                        className="px-2.5 py-1 bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-[11px] font-bold"
-                      >
-                        ⚡ Nhập nhanh Aiken
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const current = editingActivity.quizQuestions || [];
-                          setEditingActivity({
-                            ...editingActivity,
-                            quizQuestions: [
-                              ...current,
-                              {
-                                id: `q${Date.now()}`,
-                                question: `Câu hỏi ${current.length + 1}?`,
-                                options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
-                                correctAnswer: 0
-                              }
-                            ]
-                          });
-                        }}
-                        className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
-                      >
-                        + Thêm câu hỏi
-                      </button>
-                    </div>
-                  </div>
-
-                  {isEditBulkQuizOpen && (
-                    <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
-                      <textarea
-                        rows={4}
-                        value={editBulkQuizText}
-                        onChange={(e) => setEditBulkQuizText(e.target.value)}
-                        placeholder={"Dán câu hỏi chuẩn Aiken / Word...\nCâu 1: ...\nA. ...\nB. ...\nANSWER: A"}
-                        className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button type="button" onClick={() => setIsEditBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100">Đóng</button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const parsed = parseBulkQuizText(editBulkQuizText);
-                            if (parsed.length === 0) {
-                              alert('Không nhận diện được câu hỏi nào từ văn bản đã dán.');
-                              return;
-                            }
-                            setEditingActivity({
-                              ...editingActivity,
-                              quizQuestions: [...(editingActivity.quizQuestions || []), ...parsed]
-                            });
-                            setEditBulkQuizText('');
-                            setIsEditBulkQuizOpen(false);
-                          }}
-                          className="px-3 py-1 rounded-lg bg-amber-600 text-white font-bold"
-                        >
-                          Thêm {parseBulkQuizText(editBulkQuizText).length || ''} câu vào đề
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {(editingActivity.quizQuestions || []).map((q, qIdx) => (
-                    <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <span className="font-extrabold text-xs text-amber-950">
-                          Câu {qIdx + 1}
-                        </span>
-                        {(editingActivity.quizQuestions || []).length > 1 && (
                           <button
                             type="button"
                             onClick={() => {
-                              const updated = (editingActivity.quizQuestions || []).filter((_, idx) => idx !== qIdx);
+                              const current = editingActivity.quizQuestions || [];
+                              setEditingActivity({
+                                ...editingActivity,
+                                quizQuestions: [
+                                  ...current,
+                                  {
+                                    id: `q${Date.now()}`,
+                                    question: `Câu hỏi ${current.length + 1}?`,
+                                    options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+                                    correctAnswer: 0
+                                  }
+                                ]
+                              });
+                            }}
+                            className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-900 rounded-lg text-[11px] font-bold shadow-2xs"
+                          >
+                            + Thêm câu hỏi
+                          </button>
+                        </div>
+                      </div>
+
+                      {isEditBulkQuizOpen && (
+                        <div className="p-3 bg-white rounded-xl border-2 border-amber-300 space-y-2 text-xs">
+                          <textarea
+                            rows={4}
+                            value={editBulkQuizText}
+                            onChange={(e) => setEditBulkQuizText(e.target.value)}
+                            placeholder={"Dán câu hỏi chuẩn Aiken / Word...\nCâu 1: ...\nA. ...\nB. ...\nANSWER: A"}
+                            className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-[11px]"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setIsEditBulkQuizOpen(false)} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-100">Đóng</button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const parsed = parseBulkQuizText(editBulkQuizText);
+                                if (parsed.length === 0) {
+                                  alert('Không nhận diện được câu hỏi nào từ văn bản đã dán.');
+                                  return;
+                                }
+                                setEditingActivity({
+                                  ...editingActivity,
+                                  quizQuestions: [...(editingActivity.quizQuestions || []), ...parsed]
+                                });
+                                setEditBulkQuizText('');
+                                setIsEditBulkQuizOpen(false);
+                              }}
+                              className="px-3 py-1 rounded-lg bg-amber-600 text-white font-bold"
+                            >
+                              Thêm {parseBulkQuizText(editBulkQuizText).length || ''} câu vào đề
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {(editingActivity.quizQuestions || []).map((q, qIdx) => (
+                        <div key={q.id || qIdx} className="p-3 bg-white rounded-xl border border-amber-200 space-y-2.5 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-xs text-amber-950">
+                              Câu {qIdx + 1}
+                            </span>
+                            {(editingActivity.quizQuestions || []).length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = (editingActivity.quizQuestions || []).filter((_, idx) => idx !== qIdx);
+                                  setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                                }}
+                                className="text-rose-500 hover:text-rose-700 p-1"
+                                title="Xóa câu hỏi này"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          <input
+                            type="text"
+                            placeholder="Nội dung câu hỏi..."
+                            value={q.question}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
+                                idx === qIdx ? { ...item, question: val } : item
+                              );
                               setEditingActivity({ ...editingActivity, quizQuestions: updated });
                             }}
-                            className="text-rose-500 hover:text-rose-700 p-1"
-                            title="Xóa câu hỏi này"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
+                            required
+                          />
 
-                      <input
-                        type="text"
-                        placeholder="Nội dung câu hỏi..."
-                        value={q.question}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
-                            idx === qIdx ? { ...item, question: val } : item
-                          );
-                          setEditingActivity({ ...editingActivity, quizQuestions: updated });
-                        }}
-                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#0374b5]"
-                        required
-                      />
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
-                          4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
-                        </label>
-                        {q.options.map((opt, oIdx) => (
-                          <div key={oIdx} className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              name={`correct_edit_${q.id || qIdx}`}
-                              checked={q.correctAnswer === oIdx}
-                              onChange={() => {
-                                const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
-                                  idx === qIdx ? { ...item, correctAnswer: oIdx } : item
-                                );
-                                setEditingActivity({ ...editingActivity, quizQuestions: updated });
-                              }}
-                              className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
-                              title="Đánh dấu đáp án ĐÚNG"
-                            />
-                            <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
-                              {['A', 'B', 'C', 'D'][oIdx]}
-                            </span>
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                const updated = (editingActivity.quizQuestions || []).map((item, idx) => {
-                                  if (idx !== qIdx) return item;
-                                  const newOpts = [...item.options];
-                                  newOpts[oIdx] = val;
-                                  return { ...item, options: newOpts };
-                                });
-                                setEditingActivity({ ...editingActivity, quizQuestions: updated });
-                              }}
-                              className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
-                                q.correctAnswer === oIdx 
-                                  ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
-                                  : 'border-slate-300 bg-white text-slate-700'
-                              }`}
-                              placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
-                            />
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
+                              4 Phương án (Tích chọn vào nút tròn đáp án ĐÚNG):
+                            </label>
+                            {q.options.map((opt, oIdx) => (
+                              <div key={oIdx} className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name={`correct_edit_${q.id || qIdx}`}
+                                  checked={q.correctAnswer === oIdx}
+                                  onChange={() => {
+                                    const updated = (editingActivity.quizQuestions || []).map((item, idx) => 
+                                      idx === qIdx ? { ...item, correctAnswer: oIdx } : item
+                                    );
+                                    setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                                  }}
+                                  className="accent-emerald-600 cursor-pointer w-4 h-4 shrink-0"
+                                  title="Đánh dấu đáp án ĐÚNG"
+                                />
+                                <span className="font-bold text-xs text-slate-600 w-3 shrink-0">
+                                  {['A', 'B', 'C', 'D'][oIdx]}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={opt}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    const updated = (editingActivity.quizQuestions || []).map((item, idx) => {
+                                      if (idx !== qIdx) return item;
+                                      const newOpts = [...item.options];
+                                      newOpts[oIdx] = val;
+                                      return { ...item, options: newOpts };
+                                    });
+                                    setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                                  }}
+                                  className={`flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none ${
+                                    q.correctAnswer === oIdx 
+                                      ? 'border-emerald-500 bg-emerald-50/50 font-bold text-emerald-950 ring-1 ring-emerald-500/30' 
+                                      : 'border-slate-300 bg-white text-slate-700'
+                                  }`}
+                                  placeholder={`Phương án ${['A', 'B', 'C', 'D'][oIdx]}`}
+                                />
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
 
-                      <input
-                        type="text"
-                        placeholder="💡 Giải thích / Phản hồi sư phạm sau khi học sinh nộp bài (Tùy chọn)..."
-                        value={q.explanation || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const updated = (editingActivity.quizQuestions || []).map((item, idx) =>
-                            idx === qIdx ? { ...item, explanation: val } : item
-                          );
-                          setEditingActivity({ ...editingActivity, quizQuestions: updated });
-                        }}
-                        className="w-full px-2.5 py-1.5 bg-sky-50/50 border border-sky-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:border-[#0374b5] focus:bg-white"
-                      />
+                          <input
+                            type="text"
+                            placeholder="💡 Giải thích / Phản hồi sư phạm sau khi học sinh nộp bài (Tùy chọn)..."
+                            value={q.explanation || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const updated = (editingActivity.quizQuestions || []).map((item, idx) =>
+                                idx === qIdx ? { ...item, explanation: val } : item
+                              );
+                              setEditingActivity({ ...editingActivity, quizQuestions: updated });
+                            }}
+                            className="w-full px-2.5 py-1.5 bg-sky-50/50 border border-sky-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:border-[#0374b5] focus:bg-white"
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingActivity(null)}
-                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
-                >
-                  Lưu cập nhật
-                </button>
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setEditingActivity(null)}
+                      className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm"
+                    >
+                      Lưu cập nhật
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          )}
         </>
       )}
 
