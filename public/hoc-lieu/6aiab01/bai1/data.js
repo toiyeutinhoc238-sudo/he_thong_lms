@@ -11,7 +11,7 @@ export const bai1Module = {
     {
       id: 'ai6-b1-act-1',
       moduleId: 'module-lesson-1',
-      title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 1 – Nguồn gốc của AI và quyền quyết định',
+      title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 1',
       type: 'document',
       durationMinutes: 5,
       isCompleted: false,
