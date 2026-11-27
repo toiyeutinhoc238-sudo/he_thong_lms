@@ -1391,7 +1391,7 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v11-bai1-video-neo-chan';
+const AI6_BAI12_REVISION = 'v12-khbd-khop-lms';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1422,7 +1422,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem Infographic & Video 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\nKIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
+        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (TIẾT 1 – 45 PHÚT): (1) Khởi động 5p → (2) Xem sơ đồ trực quan & Video có 3 câu neo chặn 25p → (3) Chốt chặn kiểm tra ≥ 8/10đ (10p) → (4) Nhiệm vụ cầu nối bạn Minh (5p).\n\nKIẾN THỨC NỀN (Tin học 6): Máy tính xử lí thông tin dựa trên dữ liệu đầu vào và thực hiện chương trình do con người viết ra.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 1.1 SGK Bài 1): Sau giờ Tin học, bạn An thắc mắc liệu rô-bốt AI ngoài đời thật có thể “tự thức tỉnh” như trong phim khoa học viễn tưởng không; bạn Minh băn khoăn ai đã dạy YouTube gợi ý đúng bài hát và điện thoại mở khóa khuôn mặt.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Theo em, AI ngoài đời thực tự sinh ra trong vi mạch hay do con người thu thập dữ liệu, lập trình và điều khiển?\n2. Hãy kể tên ít nhất 01 ứng dụng hoặc thiết bị có AI mà em hoặc gia đình từng sử dụng.'
       },
       {
         id: 'ai6-b1-act-3',
@@ -1641,7 +1641,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Infographic & Video tương tác 15p (đạt ≥ 70/100đ) → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\nCHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\nLưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
+        description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Video tương tác có 3 câu neo chặn, đọc Kiến thức trọng tâm & làm trắc nghiệm củng cố ≥ 7/10đ 15p → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\nCHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\nLưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
       },
       {
         id: 'ai6-b2-act-video',
@@ -1870,7 +1870,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN BÀI 3 (45 PHÚT TRỰC TIẾP + LMS): Trước giờ đọc Study Guide & Kiến thức nền → Tại lớp (Khởi động 5p, Hình thành kiến thức 12p, Game Phòng thí nghiệm & Phiếu Bạch Đằng 18p, Vận dụng 10p) → Sau giờ làm Quiz chốt chặn (≥ 8/10đ) & nộp bài Vận dụng.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 3.1 SGK Bài 3): Bạn Khoa hỏi công cụ AI về Trái Đất và nhận được hai đoạn văn:\n• Đoạn văn A: “Trái Đất có dạng hình cầu, quay quanh Mặt Trời và tự quay quanh trục hết khoảng 24 giờ tạo ra ngày và đêm.”\n• Đoạn văn B: “Trái Đất có dạng hình vuông, quay quanh Mặt Trăng và mỗi ngày dài đúng 36 giờ.”\n\nEm hãy thảo luận trên Diễn đàn:\n1. Đoạn văn nào chính xác, đoạn văn nào có lỗi sai? Dựa vào kiến thức đã học nào em nhận ra?\n2. Theo em, vì sao một công cụ AI đôi khi vẫn có thể viết ra những câu nghe rất trôi chảy nhưng lại sai sự thật?'
+        description: 'SỔ TAY HƯỚNG DẪN BÀI 3 (45 PHÚT TRỰC TIẾP + LMS): Trước giờ đọc Sổ tay hướng dẫn & Kiến thức nền → Tại lớp (Khởi động 5p, Hình thành kiến thức 12p, Trò chơi biểu quyết “Phòng thí nghiệm thực chứng” & Phiếu Bạch Đằng 18p, Vận dụng 10p) → Sau giờ làm bài trắc nghiệm chốt chặn (≥ 8/10đ) & nộp bài Vận dụng.\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 3.1 SGK Bài 3): Bạn Khoa hỏi công cụ AI về Trái Đất và nhận được hai đoạn văn:\n• Đoạn văn A: “Trái Đất có dạng hình cầu, quay quanh Mặt Trời và tự quay quanh trục hết khoảng 24 giờ tạo ra ngày và đêm.”\n• Đoạn văn B: “Trái Đất có dạng hình vuông, quay quanh Mặt Trăng và mỗi ngày dài đúng 36 giờ.”\n\nEm hãy thảo luận trên Diễn đàn:\n1. Đoạn văn nào chính xác, đoạn văn nào có lỗi sai? Dựa vào kiến thức đã học nào em nhận ra?\n2. Theo em, vì sao một công cụ AI đôi khi vẫn có thể viết ra những câu nghe rất trôi chảy nhưng lại sai sự thật?'
       },
       {
         id: 'ai6-b3-act-3',
@@ -2032,7 +2032,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Học liệu vi mô & Mô phỏng Thuật toán gợi ý 15p → (3) Luyện tập chốt chặn ≥ 8/10đ (15p) → (4) Vận dụng 2 thao tác kĩ thuật & Cầu nối Bài 5 (10p).\n\nNHIỆM VỤ KHỞI ĐỘNG (Gắn tình huống An, Minh, Khoa – Hình 4.1 SGK Bài 4):\n1. Mở trang chủ YouTube của em và quan sát 10 video đầu tiên: có bao nhiêu video trùng khớp với chủ đề em vừa xem hoặc tìm kiếm gần đây?\n2. Em hãy viết 1–2 câu chia sẻ cảm nhận của bản thân: tính năng tự động đề xuất video đúng sở thích mang lại sự tiện lợi gì, và có khiến em băn khoăn điều gì không?'
+        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Video có 3 câu neo chặn, sơ đồ trực quan & Kiến thức trọng tâm 15p → (3) Trắc nghiệm chốt chặn 5 câu ≥ 8/10đ (15p) → (4) Vận dụng 2 thao tác kĩ thuật & Cầu nối Bài 5 (10p).\n\nNHIỆM VỤ KHỞI ĐỘNG (Gắn tình huống An, Minh, Khoa – Hình 4.1 SGK Bài 4):\n1. Mở trang chủ YouTube của em và quan sát 10 video đầu tiên: có bao nhiêu video trùng khớp với chủ đề em vừa xem hoặc tìm kiếm gần đây?\n2. Em hãy viết 1–2 câu chia sẻ cảm nhận của bản thân: tính năng tự động đề xuất video đúng sở thích mang lại sự tiện lợi gì, và có khiến em băn khoăn điều gì không?'
       },
       {
         id: 'ai6-b4-act-video',
@@ -2410,7 +2410,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Video “Dấu chân kỹ thuật số”, Infographic & Module 3 tình huống pháp lí cùng bạn Minh (20p) → (3) Game “Bảo vệ Kho báu dữ liệu” đạt ≥ 8/10đ (10p) → (4) Xử lí tình huống “Lời mời hấp dẫn” & Cầu nối Bài 7 (10p).\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 6.1 SGK Bài 6): Bạn Khoa tìm thấy một trang web AI miễn phí chuyển ảnh chân dung thành tranh vẽ, nhưng trang web đòi lưu trữ hình ảnh khuôn mặt, giọng nói và địa chỉ trường học.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Trong tình huống của bạn Khoa, em sẽ chọn Đồng ý ngay, Từ chối cấp quyền không cần thiết hay Dừng lại hỏi ý kiến cha mẹ? Vì sao?\n2. Hãy kể tên 02 loại thông tin cá nhân của bản thân mà em cho rằng cần được giữ kín như tài sản riêng khi dùng Internet.'
+        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Video “Dấu chân kỹ thuật số” có 3 câu neo chặn, sơ đồ trực quan & Kiến thức trọng tâm, tự trả lời 3 tình huống pháp lí cùng bạn Minh (20p) → (3) Trắc nghiệm chốt chặn “Bảo vệ Kho báu dữ liệu” 5 câu đạt ≥ 8/10đ (10p) → (4) Xử lí tình huống “Lời mời hấp dẫn” & Cầu nối Bài 7 (10p).\n\nTÌNH HUỐNG KHỞI ĐỘNG (Hình 6.1 SGK Bài 6): Bạn Khoa tìm thấy một trang web AI miễn phí chuyển ảnh chân dung thành tranh vẽ, nhưng trang web đòi lưu trữ hình ảnh khuôn mặt, giọng nói và địa chỉ trường học.\n\nEm hãy trả lời 2 câu hỏi lên Diễn đàn:\n1. Trong tình huống của bạn Khoa, em sẽ chọn Đồng ý ngay, Từ chối cấp quyền không cần thiết hay Dừng lại hỏi ý kiến cha mẹ? Vì sao?\n2. Hãy kể tên 02 loại thông tin cá nhân của bản thân mà em cho rằng cần được giữ kín như tài sản riêng khi dùng Internet.'
       },
       {
         id: 'ai6-b6-act-video',
@@ -2627,7 +2627,7 @@ function buildAi6Bai12SeedData() {
         durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Infographic 1 + Quiz 3 câu & Infographic 2 + Kéo thả 6 thẻ (20p) → (3) Game phân nhánh 3 màn đạt ≥ 8/10đ (10p) → (4) Tư vấn “Hỗ trợ bạn bè” & Cầu nối Bài 8 (10p).\n\nTÌNH HUỐNG KHỞI ĐỘNG (SGK & KHBD Bài 7): Một ứng dụng AI biến ảnh thành nhân vật hoạt hình (hoặc tài khoản lạ báo trúng thưởng như tình huống của An – Hình 7.1) yêu cầu em cung cấp họ tên thật, ngày sinh, số điện thoại, tên trường và toàn bộ thư viện ảnh/giọng nói.\n\nEm hãy chia sẻ lên Diễn đàn:\n1. Em cảm thấy thế nào và quyết định ra sao trước yêu cầu thu thập thông tin quá mức như vậy?\n2. Viết 01 câu ngắn gọn giải thích lí do cho lựa chọn của mình.'
+        description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Sơ đồ trực quan 1–2 & Kiến thức trọng tâm, tự luyện 3 câu đọc hiểu và sắp xếp 3 bước tự vệ (20p) → (3) Trắc nghiệm chốt chặn tình huống 5 câu đạt ≥ 8/10đ (10p) → (4) Tư vấn “Hỗ trợ bạn bè” & Cầu nối Bài 8 (10p).\n\nTÌNH HUỐNG KHỞI ĐỘNG (SGK & KHBD Bài 7): Một ứng dụng AI biến ảnh thành nhân vật hoạt hình (hoặc tài khoản lạ báo trúng thưởng như tình huống của An – Hình 7.1) yêu cầu em cung cấp họ tên thật, ngày sinh, số điện thoại, tên trường và toàn bộ thư viện ảnh/giọng nói.\n\nEm hãy chia sẻ lên Diễn đàn:\n1. Em cảm thấy thế nào và quyết định ra sao trước yêu cầu thu thập thông tin quá mức như vậy?\n2. Viết 01 câu ngắn gọn giải thích lí do cho lựa chọn của mình.'
       },
       {
         id: 'ai6-b7-act-3',
@@ -2651,7 +2651,7 @@ function buildAi6Bai12SeedData() {
         passScore: 8,
         timeLimitMinutes: 10,
         shuffleQuestions: false,
-        description: 'Bài kiểm tra chốt chặn Bài 7 (5 câu, thang 10 điểm, điều kiện đạt ≥ 8/10 điểm) tích hợp kiến thức Infographic 1–2 và 3 màn tình huống phân nhánh xử lí sự cố an toàn dữ liệu.',
+        description: 'Bài kiểm tra chốt chặn Bài 7 (5 câu, thang 10 điểm, điều kiện đạt ≥ 8/10 điểm) tích hợp kiến thức sơ đồ trực quan 1–2 và 3 tình huống xử lí sự cố an toàn dữ liệu.',
         quizQuestions: [
           {
             id: 'ai6-b7-q1',
@@ -2709,7 +2709,7 @@ function buildAi6Bai12SeedData() {
           },
           {
             id: 'ai6-b7-q4',
-            question: 'Câu 4 (Màn 1 & Màn 2 Game phân nhánh): Một ứng dụng AI yêu cầu bật GPS và chụp ảnh góc bàn học có đặt thẻ học sinh; ngay sau đó một chatbot lạ nhắn tin báo trúng quà game đòi mật khẩu trong 3 phút. Em chọn cách ứng xử nào AN TOÀN NHẤT?',
+            question: 'Câu 4 (Tình huống 1 & 2): Một ứng dụng AI yêu cầu bật GPS và chụp ảnh góc bàn học có đặt thẻ học sinh; ngay sau đó một chatbot lạ nhắn tin báo trúng quà trò chơi đòi mật khẩu trong 3 phút. Em chọn cách ứng xử nào AN TOÀN NHẤT?',
             options: [
               'Chỉ chụp góc bàn học có thẻ học sinh (không bật GPS) và gửi tên đăng nhập game nhưng không gửi số điện thoại',
               'Từ chối cấp quyền ứng dụng soi phòng, dừng trả lời chatbot giả mạo, chụp màn hình bằng chứng, báo cha mẹ và Chặn/Báo cáo tài khoản lừa đảo',
@@ -2727,7 +2727,7 @@ function buildAi6Bai12SeedData() {
           },
           {
             id: 'ai6-b7-q5',
-            question: 'Câu 5 (Màn 3 Deepfake & Tổng đài khẩn cấp): Em nhận cuộc gọi video mờ giật 5 giây có khuôn mặt giống giáo viên chủ nhiệm rồi tắt máy, kèm tin nhắn giục chụp hai mặt thẻ ngân hàng của bố mẹ gửi gấp. Cách xử lí nào ĐÚNG NHẤT, và số Tổng đài Quốc gia Bảo vệ Trẻ em miễn phí 24/7 tại Việt Nam là số nào?',
+            question: 'Câu 5 (Tình huống 3 – Deepfake & Tổng đài khẩn cấp): Em nhận cuộc gọi video mờ giật 5 giây có khuôn mặt giống giáo viên chủ nhiệm rồi tắt máy, kèm tin nhắn giục chụp hai mặt thẻ ngân hàng của bố mẹ gửi gấp. Cách xử lí nào ĐÚNG NHẤT, và số Tổng đài Quốc gia Bảo vệ Trẻ em miễn phí 24/7 tại Việt Nam là số nào?',
             options: [
               'Gửi trước mặt trước thẻ ngân hàng để xác nhận rồi hỏi bố mẹ sau; Tổng đài là 115',
               'Nhắn tin mắng lại tài khoản lừa đảo để cảnh cáo rồi chặn sau; Tổng đài là 114',
@@ -3214,7 +3214,7 @@ function buildAi6Bai12SeedData() {
       fileType: 'word',
       folder: 'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
       moduleId: 'module-lesson-7',
-      description: 'Kế hoạch bài dạy trực tuyến 45 phút trên LMS (YCCĐ 6.A3.4, Game phân nhánh 3 màn) – Bài 7.',
+      description: 'Kế hoạch bài dạy trực tuyến 45 phút trên LMS (YCCĐ 6.A3.4, Trắc nghiệm chốt chặn tình huống) – Bài 7.',
       uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
       uploadedAt: '27/11/2026'
     },
