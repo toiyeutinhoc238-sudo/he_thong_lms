@@ -1369,6 +1369,7 @@ function mergeAi6Bai12IntoCourse(courseObj) {
     const cur = courseObj.modules[idx] || {};
     const existingActs = (cur.activities || []).filter(a => a && a.id);
     const seedIds = new Set(seedMod.activities.map(a => a.id));
+    // Chỉ giữ lại các hoạt động do GV tự thêm tay trên web, bỏ các hoạt động seed cũ (ai6-b...) đã bị xóa trong ai6SeedData.js
     const extraTeacherActs = existingActs.filter(
       a => !seedIds.has(a.id) && !/^ai6-b\d+-act-/.test(a.id)
     );
