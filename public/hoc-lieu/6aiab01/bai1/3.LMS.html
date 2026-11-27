@@ -2418,28 +2418,28 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
           </div>
         </div>
 
-        <!-- Biểu đồ thống kê tự động lớp học (KHBD Bước 3) -->
+        <!-- Biểu đồ thống kê tự động lớp học (KHBD Bước 3 — chỉ tính từ dữ liệu phản hồi thật) -->
         <div id="svStatsBox" style="background:#f8fafc; border:1.5px solid var(--slate-200); border-radius:16px; padding:18px; margin-top:14px;">
           <div class="flex-between mb-12">
             <h4 style="color:var(--slate-900);">📊 Bảng thống kê tự động của lớp trên LMS</h4>
-            <span class="section-badge badge-blue" id="svTotalVotes">Tổng phản hồi: 24 học sinh</span>
+            <span class="section-badge badge-blue" id="svTotalVotes">Tổng phản hồi: 0 học sinh</span>
           </div>
           <div class="stat-bar-row">
             <div class="stat-bar-label">
               <span>A. Tự sinh ra từ vi mạch và linh kiện điện tử</span>
-              <span id="svPctA">17%</span>
+              <span id="svPctA">0%</span>
             </div>
             <div class="stat-bar-track">
-              <div class="stat-bar-fill" id="svBarA" style="width:17%; background:#f59e0b;"></div>
+              <div class="stat-bar-fill" id="svBarA" style="width:0%; background:#f59e0b;"></div>
             </div>
           </div>
           <div class="stat-bar-row">
             <div class="stat-bar-label">
               <span>B. Do con người thu thập dữ liệu, lập trình thuật toán và điều khiển</span>
-              <span id="svPctB">83%</span>
+              <span id="svPctB">0%</span>
             </div>
             <div class="stat-bar-track">
-              <div class="stat-bar-fill" id="svBarB" style="width:83%; background:#10b981;"></div>
+              <div class="stat-bar-fill" id="svBarB" style="width:0%; background:#10b981;"></div>
             </div>
           </div>
           <div style="margin-top:14px; font-size:13.5px; font-weight:700; color:var(--slate-700);">
@@ -3825,7 +3825,6 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
        3. MODULE 2: SURVEY APP (KHẢO SÁT KHỞI ĐỘNG CÓ LƯU TRẠNG THÁI)
     ============================================================ */
     const SurveyApp = (() => {
-      const defaultApps = ['Face ID mở khóa điện thoại', 'Gợi ý video YouTube', 'Google Dịch', 'Trợ lý ảo Siri / Google Assistant'];
       let pickedChoice = null;
 
       function pick(choice) {
@@ -3835,13 +3834,11 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
       }
 
       function renderStats(state) {
-        const baseA = 4;
-        const baseB = 20;
         const extraA = state.survey && state.survey.choice === 'A' ? 1 : 0;
         const extraB = state.survey && state.survey.choice === 'B' ? 1 : 0;
-        const total = baseA + baseB + extraA + extraB;
-        const pctA = Math.round(((baseA + extraA) / total) * 100);
-        const pctB = 100 - pctA;
+        const total = extraA + extraB;
+        const pctA = total > 0 ? Math.round((extraA / total) * 100) : 0;
+        const pctB = total > 0 ? (100 - pctA) : 0;
 
         document.getElementById('svTotalVotes').textContent = `Tổng phản hồi: ${total} học sinh`;
         document.getElementById('svPctA').textContent = `${pctA}%`;
@@ -3851,17 +3848,16 @@ Lộ trình 4 bước thực hiện trên hệ thống LMS:
 
         const cloud = document.getElementById('svTagCloud');
         cloud.innerHTML = '';
-        defaultApps.forEach(item => {
-          const sp = document.createElement('span');
-          sp.className = 'ai-chip';
-          sp.textContent = item;
-          cloud.appendChild(sp);
-        });
         if (state.survey && state.survey.app) {
           const sp = document.createElement('span');
           sp.className = 'ai-chip user-chip';
-          sp.textContent = `✨ ${state.survey.app} (${state.survey.name || 'Em'})`;
-          cloud.prepend(sp);
+          sp.textContent = `✨ ${state.survey.app} (${state.survey.name || 'Học sinh'})`;
+          cloud.appendChild(sp);
+        } else {
+          const empty = document.createElement('span');
+          empty.style.cssText = 'font-size:13px; color:#64748b; font-style:italic;';
+          empty.textContent = 'Chưa có phản hồi nào. Khi học sinh gửi câu trả lời phía trên, biểu đồ và danh sách sẽ tự cập nhật từ dữ liệu thật.';
+          cloud.appendChild(empty);
         }
       }
 

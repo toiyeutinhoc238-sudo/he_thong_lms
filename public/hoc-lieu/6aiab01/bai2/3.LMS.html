@@ -2675,20 +2675,12 @@ Lộ trình 4 bước thực hiện trên LMS:
             </div>
           </div>
 
-          <!-- Sample Classmate Posts -->
+          <!-- Danh sách bài đăng thật của học sinh (không gắn bài đăng mẫu ảo) -->
           <h4 class="lms-u-41">📌 Chia sẻ từ các bạn trong lớp:</h4>
           <div id="forumList">
-            <div class="forum-post">
-              <div class="lms-u-42">
-                <strong>🌟 Bạn An (Mẫu tham khảo)</strong>
-                <span class="lms-u-43">Vừa xong</span>
-              </div>
-              <p class="lms-u-44"><strong>1.</strong> Khi gặp bài khó ở nhà, em thường đọc lại ví dụ trong SGK và hỏi bố
-                mẹ.<br /><strong>2.</strong> Nếu có công cụ AI, em muốn nhờ giải thích khái niệm “Quang hợp” thật dễ
-                hiểu kèm ví dụ cây xanh ngoài sân trường ạ!</p>
-              <button class="btn btn-ghost btn-sm lms-u-45" onclick="likePost(this)">👍 Khích lệ bạn
-                (<span>3</span>)</button>
-            </div>
+            <p id="forumEmptyNote" style="font-size:13.5px; color:#64748b; font-style:italic; margin:8px 0;">
+              Chưa có bài đăng nào trên diễn đàn. Hãy nhập câu trả lời của em phía trên để gửi bài chia sẻ đầu tiên!
+            </p>
           </div>
         </div>
       </div>
@@ -3240,7 +3232,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
               <li>Mở trang <strong>SchoolAI Space</strong> do giáo viên cung cấp và nhập <strong>Mã phòng học (Room
                   Code)</strong>:
                 <div class="lms-u-134">
-                  <input class="lms-u-135" type="text" id="roomCodeInput" value="TIN6-BAI2-2026"
+                  <input class="lms-u-135" type="text" id="roomCodeInput" value=""
+                    placeholder="Giáo viên nhập mã phòng SchoolAI thật..."
                     aria-label="Mã phòng học SchoolAI" />
                   <button class="btn btn-outline btn-sm" onclick="copyRoomCode()">📋 Copy mã phòng</button>
                 </div>
@@ -3259,13 +3252,13 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
             <div class="lms-u-138">
               <div class="lms-u-139">🛠️ Trợ lý tạo tên tệp đúng chuẩn:</div>
               <div class="lms-u-140">
-                <input class="lms-u-141" type="text" id="fnName" placeholder="Họ tên (VD: NguyenVanAn)"
+                <input class="lms-u-141" type="text" id="fnName" placeholder="Nhập họ tên không dấu..."
                   oninput="updateFileNamePreview()" />
-                <input class="lms-u-142" type="text" id="fnClass" placeholder="Lớp (VD: 6A1)"
+                <input class="lms-u-142" type="text" id="fnClass" placeholder="Nhập lớp..."
                   oninput="updateFileNamePreview()" />
               </div>
               <div class="lms-u-143">
-                <code class="lms-u-144" id="fnPreview">NguyenVanAn_6A1_Prompt.png</code>
+                <code class="lms-u-144" id="fnPreview">[HoTen]_[Lop]_Prompt.png</code>
                 <button class="btn btn-outline btn-sm"
                   onclick="copyTextValue(document.getElementById('fnPreview').textContent)">Copy</button>
               </div>
@@ -3809,6 +3802,8 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
       }
 
       alertBox.style.display = 'none';
+      const emptyNote = document.getElementById('forumEmptyNote');
+      if (emptyNote) emptyNote.remove();
       const list = document.getElementById('forumList');
       const div = document.createElement('div');
       div.className = 'forum-post user-post';
@@ -4302,13 +4297,18 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     }
 
     function copyRoomCode() {
-      copyTextValue(document.getElementById('roomCodeInput').value.trim());
+      const code = document.getElementById('roomCodeInput').value.trim();
+      if (!code) {
+        showToast('⚠️ Giáo viên chưa nhập Mã phòng (Room Code) SchoolAI.');
+        return;
+      }
+      copyTextValue(code);
     }
 
     function updateFileNamePreview() {
       const stripVN = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '');
-      const name = stripVN(document.getElementById('fnName').value.trim()) || 'NguyenVanAn';
-      const cls = stripVN(document.getElementById('fnClass').value.trim()) || '6A1';
+      const name = stripVN(document.getElementById('fnName').value.trim()) || '[HoTen]';
+      const cls = stripVN(document.getElementById('fnClass').value.trim()) || '[Lop]';
       document.getElementById('fnPreview').textContent = `${name}_${cls}_Prompt.png`;
     }
 
@@ -4574,7 +4574,7 @@ C. “Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”</texta
     }
 
     function downloadStandalonePromptLab() {
-      const roomCode = (document.getElementById('roomCodeInput').value.trim() || 'TIN6-BAI2-2026').replace(/"/g, '&quot;');
+      const roomCode = (document.getElementById('roomCodeInput').value.trim() || 'Do giáo viên cung cấp').replace(/"/g, '&quot;');
       const html = `<!DOCTYPE html>
 <html lang="vi">
 <head>

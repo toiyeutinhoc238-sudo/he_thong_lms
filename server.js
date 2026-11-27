@@ -1387,8 +1387,8 @@ async function ensureDefaultCourse() {
 }
 
 // ====================== HỌC LIỆU CHÍNH THỨC BÀI 1 & BÀI 2 CHO KHÓA HỌC 6AIAB01 ======================
-// Đồng bộ 100% với 2 thư mục BAI1/ và BAI2/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html)
-const AI6_BAI12_REVISION = 'v1-bai1-bai2';
+// Đồng bộ 100% với 2 thư mục BAI1/ và BAI2/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html) — tuyệt đối KHÔNG chứa dữ liệu ảo
+const AI6_BAI12_REVISION = 'v2-clean-no-mock';
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1398,7 +1398,7 @@ function buildAi6Bai12SeedData() {
     title: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
     description: 'Thời lượng: 02 tiết (Tiết 1: Trực tuyến trên LMS – Mức Hiểu 6.A1.1 | Tiết 2: Trực tiếp tại lớp – Mức Vận dụng 6.A1.2).',
     learningObjectives: '• (6.A1.1) Giải thích được AI là sản phẩm do con người tạo ra, lập trình và điều khiển để thực hiện những nhiệm vụ cụ thể; AI không tự sinh ra và không hoạt động độc lập; nêu ví dụ công cụ AI quen thuộc và vai trò con người (Dữ liệu – Thuật toán – Điều khiển).\n• (6.A1.2) Trình bày được vai trò của AI chỉ là công cụ hỗ trợ; con người luôn giám sát (Humans in the Loop / EU AI Act 2024), đưa ra quyết định cuối cùng và chịu trách nhiệm 100%.',
-    ownerName: 'Nhóm 2 – Bài 1',
+    ownerName: '',
     activities: [
       {
         id: 'ai6-b1-act-1',
@@ -1430,38 +1430,9 @@ function buildAi6Bai12SeedData() {
         isCompleted: false,
         isRequired: true,
         videoUrl: 'https://www.youtube.com/watch?v=Ok-xpKjKp2g',
-        preventVideoSkip: true,
-        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) và trả lời 2 mốc neo chặn. 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.',
-        videoCheckpoints: [
-          {
-            id: 'ai6-b1-cp-1',
-            timeSeconds: 90,
-            question: 'Để một hệ thống AI có thể nhận diện hình ảnh hoặc dự đoán thông minh, nguồn nguyên liệu quan trọng đầu tiên mà con người phải thu thập và xử lí là gì?',
-            options: [
-              'Các dòng lệnh cố định không cần thay đổi theo thời gian',
-              'Dữ liệu mẫu đã được chọn lọc và làm sạch (hình ảnh, âm thanh, văn bản...)',
-              'Các linh kiện điện tử có khả năng tự sinh ra ý thức',
-              'Công tắc cơ học bật tắt nguồn điện của thiết bị'
-            ],
-            correctAnswer: 1,
-            explanation: 'Bước 1 trong quy trình tạo ra AI (SGK Bài 1 – Hình 1.2): Con người thu thập, phân loại và làm sạch lượng lớn dữ liệu mẫu để “dạy” máy tính học.',
-            requireCorrect: true
-          },
-          {
-            id: 'ai6-b1-cp-2',
-            timeSeconds: 180,
-            question: 'Vì sao công nghệ này được gọi là Trí tuệ “NHÂN TẠO” (Artificial Intelligence)?',
-            options: [
-              'Vì AI có thể tự tiến hóa và hoạt động độc lập tách rời khỏi con người',
-              'Vì mọi thiết bị sử dụng điện trong nhà đều có trí thông minh giống con người',
-              'Vì AI hoàn toàn là sản phẩm do con người tạo ra, lập trình thuật toán và trực tiếp điều khiển',
-              'Vì sau khi cài đặt xong, AI tự viết lại luật pháp thay thế trách nhiệm con người'
-            ],
-            correctAnswer: 2,
-            explanation: 'Khác với phim viễn tưởng, AI do con người dẫn dắt (human-led – UNESCO 2024): con người giữ vai trò quyết định ở cả 3 khâu Dữ liệu – Thuật toán – Điều khiển.',
-            requireCorrect: true
-          }
-        ]
+        preventVideoSkip: false,
+        description: 'Xem video hoạt hình ngắn về cách AI hoạt động (bật phụ đề tiếng Việt nếu cần) theo đúng KHBD Bài 1 (không khóa tua phức tạp). 3 câu hỏi định hướng khi xem:\n(1) Vì sao công nghệ này được gọi là Trí tuệ “Nhân tạo”?\n(2) Máy tính cần có gì do con người cung cấp để có thể học và nhận diện?\n(3) Ghi chú 3 bước con người tạo ra AI (Thu thập & xử lí dữ liệu → Thiết kế thuật toán & lập trình → Triển khai, điều khiển) vào SGK Bài 1.',
+        videoCheckpoints: []
       },
       {
         id: 'ai6-b1-act-4',
@@ -1605,7 +1576,7 @@ function buildAi6Bai12SeedData() {
     title: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
     description: 'Thời lượng: 01 tiết – 45 phút (Dạy học trực tuyến trên hệ thống LMS theo chu trình 5 thành phần – Yêu cầu cần đạt 6.A3.2).',
     learningObjectives: '• (6.A3.2) Trình bày được 3 lợi ích của AI trong học tập (học hỏi kiến thức mới, rèn luyện kĩ năng, mở rộng hiểu biết) khi sử dụng đúng mục đích.\n• Nắm công thức viết câu lệnh (Prompt) 3 thành phần: Bối cảnh (Ngữ cảnh) + Vai trò + Yêu cầu & định dạng cụ thể; tuân thủ Cẩm nang “4 KHÔNG” bảo vệ dữ liệu cá nhân.\n• Sử dụng công cụ AI phù hợp lứa tuổi hỗ trợ 1 nhiệm vụ học tập lớp 6 và tự tóm tắt 3–5 câu bằng ngôn ngữ riêng kèm đối chiếu SGK chuẩn bị Bài 3.',
-    ownerName: 'Nhóm 2 – Bài 2',
+    ownerName: '',
     activities: [
       {
         id: 'ai6-b2-act-1',
@@ -1920,7 +1891,7 @@ function mergeAi6Bai12IntoCourse(courseObj) {
       title: seedMod.title,
       description: seedMod.description,
       learningObjectives: seedMod.learningObjectives,
-      ownerName: cur.ownerName || seedMod.ownerName,
+      ownerName: (cur.ownerName && !/^Nhóm 2 – Bài \d+$/i.test(cur.ownerName)) ? cur.ownerName : seedMod.ownerName,
       activities: [...seedMod.activities.map(a => ({ ...a, moduleId: cur.id || seedMod.id })), ...extraTeacherActs]
     };
   };
