@@ -19,7 +19,7 @@ export const OFFICIAL_AI_GRADE6_LESSONS = [
 ];
 
 // Mỗi lần sửa bất kỳ file data.js nào, đổi số phiên bản này rồi restart server
-export const AI6_BAI12_REVISION = 'v17-split-by-lesson';
+export const AI6_BAI12_REVISION = 'v18-update-bai1';
 
 export function buildAi6Bai12SeedData() {
   const lessonModules = [
