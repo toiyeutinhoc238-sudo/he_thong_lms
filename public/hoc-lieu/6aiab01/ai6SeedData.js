@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { bai1Module } from './bai1/data.js';
 import { bai2Module } from './bai2/data.js';
 import { bai3Module } from './bai3/data.js';
@@ -17,9 +18,6 @@ export const OFFICIAL_AI_GRADE6_LESSONS = [
   'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
   'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO'
 ];
-
-// Mỗi lần sửa bất kỳ file data.js nào, đổi số phiên bản này rồi restart server
-export const AI6_BAI12_REVISION = 'v18-update-bai1';
 
 export function buildAi6Bai12SeedData() {
   const lessonModules = [
@@ -59,3 +57,10 @@ export function buildAi6Bai12SeedData() {
     officialSyllabus
   };
 }
+
+// Tự động tạo mã phiên bản theo nội dung 8 file data.js (sửa file -> restart server là tự cập nhật)
+export const AI6_BAI12_REVISION = 'auto-' + crypto
+  .createHash('sha256')
+  .update(JSON.stringify(buildAi6Bai12SeedData()))
+  .digest('hex')
+  .slice(0, 16);
