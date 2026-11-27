@@ -37,7 +37,8 @@ import {
   ArrowDown,
   Shuffle,
   Target,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react';
 import { CourseModule, Activity, QuizQuestion, VideoCheckpoint } from '../types';
 import { VideoCheckpointEditor } from './VideoCheckpointEditor';
@@ -94,7 +95,10 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
-  const [expandedObjectives, setExpandedObjectives] = useState<Record<string, boolean>>({});
+
+  // Popup xem chi tiết Mục tiêu bài học & Popup xem chi tiết từng mục hoạt động
+  const [objectivesModalModule, setObjectivesModalModule] = useState<CourseModule | null>(null);
+  const [previewActivity, setPreviewActivity] = useState<{ moduleTitle: string; activity: Activity } | null>(null);
 
   // Modal Thêm Mô-đun
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
@@ -187,10 +191,6 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
   const toggleModule = (id: string) => {
     setCollapsedModules(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const toggleObjectives = (id: string) => {
-    setExpandedObjectives(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const toggleAll = () => {
@@ -784,44 +784,27 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                 {/* Module Items Body */}
                 {!isCollapsed && (
                   <div>
-                    {/* Khung Mục tiêu học tập (Nhấn vào để xem chi tiết) */}
-                    {mod.learningObjectives && (() => {
-                      const isObjOpen = Boolean(expandedObjectives[mod.id]);
-                      return (
-                        <div className="bg-sky-50/70 border-b border-sky-100 text-xs">
-                          <button
-                            type="button"
-                            onClick={() => toggleObjectives(mod.id)}
-                            className="w-full px-4 py-2.5 flex items-center justify-between gap-2 hover:bg-sky-100/60 transition-colors text-left"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Target className="w-4 h-4 text-[#0374b5] shrink-0" />
-                              <span className="font-extrabold text-[#0374b5] uppercase text-[10px] tracking-wider">
-                                Mục tiêu bài học
-                              </span>
-                              <span className="text-[11px] text-slate-500 font-medium">
-                                ({isObjOpen ? 'Nhấn để thu gọn' : 'Nhấn để xem chi tiết'})
-                              </span>
-                            </div>
-                            <span className="text-[#0374b5] shrink-0">
-                              {isObjOpen ? (
-                                <ChevronDown className="w-4 h-4" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4" />
-                              )}
+                    {/* Khung Mục tiêu học tập (Nhấn vào để mở Popup xem chi tiết) */}
+                    {mod.learningObjectives && (
+                      <div className="bg-sky-50/70 border-b border-sky-100 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setObjectivesModalModule(mod)}
+                          className="w-full px-4 py-2.5 flex items-center justify-between gap-2 hover:bg-sky-100/70 transition-colors text-left"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Target className="w-4 h-4 text-[#0374b5] shrink-0" />
+                            <span className="font-extrabold text-[#0374b5] uppercase text-[10px] tracking-wider">
+                              Mục tiêu bài học
                             </span>
-                          </button>
-
-                          {isObjOpen && (
-                            <div className="px-4 pb-3 pl-10">
-                              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
-                                {mod.learningObjectives}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              (Nhấn để xem chi tiết)
+                            </span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-[#0374b5] shrink-0" />
+                        </button>
+                      </div>
+                    )}
 
                     {activities.length === 0 ? (
                       <div className="py-6 px-4 text-center text-xs text-slate-400 bg-slate-50/30">
@@ -848,9 +831,9 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
                             key={act.id}
                             className={`px-4 py-3 flex items-center justify-between border-b border-slate-200 last:border-b-0 hover:bg-slate-50/80 transition-colors group select-none ${act.isHidden ? 'bg-amber-50/40' : ''}`}
                           >
-                            {/* Left: Icon & Info (Click to view activity) */}
+                            {/* Left: Icon & Info (Click to open detail popup) */}
                             <div 
-                              onClick={() => onSelectActivity(act.id)}
+                              onClick={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
                               className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                             >
                               <span className="shrink-0 p-1.5 rounded-md bg-slate-100 group-hover:bg-sky-50 transition-colors">
@@ -1010,7 +993,7 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
 
                               {/* Status circle */}
                               <div 
-                                onClick={() => onSelectActivity(act.id)}
+                                onClick={() => setPreviewActivity({ moduleTitle: mod.title, activity: act })}
                                 className="cursor-pointer pl-1"
                               >
                                 {act.isCompleted ? (
@@ -1029,6 +1012,182 @@ export const CanvasModulesView: React.FC<CanvasModulesViewProps> = ({ onSelectAc
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* POPUP XEM CHI TIẾT MỤC TIÊU BÀI HỌC */}
+      {objectivesModalModule && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4"
+          onClick={() => setObjectivesModalModule(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#0374b5] flex items-center justify-center shrink-0">
+                  <Target className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0374b5] block">
+                    Mục tiêu bài học
+                  </span>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    {objectivesModalModule.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setObjectivesModalModule(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                title="Đóng"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-sky-50/60 border border-sky-100 rounded-xl p-4 max-h-[60vh] overflow-y-auto">
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                {objectivesModalModule.learningObjectives}
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => setObjectivesModalModule(null)}
+                className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-xs transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP XEM CHI TIẾT HOẠT ĐỘNG / HỌC LIỆU */}
+      {previewActivity && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center p-4"
+          onClick={() => setPreviewActivity(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-slate-100 shrink-0 mt-0.5">
+                  {getActivityIcon(previewActivity.activity.type)}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+                    {previewActivity.moduleTitle}
+                  </span>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug mt-0.5">
+                    {previewActivity.activity.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewActivity(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                title="Đóng"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Các huy hiệu thông tin nhanh */}
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+              {previewActivity.activity.isCompleted ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Đã hoàn thành
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                  <Circle className="w-3.5 h-3.5" /> Chưa hoàn thành
+                </span>
+              )}
+
+              {previewActivity.activity.type === 'video' && (
+                <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  Video bài giảng
+                </span>
+              )}
+              {previewActivity.activity.type === 'video' && (previewActivity.activity.videoCheckpoints?.length || 0) > 0 && (
+                <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {previewActivity.activity.videoCheckpoints?.length} câu neo chặn
+                </span>
+              )}
+              {previewActivity.activity.type === 'document' && (
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Tài liệu học tập
+                </span>
+              )}
+              {previewActivity.activity.type === 'assignment' && (
+                <span className="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  Bài tập
+                </span>
+              )}
+              {previewActivity.activity.type === 'quiz' && (
+                <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  Trắc nghiệm • {previewActivity.activity.timeLimitMinutes || 15} phút
+                </span>
+              )}
+              {previewActivity.activity.dueDate && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                  <Clock className="w-3.5 h-3.5" /> Hạn nộp: {previewActivity.activity.dueDate}
+                </span>
+              )}
+            </div>
+
+            {/* Mô tả chi tiết */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-[50vh] overflow-y-auto space-y-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                Mô tả chi tiết
+              </span>
+              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                {previewActivity.activity.description || 'Nhấn nút bên dưới để mở và bắt đầu thực hiện học liệu này.'}
+              </p>
+              {previewActivity.activity.assignmentPrompt && (
+                <div className="pt-2 mt-2 border-t border-slate-200">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 block mb-1">
+                    Yêu cầu bài tập
+                  </span>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {previewActivity.activity.assignmentPrompt}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setPreviewActivity(null)}
+                className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const id = previewActivity.activity.id;
+                  setPreviewActivity(null);
+                  onSelectActivity(id);
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-[#0374b5] hover:bg-[#025a8c] rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <span>Mở học liệu / Bắt đầu học</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
