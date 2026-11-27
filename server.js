@@ -709,6 +709,9 @@ const isStaff = (user) => !!user && (
   (user.email && user.email.toLowerCase().trim() === 'phanphiphu04@gmail.com')
 );
 
+// Hoạt động có phần trắc nghiệm do máy chủ chấm: bài trắc nghiệm, hoặc học liệu HTML có bài trắc nghiệm bên trong
+const hasQuizPart = (act) => !!act && (act.type === 'quiz' || (Array.isArray(act.quizQuestions) && act.quizQuestions.length > 0));
+
 // Gắn req.user từ token (vai trò luôn lấy từ cơ sở dữ liệu, không tin dữ liệu client gửi lên)
 app.use(async (req, res, next) => {
   req.user = null;
@@ -1388,7 +1391,25 @@ async function ensureDefaultCourse() {
 
 // ====================== HỌC LIỆU CHÍNH THỨC TRỌN BỘ 8 BÀI CHO KHÓA HỌC 6AIAB01 ======================
 // Đồng bộ 100% với 8 thư mục BAI1/..BAI8/ (0.SGK.docx, 1.KHBD.docx, 2.HocLieuSo.docx, 3.LMS.html) — tuyệt đối KHÔNG chứa dữ liệu ảo
-const AI6_BAI12_REVISION = 'v4-all-8-lessons-clean';
+const AI6_BAI12_REVISION = 'v8-gioi-thieu-tong-quan-8-bai';
+
+// Bộ câu hỏi trắc nghiệm của 8 học liệu HTML (content/ai6-hoclieu-quiz.json).
+// Máy chủ giữ đáp án để tự chấm bài khi học liệu gửi bài làm lên; học sinh không gửi được điểm tự đặt.
+function loadAi6HoclieuQuiz() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'content', 'ai6-hoclieu-quiz.json'), 'utf8'));
+  } catch (e) {
+    console.warn('Không đọc được content/ai6-hoclieu-quiz.json:', e.message);
+    return {};
+  }
+}
+
+function attachHoclieuQuiz(activity, bank) {
+  const m = /\/hoc-lieu\/6aiab01\/bai(\d+)\/3\.LMS\.html$/.exec(activity.fileUrl || '');
+  const entry = m && bank['bai' + m[1]];
+  if (!entry || !Array.isArray(entry.questions) || entry.questions.length === 0) return activity;
+  return { ...activity, quizQuestions: entry.questions, passScore: entry.passScore || 8, maxAttempts: 0 };
+}
 
 function buildAi6Bai12SeedData() {
   const bai1Module = {
@@ -1403,13 +1424,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b1-act-1',
         moduleId: 'module-lesson-1',
-        title: 'Học liệu tương tác Bài 1: Nguồn gốc của AI và Quyền quyết định',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 1 – Nguồn gốc của AI và quyền quyết định',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai1/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 1 (Tiết 1 Trực tuyến & Tiết 2 Trực tiếp): Hướng dẫn học tập 4 bước, Tình huống An–Minh–Khoa, Infographic 1 & 2, Video bài giảng, Bài kiểm tra kéo thả và Trò chơi Người cầm lái thông thái.'
+        fileUrl: '/hoc-lieu/6aiab01/bai1/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 1: Nguồn gốc của AI và quyền quyết định (YCCĐ 6.A1.1 & 6.A1.2 · 02 tiết Blended).'
       },
       {
         id: 'ai6-b1-act-2',
@@ -1581,13 +1602,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b2-act-1',
         moduleId: 'module-lesson-2',
-        title: 'Học liệu tương tác Bài 2: Lợi ích và Cách sử dụng công cụ AI phù hợp',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 2 – Lợi ích và cách sử dụng công cụ AI phù hợp',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai2/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 2 (45 phút trực tuyến): Hướng dẫn học tập 4 bước, Tình huống An–Minh–Khoa (Hình 2.1), Infographic công thức câu lệnh, Video tương tác 06:27 có 3 mốc câu hỏi, Quy tắc 4 KHÔNG và Trạm luyện viết câu lệnh AI.'
+        fileUrl: '/hoc-lieu/6aiab01/bai2/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp (YCCĐ 6.A3.2 · 01 tiết Trực tuyến).'
       },
       {
         id: 'ai6-b2-act-2',
@@ -1598,6 +1619,60 @@ function buildAi6Bai12SeedData() {
         isCompleted: false,
         isRequired: true,
         description: 'SỔ TAY HƯỚNG DẪN 4 BƯỚC (45 PHÚT): (1) Khởi động Diễn đàn 5p → (2) Xem Infographic & Video tương tác 15p (đạt ≥ 70/100đ) → (3) Thực hành “Hỏi đúng – Trúng đáp án” 15p → (4) Viết tóm tắt “Nhà báo nhí” & Cầu nối Bài 3 (10p).\n\nCHỦ ĐỀ THẢO LUẬN (Gắn tình huống An, Minh, Khoa – Hình 2.1 SGK Bài 2):\nBạn Khoa dùng ứng dụng AI để luyện 5 câu hội thoại tiếng Anh về bảo vệ môi trường, sửa phát âm và giải thích từ mới rất rõ ràng. Hãy chia sẻ ngắn gọn 2 câu hỏi:\n1. Khi gặp một bài tập khó hoặc một khái niệm chưa hiểu rõ ở nhà, em thường làm gì để tìm sự trợ giúp?\n2. Nếu được sử dụng một công cụ AI hỗ trợ học tập phù hợp lứa tuổi, câu hỏi học tập đầu tiên em muốn nhờ công cụ đó giải thích là gì?\n\nLưu ý: Gõ tiếng Việt có dấu, lịch sự và tuyệt đối KHÔNG chia sẻ thông tin cá nhân (họ tên đầy đủ, địa chỉ nhà, số điện thoại, mật khẩu).'
+      },
+      {
+        id: 'ai6-b2-act-video',
+        moduleId: 'module-lesson-2',
+        title: 'Hoạt động 2 (Video tương tác): Bí kíp giao tiếp với AI – Bối cảnh, Vai trò, Yêu cầu (06:28 · 3 câu neo chặn)',
+        type: 'video',
+        durationMinutes: 15,
+        isCompleted: false,
+        isRequired: true,
+        videoUrl: 'https://www.youtube.com/watch?v=fmQWlfG3Rcs',
+        videoDuration: 388,
+        preventVideoSkip: true,
+        description: 'Em xem video về cách viết câu lệnh cho AI. Video sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được. Hoàn thành khi xem hết video và vượt qua cả 3 câu hỏi. Sau đó đối chiếu với Hình 2.2, Hình 2.3 SGK Bài 2.',
+        videoCheckpoints: [
+          {
+            id: 'b2-cp1',
+            timeSeconds: 105,
+            question: 'Qua ví dụ so sánh giữa câu lệnh “Viết về măng” và “Viết 3 câu bán măng sạch”, vì sao câu lệnh thứ hai giúp AI trả lời hữu ích hơn?',
+            options: [
+              'Vì câu lệnh thứ hai ngắn hơn và dùng dấu chấm than.',
+              'Vì câu lệnh thứ hai giao việc rõ ràng, nêu cụ thể số lượng (3 câu) và mục đích sử dụng.',
+              'Vì AI tự bỏ qua câu lệnh thứ nhất do đường truyền mạng.'
+            ],
+            correctAnswer: 1,
+            explanation: 'AI trả lời dựa trên thông tin em đưa vào; yêu cầu càng rõ mục đích và số lượng thì kết quả càng sát nhu cầu.',
+            requireCorrect: true
+          },
+          {
+            id: 'b2-cp2',
+            timeSeconds: 220,
+            question: 'Công thức gồm 3 thành phần để viết một câu lệnh hiệu quả cho AI là gì?',
+            options: [
+              'Bối cảnh + Vai trò + Yêu cầu (nhiệm vụ) cụ thể.',
+              'Tên điện thoại + Họ tên người dùng + Mật khẩu tài khoản.',
+              'Lời khen công cụ AI + Thời gian chờ + Lời cảm ơn.'
+            ],
+            correctAnswer: 0,
+            explanation: 'Câu lệnh rõ ràng gồm: Bối cảnh (em là ai, cần gì) + Vai trò của AI + Yêu cầu và cách trình bày cụ thể.',
+            requireCorrect: true
+          },
+          {
+            id: 'b2-cp3',
+            timeSeconds: 330,
+            question: 'Trong câu lệnh “Tôi là nông dân mới trồng sâm. Hãy đóng vai một chuyên gia nông nghiệp. Viết 3 gạch đầu dòng những lưu ý quan trọng nhất về tưới nước cho cây sâm 1 năm tuổi”, cụm nào là BỐI CẢNH?',
+            options: [
+              '“Hãy đóng vai một chuyên gia nông nghiệp”',
+              '“Tôi là nông dân mới trồng sâm”',
+              '“Viết 3 gạch đầu dòng những lưu ý quan trọng nhất”'
+            ],
+            correctAnswer: 1,
+            explanation: '“Tôi là nông dân mới trồng sâm” cho AI biết người hỏi là ai – đó là Bối cảnh. “Đóng vai chuyên gia” là Vai trò, “Viết 3 gạch đầu dòng” là Yêu cầu.',
+            requireCorrect: true
+          }
+        ]
       },
       {
         id: 'ai6-b2-act-3',
@@ -1756,13 +1831,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b3-act-1',
         moduleId: 'module-lesson-3',
-        title: 'Học liệu tương tác Bài 3: Thực chứng thông tin – Làm chủ AI',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 3 – Thực chứng thông tin – Làm chủ AI',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai3/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 3: Sổ tay hướng dẫn học tập, Bộ 8 Slide bài giảng, Infographic “Ảo giác AI & 3 Kênh kiểm chứng”, Trò chơi “Phòng thí nghiệm thực chứng thông tin”, Phiếu đối chiếu Chiến thắng Bạch Đằng 938 và Bảng Rubric 10 điểm.'
+        fileUrl: '/hoc-lieu/6aiab01/bai3/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 3: Thực chứng thông tin – Làm chủ AI (YCCĐ 6.A1.3 · 01 tiết Blended).'
       },
       {
         id: 'ai6-b3-act-2',
@@ -1918,13 +1993,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b4-act-1',
         moduleId: 'module-lesson-4',
-        title: 'Học liệu tương tác Bài 4: Mặt tích cực và tiêu cực của một số tính năng AI',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 4 – Khám phá mặt tích cực và tiêu cực của một số tính năng AI',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai4/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 4 (45 phút trực tuyến): Study Guide 4 chặng, Khảo sát “Trang chủ video của em”, Video cơ chế thuật toán gợi ý, Infographic Hai mặt của 3 tính năng AI, Trò chơi mô phỏng “Đóng vai thuật toán gợi ý” và Bài tập kéo – thả phân loại 10 thẻ.'
+        fileUrl: '/hoc-lieu/6aiab01/bai4/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 4: Mặt tích cực và tiêu cực của một số tính năng AI (YCCĐ 6.B1.1 · 01 tiết Trực tuyến).'
       },
       {
         id: 'ai6-b4-act-2',
@@ -1935,6 +2010,60 @@ function buildAi6Bai12SeedData() {
         isCompleted: false,
         isRequired: true,
         description: 'SỔ TAY HƯỚNG DẪN 4 CHẶNG (45 PHÚT TRỰC TUYẾN): (1) Khởi động 5p → (2) Học liệu vi mô & Mô phỏng Thuật toán gợi ý 15p → (3) Luyện tập chốt chặn ≥ 8/10đ (15p) → (4) Vận dụng 2 thao tác kĩ thuật & Cầu nối Bài 5 (10p).\n\nNHIỆM VỤ KHỞI ĐỘNG (Gắn tình huống An, Minh, Khoa – Hình 4.1 SGK Bài 4):\n1. Mở trang chủ YouTube của em và quan sát 10 video đầu tiên: có bao nhiêu video trùng khớp với chủ đề em vừa xem hoặc tìm kiếm gần đây?\n2. Em hãy viết 1–2 câu chia sẻ cảm nhận của bản thân: tính năng tự động đề xuất video đúng sở thích mang lại sự tiện lợi gì, và có khiến em băn khoăn điều gì không?'
+      },
+      {
+        id: 'ai6-b4-act-video',
+        moduleId: 'module-lesson-4',
+        title: 'Hoạt động 2 – Nhiệm vụ 1 (Video): Cơ chế thuật toán gợi ý – Vì sao ứng dụng biết em muốn gì? (05:47 · 3 câu neo chặn)',
+        type: 'video',
+        durationMinutes: 7,
+        isCompleted: false,
+        isRequired: true,
+        videoUrl: 'https://www.youtube.com/watch?v=Wl5Hb2cfIh0',
+        videoDuration: 347,
+        preventVideoSkip: true,
+        description: 'Em xem video giải thích cách thuật toán gợi ý thu thập hành vi người dùng (lượt nhấp, thời gian dừng màn hình, lượt thích, lịch sử tìm kiếm) để đoán em muốn gì. Video sẽ tự dừng ở 3 điểm để em trả lời câu hỏi; em cần trả lời đúng mới xem tiếp được. Xem xong, em đối chiếu với Mục 1 và Mục 2 SGK Bài 4 về hai mặt của tính năng AI.',
+        videoCheckpoints: [
+          {
+            id: 'b4-cp1',
+            timeSeconds: 88,
+            question: 'Vì sao ứng dụng mua sắm gợi ý đúng món đồ em đang cần?',
+            options: [
+              'Vì ứng dụng nghe lén cuộc trò chuyện của em qua micro.',
+              'Vì hệ thống phân tích hành vi của em như tìm kiếm, nhấp xem, thời gian dừng lại và những món đã mua trước đó.',
+              'Vì đó là sự trùng hợp ngẫu nhiên.'
+            ],
+            correctAnswer: 1,
+            explanation: 'Thuật toán gợi ý không cần nghe lén: nó học từ dữ liệu hành vi em để lại khi dùng ứng dụng để dự đoán nhu cầu của em.',
+            requireCorrect: true
+          },
+          {
+            id: 'b4-cp2',
+            timeSeconds: 171,
+            question: 'Hệ thống kết nối các sản phẩm với nhau để làm gì?',
+            options: [
+              'Để xóa bớt những sản phẩm em không mua.',
+              'Để tăng giá các sản phẩm được nhiều người xem.',
+              'Để từ món em đã xem hoặc đã mua, gợi ý thêm những món có liên quan.'
+            ],
+            correctAnswer: 2,
+            explanation: 'Nhờ “bản đồ” kết nối giữa các sản phẩm, hệ thống tìm ra những món liên quan đến điều em quan tâm để gợi ý tiếp.',
+            requireCorrect: true
+          },
+          {
+            id: 'b4-cp3',
+            timeSeconds: 335,
+            question: 'Tính năng gợi ý cá nhân hóa có hai mặt. Ý nào nêu đúng cả hai mặt đó?',
+            options: [
+              'Giúp em tìm đúng thứ cần nhanh hơn, nhưng hệ thống thu thập nhiều dữ liệu hành vi và có thể khiến em xem hoặc mua nhiều hơn dự định.',
+              'Chỉ có lợi, không có hạn chế nào.',
+              'Chỉ có hại, nên không bao giờ dùng ứng dụng có gợi ý.'
+            ],
+            correctAnswer: 0,
+            explanation: 'Mọi tính năng AI đều có hai mặt: tiết kiệm thời gian, nhưng ảnh hưởng quyền riêng tư và dễ tạo “bong bóng thông tin” nếu em không tự kiểm soát.',
+            requireCorrect: true
+          }
+        ]
       },
       {
         id: 'ai6-b4-act-3',
@@ -2080,13 +2209,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b5-act-1',
         moduleId: 'module-lesson-5',
-        title: 'Học liệu tương tác Bài 5: Đánh giá độ an toàn của Trí tuệ nhân tạo',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 5 – Đánh giá độ an toàn của Trí tuệ nhân tạo',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai5/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 5: Study Guide & Kiến thức nền, Bộ 8 Slide trình chiếu, Mô phỏng kho ứng dụng “An toàn dữ liệu (Data Safety)” & Infographic 4 Tiêu chí – 4 Câu hỏi, Trò chơi “Trạm kiểm định ứng dụng AI”, Phiếu kiểm duyệt và Rubric 10 điểm.'
+        fileUrl: '/hoc-lieu/6aiab01/bai5/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 5: Đánh giá độ an toàn của Trí tuệ nhân tạo (YCCĐ 6.B2.1 · 01 tiết Blended).'
       },
       {
         id: 'ai6-b5-act-2',
@@ -2242,13 +2371,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b6-act-1',
         moduleId: 'module-lesson-6',
-        title: 'Học liệu tương tác Bài 6: Dữ liệu cá nhân là tài sản của mỗi con người',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 6 – Dữ liệu cá nhân là tài sản của mỗi con người',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai6/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 6 (45 phút trực tuyến): Study Guide 4 chặng, Tình huống An–Minh–Khoa (Hình 6.1), Video “Dấu chân kỹ thuật số” kèm 3 câu neo chặn, Infographic Hình 6.2 & 6.3, Module 3 tình huống pháp lí cùng bạn Minh và Game kéo – thả “Bảo vệ Kho báu dữ liệu” (10 thẻ).'
+        fileUrl: '/hoc-lieu/6aiab01/bai6/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 6: Dữ liệu cá nhân là tài sản của mỗi con người (YCCĐ 6.A3.3 · 01 tiết Trực tuyến).'
       },
       {
         id: 'ai6-b6-act-2',
@@ -2404,13 +2533,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b7-act-1',
         moduleId: 'module-lesson-7',
-        title: 'Học liệu tương tác Bài 7: Quyền riêng tư và Kỹ năng tự vệ số',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 7 – Quyền riêng tư và kỹ năng tự vệ số',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai7/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 7 (45 phút trực tuyến): Study Guide 4 chặng, Khảo sát “Cảnh giác dữ liệu”, Infographic 1 & Quiz đọc hiểu 3 câu, Infographic 2 & Bài tập kéo – thả 6 thẻ tự vệ số, Trò chơi tình huống phân nhánh 3 màn “Xử lí sự cố an toàn dữ liệu” và Phiếu tư vấn hỗ trợ bạn bè.'
+        fileUrl: '/hoc-lieu/6aiab01/bai7/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 7: Quyền riêng tư và kỹ năng tự vệ số (YCCĐ 6.A3.4 · 01 tiết Trực tuyến).'
       },
       {
         id: 'ai6-b7-act-2',
@@ -2566,13 +2695,13 @@ function buildAi6Bai12SeedData() {
       {
         id: 'ai6-b8-act-1',
         moduleId: 'module-lesson-8',
-        title: 'Học liệu tương tác Bài 8: Con người làm chủ Trí tuệ nhân tạo',
+        title: 'Tài liệu đọc: Giới thiệu tổng quan Bài 8 – Con người làm chủ Trí tuệ nhân tạo',
         type: 'document',
-        durationMinutes: 45,
+        durationMinutes: 5,
         isCompleted: false,
         isRequired: true,
-        fileUrl: '/hoc-lieu/6aiab01/bai8/3.LMS.html',
-        description: 'Gói học liệu HTML5 tương tác Bài 8 (Tổng kết chuyên đề): Study Guide & Kiến thức nền tổng hợp Bài 1–7, Bộ 8 Slide trình chiếu, Infographic Quy trình 3 bước ra quyết định, Trò chơi “Ngã rẽ thông minh” (5 tình huống), 4 Thẻ tình huống cặp đôi và Phiếu Vận dụng lớp 6A.'
+        fileUrl: '/hoc-lieu/6aiab01/bai8/0.GioiThieuTongQuan.html',
+        description: 'Tài liệu đọc giới thiệu tổng quan kèm sơ đồ cấu trúc 4 mạch nội dung Bài 8: Con người làm chủ Trí tuệ nhân tạo (YCCĐ 6.A3.1 · 01 tiết Blended).'
       },
       {
         id: 'ai6-b8-act-2',
@@ -2717,6 +2846,20 @@ function buildAi6Bai12SeedData() {
   };
 
   const officialFiles = [
+    ...OFFICIAL_AI_GRADE6_LESSONS.map((lessonTitle, idx) => ({
+      id: `file-ai6-b${idx + 1}-tongquan`,
+      name: `0.GioiThieuTongQuan_Bai${idx + 1}.html`,
+      filename: '0.GioiThieuTongQuan.html',
+      url: `/hoc-lieu/6aiab01/bai${idx + 1}/0.GioiThieuTongQuan.html`,
+      size: idx === 2 ? '25 KB' : '26 KB',
+      mimetype: 'text/html',
+      fileType: 'code',
+      folder: lessonTitle,
+      moduleId: `module-lesson-${idx + 1}`,
+      description: `Tài liệu đọc Giới thiệu tổng quan kèm sơ đồ 4 mạch nội dung chuẩn mẫu M9 cho ${lessonTitle}.`,
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '27/11/2026'
+    })),
     {
       id: 'file-ai6-b1-sgk',
       name: '0.SGK_Bai1_NguonGocAI_QuyenQuyetDinh.docx',
@@ -3187,6 +3330,8 @@ function buildAi6Bai12SeedData() {
 
 function mergeAi6Bai12IntoCourse(courseObj) {
   const { lessonModules, officialFiles, officialSyllabus } = buildAi6Bai12SeedData();
+  const quizBank = loadAi6HoclieuQuiz();
+  lessonModules.forEach(mod => { mod.activities = mod.activities.map(a => attachHoclieuQuiz(a, quizBank)); });
   courseObj.modules = Array.isArray(courseObj.modules) ? courseObj.modules : [];
   for (let i = 0; i < OFFICIAL_AI_GRADE6_LESSONS.length; i++) {
     if (!courseObj.modules[i]) {
@@ -4510,6 +4655,10 @@ app.post('/api/courses/:id/activities/:actId/complete', requireAuth, async (req,
   if (ctx.activity.type === 'quiz') {
     return res.status(400).json({ message: 'Bài trắc nghiệm chỉ được tính hoàn thành khi nộp bài và đạt điểm sàn.' });
   }
+  // Học liệu HTML có bài trắc nghiệm bên trong: chỉ hoàn thành khi nộp bài trong học liệu và đạt điểm sàn
+  if (Array.isArray(ctx.activity.quizQuestions) && ctx.activity.quizQuestions.length > 0 && !isStaff(req.user)) {
+    return res.status(400).json({ message: `Em cần làm bài trắc nghiệm trong học liệu và đạt từ ${Number(ctx.activity.passScore) || 8}/10 điểm để hoàn thành.` });
+  }
   // Chống học sinh bỏ qua neo chặn / chống tua của video bằng cách bấm hoàn thành thủ công
   if (ctx.activity.type === 'video' && !isStaff(req.user)) {
     const cps = Array.isArray(ctx.activity.videoCheckpoints) ? ctx.activity.videoCheckpoints : [];
@@ -4598,7 +4747,21 @@ app.post('/api/courses/:id/activities/:actId/video-progress', requireAuth, async
 
   // Gộp kết quả trả lời các neo chặn video (Video Checkpoints)
   const checkpoints = Array.isArray(ctx.activity.videoCheckpoints) ? ctx.activity.videoCheckpoints : [];
-  const incomingCpResults = (req.body.checkpointResults && typeof req.body.checkpointResults === 'object') ? req.body.checkpointResults : {};
+  const rawCpResults = (req.body.checkpointResults && typeof req.body.checkpointResults === 'object') ? req.body.checkpointResults : {};
+  // Máy chủ tự chấm đúng/sai theo đáp án của neo chặn, không tin giá trị isCorrect do trình duyệt gửi lên
+  const incomingCpResults = {};
+  for (const cp of checkpoints) {
+    const r = rawCpResults[cp.id];
+    if (!r || typeof r !== 'object') continue;
+    const selected = Number.isInteger(r.selectedAnswer) ? r.selectedAnswer : -1;
+    const prev = prevVp.checkpointResults?.[cp.id];
+    incomingCpResults[cp.id] = {
+      ...r,
+      selectedAnswer: selected,
+      isCorrect: selected === cp.correctAnswer || !!prev?.isCorrect,
+      attempts: Math.max(Number(r.attempts) || 1, prev?.attempts || 0)
+    };
+  }
   const mergedCpResults = { ...(prevVp.checkpointResults || {}), ...incomingCpResults };
   const checkpointsTotal = checkpoints.length;
   const checkpointsPassed = checkpoints.filter(cp => {
@@ -5103,7 +5266,7 @@ app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
         submittedCount++;
         if (ap.submission.status !== 'graded') pendingGradingCount++;
       }
-      if (act.type === 'quiz' && ap.quizResult?.answers) {
+      if (hasQuizPart(act) && ap.quizResult?.answers) {
         submittedCount++;
         (act.quizQuestions || []).forEach(q => {
           qAttemptMap.set(q.id, (qAttemptMap.get(q.id) || 0) + 1);
@@ -5114,7 +5277,7 @@ app.get('/api/courses/:id/gradebook', requireAuth, async (req, res) => {
       }
     });
 
-    const questionStats = act.type === 'quiz' && isStaff(req.user)
+    const questionStats = hasQuizPart(act) && isStaff(req.user)
       ? (act.quizQuestions || []).map((q, idx) => {
           const attempts = qAttemptMap.get(q.id) || 0;
           const correct = qCorrectMap.get(q.id) || 0;

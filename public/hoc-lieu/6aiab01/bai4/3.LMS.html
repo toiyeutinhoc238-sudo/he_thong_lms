@@ -1,2751 +1,361 @@
 <!DOCTYPE html>
-<html lang="vi"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>Trọn Bộ Học Liệu Số LMS – Bài 4: Mặt Tích Cực & Tiêu Cực Của Tính Năng AI (Tin học 6)</title> <link rel="preconnect" href="https://fonts.googleapis.com" /> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> <link
-    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
-    rel="stylesheet" /> <style id="shared-styles"> :root {
-      --primary: #1d4ed8;
-      --primary-light: #3b82f6;
-      --primary-bg: #eff6ff;
-      --primary-border: #bfdbfe;
-      --green: #059669;
-      --green-light: #10b981;
-      --green-bg: #ecfdf5;
-      --green-border: #a7f3d0;
-      --orange: #d97706;
-      --orange-strong: #ea580c;
-      --orange-bg: #fff7ed;
-      --orange-border: #fed7aa;
-      --red: #dc2626;
-      --red-bg: #fef2f2;
-      --red-border: #fecaca;
-      --purple: #7c3aed;
-      --purple-bg: #f5f3ff;
-      --purple-border: #ddd6fe;
-      --slate-900: #0f172a;
-      --slate-800: #1e293b;
-      --slate-700: #334155;
-      --slate-600: #475569;
-      --slate-500: #64748b;
-      --slate-400: #94a3b8;
-      --slate-200: #e2e8f0;
-      --slate-100: #f1f5f9;
-      --slate-50: #f8fafc;
-      --white: #ffffff;
-      --radius-lg: 18px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
-      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
-      --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
-      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--slate-50);
-      color: var(--slate-800);
-      line-height: 1.65;
-      font-size: 15px;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ===== TOP HUB HEADER ===== */
-    .hub-header {
-      background: linear-gradient(135deg, #0f2b7a 0%, #1d4ed8 55%, #0284c7 100%);
-      color: var(--white);
-      padding: 18px 20px 22px;
-      box-shadow: var(--shadow-md);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .hub-header-inner {
-      max-width: 1180px;
-      margin: 0 auto;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    .hub-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .hub-logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    .hub-kicker {
-      font-size: 11.5px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #bfdbfe;
-      font-weight: 700;
-    }
-
-    .hub-title {
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.3;
-      color: #ffffff;
-    }
-
-    .hub-controls {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .mode-switch {
-      display: inline-flex;
-      background: rgba(15, 23, 42, 0.3);
-      padding: 4px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .mode-btn {
-      border: none;
-      background: transparent;
-      color: #dbeafe;
-      font-family: inherit;
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 7px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .mode-btn.active {
-      background: var(--white);
-      color: var(--primary);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    .progress-pill {
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 12.5px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .progress-mini-bar {
-      width: 72px;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-mini-fill {
-      height: 100%;
-      width: 0%;
-      background: #34d399;
-      border-radius: 999px;
-      transition: width 0.4s ease;
-    }
-
-    /* ===== MODULE NAV TABS ===== */
-    .hub-nav-wrap {
-      background: var(--white);
-      border-bottom: 1px solid var(--slate-200);
-      padding: 10px 16px;
-    }
-
-    .hub-nav {
-      max-width: 1180px;
-      margin: 0 auto;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: thin;
-    }
-
-    .nav-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 9px 14px;
-      border-radius: 10px;
-      border: 1.5px solid var(--slate-200);
-      background: var(--slate-50);
-      color: var(--slate-700);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.18s;
-      position: relative;
-    }
-
-    .nav-tab:hover:not(.locked) {
-      border-color: var(--primary-light);
-      background: var(--primary-bg);
-      color: var(--primary);
-    }
-
-    .nav-tab.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: var(--white);
-      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
-    }
-
-    .nav-tab.completed:not(.active) {
-      border-color: var(--green-border);
-      background: var(--green-bg);
-      color: var(--green);
-    }
-
-    .nav-tab.locked {
-      opacity: 0.55;
-      cursor: not-allowed;
-      background: var(--slate-100);
-    }
-
-    .nav-tab.export-tab {
-      border-color: var(--purple-border);
-      background: var(--purple-bg);
-      color: var(--purple);
-      margin-left: auto;
-    }
-
-    .nav-tab.export-tab.active {
-      background: var(--purple);
-      border-color: var(--purple);
-      color: var(--white);
-    }
-
-    /* ===== MAIN CONTAINER ===== */
-    .hub-main {
-      max-width: 1180px;
-      margin: 24px auto 60px;
-      padding: 0 18px;
-    }
-
-    .lms-panel {
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-
-    .lms-panel.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ===== TEACHER EXPORT BAR PER MODULE ===== */
-    .module-export-bar {
-      background: linear-gradient(90deg, #f5f3ff, #eff6ff);
-      border: 1.5px dashed #8b5cf6;
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      margin-bottom: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .module-export-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--slate-700);
-    }
-
-    .module-export-badge {
-      background: var(--purple);
-      color: var(--white);
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .module-export-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    body.student-mode .teacher-only,
-    body.student-mode .module-export-bar {
-      display: none !important;
-    }
-
-    /* ===== CARDS & TYPOGRAPHY ===== */
-    .card {
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: var(--shadow-sm);
-      margin-bottom: 20px;
-    }
-
-    .card-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--slate-100);
-    }
-
-    .card-title {
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--slate-900);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 11px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .tag-blue {
-      background: var(--primary-bg);
-      color: var(--primary);
-      border: 1px solid var(--primary-border);
-    }
-
-    .tag-green {
-      background: var(--green-bg);
-      color: var(--green);
-      border: 1px solid var(--green-border);
-    }
-
-    .tag-orange {
-      background: var(--orange-bg);
-      color: var(--orange-strong);
-      border: 1px solid var(--orange-border);
-    }
-
-    .tag-red {
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid var(--red-border);
-    }
-
-    .tag-purple {
-      background: var(--purple-bg);
-      color: var(--purple);
-      border: 1px solid var(--purple-border);
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: none;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s;
-      text-decoration: none;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-sm {
-      padding: 7px 13px;
-      font-size: 12.5px;
-      border-radius: 8px;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: var(--white);
-      box-shadow: 0 3px 10px rgba(29, 78, 216, 0.25);
-    }
-
-    .btn-primary:hover {
-      background: #1e40af;
-    }
-
-    .btn-green {
-      background: var(--green);
-      color: var(--white);
-      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
-    }
-
-    .btn-green:hover {
-      background: #047857;
-    }
-
-    .btn-orange {
-      background: var(--orange-strong);
-      color: var(--white);
-    }
-
-    .btn-orange:hover {
-      background: #c2410c;
-    }
-
-    .btn-purple {
-      background: var(--purple);
-      color: var(--white);
-    }
-
-    .btn-purple:hover {
-      background: #6d28d9;
-    }
-
-    .btn-outline {
-      background: var(--white);
-      color: var(--slate-700);
-      border: 1.5px solid var(--slate-200);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: var(--primary-bg);
-    }
-
-    .btn-soft-blue {
-      background: var(--primary-bg);
-      color: var(--primary);
-      border: 1px solid var(--primary-border);
-    }
-
-    .btn-soft-blue:hover {
-      background: #dbeafe;
-    }
-
-    /* ===== CALLOUT BOXES ===== */
-    .callout {
-      border-radius: var(--radius-md);
-      padding: 16px 18px;
-      margin: 14px 0;
-      border-left: 4px solid;
-    }
-
-    .callout-blue {
-      background: var(--primary-bg);
-      border-color: var(--primary);
-      color: #1e3a8a;
-    }
-
-    .callout-green {
-      background: var(--green-bg);
-      border-color: var(--green);
-      color: #065f46;
-    }
-
-    .callout-orange {
-      background: var(--orange-bg);
-      border-color: var(--orange-strong);
-      color: #9a3412;
-    }
-
-    .callout-purple {
-      background: var(--purple-bg);
-      border-color: var(--purple);
-      color: #5b21b6;
-    }
-
-    .callout-title {
-      font-weight: 800;
-      font-size: 14.5px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    /* ===== MODULE 1: STUDY GUIDE & ROADMAP ===== */
-    .hero-banner {
-      background: linear-gradient(135deg, #eff6ff 0%, #ecfeff 60%, #ecfdf5 100%);
-      border: 1.5px solid var(--primary-border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-
-    .hero-banner h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1e3a8a;
-      margin-bottom: 8px;
-    }
-
-    .roadmap-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 14px;
-      margin-top: 16px;
-    }
-
-    .roadmap-card {
-      background: var(--white);
-      border: 1.5px solid var(--slate-200);
-      border-radius: 14px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-
-    .roadmap-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--primary-light);
-    }
-
-    .step-num {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .roadmap-card h4 {
-      font-size: 15.5px;
-      font-weight: 800;
-      color: var(--slate-900);
-      margin-bottom: 6px;
-    }
-
-    .roadmap-card p {
-      font-size: 13.5px;
-      color: var(--slate-600);
-      margin-bottom: 12px;
-    }
-
-    .prereq-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-      margin: 14px 0;
-    }
-
-    .prereq-item {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 12px;
-      padding: 15px;
-    }
-
-    .prereq-item strong {
-      color: var(--primary);
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    /* Comic dialogue (SGK Story) */
-    .story-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .chat-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .chat-bubble {
-      padding: 12px 15px;
-      border-radius: 14px;
-      border: 1px solid var(--slate-200);
-      font-size: 14px;
-    }
-
-    .chat-minh {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-    }
-
-    .chat-khoa {
-      background: #ecfdf5;
-      border-color: #a7f3d0;
-    }
-
-    .chat-an {
-      background: #fff7ed;
-      border-color: #fed7aa;
-    }
-
-    .chat-speaker {
-      font-weight: 800;
-      font-size: 13px;
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ===== FORMS (MODULE 2 & MODULE 5) ===== */
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      display: block;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--slate-800);
-      margin-bottom: 6px;
-    }
-
-    .form-req {
-      color: var(--red);
-      margin-left: 3px;
-    }
-
-    .form-input,
-    .form-select,
-    .form-textarea {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 10px;
-      border: 1.5px solid var(--slate-200);
-      font-family: inherit;
-      font-size: 14.5px;
-      color: var(--slate-800);
-      background: var(--white);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
-    }
-
-    .form-textarea {
-      min-height: 92px;
-      resize: vertical;
-    }
-
-    .radio-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-    }
-
-    .radio-card {
-      border: 1.5px solid var(--slate-200);
-      border-radius: 10px;
-      padding: 11px 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      background: var(--slate-50);
-      transition: all 0.18s;
-    }
-
-    .radio-card:hover {
-      border-color: var(--primary-light);
-      background: var(--primary-bg);
-    }
-
-    .radio-card input {
-      accent-color: var(--primary);
-      width: 17px;
-      height: 17px;
-    }
-
-    .radio-card.selected {
-      border-color: var(--primary);
-      background: var(--primary-bg);
-      color: var(--primary);
-    }
-
-    /* ===== MODULE 3A: ANIMATED VIDEO EXPLAINER ===== */
-    .sub-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
-    .sub-tab {
-      padding: 9px 15px;
-      border-radius: 10px;
-      border: 1.5px solid var(--slate-200);
-      background: var(--white);
-      color: var(--slate-700);
-      font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-
-    .sub-tab.active {
-      background: #0f2b7a;
-      color: var(--white);
-      border-color: #0f2b7a;
-    }
-
-    .sub-panel {
-      display: none;
-    }
-
-    .sub-panel.active {
-      display: block;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .video-stage {
-      background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-      border-radius: 16px;
-      overflow: hidden;
-      border: 2px solid #334155;
-      color: var(--white);
-      position: relative;
-    }
-
-    .video-viewport {
-      min-height: 360px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: relative;
-    }
-
-    .video-controls-bar {
-      background: rgba(15, 23, 42, 0.92);
-      padding: 12px 18px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .scene-dots {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .scene-dot {
-      padding: 5px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: #cbd5e1;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .scene-dot.active {
-      background: #3b82f6;
-      color: #fff;
-      border-color: #60a5fa;
-    }
-
-    /* ===== MODULE 3B: INFOGRAPHIC ===== */
-    .info-board {
-      border: 2px solid var(--primary-border);
-      border-radius: 18px;
-      overflow: hidden;
-      background: var(--white);
-      box-shadow: var(--shadow-md);
-      transition: max-width 0.3s ease;
-      margin: 0 auto;
-    }
-
-    .info-board.vertical-mode {
-      max-width: 540px;
-    }
-
-    .info-header {
-      background: linear-gradient(135deg, #1e3a8a, #2563eb);
-      color: var(--white);
-      padding: 20px 24px;
-      text-align: center;
-    }
-
-    .info-header h3 {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-    }
-
-    .info-header p {
-      font-size: 13px;
-      color: #dbeafe;
-      margin-top: 4px;
-    }
-
-    .info-col-heads {
-      display: grid;
-      grid-template-columns: 220px 1fr 1fr;
-      font-weight: 800;
-      font-size: 14px;
-      text-transform: uppercase;
-    }
-
-    .info-board.vertical-mode .info-col-heads {
-      display: none;
-    }
-
-    .info-head-feat {
-      background: var(--slate-100);
-      color: var(--slate-800);
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--slate-200);
-    }
-
-    .info-head-pos {
-      background: #d1fae5;
-      color: #065f46;
-      padding: 12px 16px;
-      border-bottom: 2px solid #10b981;
-      text-align: center;
-    }
-
-    .info-head-neg {
-      background: #ffedd5;
-      color: #9a3412;
-      padding: 12px 16px;
-      border-bottom: 2px solid #f97316;
-      text-align: center;
-    }
-
-    .info-row {
-      display: grid;
-      grid-template-columns: 220px 1fr 1fr;
-      border-bottom: 1px solid var(--slate-200);
-    }
-
-    .info-row:last-child {
-      border-bottom: none;
-    }
-
-    .info-board.vertical-mode .info-row {
-      grid-template-columns: 1fr;
-    }
-
-    .info-cell {
-      padding: 16px;
-    }
-
-    .info-cell-feat {
-      background: var(--slate-50);
-      font-weight: 800;
-      color: var(--slate-900);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      border-right: 1px solid var(--slate-200);
-    }
-
-    .info-cell-pos {
-      background: #f0fdf4;
-      color: #064e3b;
-      border-right: 1px solid #dcfce7;
-    }
-
-    .info-cell-neg {
-      background: #fff7ed;
-      color: #7c2d12;
-    }
-
-    .info-mobile-label {
-      display: none;
-      font-size: 11.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-
-    .info-board.vertical-mode .info-mobile-label {
-      display: block;
-    }
-
-    /* ===== MODULE 3C: SIMULATION GAME ===== */
-    .sim-shell {
-      background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
-      border: 2px solid var(--primary-border);
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: var(--shadow-md);
-    }
-
-    .sim-profile-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      background: var(--white);
-      border: 1px solid var(--primary-border);
-      border-radius: 14px;
-      padding: 14px 18px;
-      margin-bottom: 18px;
-    }
-
-    .sim-avatar-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .sim-avatar {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: #dbeafe;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      border: 2px solid var(--primary-light);
-      flex-shrink: 0;
-    }
-
-    .sim-meters {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .meter-card {
-      background: var(--white);
-      border: 1px solid var(--slate-200);
-      border-radius: 14px;
-      padding: 13px 15px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .meter-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 7px;
-      gap: 6px;
-    }
-
-    .meter-label {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--slate-600);
-    }
-
-    .meter-val {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--slate-900);
-    }
-
-    .meter-track {
-      height: 11px;
-      background: var(--slate-100);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .meter-fill {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.4s;
-    }
-
-    .sim-workspace {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .sim-stage-card {
-      background: var(--white);
-      border: 1.5px solid var(--slate-200);
-      border-radius: 16px;
-      padding: 20px;
-    }
-
-    .sim-choice-btn {
-      width: 100%;
-      text-align: left;
-      background: var(--slate-50);
-      border: 2px solid var(--slate-200);
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-top: 12px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      display: block;
-    }
-
-    .sim-choice-btn:hover {
-      border-color: var(--primary);
-      background: var(--primary-bg);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.12);
-    }
-
-    .sim-choice-head {
-      font-weight: 800;
-      font-size: 14.5px;
-      color: var(--slate-900);
-      margin-bottom: 4px;
-    }
-
-    .sim-choice-meta {
-      font-size: 12.5px;
-      color: var(--slate-600);
-    }
-
-    .bubble-viz-card {
-      background: var(--white);
-      border: 1.5px solid var(--slate-200);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .quiz-option {
-      width: 100%;
-      text-align: left;
-      padding: 12px 15px;
-      border-radius: 12px;
-      border: 1.5px solid var(--slate-200);
-      background: var(--white);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--slate-800);
-      margin-top: 9px;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-
-    .quiz-option:hover:not(:disabled) {
-      border-color: var(--primary);
-      background: var(--primary-bg);
-    }
-
-    .quiz-option.correct {
-      border-color: var(--green);
-      background: var(--green-bg);
-      color: #065f46;
-    }
-
-    .quiz-option.wrong {
-      border-color: var(--red);
-      background: var(--red-bg);
-      color: #991b1b;
-    }
-
-    /* ===== MODULE 4: DRAG & DROP 10 CARDS ===== */
-    .dnd-bank {
-      background: var(--slate-50);
-      border: 2px dashed var(--slate-300, #cbd5e1);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 18px;
-      min-height: 92px;
-    }
-
-    .dnd-bank-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .dnd-columns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .drop-zone {
-      border-radius: 16px;
-      padding: 16px;
-      min-height: 280px;
-      transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .drop-zone-pos {
-      background: #f0fdf4;
-      border: 2.5px dashed #34d399;
-    }
-
-    .drop-zone-neg {
-      background: #fff7ed;
-      border: 2.5px dashed #fb923c;
-    }
-
-    .drop-zone.drag-over {
-      transform: scale(1.01);
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
-    }
-
-    .drop-zone-title {
-      font-size: 16px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 10px;
-      border-bottom: 1.5px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .dnd-card {
-      background: var(--white);
-      border: 1.5px solid var(--slate-200);
-      border-radius: 12px;
-      padding: 12px 13px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--slate-800);
-      cursor: grab;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.18s;
-      user-select: none;
-    }
-
-    .dnd-card:hover {
-      border-color: var(--primary-light);
-      box-shadow: var(--shadow-md);
-    }
-
-    .dnd-card.selected-card {
-      border: 2px solid var(--primary);
-      background: var(--primary-bg);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
-    }
-
-    .dnd-card.card-correct {
-      border: 2px solid var(--green);
-      background: #ecfdf5;
-    }
-
-    .dnd-card.card-wrong {
-      border: 2px solid var(--red);
-      background: #fef2f2;
-    }
-
-    .dnd-card-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-
-    .mini-assign {
-      border: 1px solid var(--slate-200);
-      background: var(--slate-50);
-      font-family: inherit;
-      font-size: 11.5px;
-      font-weight: 700;
-      padding: 4px 9px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .mini-assign.pos:hover {
-      background: #d1fae5;
-      color: #065f46;
-      border-color: #10b981;
-    }
-
-    .mini-assign.neg:hover {
-      background: #ffedd5;
-      color: #9a3412;
-      border-color: #f97316;
-    }
-
-    .card-feedback {
-      margin-top: 8px;
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-
-    /* ===== TABLES (RUBRIC & EXPORT) ===== */
-    .table-wrap {
-      overflow-x: auto;
-      margin: 12px 0;
-      border-radius: 12px;
-      border: 1px solid var(--slate-200);
-    }
-
-    table.styled-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
-      background: var(--white);
-    }
-
-    table.styled-table th {
-      background: var(--slate-100);
-      color: var(--slate-800);
-      font-weight: 800;
-      text-align: left;
-      padding: 12px 14px;
-      border-bottom: 1.5px solid var(--slate-200);
-    }
-
-    table.styled-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--slate-100);
-      vertical-align: top;
-    }
-
-    table.styled-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* ===== FORUM POST CARD ===== */
-    .forum-post {
-      background: var(--slate-50);
-      border: 1.5px solid var(--primary-border);
-      border-radius: 14px;
-      padding: 16px 18px;
-      margin-top: 14px;
-    }
-
-    .forum-post-title {
-      font-size: 15.5px;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-
-    /* ===== TOAST NOTIFICATION ===== */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--slate-900);
-      color: var(--white);
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-size: 13.5px;
-      font-weight: 700;
-      box-shadow: var(--shadow-lg);
-      z-index: 9999;
-      opacity: 0;
-      transform: translateY(14px);
-      pointer-events: none;
-      transition: all 0.25s ease;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 860px) {
-
-      .story-grid,
-      .sim-workspace,
-      .dnd-columns {
-        grid-template-columns: 1fr;
-      }
-
-      .sim-meters {
-        grid-template-columns: 1fr;
-      }
-
-      .info-col-heads {
-        display: none;
-      }
-
-      .info-row {
-        grid-template-columns: 1fr;
-      }
-
-      .info-mobile-label {
-        display: block;
-      }
-
-      .info-cell-feat {
-        border-right: none;
-        border-bottom: 1px solid var(--slate-200);
-      }
-
-      .info-cell-pos {
-        border-right: none;
-        border-bottom: 1px solid #dcfce7;
-      }
-    }
-  </style> <style id="lms-clean-student-overrides"> /* Clean academic LMS presentation: hide teacher export/Moodle/Canvas chrome & enforce crisp Vietnamese typography */
-    body, button, input, select, textarea {
-      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
-    .mode-switch,
-    .teacher-only,
-    .teacher-bar,
-    .module-export-bar,
-    .export-tab,
-    #btn-teacher-mode,
-    [onclick*="exportStandalone"],
-    [onclick*="downloadStandalone"],
-    [onclick*="copyModuleHtml"],
-    [onclick*="copyLMSGuide"],
-    [onclick*="copyM1Html"],
-    [onclick*="exportQuizGIFT"],
-    [onclick*="exportQuizCSV"],
-    [onclick*="copyMoodleGift"],
-    [onclick*="copyGoogleAppsScript"],
-    [onclick*="copyGoogleFormBlueprint"],
-    [onclick*="openExportModal"],
-    [onclick*="copyRubricHTML"],
-    [onclick*="copySlideEmbedSnippet"],
-    [onclick*="copyInfographicHTML"],
-    [onclick*="copyWorksheetHTML"],
-    [onclick*="copyTextTemplate"],
-    [onclick*="copyModuleText"],
-    [onclick*="switchSubtab('m7-tab-teacher'"] {
-      display: none !important;
-    }
-    .lms-toolbar {
-      display: none !important;
-    }
-  </style>
-</head> <body class="student-mode"> <!-- ==================== TOP HUB HEADER ==================== --> <header class="hub-header"> <div class="hub-header-inner"> <div class="hub-brand"> <div class="hub-logo"></div> <div> <div class="hub-kicker">Tin học 6 • Chủ đề B: Đạo đức AI • YCCĐ 6.B1.1 • 45 phút trực tuyến</div> <h1 class="hub-title">Bài 4: Khám phá mặt tích cực và tiêu cực của một số tính năng AI</h1> </div> </div> <div class="hub-controls"> <div class="progress-pill" title="Tiến độ hoàn thành 4 chặng"> <span id="hub-progress-text">Tiến độ: 0/4 chặng</span> <div class="progress-mini-bar"> <div class="progress-mini-fill" id="hub-progress-fill"></div> </div> </div> <div class="mode-switch" role="group" aria-label="Chế độ hiển thị"> <button class="mode-btn active" id="btn-mode-teacher" onclick="setViewMode('teacher')"> Giáo viên (Xuất
-            LMS)</button> <button class="mode-btn" id="btn-mode-student" onclick="setViewMode('student')"> Học sinh (Chốt
-            chặn)</button> </div> </div> </div> </header> <!-- ==================== NAVIGATION TABS ==================== --> <nav class="hub-nav-wrap" aria-label="Các module học liệu Bài 4"> <div class="hub-nav"> <button class="nav-tab active" data-target="panel-mod1" onclick="switchPanel('panel-mod1')"> 1. Study Guide
-        &amp; Nền</button> <button class="nav-tab" data-target="panel-mod2" onclick="switchPanel('panel-mod2')"> 2. HĐ1: Khởi động
-        (5p)</button> <button class="nav-tab" id="tab-mod3" data-target="panel-mod3" onclick="switchPanel('panel-mod3')"> 3. HĐ2: Khám
-        phá KT (15p)</button> <button class="nav-tab" id="tab-mod4" data-target="panel-mod4" onclick="switchPanel('panel-mod4')"> 4. HĐ3:
-        Kéo–Thả 10 thẻ (12p)</button> <button class="nav-tab" id="tab-mod5" data-target="panel-mod5" onclick="switchPanel('panel-mod5')"> 5. HĐ4: Vận
-        dụng &amp; Cầu nối (13p)</button> <button class="nav-tab export-tab teacher-only" data-target="panel-export"
-        onclick="switchPanel('panel-export')"> Trung tâm Xuất Module LMS</button> </div> </nav> <main class="hub-main"> <!-- ==================== MODULE 1: STUDY GUIDE & PREREQUISITES ==================== --> <section id="panel-mod1" class="lms-panel active"> <div class="module-export-bar"> <div class="module-export-info"> <span class="module-export-badge">Thành phần 1 &amp; 2 LMS</span> <span><strong>Đầu trang Bài 4:</strong> Sổ tay hướng dẫn học tập (Study Guide) &amp; Khung kết nối kiến thức
-            nền.</span> </div> <div class="module-export-actions"> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod1-content', 'Module1_StudyGuide_KienThucNen.html', 'Bài 4 – Sổ tay hướng dẫn học tập & Kiến thức nền', [])">⬇
-            Tải file HTML Module 1</button> <button class="btn btn-sm btn-outline"
-            onclick="copyModuleHtml('mod1-content', 'Bài 4 – Study Guide & Kiến thức nền', [])"> Sao chép mã HTML dán
-            LMS</button> </div> </div> <div id="mod1-content"> <div class="hero-banner"> <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"> <span class="tag tag-blue"> Thời gian dự kiến: 45 phút trực tuyến</span> <span class="tag tag-green"> Tin học 6 – Chuyên đề Trí tuệ nhân tạo</span> <span class="tag tag-purple"> Yêu cầu cần đạt: 6.B1.1</span> </div> <h2> HƯỚNG DẪN HỌC TẬP BÀI 4 (STUDY GUIDE)</h2> <p style="font-size:15px;color:#1e293b;"> <strong>Mục tiêu bài học:</strong> Chỉ ra được mặt tích cực và hạn chế của tính năng thu thập dữ liệu để gợi
-            ý nội dung cũng như một số tính năng AI quen thuộc (nhận diện khuôn mặt/giọng nói, tạo sinh văn bản/hình
-            ảnh); đề xuất được biện pháp sử dụng hợp lí để phát huy mặt tích cực và bảo vệ quyền riêng tư.
-          </p> <div class="roadmap-grid"> <div class="roadmap-card"> <div> <div class="step-num" style="color:#1d4ed8;"> Chặng 1 • 5 phút</div> <h4>Khởi động – Trải nghiệm thực tế</h4> <p>Đọc phần Kết nối kiến thức nền, quan sát 10 video đầu trên trang chủ YouTube và gửi kết quả vào biểu
-                  mẫu khảo sát.</p> </div> <button class="btn btn-sm btn-soft-blue" onclick="window.switchPanel && switchPanel('panel-mod2')">Vào
-                Chặng 1 →</button> </div> <div class="roadmap-card"> <div> <div class="step-num" style="color:#059669;"> Chặng 2 • 15 phút</div> <h4>Khám phá kiến thức mới</h4> <p>Xem Video hoạt hình ngắn (3–5p), đọc Infographic “Hai mặt của một số tính năng AI” và chơi Mô phỏng
-                  “Đóng vai thuật toán gợi ý”.</p> </div> <button class="btn btn-sm btn-soft-blue" onclick="window.switchPanel && switchPanel('panel-mod3')">Vào
-                Chặng 2 →</button> </div> <div class="roadmap-card"> <div> <div class="step-num" style="color:#ea580c;"> Chặng 3 • 12 phút</div> <h4>Luyện tập chốt chặn</h4> <p>Thực hiện bài tập kéo – thả phân loại 10 tình huống thực tế (<strong>bắt buộc đạt ≥ 8/10
-                    điểm</strong> để mở khóa Chặng 4).</p> </div> <button class="btn btn-sm btn-soft-blue" onclick="window.switchPanel && switchPanel('panel-mod4')">Vào
-                Chặng 3 →</button> </div> <div class="roadmap-card"> <div> <div class="step-num" style="color:#7c3aed;"> Chặng 4 • 13 phút</div> <h4>Vận dụng &amp; Cầu nối Bài 5</h4> <p>Đăng bài trên Diễn đàn LMS (hoặc Google Form) đề xuất 02 thao tác kĩ thuật kèm cơ sở khoa học và 01
-                  câu hỏi cầu nối Bài 5.</p> </div> <button class="btn btn-sm btn-soft-blue" onclick="window.switchPanel && switchPanel('panel-mod5')">Vào
-                Chặng 4 →</button> </div> </div> </div> <div class="card"> <div class="card-header"> <h3 class="card-title"> KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI HỌC BÀI 4</h3> <span class="tag tag-blue">Prerequisites</span> </div> <div class="prereq-grid"> <div class="prereq-item"> <strong> Từ Bài 1 – Bài 3 (Chủ đề A – Chuyên đề AI)</strong> Em đã biết AI hoạt động dựa trên dữ liệu do con người cung cấp và con người phải luôn kiểm chứng kết quả
-              do AI đưa ra.
-            </div> <div class="prereq-item"> <strong> Từ Bài 7 &amp; Bài 9 môn Tin học 6</strong> Em đã biết cách tìm kiếm thông tin trên Internet và các nguyên tắc cơ bản về an toàn thông tin cá nhân.
-            </div> </div> <div class="callout callout-orange"> <div class="callout-title"> Câu hỏi định hướng:</div> Khi các ứng dụng trực tuyến tự động đề xuất đúng video em yêu thích, hệ thống AI đã thu thập những dữ liệu
-            gì và việc đó mang lại lợi ích hay hạn chế nào?
-          </div> </div> <div class="card"> <div class="card-header"> <h3 class="card-title"> Tình huống Khởi động SGK (Hình 4.1)</h3> <span class="tag tag-green">SGK Tin học 6 – Bài 4</span> </div> <p style="margin-bottom:14px;color:var(--slate-700);"> <em>Buổi sáng, Minh sử dụng máy tính tìm kiếm một số video hướng dẫn làm thí nghiệm Khoa học tự nhiên. Đến
-              chiều, khi mở trang xem video, Minh nhận thấy trang chủ hiển thị hàng loạt video có chủ đề tương tự.</em> </p> <div class="story-grid"> <div class="chat-list"> <div class="chat-bubble chat-minh"> <div class="chat-speaker" style="color:#1d4ed8;"> Minh:</div> “Lạ thật! Sao ứng dụng xem video lại biết đúng chủ đề thí nghiệm khoa học mà tớ vừa tìm kiếm sáng nay
-                vậy nhỉ?”
-              </div> <div class="chat-bubble chat-khoa"> <div class="chat-speaker" style="color:#059669;"> Khoa:</div> “Đó là tính năng hệ thống gợi ý của AI đấy Minh! Thuật toán AI ghi nhận lịch sử tìm kiếm và lượt xem của
-                cậu để đề xuất nội dung phù hợp.”
-              </div> <div class="chat-bubble chat-an"> <div class="chat-speaker" style="color:#ea580c;"> An:</div> “Tính năng này giúp tìm bài học nhanh hơn thật, nhưng nếu thuật toán thu thập nhiều dữ liệu và chỉ gợi ý
-                một loại nội dung thì có hạn chế gì không nhỉ? Chúng ta cùng tìm hiểu nhé!”
-              </div> </div> <div
-              style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:14px;padding:14px;text-align:center;"> <svg viewBox="0 0 360 220" width="100%" style="max-width:360px;height:auto;display:block;margin:0 auto;"> <rect x="10" y="10" width="340" height="190" rx="14" fill="#1e293b" /> <rect x="20" y="20" width="320" height="160" rx="8" fill="#ffffff" /> <rect x="20" y="20" width="320" height="28" rx="8" fill="#ef4444" /> <circle cx="38" cy="34" r="6" fill="#ffffff" /> <polygon points="36,31 36,37 42,34" fill="#ef4444" /> <text x="52" y="38" font-size="11" font-weight="bold" fill="#ffffff" font-family="sans-serif">Trang chủ
-                  Video – Đề xuất cho Minh</text> <!-- 4 recommended video thumbnails --> <rect x="30" y="58" width="142" height="52" rx="6" fill="#dbeafe" stroke="#93c5fd" /> <text x="40" y="79" font-size="11" font-weight="bold" fill="#1e3a8a" font-family="sans-serif"> Thí
-                  nghiệm Núi lửa</text> <text x="40" y="96" font-size="9.5" fill="#2563eb" font-family="sans-serif">AI gợi ý • Trùng lịch sử
-                  tìm</text> <rect x="184" y="58" width="146" height="52" rx="6" fill="#dcfce7" stroke="#86efac" /> <text x="194" y="79" font-size="11" font-weight="bold" fill="#065f46" font-family="sans-serif"> Khoa
-                  học tự nhiên 6</text> <text x="194" y="96" font-size="9.5" fill="#059669" font-family="sans-serif">AI gợi ý • Phù hợp sở
-                  thích</text> <rect x="30" y="118" width="142" height="52" rx="6" fill="#ffedd5" stroke="#fdba74" /> <text x="40" y="139" font-size="11" font-weight="bold" fill="#9a3412" font-family="sans-serif"> 10 thí
-                  nghiệm tại nhà</text> <text x="40" y="156" font-size="9.5" fill="#ea580c" font-family="sans-serif">Tự động phát tiếp
-                  theo</text> <rect x="184" y="118" width="146" height="52" rx="6" fill="#ede9fe" stroke="#c4b5fd" /> <text x="194" y="139" font-size="11" font-weight="bold" fill="#5b21b6" font-family="sans-serif"> Lắp
-                  ráp mô hình KHTN</text> <text x="194" y="156" font-size="9.5" fill="#7c3aed" font-family="sans-serif">Đề xuất dựa trên lượt
-                  xem</text> <rect x="135" y="200" width="90" height="8" rx="4" fill="#475569" /> </svg> <div style="font-size:12.5px;color:var(--slate-600);margin-top:8px;font-weight:600;"> Hình 4.1. Minh trao đổi với An và Khoa về danh sách video được hệ thống AI gợi ý
-              </div> </div> </div> <div style="margin-top:16px;text-align:right;"> <button class="btn btn-primary" onclick="window.switchPanel && switchPanel('panel-mod2')">Bắt đầu Hoạt động
-              1: Khởi động →</button> </div> </div> </div> </section> <!-- ==================== MODULE 2: HOẠT ĐỘNG 1 - KHỞI ĐỘNG ==================== --> <section id="panel-mod2" class="lms-panel"> <div class="module-export-bar"> <div class="module-export-info"> <span class="module-export-badge">Hoạt động 1 • 5 phút</span> <span><strong>Khởi động "Trang chủ video của em":</strong> Form khảo sát tương tác hoặc nhúng Google Form thật
-            của GV.</span> </div> <div class="module-export-actions"> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod2-content', 'Module2_KhoiDong_KhaoSat.html', 'Hoạt động 1 – Khảo sát Khởi động Bài 4', ['script-mod-2'])">⬇
-            Tải file HTML Module 2</button> <button class="btn btn-sm btn-outline"
-            onclick="copyModuleHtml('mod2-content', 'Hoạt động 1 – Khảo sát Khởi động Bài 4', ['script-mod-2'])"> Sao
-            chép mã HTML</button> </div> </div> <!-- Teacher config for Google Form embed --> <div class="card teacher-only" style="border:1.5px solid var(--purple-border);background:#faf5ff;"> <div style="font-weight:800;color:var(--purple);margin-bottom:8px;"> Cấu hình nhanh cho Giáo viên (Tùy chọn
-          nhúng Google Form thật)</div> <p style="font-size:13.5px;color:var(--slate-700);margin-bottom:10px;"> Nếu thầy/cô đã tạo Google Form theo cấu trúc 5 câu ở Mục 1.3 và liên kết Google Sheets, hãy dán đường dẫn
-          nhúng (<code>https://docs.google.com/forms/d/e/.../viewform?embedded=true</code>) vào ô dưới đây để thay thế
-          Form mẫu. Khi tải file HTML Module 2, mã nhúng Google Form sẽ được tích hợp sẵn!
-        </p> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <input type="text" id="gf-h1-url" class="form-input" style="flex:1;min-width:260px;"
-            placeholder="Dán link nhúng Google Form (embedded=true) hoặc để trống để dùng Form tương tác tích hợp sẵn..." /> <button class="btn btn-sm btn-purple" onclick="applyGoogleFormH1()">Áp dụng nhúng Google Form</button> <button class="btn btn-sm btn-outline" onclick="resetGoogleFormH1()">Dùng Form tương tác sẵn có</button> </div> </div> <div id="mod2-content"> <div class="card"> <div class="card-header"> <h2 class="card-title"> HOẠT ĐỘNG 1: KHỞI ĐỘNG – “TRANG CHỦ VIDEO CỦA EM”</h2> <span class="tag tag-blue"> 5 phút • Thành phần 2 LMS</span> </div> <div class="callout callout-blue"> <div class="callout-title"> Hướng dẫn 3 bước thực hiện:</div> <ol style="padding-left:20px;margin-top:4px;font-size:14.5px;"> <li><strong>Thao tác 1:</strong> Mở trang chủ YouTube trên máy tính hoặc điện thoại của em, quan sát
-                <strong>10 video đầu tiên</strong> xuất hiện.</li> <li><strong>Thao tác 2:</strong> Đếm số video trùng khớp hoặc liên quan trực tiếp đến chủ đề em vừa xem
-                hoặc tìm kiếm gần đây.</li> <li><strong>Thao tác 3:</strong> Ghi số liệu vào SGK Bài 4 và điền phiếu khảo sát bên dưới (thực hiện
-                trong 5 phút).</li> </ol> </div> <div id="h1-gform-container" style="display:none;margin-top:16px;"> <iframe id="h1-gform-iframe" src="" width="100%" height="680" frameborder="0"
-              style="border-radius:12px;border:1px solid #cbd5e1;background:#fff;">Đang tải biểu mẫu…</iframe> <div style="margin-top:12px;text-align:right;"> <button class="btn btn-green" onclick="markH1DoneFromExternal()">✓ Em đã bấm Gửi Google Form – Sang Hoạt
-                động 2 →</button> </div> </div> <form id="h1-survey-form" onsubmit="submitH1Survey(event)" style="margin-top:18px;"> <div
-              style="background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:12px;padding:14px 16px;margin-bottom:18px;"> <strong style="color:var(--primary);font-size:15px;">[TIN HỌC 6 – AI] KHẢO SÁT KHỞI ĐỘNG BÀI 4</strong> <p style="font-size:13.5px;color:var(--slate-600);margin-top:3px;">Quan sát 10 video đầu tiên trên trang
-                chủ YouTube cá nhân và điền đầy đủ thông tin dưới đây.</p> </div> <div style="display:grid;grid-template-columns:1.4fr 0.6fr;gap:14px;"> <div class="form-group"> <label class="form-label" for="h1-name">Câu 1. Họ và tên học sinh <span
-                    class="form-req">*</span></label> <input type="text" id="h1-name" class="form-input" required placeholder="Nhập họ và tên của em..." /> </div> <div class="form-group"> <label class="form-label" for="h1-class">Câu 2. Lớp <span class="form-req">*</span></label> <select id="h1-class" class="form-select" required> <option value="">-- Chọn lớp --</option> <option>6A1</option> <option>6A2</option> <option>6A3</option> <option>6A4</option> <option>6A5</option> <option>6A6</option> </select> </div> </div> <div class="form-group"> <label class="form-label">Câu 3. Trong 10 video đầu tiên trên trang chủ YouTube của em, có bao nhiêu video
-                trùng khớp với chủ đề em vừa xem hoặc tìm kiếm gần đây? <span class="form-req">*</span></label> <div class="radio-grid" id="h1-radio-group"> <label class="radio-card" onclick="selectH1Radio(this)"><input type="radio" name="h1-count"
-                    value="0–2 video" required /> 0–2 video</label> <label class="radio-card" onclick="selectH1Radio(this)"><input type="radio" name="h1-count"
-                    value="3–5 video" /> 3–5 video</label> <label class="radio-card" onclick="selectH1Radio(this)"><input type="radio" name="h1-count"
-                    value="6–8 video" /> 6–8 video</label> <label class="radio-card" onclick="selectH1Radio(this)"><input type="radio" name="h1-count"
-                    value="9–10 video" /> 9–10 video</label> </div> </div> <div class="form-group"> <label class="form-label" for="h1-feeling">Câu 4. Em hãy viết 1–2 câu nêu cảm nghĩ của mình khi thấy trang
-                chủ tự động đề xuất các video đúng sở thích như vậy. <span class="form-req">*</span></label> <textarea id="h1-feeling" class="form-textarea" required
-                placeholder="Ví dụ: Em thấy rất tiện lợi vì tìm được video yêu thích nhanh, nhưng cũng hơi bất ngờ vì sao ứng dụng lại biết rõ sở thích của em..."></textarea> </div> <div class="form-group"> <label class="form-label" for="h1-file">Câu 5 (Tùy chọn). Tải lên 01 ảnh chụp màn hình trang chủ YouTube
-                minh chứng (.png/.jpg, tối đa 5MB)</label> <input type="file" id="h1-file" class="form-input" accept="image/png,image/jpeg"
-                onchange="previewH1Image(event)" /> <div id="h1-img-preview" style="margin-top:10px;display:none;"> <img id="h1-preview-el" alt="Ảnh minh chứng"
-                  style="max-height:180px;border-radius:10px;border:1px solid #cbd5e1;" /> </div> </div> <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;"> <button type="submit" class="btn btn-primary"> Gửi kết quả Khởi động</button> <button type="reset" class="btn btn-outline" onclick="resetH1Visual()">Làm mới phiếu</button> </div> </form> <div id="h1-result-box" style="display:none;margin-top:20px;"> <div class="callout callout-green" style="border-width:2px;"> <div class="callout-title"> Gửi phiếu khảo sát thành công!</div> <p style="font-size:15px;font-weight:600;margin-bottom:10px;"> “Cảm ơn em đã hoàn thành Khởi động! Em vừa trực tiếp trải nghiệm Hệ thống gợi ý của AI. Hãy quay lại LMS
-                và bước sang Hoạt động 2 để tìm hiểu cơ chế hoạt động của thuật toán này nhé!”
-              </p> <div id="h1-summary-detail"
-                style="background:rgba(255,255,255,0.85);padding:12px 14px;border-radius:10px;font-size:13.5px;color:#1e293b;margin-bottom:12px;"> </div> <button class="btn btn-green" onclick="window.switchPanel && switchPanel('panel-mod3')">Bước sang Hoạt
-                động 2: Khám phá kiến thức →</button> </div> </div> </div> </div> </section> <!-- ==================== MODULE 3: HOẠT ĐỘNG 2 - HÌNH THÀNH KIẾN THỨC MỚI ==================== --> <section id="panel-mod3" class="lms-panel"> <div class="module-export-bar"> <div class="module-export-info"> <span class="module-export-badge">Hoạt động 2 • 15 phút</span> <span><strong>3 học liệu vi mô (Microlearning):</strong> Video hoạt hình (3A) + Infographic PNG (3B) + Game Mô
-            phỏng AI (3C). Có thể xuất riêng từng học liệu!</span> </div> <div class="module-export-actions"> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod3a-content', 'Module3A_Video_ThuatToanGoiY.html', 'Học liệu 3A – Video Cơ chế Thuật toán Gợi ý', ['script-mod-3a'])">⬇
-            Tải 3A (Video)</button> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod3b-content', 'Module3B_Infographic_HaiMatAI.html', 'Học liệu 3B – Infographic Hai mặt của một số tính năng AI', ['script-mod-3b'])">⬇
-            Tải 3B (Infographic)</button> <button class="btn btn-sm btn-green"
-            onclick="exportStandaloneModule('mod3c-content', 'Module3C_Game_MoPhong_HeThongGoiY_AI.html', 'Trò chơi Mô phỏng Hệ thống Gợi ý AI – Bài 4', ['script-mod-3c'])">⬇
-            Tải 3C (Game Mô phỏng)</button> </div> </div> <div class="sub-tabs" role="tablist"> <button class="sub-tab active" data-sub="sub-3a" onclick="switchSubTab('sub-3a', this)"> 3A. Video Cơ chế
-          Thuật toán (3–5p)</button> <button class="sub-tab" data-sub="sub-3b" onclick="switchSubTab('sub-3b', this)"> 3B. Infographic Hai mặt AI
-          (Hình 4.2)</button> <button class="sub-tab" data-sub="sub-3c" onclick="switchSubTab('sub-3c', this)"> 3C. Game Mô phỏng “Đóng vai
-          thuật toán” (8p)</button> </div> <!-- ===== SUB-MODULE 3A: VIDEO HOẠT HÌNH ===== --> <div id="sub-3a" class="sub-panel active"> <div class="card teacher-only" style="border:1.5px solid var(--purple-border);background:#faf5ff;"> <div style="font-weight:800;color:var(--purple);margin-bottom:8px;"> Ghi chú tìm Video YouTube (Mục 2.1)
-            &amp; Nhúng link thật cho LMS</div> <div style="font-size:13.5px;color:var(--slate-700);display:grid;gap:6px;margin-bottom:12px;"> <div><strong>• Từ khóa tiếng Việt:</strong> “Thuật toán mạng xã hội hoạt động như thế nào”, “Bong bóng thông
-              tin filter bubble là gì”, “Cách thuật toán YouTube gợi ý video”.</div> <div><strong>• Từ khóa tiếng Anh (có phụ đề Việt):</strong> “How do recommendation algorithms work for
-              kids”, “Filter bubbles and algorithms explained”, “Code.org How AI Works”.</div> <div><strong>• 3 tiêu chí chọn clip chuẩn:</strong> (1) Thu thập hành vi (lượt nhấp, thời gian xem, lượt
-              thích, tìm kiếm); (2) Tối ưu tương tác/giữ chân người dùng; (3) Hệ quả “Bong bóng thông tin” &amp; gia
-              tăng thu thập dữ liệu cá nhân.</div> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <input type="text" id="yt-url-input" class="form-input" style="flex:1;min-width:260px;"
-              placeholder="Dán link YouTube (vd: https://www.youtube.com/watch?v=...) để thay thế bản hoạt hình có sẵn..." /> <button class="btn btn-sm btn-purple" onclick="applyYoutubeUrl()">Nhúng Video YouTube</button> <button class="btn btn-sm btn-outline" onclick="resetYoutubeUrl()">Dùng Hoạt hình tương tác sẵn có</button> </div> </div> <div id="mod3a-content"> <div class="card"> <div class="card-header"> <h2 class="card-title"> HỌC LIỆU 3A: CƠ CHẾ HOẠT ĐỘNG CỦA HỆ THỐNG GỢI Ý AI</h2> <span class="tag tag-blue"> 3–5 phút • Microlearning</span> </div> <div class="callout callout-blue" style="margin-top:0;"> <div class="callout-title"> 3 câu hỏi định hướng trước khi xem Video:</div> <ol style="padding-left:20px;margin-top:4px;font-size:14.5px;"> <li>Thuật toán ghi nhận những hành vi nào của người dùng?</li> <li>Hệ thống gợi ý mang lại thuận tiện gì?</li> <li>Điều gì xảy ra nếu em chỉ xem các video thuật toán đề xuất sẵn?</li> </ol> </div> <!-- YouTube embed container (shown if teacher pasted a URL) --> <div id="yt-embed-box" style="display:none;margin:16px 0;"> <div
-                style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;border:2px solid #cbd5e1;background:#000;"> <iframe id="yt-embed-iframe" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen></iframe> </div> </div> <!-- Built-in Interactive 4-Scene Animated Explainer (works 100% offline!) --> <div id="builtin-explainer" class="video-stage" style="margin:16px 0;"> <div class="video-viewport" id="explainer-viewport"> <!-- Rendered dynamically by script-mod-3a --> </div> <div class="video-controls-bar"> <div style="display:flex;gap:8px;align-items:center;"> <button class="btn btn-sm btn-primary" id="btn-exp-play" onclick="toggleExplainerPlay()">▶ Tự động
-                    phát</button> <button class="btn btn-sm btn-outline"
-                    style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);"
-                    onclick="stepExplainer(-1)"> Trước</button> <button class="btn btn-sm btn-outline"
-                    style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);"
-                    onclick="stepExplainer(1)">Tiếp </button> </div> <div class="scene-dots"> <button class="scene-dot active" onclick="goExplainerScene(0)">Cảnh 1: Thu thập</button> <button class="scene-dot" onclick="goExplainerScene(1)">Cảnh 2: Gợi ý</button> <button class="scene-dot" onclick="goExplainerScene(2)">Cảnh 3: Bong bóng</button> <button class="scene-dot" onclick="goExplainerScene(3)">Cảnh 4: Ghi nhớ</button> </div> </div> </div> <div
-              style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;"> <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--green);cursor:pointer;"> <input type="checkbox" id="chk-video-done" onchange="checkMod3Progress()"
-                  style="width:18px;height:18px;accent-color:#059669;" /> Em đã xem hết Video và tự trả lời được 3 câu hỏi định hướng
-              </label> <button class="btn btn-primary"
-                onclick="window.switchSubTab && switchSubTab('sub-3b', document.querySelector('[data-sub=sub-3b]'))">Tiếp
-                tục: Xem Infographic (3B) →</button> </div> </div> </div> </div> <!-- ===== SUB-MODULE 3B: INFOGRAPHIC HAI MẶT AI ===== --> <div id="sub-3b" class="sub-panel"> <div class="card" style="background:#f8fafc;border:1.5px solid var(--primary-border);padding:14px 18px;"> <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;"> <div style="font-size:13.5px;font-weight:700;color:var(--slate-700);"> Tùy chọn hiển thị &amp; Tải ảnh PNG Infographic (dùng chung cho <strong>LMS</strong> &amp;
-              <strong>Hình 4.2 SGK</strong>):
-            </div> <div style="display:flex;flex-wrap:wrap;gap:8px;"> <button class="btn btn-sm btn-soft-blue" id="btn-info-horiz"
-                onclick="setInfographicLayout('horizontal')"> Bản ngang (SGK 14,5 × 4,9 cm)</button> <button class="btn btn-sm btn-outline" id="btn-info-vert" onclick="setInfographicLayout('vertical')"> Bản dọc (LMS 1080 × 1920 px)</button> <button class="btn btn-sm btn-green" onclick="downloadInfographicPNG('horizontal')">⬇ Tải ảnh PNG Ngang
-                (SGK)</button> <button class="btn btn-sm btn-purple" onclick="downloadInfographicPNG('vertical')">⬇ Tải ảnh PNG Dọc
-                (LMS)</button> </div> </div> </div> <div id="mod3b-content"> <div class="info-board" id="infographic-board"> <div class="info-header"> <div
-                style="font-size:11.5px;text-transform:uppercase;letter-spacing:0.08em;color:#bfdbfe;font-weight:700;"> TIN HỌC 6 • CHỦ ĐỀ B: ĐẠO ĐỨC AI • BÀI 4 (HÌNH 4.2 SGK)</div> <h3>HAI MẶT CỦA MỘT SỐ TÍNH NĂNG AI</h3> <p>Đối chiếu Mặt tích cực và Mặt hạn chế của 3 tính năng AI phổ biến trong đời sống</p> </div> <div class="info-col-heads"> <div class="info-head-feat"> Tính năng AI</div> <div class="info-head-pos">✓ MẶT TÍCH CỰC</div> <div class="info-head-neg"> MẶT HẠN CHẾ</div> </div> <!-- Row 1 --> <div class="info-row"> <div class="info-cell info-cell-feat"> <div style="font-size:24px;"></div> <div>1. Thu thập dữ liệu để gợi ý nội dung</div> <div style="font-size:12px;font-weight:600;color:var(--primary);">(Recommender Systems)</div> </div> <div class="info-cell info-cell-pos"> <div class="info-mobile-label" style="color:#059669;">✓ MẶT TÍCH CỰC</div> Đề xuất nhanh bài giảng, video, tài liệu đúng sở thích và nhu cầu, giúp <strong>tiết kiệm thời gian tìm
-                  kiếm</strong> và nâng cao trải nghiệm.
-              </div> <div class="info-cell info-cell-neg"> <div class="info-mobile-label" style="color:#ea580c;"> MẶT HẠN CHẾ</div> Thu thập lượng lớn dữ liệu hành vi làm tăng <strong>nguy cơ ảnh hưởng quyền riêng tư</strong>; dễ tạo
-                <strong>“bong bóng thông tin”</strong> làm thu hẹp góc nhìn và dễ xem quá giờ.
-              </div> </div> <!-- Row 2 --> <div class="info-row"> <div class="info-cell info-cell-feat"> <div style="font-size:24px;"></div> <div>2. Nhận diện khuôn mặt, giọng nói</div> <div style="font-size:12px;font-weight:600;color:var(--slate-500);">(Sinh trắc học AI)</div> </div> <div class="info-cell info-cell-pos"> <div class="info-mobile-label" style="color:#059669;">✓ MẶT TÍCH CỰC</div> Mở khóa thiết bị <strong>nhanh chóng, thuận tiện</strong>; hỗ trợ người khuyết tật điều khiển thiết bị
-                bằng giọng nói.
-              </div> <div class="info-cell info-cell-neg"> <div class="info-mobile-label" style="color:#ea580c;"> MẶT HẠN CHẾ</div> Có thể <strong>nhận diện nhầm</strong> khi thiếu sáng hoặc ồn ào; dữ liệu khuôn mặt và giọng nói gắn
-                liền với cơ thể nên gây <strong>rủi ro lớn nếu bị rò rỉ</strong>.
-              </div> </div> <!-- Row 3 --> <div class="info-row"> <div class="info-cell info-cell-feat"> <div style="font-size:24px;"></div> <div>3. Tạo sinh văn bản, hình ảnh tự động</div> <div style="font-size:12px;font-weight:600;color:var(--slate-500);">(Generative AI)</div> </div> <div class="info-cell info-cell-pos"> <div class="info-mobile-label" style="color:#059669;">✓ MẶT TÍCH CỰC</div> Gợi ý ý tưởng học tập, minh họa trực quan và <strong>rút ngắn thời gian soạn thảo</strong>.
-              </div> <div class="info-cell info-cell-neg"> <div class="info-mobile-label" style="color:#ea580c;"> MẶT HẠN CHẾ</div> Nội dung có thể <strong>sai lệch kiến thức</strong> (ảo giác AI), vi phạm bản quyền hoặc làm
-                <strong>giảm tính tự chủ tư duy</strong> nếu lạm dụng.
-              </div> </div> </div> <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px;"> <div class="callout callout-blue" style="margin:0;"> <div class="callout-title"> EM CÓ BIẾT? (SGK Bài 4)</div> Trong phần <strong>Cài đặt</strong> của nhiều trình duyệt web và ứng dụng trực tuyến, người dùng có thể
-              chủ động <em>xóa lịch sử tìm kiếm</em>, <em>xóa lịch sử xem</em> hoặc <em>tắt tính năng cá nhân hóa gợi
-                ý</em> để hạn chế việc hệ thống theo dõi thói quen sử dụng của mình.
-            </div> <div class="callout callout-green" style="margin:0;"> <div class="callout-title"> GIẢI THÍCH THUẬT NGỮ BÀI 4</div> <div style="font-size:13.5px;"> <strong>• Hệ thống gợi ý (Recommender Systems):</strong> Tính năng AI phân tích dữ liệu lịch sử hoạt
-                động của người dùng để dự đoán sở thích và đề xuất nội dung phù hợp.<br /> <strong>• Bong bóng thông tin (Filter Bubbles):</strong> Tình trạng người dùng chỉ tiếp nhận các thông
-                tin lặp lại theo sở thích sẵn có do thuật toán chọn lọc, làm hạn chế tiếp cận các kiến thức đa dạng
-                khác.
-              </div> </div> </div> <div class="card"
-            style="margin-top:16px;padding:16px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;"> <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--green);cursor:pointer;"> <input type="checkbox" id="chk-info-done" onchange="checkMod3Progress()"
-                style="width:18px;height:18px;accent-color:#059669;" /> Em đã đọc kĩ Infographic “Hai mặt của một số tính năng AI”
-            </label> <button class="btn btn-primary"
-              onclick="window.switchSubTab && switchSubTab('sub-3c', document.querySelector('[data-sub=sub-3c]'))">Tiếp
-              tục: Chơi Game Mô phỏng (3C) →</button> </div> </div> </div> <!-- ===== SUB-MODULE 3C: GAME MÔ PHỎNG HỆ THỐNG GỢI Ý AI ===== --> <div id="sub-3c" class="sub-panel"> <div id="mod3c-content"> <div class="sim-shell"> <div
-              style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;"> <div> <span class="tag tag-blue"> TRÒ CHƠI MÔ PHỎNG TƯƠNG TÁC • 8 PHÚT</span> <h2 style="font-size:21px;font-weight:800;color:#1e3a8a;margin-top:6px;">MÔ PHỎNG HỆ THỐNG GỢI Ý AI –
-                  “ĐÓNG VAI THUẬT TOÁN”</h2> </div> <button class="btn btn-sm btn-outline" onclick="resetSimGame()">↻ Chơi lại từ đầu</button> </div> <!-- Profile bar --> <div class="sim-profile-bar"> <div class="sim-avatar-wrap"> <div class="sim-avatar" id="sim-avatar-emoji"></div> <div> <div style="font-weight:800;font-size:15px;color:var(--slate-900);">Hồ sơ người dùng ảo: Bạn Minh (học
-                    sinh lớp 6)</div> <div style="font-size:13px;color:var(--slate-600);" id="sim-minh-status">Đang xem video trên ứng dụng
-                    vào tối Chủ nhật • Tâm trạng: Thoải mái, tò mò học hỏi</div> </div> </div> <span class="tag tag-purple" id="sim-step-badge">Lượt 1 / 3</span> </div> <!-- 3 Live Meters --> <div class="sim-meters"> <div class="meter-card"> <div class="meter-top"> <span class="meter-label"> Thời gian Minh xem màn hình</span> <span class="meter-val" id="sim-time-val">0 phút</span> </div> <div class="meter-track"> <div class="meter-fill" id="sim-time-bar" style="width:0%;background:#3b82f6;"></div> </div> </div> <div class="meter-card"> <div class="meter-top"> <span class="meter-label"> Mức độ “Bong bóng thông tin”</span> <span class="meter-val" id="sim-bubble-val">0%</span> </div> <div class="meter-track"> <div class="meter-fill" id="sim-bubble-bar" style="width:0%;background:#10b981;"></div> </div> </div> <div class="meter-card"> <div class="meter-top"> <span class="meter-label"> Dữ liệu cá nhân bị thu thập</span> <span class="meter-val" id="sim-data-val">0%</span> </div> <div class="meter-track"> <div class="meter-fill" id="sim-data-bar" style="width:0%;background:#f59e0b;"></div> </div> </div> </div> <!-- Main Interactive Area + Circle Visualizer --> <div class="sim-workspace"> <div class="sim-stage-card" id="sim-stage-body"> <!-- Populated dynamically by script-mod-3c --> </div> <div class="bubble-viz-card"> <div style="font-weight:800;font-size:14px;color:var(--slate-800);margin-bottom:6px;"> Góc nhìn thông
-                  tin của Minh</div> <svg id="bubble-svg" viewBox="0 0 260 240" width="100%"
-                  style="max-width:255px;height:auto;display:block;margin:0 auto;"> <!-- Outer world circle --> <circle cx="130" cy="120" r="105" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"
-                    stroke-dasharray="5 5" /> <!-- Diverse topic bubbles (fade out as filter bubble grows) --> <g id="viz-diverse-topics" style="transition:opacity 0.5s;"> <g transform="translate(55,58)"> <circle r="20" fill="#dbeafe" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#1e40af" font-family="sans-serif"> Nhạc</text> </g> <g transform="translate(202,60)"> <circle r="21" fill="#dcfce7" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#065f46" font-family="sans-serif"> Toán</text> </g> <g transform="translate(48,162)"> <circle r="21" fill="#fef3c7" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#92400e" font-family="sans-serif"> Mỹ thuật</text> </g> <g transform="translate(206,166)"> <circle r="21" fill="#f3e8ff" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#6b21a8" font-family="sans-serif"> Thể thao</text> </g> <g transform="translate(130,36)"> <circle r="19" fill="#ffe4e6" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#9f1239" font-family="sans-serif"> Lịch sử</text> </g> <g transform="translate(130,204)"> <circle r="19" fill="#e0f2fe" /><text y="4" text-anchor="middle" font-size="10" font-weight="bold"
-                        fill="#075985" font-family="sans-serif"> Địa lí</text> </g> </g> <!-- Active perspective circle (shrinks as filter bubble rises) --> <circle id="viz-view-circle" cx="130" cy="120" r="96" fill="rgba(59,130,246,0.10)" stroke="#2563eb"
-                    stroke-width="3" style="transition:all 0.6s ease;" /> <!-- Center Minh's single topic --> <circle cx="130" cy="120" r="34" fill="#1d4ed8" /> <text x="130" y="116" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff"
-                    font-family="sans-serif"> Mô hình</text> <text id="viz-center-sub" x="130" y="131" text-anchor="middle" font-size="9.5" fill="#bfdbfe"
-                    font-family="sans-serif">Đa chiều</text> </svg> <div id="viz-caption" style="font-size:12.5px;color:var(--slate-600);margin-top:8px;font-weight:600;"> Góc nhìn đang rộng mở: Minh có cơ hội tiếp cận nhiều lĩnh vực kiến thức khác nhau.
-                </div> </div> </div> </div> </div> </div> </section> <!-- ==================== MODULE 4: HOẠT ĐỘNG 3 - GAME KÉO THẢ 10 THẺ ==================== --> <section id="panel-mod4" class="lms-panel"> <div class="module-export-bar"> <div class="module-export-info"> <span class="module-export-badge">Hoạt động 3 • 12 phút • Chốt chặn</span> <span><strong>Bài tập Kéo – Thả 10 thẻ (HĐ3):</strong> Điều kiện bắt buộc đạt ≥ 8/10 điểm mở khóa Hoạt động 4.
-            Chạy mượt cả chuột &amp; điện thoại!</span> </div> <div class="module-export-actions"> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod4-content', 'Module4_Game_KeoTha_10The_AI.html', 'Hoạt động 3 – Phân loại Hai mặt của Tính năng AI (10 thẻ)', ['script-mod-4'])">⬇
-            Tải file HTML Game Kéo–Thả</button> <button class="btn btn-sm btn-outline"
-            onclick="copyModuleHtml('mod4-content', 'Hoạt động 3 – Phân loại Hai mặt của Tính năng AI', ['script-mod-4'])"> Sao chép mã HTML</button> </div> </div> <div id="mod4-content"> <div class="card"> <div class="card-header"> <div> <h2 class="card-title"> PHÂN LOẠI HAI MẶT CỦA TÍNH NĂNG AI (10 THẺ)</h2> <p style="font-size:13.5px;color:var(--slate-600);margin-top:4px;"> Kéo thả từng thẻ tình huống vào đúng cột <strong>Mặt tích cực</strong> hoặc <strong>Mặt hạn chế</strong> (trên điện thoại: <em>nhấn chọn thẻ rồi nhấn vào cột đích</em>, hoặc bấm nhanh nút <strong>+ Tích cực /
-                  ! Hạn chế</strong>).
-              </p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"> <span class="tag tag-orange"> Yêu cầu chốt chặn: ≥ 8/10 điểm</span> <span class="tag tag-blue" id="dnd-best-score">Điểm cao nhất: 0/10</span> </div> </div> <!-- Card Bank --> <div class="dnd-bank" id="zone-bank" ondragover="allowDrop(event)" ondrop="dropToZone(event, 'bank')"
-            onclick="placeSelectedInto('bank')"> <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;"> <strong style="font-size:14px;color:var(--slate-700);"> Kho thẻ tình huống chưa phân loại (<span
-                  id="count-bank">10</span>/10 thẻ)</strong> <span style="font-size:12.5px;color:var(--slate-500);">Kéo thẻ xuống 2 cột bên dưới hoặc nhấn nút phân
-                loại nhanh trên từng thẻ</span> </div> <div class="dnd-bank-grid" id="list-bank"></div> </div> <!-- Two Drop Columns --> <div class="dnd-columns"> <div class="drop-zone drop-zone-pos" id="zone-pos" ondragover="allowDrop(event)"
-              ondragleave="leaveDrop(event)" ondrop="dropToZone(event, 'pos')" onclick="placeSelectedInto('pos')"> <div class="drop-zone-title" style="color:#065f46;"> <span>✓ MẶT TÍCH CỰC</span> <span class="tag tag-green" id="count-pos">0 thẻ</span> </div> <div id="list-pos" style="display:flex;flex-direction:column;gap:10px;min-height:180px;"></div> </div> <div class="drop-zone drop-zone-neg" id="zone-neg" ondragover="allowDrop(event)"
-              ondragleave="leaveDrop(event)" ondrop="dropToZone(event, 'neg')" onclick="placeSelectedInto('neg')"> <div class="drop-zone-title" style="color:#9a3412;"> <span> MẶT HẠN CHẾ</span> <span class="tag tag-orange" id="count-neg">0 thẻ</span> </div> <div id="list-neg" style="display:flex;flex-direction:column;gap:10px;min-height:180px;"></div> </div> </div> <!-- Controls --> <div
-            style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding-top:8px;"> <div style="display:flex;gap:10px;flex-wrap:wrap;"> <button class="btn btn-primary" onclick="gradeDndGame()">✓ Kiểm tra kết quả</button> <button class="btn btn-outline" onclick="resetDndGame(true)"> Xáo trộn &amp; Làm lại</button> </div> <div style="font-size:13px;color:var(--slate-500);">Cho phép làm lại nhiều lần – Hệ thống ghi nhận điểm cao
-              nhất.</div> </div> <!-- Result Banner --> <div id="dnd-result-area" style="display:none;margin-top:18px;"></div> </div> </div> </section> <!-- ==================== MODULE 5: HOẠT ĐỘNG 4 - VẬN DỤNG & CẦU NỐI BÀI 5 ==================== --> <section id="panel-mod5" class="lms-panel"> <div class="module-export-bar"> <div class="module-export-info"> <span class="module-export-badge">Hoạt động 4 • 13 phút • Thành phần 5 LMS</span> <span><strong>Diễn đàn Vận dụng, Rubric 10đ &amp; Cầu nối Bài 5:</strong> Hỗ trợ Diễn đàn LMS hoặc nhúng
-            Google Form dự phòng (Mục 4.2).</span> </div> <div class="module-export-actions"> <button class="btn btn-sm btn-purple"
-            onclick="exportStandaloneModule('mod5-content', 'Module5_VanDung_Rubric_CauNoiBai5.html', 'Hoạt động 4 – Vận dụng, Rubric 10đ & Cầu nối Bài 5', ['script-mod-5'])">⬇
-            Tải file HTML Module 5</button> <button class="btn btn-sm btn-outline"
-            onclick="copyModuleHtml('mod5-content', 'Hoạt động 4 – Vận dụng & Cầu nối Bài 5', ['script-mod-5'])"> Sao
-            chép mã HTML</button> </div> </div> <!-- Teacher config for Backup Google Form (Mục 4.2) --> <div class="card teacher-only" style="border:1.5px solid var(--purple-border);background:#faf5ff;"> <div style="font-weight:800;color:var(--purple);margin-bottom:8px;"> Phương án dự phòng cho Giáo viên (Mục 4.2
-          – Nếu LMS không bật Forum)</div> <p style="font-size:13.5px;color:var(--slate-700);margin-bottom:10px;"> Nếu hệ thống LMS không có Diễn đàn (Forum), thầy/cô có thể dán link nhúng Google Form nộp bài Vận dụng
-          (<code>...viewform?embedded=true</code>) vào đây để thay thế khung soạn bài bên dưới.
-        </p> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <input type="text" id="gf-h4-url" class="form-input" style="flex:1;min-width:260px;"
-            placeholder="Dán link nhúng Google Form Vận dụng (embedded=true)..." /> <button class="btn btn-sm btn-purple" onclick="applyGoogleFormH4()">Nhúng Google Form dự phòng</button> <button class="btn btn-sm btn-outline" onclick="resetGoogleFormH4()">Dùng khung soạn Diễn đàn sẵn có</button> </div> </div> <div id="mod5-content"> <div class="card"> <div class="card-header"> <h2 class="card-title"> CHỦ ĐỀ DIỄN ĐÀN: BIỆN PHÁP KIỂM SOÁT THUẬT TOÁN GỢI Ý VÀ BẢO VỆ QUYỀN RIÊNG TƯ
-            </h2> <span class="tag tag-purple"> 13 phút • Rubric 10 điểm</span> </div> <div class="callout callout-blue" style="margin-top:0;"> <div class="callout-title"> Điều kiện tham gia &amp; Yêu cầu nhiệm vụ:</div> <p style="font-size:14px;margin-bottom:8px;"> <strong>Điều kiện:</strong> Học sinh đã hoàn thành Hoạt động 3 (đạt tối thiểu <strong>8/10 điểm</strong>).
-              Sau khi phác thảo dàn ý vào SGK Bài 4, em hãy nhấn “Thêm chủ đề mới”, đặt tiêu đề đúng cú pháp
-              <code>[Họ và tên – Lớp]</code> (Ví dụ: <code>[Nguyễn Thu An – 6A1]</code>) và trình bày đầy đủ 3 phần sau:
-            </p> <ol style="padding-left:20px;font-size:14px;display:grid;gap:6px;"> <li><strong>Đề xuất ít nhất 02 thao tác kĩ thuật thực tế</strong> mà em có thể áp dụng ngay trên máy tính
-                hoặc điện thoại để hạn chế “bong bóng thông tin” và bảo vệ quyền riêng tư số.</li> <li><strong>Giải thích cơ sở khoa học</strong> cho từng thao tác (dựa trên cách thuật toán AI thu thập và
-                khai thác dữ liệu người dùng).</li> <li><strong>Nhiệm vụ cầu nối chuẩn bị Bài 5 (Đánh giá độ an toàn của Trí tuệ nhân tạo):</strong> Trước khi
-                tải và sử dụng một ứng dụng AI mới trên mạng, theo em cần đặt ra ít nhất 01 câu hỏi kiểm tra nào để biết
-                ứng dụng đó có an toàn và minh bạch về việc thu thập dữ liệu hay không?</li> </ol> </div> <!-- Rubric Table --> <h3 style="font-size:16px;font-weight:800;color:var(--slate-900);margin:18px 0 8px;"> Bảng tiêu chuẩn chấm
-            điểm (Rubric 3 tiêu chí – Thang điểm 10)</h3> <div class="table-wrap"> <table class="styled-table"> <thead> <tr> <th style="width:22%;">Tiêu chí đánh giá</th> <th style="width:25%;background:#ecfdf5;color:#065f46;">Mức Tốt (Xuất sắc)</th> <th style="width:24%;background:#eff6ff;color:#1e3a8a;">Mức Đạt (Khá / TB)</th> <th style="width:20%;background:#fff7ed;color:#9a3412;">Mức Cần cố gắng</th> <th style="width:9%;text-align:center;">Tối đa</th> </tr> </thead> <tbody> <tr> <td><strong>1. Tính đúng đắn và khả thi của thao tác kĩ thuật</strong><br /><span class="tag tag-blue"
-                      style="margin-top:4px;">Trọng số 50%</span></td> <td><strong>(4.5 – 5.0đ)</strong> Đề xuất từ 02 thao tác kĩ thuật cụ thể trở lên, chính xác, khả thi
-                    cao và thực hiện được ngay trên thiết bị số.</td> <td><strong>(2.5 – 4.0đ)</strong> Chỉ nêu được 01 thao tác chính xác; hoặc nêu 02 thao tác nhưng còn
-                    chung chung, chưa rõ cách thực hiện.</td> <td><strong>(0.0 – 2.0đ)</strong> Đề xuất sai thao tác kĩ thuật, không khả thi hoặc không liên quan
-                    đến kiểm soát thuật toán gợi ý.</td> <td style="text-align:center;font-weight:800;color:var(--primary);">5.0đ</td> </tr> <tr> <td><strong>2. Giải thích cơ sở khoa học theo bản chất thuật toán AI</strong><br /><span
-                      class="tag tag-green" style="margin-top:4px;">Trọng số 30%</span></td> <td><strong>(2.5 – 3.0đ)</strong> Giải thích chuẩn xác, rõ ràng mối liên hệ giữa từng thao tác kĩ
-                    thuật với cơ chế thu thập &amp; phân tích dữ liệu của AI.</td> <td><strong>(1.5 – 2.0đ)</strong> Có giải thích lí do nhưng còn sơ lược, chưa làm rõ bản chất hoạt
-                    động của thuật toán gợi ý.</td> <td><strong>(0.0 – 1.0đ)</strong> Không giải thích cơ sở khoa học hoặc giải thích sai bản chất cách
-                    thuật toán thu thập dữ liệu.</td> <td style="text-align:center;font-weight:800;color:var(--green);">3.0đ</td> </tr> <tr> <td><strong>3. Tính hoàn thiện, trình bày &amp; Nhiệm vụ cầu nối Bài 5</strong><br /><span
-                      class="tag tag-purple" style="margin-top:4px;">Trọng số 20%</span></td> <td><strong>(2.0đ)</strong> Đặt đúng tiêu đề <code>[Họ tên – Lớp]</code>, nộp đúng hạn, không sai
-                    chính tả; hoàn thành đầy đủ câu hỏi cầu nối Bài 5.</td> <td><strong>(1.0đ)</strong> Nộp đúng hạn nhưng còn thiếu câu hỏi cầu nối hoặc mắc lỗi chính tả, diễn
-                    đạt chưa mạch lạc.</td> <td><strong>(0.0đ)</strong> Nộp quá hạn, thiếu mục nội dung bắt buộc hoặc trình bày cẩu thả.</td> <td style="text-align:center;font-weight:800;color:var(--purple);">2.0đ</td> </tr> </tbody> </table> </div> <!-- Backup Google Form container --> <div id="h4-gform-container" style="display:none;margin-top:18px;"> <iframe id="h4-gform-iframe" src="" width="100%" height="720" frameborder="0"
-              style="border-radius:12px;border:1px solid #cbd5e1;background:#fff;">Đang tải biểu mẫu…</iframe> <div style="margin-top:12px;text-align:right;"> <button class="btn btn-green" onclick="markH4DoneExternal()">✓ Xác nhận đã nộp bài Vận dụng</button> </div> </div> <!-- Interactive Forum Composer / Backup Form --> <form id="h4-forum-form" onsubmit="submitH4Post(event)"
-            style="margin-top:20px;background:var(--slate-50);border:1.5px solid var(--slate-200);border-radius:16px;padding:20px;"> <h3 style="font-size:16.5px;font-weight:800;color:var(--primary);margin-bottom:12px;"> Khung soạn bài đăng
-              Diễn đàn / Phiếu nộp Vận dụng Bài 4</h3> <div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:14px;"> <div class="form-group"> <label class="form-label" for="h4-name">Họ và tên học sinh <span class="form-req">*</span></label> <input type="text" id="h4-name" class="form-input" required placeholder="Nhập họ và tên của em..."
-                  oninput="updateH4PreviewTitle()" /> </div> <div class="form-group"> <label class="form-label" for="h4-class">Lớp <span class="form-req">*</span></label> <select id="h4-class" class="form-select" required onchange="updateH4PreviewTitle()"> <option value="">-- Chọn lớp --</option> <option>6A1</option> <option>6A2</option> <option>6A3</option> <option>6A4</option> <option>6A5</option> <option>6A6</option> </select> </div> </div> <div style="font-size:13px;color:var(--slate-600);margin:-6px 0 14px;"> Tiêu đề chuẩn cú pháp tự động: <strong id="h4-auto-title" style="color:var(--primary);">[Họ và tên –
-                Lớp]</strong> </div> <div class="form-group"> <label class="form-label" for="h4-sol1">1. Thao tác kĩ thuật số 1 &amp; Giải thích cơ sở khoa học <span
-                  class="form-req">*</span></label> <textarea id="h4-sol1" class="form-textarea" required
-                placeholder="Nêu rõ thao tác kĩ thuật (ví dụ: Xóa lịch sử xem & tìm kiếm định kì) và giải thích vì sao thao tác này giúp kiểm soát thuật toán gợi ý hoặc bảo vệ quyền riêng tư..."></textarea> </div> <div class="form-group"> <label class="form-label" for="h4-sol2">2. Thao tác kĩ thuật số 2 &amp; Giải thích cơ sở khoa học <span
-                  class="form-req">*</span></label> <textarea id="h4-sol2" class="form-textarea" required
-                placeholder="Nêu rõ thao tác kĩ thuật thứ 2 (ví dụ: Tắt Tự động phát Autoplay / Chế độ ẩn danh / Tắt cá nhân hóa quảng cáo...) và cơ sở khoa học..."></textarea> </div> <div class="form-group"> <label class="form-label" for="h4-bridge">3. Nhiệm vụ cầu nối Bài 5 (Đánh giá độ an toàn của AI) <span
-                  class="form-req">*</span></label> <textarea id="h4-bridge" class="form-textarea" style="min-height:72px;" required
-                placeholder="Trước khi cài đặt hoặc đăng nhập một ứng dụng AI mới, em sẽ đặt câu hỏi kiểm tra nào để biết ứng dụng đó có an toàn và minh bạch về dữ liệu không?"></textarea> </div> <div style="display:flex;gap:10px;flex-wrap:wrap;"> <button type="submit" class="btn btn-primary"> Đăng bài &amp; Kiểm tra chuẩn Rubric</button> <button type="button" class="btn btn-outline" onclick="copyH4PostText()"> Sao chép bài để dán lên Diễn
-                đàn LMS</button> </div> </form> <div id="h4-published-list" style="margin-top:16px;"></div> </div> <!-- Teacher Answer Key & Quick Rubric Grader (Hidden in Student Mode & Exports) --> <div class="card teacher-only" style="border:2px solid #86efac;background:#f0fdf4;"> <div class="card-header" style="border-bottom-color:#bbf7d0;"> <h3 class="card-title" style="color:#065f46;"> Gợi ý đáp án 5 thao tác kĩ thuật chuẩn khoa học (Dành cho
-              Giáo viên chấm Rubric)</h3> <span class="tag tag-green">Mục 4.3 – Không hiển thị khi xuất cho HS</span> </div> <ol style="padding-left:20px;display:grid;gap:10px;font-size:14px;color:#064e3b;"> <li><strong>Xóa lịch sử xem và tìm kiếm định kì:</strong> Vào Cài đặt tài khoản → Xóa lịch sử xem và lịch sử
-              tìm kiếm. <em>Cơ sở khoa học:</em> Lịch sử hoạt động là dữ liệu đầu vào chính để thuật toán dự đoán sở
-              thích; xóa dữ liệu cũ giúp làm mới luồng gợi ý, giảm bám đuổi.</li> <li><strong>Tắt Tự động phát (Autoplay) và đặt giới hạn thời gian:</strong> Chuyển công tắc Tự động phát
-              sang Tắt và cài đặt nhắc nghỉ ngơi sau 45 phút. <em>Cơ sở khoa học:</em> Ngắt chuỗi gợi ý liên hoàn được
-              tối ưu nhằm tối đa hóa thời gian giữ chân người dùng, giúp kiểm soát thời gian sử dụng thiết bị.</li> <li><strong>Sử dụng Chế độ Ẩn danh (Incognito Mode):</strong> Mở cửa sổ Ẩn danh
-              (<code>Ctrl + Shift + N</code>) khi tìm kiếm các chủ đề tạm thời. <em>Cơ sở khoa học:</em> Hạn chế việc
-              nền tảng lưu dữ liệu tìm kiếm nhất thời vào hồ sơ tài khoản cá nhân để phục vụ quảng cáo bám đuổi.</li> <li><strong>Chủ động tìm kiếm nội dung đa chiều:</strong> Chủ động gõ từ khóa tìm kiếm các lĩnh vực khoa
-              học, văn hóa, nghệ thuật phong phú thay vì chỉ nhấp vào danh sách đề xuất sẵn. <em>Cơ sở khoa học:</em> Bổ
-              sung dữ liệu tương tác đa dạng giúp phá vỡ “bong bóng thông tin” một chiều.</li> <li><strong>Tắt tính năng Cá nhân hóa quảng cáo:</strong> Vào mục Cài đặt quyền riêng tư của tài khoản → Tắt
-              tính năng Cá nhân hóa quảng cáo. <em>Cơ sở khoa học:</em> Giảm thiểu việc nền tảng khai thác hồ sơ hành vi
-              chi tiết cho mục đích quảng cáo mục tiêu, bảo vệ quyền riêng tư số.</li> </ol> <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #86efac;"> <strong style="color:#065f46;font-size:14px;"> Công cụ tính điểm nhanh theo Rubric 10đ:</strong> <div
-              style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px;"> <div> <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:4px;">TC1: Thao tác kĩ thuật
-                  (0–5đ)</label> <input type="number" id="rub-c1" class="form-input" min="0" max="5" step="0.5" value="5"
-                  oninput="calcRubricTotal()" /> </div> <div> <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:4px;">TC2: Cơ sở khoa học
-                  (0–3đ)</label> <input type="number" id="rub-c2" class="form-input" min="0" max="3" step="0.5" value="3"
-                  oninput="calcRubricTotal()" /> </div> <div> <label style="font-size:12.5px;font-weight:700;display:block;margin-bottom:4px;">TC3: Trình bày &amp;
-                  Cầu nối (0–2đ)</label> <input type="number" id="rub-c3" class="form-input" min="0" max="2" step="0.5" value="2"
-                  oninput="calcRubricTotal()" /> </div> <div style="display:flex;align-items:flex-end;"> <div
-                  style="background:#059669;color:#fff;padding:11px 16px;border-radius:10px;font-weight:800;width:100%;text-align:center;"
-                  id="rub-total-out">Tổng: 10.0 / 10 điểm (Tốt)</div> </div> </div> </div> </div> </div> </section> <!-- ==================== MODULE 6: TRUNG TÂM XUẤT MODULE LMS (TEACHER ONLY) ==================== --> <section id="panel-export" class="lms-panel teacher-only"> <div class="card"> <div class="card-header"> <div> <h2 class="card-title"> TRUNG TÂM XUẤT TỪNG MODULE HỌC LIỆU SỐ LÊN HỆ THỐNG LMS</h2> <p style="font-size:13.5px;color:var(--slate-600);margin-top:4px;"> Thầy/cô có thể tải riêng từng file <code>.html</code> độc lập (tự chứa đầy đủ CSS &amp; JavaScript, chạy
-              offline/online không lỗi phông chữ) hoặc sao chép mã HTML để dán trực tiếp vào <strong>Moodle, Canvas,
-                OLM, Azota, K12Online, Google Sites</strong>.
-            </p> </div> <span class="tag tag-purple">Chuẩn danh mục Mục 4.2 KHBD</span> </div> <div class="table-wrap"> <table class="styled-table"> <thead> <tr> <th style="width:16%;">Vị trí trên LMS</th> <th style="width:24%;">Học liệu số / Module</th> <th style="width:30%;">Lưu ý thiết lập trên LMS</th> <th style="width:30%;">Thao tác xuất học liệu</th> </tr> </thead> <tbody> <tr> <td><strong>Đầu trang Bài 4</strong><br /><span class="tag tag-blue">TP 1 &amp; 2</span></td> <td><strong>Module 1:</strong> Sổ tay hướng dẫn (Study Guide), Kiến thức nền &amp; Tình huống SGK</td> <td>Dán mã HTML vào Label/Banner đầu trang Bài 4 hoặc upload làm Trang giới thiệu (Page).</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod1-content', 'Module1_StudyGuide_KienThucNen.html', 'Bài 4 – Study Guide & Kiến thức nền', [])">⬇
-                      Tải HTML</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod1-content', 'Bài 4 – Study Guide & Kiến thức nền', [])"> Copy
-                      HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 1</strong><br /><span class="tag tag-blue">Khởi động • 5p</span></td> <td><strong>Module 2:</strong> Khảo sát “Trang chủ video của em” (5 câu + Phản hồi tự động)</td> <td>Dùng ngay Form tương tác hoặc dán link Google Form thật ở Tab 2 rồi tải về để nhúng
-                  <code>&lt;iframe&gt;</code>.</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod2-content', 'Module2_KhoiDong_KhaoSat.html', 'Hoạt động 1 – Khảo sát Khởi động Bài 4', ['script-mod-2'])">⬇
-                      Tải HTML</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod2-content', 'Hoạt động 1 – Khảo sát Khởi động Bài 4', ['script-mod-2'])"> Copy HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 2 (3A)</strong><br /><span class="tag tag-green">Khám phá • 3–5p</span></td> <td><strong>Module 3A:</strong> Video Cơ chế Thuật toán Gợi ý + 3 câu hỏi định hướng</td> <td>Chạy sẵn hoạt hình 4 cảnh HTML5 hoặc dán link YouTube ở Tab 3A trước khi tải file HTML.</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod3a-content', 'Module3A_Video_ThuatToanGoiY.html', 'Học liệu 3A – Video Cơ chế Thuật toán Gợi ý', ['script-mod-3a'])">⬇
-                      Tải HTML</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod3a-content', 'Học liệu 3A – Video Cơ chế Thuật toán Gợi ý', ['script-mod-3a'])"> Copy HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 2 (3B)</strong><br /><span class="tag tag-green">Infographic • Hình 4.2</span> </td> <td><strong>Module 3B:</strong> Infographic “Hai mặt của một số tính năng AI” (HTML + PNG)</td> <td>Tải <strong>PNG Ngang</strong> để chèn Word/SGK Hình 4.2; tải <strong>PNG Dọc (1080×1920)</strong> hoặc HTML để up lên LMS.</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-green" onclick="downloadInfographicPNG('horizontal')"> PNG
-                      Ngang</button> <button class="btn btn-sm btn-green" onclick="downloadInfographicPNG('vertical')"> PNG
-                      Dọc</button> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod3b-content', 'Module3B_Infographic_HaiMatAI.html', 'Infographic Hai mặt của một số tính năng AI', ['script-mod-3b'])">⬇
-                      HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 2 (3C)</strong><br /><span class="tag tag-green">Mô phỏng • 8p</span></td> <td><strong>Module 3C:</strong> Game HTML5 “Đóng vai thuật toán gợi ý” (Bạn Minh – 3 lượt + 2 quiz)</td> <td>Up file HTML5 độc lập lên LMS (thay thế hoặc song song H5P Branching Scenario), chạy tốt cả di động.
-                </td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod3c-content', 'Module3C_Game_MoPhong_HeThongGoiY_AI.html', 'Trò chơi Mô phỏng Hệ thống Gợi ý AI – Bài 4', ['script-mod-3c'])">⬇
-                      Tải Game HTML5</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod3c-content', 'Trò chơi Mô phỏng Hệ thống Gợi ý AI', ['script-mod-3c'])"> Copy HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 3</strong><br /><span class="tag tag-orange">Chốt chặn • 12p</span></td> <td><strong>Module 4:</strong> Game Kéo–Thả 10 thẻ “Phân loại hai mặt tính năng AI”</td> <td>Cài điều kiện đạt <strong>≥ 8/10 điểm</strong> mở khóa HĐ4; hỗ trợ kéo chuột và nhấn chọn trên điện
-                  thoại.</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod4-content', 'Module4_Game_KeoTha_10The_AI.html', 'Hoạt động 3 – Phân loại Hai mặt của Tính năng AI', ['script-mod-4'])">⬇
-                      Tải Game HTML5</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod4-content', 'Hoạt động 3 – Phân loại Hai mặt của Tính năng AI', ['script-mod-4'])"> Copy HTML</button> </div> </td> </tr> <tr> <td><strong>Hoạt động 4</strong><br /><span class="tag tag-purple">Vận dụng • 13p</span></td> <td><strong>Module 5:</strong> Đề bài Diễn đàn LMS, Bảng Rubric 10đ &amp; Cầu nối Bài 5</td> <td>Tự động ẩn phần Đáp án GV khi xuất; có thể nhúng Google Form dự phòng ở Tab 5 trước khi xuất.</td> <td> <div style="display:flex;gap:6px;flex-wrap:wrap;"> <button class="btn btn-sm btn-purple"
-                      onclick="exportStandaloneModule('mod5-content', 'Module5_VanDung_Rubric_CauNoiBai5.html', 'Hoạt động 4 – Vận dụng, Rubric 10đ & Cầu nối Bài 5', ['script-mod-5'])">⬇
-                      Tải HTML</button> <button class="btn btn-sm btn-outline"
-                      onclick="copyModuleHtml('mod5-content', 'Hoạt động 4 – Vận dụng & Cầu nối Bài 5', ['script-mod-5'])"> Copy HTML</button> </div> </td> </tr> </tbody> </table> </div> <div class="callout callout-green" style="margin-top:16px;"> <div class="callout-title"> Mẹo triển khai nhanh lên LMS (Moodle / Canvas / K12Online / OLM / Google Sites):
-          </div> <ul style="padding-left:20px;font-size:13.5px;display:grid;gap:4px;"> <li><strong>Cách 1 (Upload file HTML5 độc lập – Khuyên dùng cho Game 3C &amp; Game 4):</strong> Nhấn <em>⬇
-                Tải HTML</em> → Trên LMS chọn <em>Thêm tài nguyên → Tệp (File)</em> hoặc <em>Nhúng HTML5</em> → Tải tệp
-              <code>.html</code> lên (chọn chế độ hiển thị “Nhúng” hoặc “Mở trong cửa sổ”).</li> <li><strong>Cách 2 (Dán mã nguồn HTML):</strong> Nhấn <em> Copy HTML</em> → Trong trình soạn thảo LMS
-              (Label / Page / Forum), bấm biểu tượng mã nguồn <code>&lt;/&gt;</code> rồi dán trực tiếp.</li> <li><strong>Cách 3 (Dùng nguyên trang này làm Cổng học liệu Bài 4):</strong> Chuyển sang <em> Chế độ Học
-                sinh</em> để trải nghiệm trọn vẹn cơ chế mở khóa chốt chặn 4 chặng trong 45 phút!</li> </ul> </div> <div
-          style="font-size:12.5px;color:var(--slate-500);margin-top:14px;border-top:1px solid var(--slate-200);padding-top:12px;"> <strong>Tài liệu tham khảo khoa học của bài dạy:</strong> (1) Australian Government – Digital Platform
-          Regulators Forum (DP-REG, 2023), <em>Examination of technology: Algorithms – Literature Summary</em> (Section
-          2.B, 2.B.1.2, 2.B.2.3); (2) Bộ GD&amp;ĐT (2020), Công văn số 5512/BGDĐT-GDTrH.
-        </div> </div> </section> </main> <div class="toast" id="toast-el">Đã thực hiện!</div> <!-- ==================== SCRIPT MODULE 2: HOẠT ĐỘNG 1 KHỞI ĐỘNG ==================== --> <script id="script-mod-2"> function selectH1Radio(labelEl) {
-      var group = document.getElementById('h1-radio-group');
-      if (!group) return;
-      var cards = group.querySelectorAll('.radio-card');
-      cards.forEach(function (c) { c.classList.remove('selected'); });
-      labelEl.classList.add('selected');
-    }
-
-    function previewH1Image(ev) {
-      var file = ev.target.files && ev.target.files[0];
-      var box = document.getElementById('h1-img-preview');
-      var img = document.getElementById('h1-preview-el');
-      if (!file) { if (box) box.style.display = 'none'; return; }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ảnh vượt quá dung lượng tối đa 5MB. Em hãy chọn ảnh nhỏ hơn nhé!');
-        ev.target.value = '';
-        return;
-      }
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        img.src = e.target.result;
-        box.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function resetH1Visual() {
-      var group = document.getElementById('h1-radio-group');
-      if (group) group.querySelectorAll('.radio-card').forEach(function (c) { c.classList.remove('selected'); });
-      var box = document.getElementById('h1-img-preview');
-      if (box) box.style.display = 'none';
-      var res = document.getElementById('h1-result-box');
-      if (res) res.style.display = 'none';
-    }
-
-    function submitH1Survey(ev) {
-      ev.preventDefault();
-      var name = document.getElementById('h1-name').value.trim();
-      var cls = document.getElementById('h1-class').value;
-      var checked = document.querySelector('input[name="h1-count"]:checked');
-      var feeling = document.getElementById('h1-feeling').value.trim();
-      if (!name || !cls || !checked || !feeling) return;
-
-      var detail = document.getElementById('h1-summary-detail');
-      detail.innerHTML =
-        '<strong>Học sinh:</strong> ' + escapeHtmlSafe(name) + ' (' + escapeHtmlSafe(cls) + ')<br/>' +
-        '<strong>Số video trùng sở thích/10:</strong> <span style="color:#1d4ed8;font-weight:800;">' + escapeHtmlSafe(checked.value) + '</span><br/>' +
-        '<strong>Cảm nghĩ của em:</strong> “' + escapeHtmlSafe(feeling) + '”';
-
-      document.getElementById('h1-result-box').style.display = 'block';
-      document.getElementById('h1-result-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      if (window.lmsNotifyComplete) window.lmsNotifyComplete('h1');
-    }
-
-    function markH1DoneFromExternal() {
-      if (window.lmsNotifyComplete) window.lmsNotifyComplete('h1');
-      if (window.switchPanel) window.switchPanel('panel-mod3');
-    }
-
-    function escapeHtmlSafe(str) {
-      return String(str).replace(/[&<>"']/g, function (m) {
-        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
-      });
-    }
-  </script> <!-- ==================== SCRIPT MODULE 3A: VIDEO EXPLAINER ==================== --> <script id="script-mod-3a"> var expSceneIdx = 0;
-    var expTimer = null;
-    var expScenes = [
-      {
-        badge: 'CẢNH 1 / 4 • THU THẬP DỮ LIỆU HÀNH VI',
-        title: 'Thuật toán gợi ý ghi nhận những hành vi nào của em?',
-        desc: 'Mỗi khi em mở ứng dụng xem video hoặc tìm kiếm, Hệ thống gợi ý (Recommender Systems) tự động ghi lại 4 tín hiệu hành vi chính để đoán sở thích của em:',
-        svg: '<svg viewBox="0 0 560 175" width="100%" style="max-width:540px;height:auto;margin:10px auto;display:block;">' +
-          '<rect x="10" y="25" width="118" height="115" rx="14" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/>' +
-          '<text x="69" y="68" text-anchor="middle" font-size="28"></text>' +
-          '<text x="69" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif">Lượt nhấp</text>' +
-          '<text x="69" y="118" text-anchor="middle" font-size="11" fill="#bfdbfe" font-family="sans-serif">(Click video)</text>' +
-          '<rect x="148" y="25" width="118" height="115" rx="14" fill="#065f46" stroke="#34d399" stroke-width="2"/>' +
-          '<text x="207" y="68" text-anchor="middle" font-size="28"></text>' +
-          '<text x="207" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif">Thời gian xem</text>' +
-          '<text x="207" y="118" text-anchor="middle" font-size="11" fill="#a7f3d0" font-family="sans-serif">(Xem lâu hay lướt)</text>' +
-          '<rect x="286" y="25" width="118" height="115" rx="14" fill="#7c2d12" stroke="#fb923c" stroke-width="2"/>' +
-          '<text x="345" y="68" text-anchor="middle" font-size="28"></text>' +
-          '<text x="345" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif">Lượt thích</text>' +
-          '<text x="345" y="118" text-anchor="middle" font-size="11" fill="#fed7aa" font-family="sans-serif">(Like, bình luận)</text>' +
-          '<rect x="424" y="25" width="124" height="115" rx="14" fill="#5b21b6" stroke="#c084fc" stroke-width="2"/>' +
-          '<text x="486" y="68" text-anchor="middle" font-size="28"></text>' +
-          '<text x="486" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif">Lịch sử tìm kiếm</text>' +
-          '<text x="486" y="118" text-anchor="middle" font-size="11" fill="#e9d5ff" font-family="sans-serif">(Từ khóa đã gõ)</text>' +
-          '</svg>'
-      },
-      {
-        badge: 'CẢNH 2 / 4 • MỤC TIÊU CỦA NỀN TẢNG',
-        title: 'Tối ưu tương tác & giữ chân người dùng ở lại lâu hơn',
-        desc: 'Từ dữ liệu thu thập được, AI sắp xếp trang chủ ưu tiên các video tương tự. Điều này giúp em tiết kiệm thời gian tìm bài học yêu thích, đồng thời giúp nền tảng tối đa hóa thời gian em ở lại xem (theo DP-REG, 2023).',
-        svg: '<svg viewBox="0 0 560 175" width="100%" style="max-width:540px;height:auto;margin:10px auto;display:block;">' +
-          '<rect x="18" y="45" width="145" height="82" rx="14" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>' +
-          '<text x="90" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#f8fafc" font-family="sans-serif"> Dữ liệu hành vi</text>' +
-          '<text x="90" y="102" text-anchor="middle" font-size="11.5" fill="#93c5fd" font-family="sans-serif">Thí nghiệm KHTN</text>' +
-          '<text x="185" y="93" text-anchor="middle" font-size="24" fill="#38bdf8">➜</text>' +
-          '<rect x="208" y="32" width="145" height="108" rx="18" fill="#1d4ed8" stroke="#93c5fd" stroke-width="2.5"/>' +
-          '<text x="280" y="72" text-anchor="middle" font-size="26"></text>' +
-          '<text x="280" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif">Thuật toán AI</text>' +
-          '<text x="280" y="118" text-anchor="middle" font-size="11" fill="#dbeafe" font-family="sans-serif">Dự đoán sở thích</text>' +
-          '<text x="375" y="93" text-anchor="middle" font-size="24" fill="#34d399">➜</text>' +
-          '<rect x="398" y="45" width="146" height="82" rx="14" fill="#065f46" stroke="#34d399" stroke-width="2"/>' +
-          '<text x="471" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff" font-family="sans-serif"> Trang chủ gợi ý</text>' +
-          '<text x="471" y="102" text-anchor="middle" font-size="11.5" fill="#a7f3d0" font-family="sans-serif">Đúng gu &amp; xem lâu hơn</text>' +
-          '</svg>'
-      },
-      {
-        badge: 'CẢNH 3 / 4 • HỆ QUẢ CẦN CẢNH GIÁC',
-        title: '“Bong bóng thông tin” (Filter Bubbles) & Rủi ro Quyền riêng tư',
-        desc: 'Nếu em chỉ bấm vào video gợi ý sẵn, thuật toán sẽ ngày càng lặp lại 1 chủ đề hẹp → tạo thành “Bong bóng thông tin” làm thu hẹp góc nhìn, dễ xem quá giờ và gia tăng nguy cơ mất kiểm soát dữ liệu cá nhân!',
-        svg: '<svg viewBox="0 0 560 175" width="100%" style="max-width:540px;height:auto;margin:10px auto;display:block;">' +
-          '<circle cx="170" cy="88" r="72" fill="rgba(234,88,12,0.18)" stroke="#fb923c" stroke-width="3" stroke-dasharray="6 4"/>' +
-          '<text x="170" y="72" text-anchor="middle" font-size="26"></text>' +
-          '<text x="170" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#fed7aa" font-family="sans-serif">Bong bóng thông tin</text>' +
-          '<text x="170" y="118" text-anchor="middle" font-size="11" fill="#fdba74" font-family="sans-serif">Chỉ thấy 1 chủ đề lặp lại</text>' +
-          '<rect x="300" y="28" width="235" height="54" rx="12" fill="rgba(220,38,38,0.22)" stroke="#f87171" stroke-width="2"/>' +
-          '<text x="417" y="52" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#fecaca" font-family="sans-serif"> Nguy cơ lộ dữ liệu cá nhân</text>' +
-          '<text x="417" y="70" text-anchor="middle" font-size="11" fill="#fca5a5" font-family="sans-serif">Hồ sơ thói quen bị lưu trữ chặt chẽ</text>' +
-          '<rect x="300" y="95" width="235" height="54" rx="12" fill="rgba(245,158,11,0.22)" stroke="#fbbf24" stroke-width="2"/>' +
-          '<text x="417" y="119" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#fef3c7" font-family="sans-serif"> Xem quá giờ &amp; góc nhìn hẹp</text>' +
-          '<text x="417" y="137" text-anchor="middle" font-size="11" fill="#fde68a" font-family="sans-serif">Bỏ lỡ nhiều kiến thức mới đa chiều</text>' +
-          '</svg>'
-      },
-      {
-        badge: 'CẢNH 4 / 4 • TỔNG KẾT & CHUYỂN BƯỚC',
-        title: 'Hiểu thuật toán để làm chủ công nghệ thông minh!',
-        desc: 'Mọi tính năng AI đều có hai mặt. Em hãy chủ động tìm kiếm nội dung đa dạng, quản lí thời gian xem và khám phá tiếp Infographic (3B) cùng Trò chơi mô phỏng (3C) nhé!',
-        svg: '<svg viewBox="0 0 560 175" width="100%" style="max-width:540px;height:auto;margin:10px auto;display:block;">' +
-          '<rect x="30" y="30" width="235" height="115" rx="16" fill="rgba(16,185,129,0.2)" stroke="#34d399" stroke-width="2"/>' +
-          '<text x="147" y="65" text-anchor="middle" font-size="14" font-weight="bold" fill="#6ee7b7" font-family="sans-serif">✓ MẶT TÍCH CỰC</text>' +
-          '<text x="147" y="92" text-anchor="middle" font-size="12" fill="#ecfdf5" font-family="sans-serif">• Đề xuất đúng nhu cầu học tập</text>' +
-          '<text x="147" y="115" text-anchor="middle" font-size="12" fill="#ecfdf5" font-family="sans-serif">• Tiết kiệm thời gian tìm kiếm</text>' +
-          '<rect x="295" y="30" width="235" height="115" rx="16" fill="rgba(249,115,22,0.2)" stroke="#fb923c" stroke-width="2"/>' +
-          '<text x="412" y="65" text-anchor="middle" font-size="14" font-weight="bold" fill="#fdba74" font-family="sans-serif"> MẶT HẠN CHẾ</text>' +
-          '<text x="412" y="92" text-anchor="middle" font-size="12" fill="#fff7ed" font-family="sans-serif">• Ảnh hưởng quyền riêng tư</text>' +
-          '<text x="412" y="115" text-anchor="middle" font-size="12" fill="#fff7ed" font-family="sans-serif">• Tạo “bong bóng thông tin”</text>' +
-          '</svg>'
-      }
-    ];
-
-    function renderExplainerScene() {
-      var vp = document.getElementById('explainer-viewport');
-      if (!vp) return;
-      var s = expScenes[expSceneIdx];
-      vp.innerHTML =
-        '<span style="background:rgba(59,130,246,0.28);border:1px solid #60a5fa;color:#bfdbfe;padding:4px 12px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:0.05em;">' + s.badge + '</span>' +
-        '<h3 style="font-size:20px;font-weight:800;margin:12px 0 6px;color:#ffffff;">' + s.title + '</h3>' +
-        '<p style="max-width:680px;font-size:14px;color:#cbd5e1;margin-bottom:6px;">' + s.desc + '</p>' +
-        s.svg;
-      document.querySelectorAll('.scene-dot').forEach(function (d, idx) {
-        d.classList.toggle('active', idx === expSceneIdx);
-      });
-      if (expSceneIdx === expScenes.length - 1) {
-        var chk = document.getElementById('chk-video-done');
-        if (chk && !chk.checked) { chk.checked = true; checkMod3Progress(); }
-      }
-    }
-
-    function goExplainerScene(idx) {
-      expSceneIdx = (idx + expScenes.length) % expScenes.length;
-      renderExplainerScene();
-    }
-
-    function stepExplainer(delta) {
-      goExplainerScene(expSceneIdx + delta);
-    }
-
-    function toggleExplainerPlay() {
-      var btn = document.getElementById('btn-exp-play');
-      if (expTimer) {
-        clearInterval(expTimer);
-        expTimer = null;
-        if (btn) btn.textContent = '▶ Tự động phát';
-      } else {
-        if (btn) btn.textContent = '⏸ Tạm dừng';
-        expTimer = setInterval(function () {
-          if (expSceneIdx < expScenes.length - 1) {
-            stepExplainer(1);
-          } else {
-            toggleExplainerPlay();
-          }
-        }, 5500);
-      }
-    }
-
-    function checkMod3Progress() {
-      var v = document.getElementById('chk-video-done');
-      var i = document.getElementById('chk-info-done');
-      if (window.simFinished && (!v || v.checked) && (!i || i.checked)) {
-        if (window.lmsNotifyComplete) window.lmsNotifyComplete('h2');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', renderExplainerScene);
-  </script> <!-- ==================== SCRIPT MODULE 3B: INFOGRAPHIC & PNG EXPORTER ==================== --> <script id="script-mod-3b"> function setInfographicLayout(mode) {
-      var board = document.getElementById('infographic-board');
-      var bH = document.getElementById('btn-info-horiz');
-      var bV = document.getElementById('btn-info-vert');
-      if (!board) return;
-      if (mode === 'vertical') {
-        board.classList.add('vertical-mode');
-        if (bV) { bV.classList.remove('btn-outline'); bV.classList.add('btn-soft-blue'); }
-        if (bH) { bH.classList.remove('btn-soft-blue'); bH.classList.add('btn-outline'); }
-      } else {
-        board.classList.remove('vertical-mode');
-        if (bH) { bH.classList.remove('btn-outline'); bH.classList.add('btn-soft-blue'); }
-        if (bV) { bV.classList.remove('btn-soft-blue'); bV.classList.add('btn-outline'); }
-      }
-    }
-
-    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
-      var words = text.split(' ');
-      var line = '';
-      var currY = y;
-      for (var n = 0; n < words.length; n++) {
-        var testLine = line + words[n] + ' ';
-        var metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          ctx.fillText(line.trim(), x, currY);
-          line = words[n] + ' ';
-          currY += lineHeight;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line.trim(), x, currY);
-      return currY + lineHeight;
-    }
-
-    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
-    }
-
-    function downloadInfographicPNG(orient) {
-      var rows = [
-        {
-          title: '1. Thu thập dữ liệu để gợi ý nội dung',
-          sub: '(Recommender Systems)',
-          pos: 'Đề xuất nhanh bài giảng, video, tài liệu đúng sở thích và nhu cầu, giúp tiết kiệm thời gian tìm kiếm.',
-          neg: 'Thu thập lượng lớn dữ liệu hành vi làm tăng nguy cơ ảnh hưởng quyền riêng tư; dễ tạo “bong bóng thông tin” làm thu hẹp góc nhìn và dễ xem quá giờ.'
-        },
-        {
-          title: '2. Nhận diện khuôn mặt, giọng nói',
-          sub: '(Sinh trắc học AI)',
-          pos: 'Mở khóa thiết bị nhanh chóng, thuận tiện; hỗ trợ người khuyết tật điều khiển thiết bị bằng giọng nói.',
-          neg: 'Có thể nhận diện nhầm khi thiếu sáng hoặc ồn ào; dữ liệu khuôn mặt và giọng nói gắn liền với cơ thể nên gây rủi ro lớn nếu bị rò rỉ.'
-        },
-        {
-          title: '3. Tạo sinh văn bản, hình ảnh tự động',
-          sub: '(Generative AI)',
-          pos: 'Gợi ý ý tưởng học tập, minh họa trực quan và rút ngắn thời gian soạn thảo.',
-          neg: 'Nội dung có thể sai lệch kiến thức (ảo giác AI), vi phạm bản quyền hoặc làm giảm tính tự chủ tư duy nếu lạm dụng.'
-        }
-      ];
-
-      var canvas = document.createElement('canvas');
-      var ctx = canvas.getContext('2d');
-      var font = 'Segoe UI, Arial, sans-serif';
-
-      if (orient === 'vertical') {
-        canvas.width = 1080;
-        canvas.height = 1920;
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(0, 0, 1080, 1920);
-
-        // Header
-        var grad = ctx.createLinearGradient(0, 0, 1080, 240);
-        grad.addColorStop(0, '#1e3a8a');
-        grad.addColorStop(1, '#2563eb');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1080, 230);
-
-        ctx.fillStyle = '#bfdbfe';
-        ctx.font = 'bold 24px ' + font;
-        ctx.textAlign = 'center';
-        ctx.fillText('TIN HỌC 6 • CHỦ ĐỀ B: ĐẠO ĐỨC AI • BÀI 4', 540, 72);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 46px ' + font;
-        ctx.fillText('HAI MẶT CỦA MỘT SỐ TÍNH NĂNG AI', 540, 138);
-        ctx.fillStyle = '#dbeafe';
-        ctx.font = '25px ' + font;
-        ctx.fillText('Đối chiếu Mặt tích cực và Mặt hạn chế của 3 tính năng AI quen thuộc', 540, 188);
-
-        var y = 270;
-        rows.forEach(function (r) {
-          drawRoundRect(ctx, 48, y, 984, 485, 24, '#ffffff', '#cbd5e1');
-          drawRoundRect(ctx, 48, y, 984, 92, 24, '#eff6ff', null);
-          ctx.textAlign = 'left';
-          ctx.fillStyle = '#1e3a8a';
-          ctx.font = 'bold 31px ' + font;
-          ctx.fillText(r.title, 80, y + 48);
-          ctx.fillStyle = '#3b82f6';
-          ctx.font = '600 22px ' + font;
-          ctx.fillText(r.sub, 80, y + 78);
-
-          // Left Positive Box
-          drawRoundRect(ctx, 74, y + 114, 452, 344, 18, '#ecfdf5', '#6ee7b7');
-          ctx.fillStyle = '#065f46';
-          ctx.font = 'bold 26px ' + font;
-          ctx.fillText('✓ MẶT TÍCH CỰC', 100, y + 158);
-          ctx.fillStyle = '#064e3b';
-          ctx.font = '25px ' + font;
-          wrapCanvasText(ctx, r.pos, 100, y + 206, 400, 38);
-
-          // Right Negative Box
-          drawRoundRect(ctx, 554, y + 114, 452, 344, 18, '#fff7ed', '#fdba74');
-          ctx.fillStyle = '#9a3412';
-          ctx.font = 'bold 26px ' + font;
-          ctx.fillText('! MẶT HẠN CHẾ', 580, y + 158);
-          ctx.fillStyle = '#7c2d12';
-          ctx.font = '25px ' + font;
-          wrapCanvasText(ctx, r.neg, 580, y + 206, 400, 38);
-
-          y += 518;
-        });
-
-        // Footer
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#475569';
-        ctx.font = 'bold 22px ' + font;
-        ctx.fillText('Ghi nhớ: Nhận biết hai mặt của AI giúp khai thác hiệu quả và bảo vệ quyền riêng tư số.', 540, 1872);
-      } else {
-        // Horizontal SGK high-res (1650 x 820)
-        canvas.width = 1650;
-        canvas.height = 820;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, 1650, 820);
-
-        var gradH = ctx.createLinearGradient(0, 0, 1650, 115);
-        gradH.addColorStop(0, '#1e3a8a');
-        gradH.addColorStop(1, '#2563eb');
-        ctx.fillStyle = gradH;
-        ctx.fillRect(0, 0, 1650, 112);
-
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 34px ' + font;
-        ctx.fillText('HAI MẶT CỦA MỘT SỐ TÍNH NĂNG AI (HÌNH 4.2 – TIN HỌC 6)', 825, 56);
-        ctx.fillStyle = '#dbeafe';
-        ctx.font = '20px ' + font;
-        ctx.fillText('So sánh Mặt tích cực và Mặt hạn chế của các tính năng AI phổ biến trong đời sống', 825, 90);
-
-        // Column headers
-        ctx.fillStyle = '#f1f5f9'; ctx.fillRect(24, 128, 390, 56);
-        ctx.fillStyle = '#d1fae5'; ctx.fillRect(424, 128, 595, 56);
-        ctx.fillStyle = '#ffedd5'; ctx.fillRect(1029, 128, 597, 56);
-        ctx.font = 'bold 22px ' + font;
-        ctx.fillStyle = '#1e293b'; ctx.fillText('TÍNH NĂNG AI', 219, 164);
-        ctx.fillStyle = '#065f46'; ctx.fillText('✓ MẶT TÍCH CỰC', 721, 164);
-        ctx.fillStyle = '#9a3412'; ctx.fillText('! MẶT HẠN CHẾ', 1327, 164);
-
-        var ry = 196;
-        rows.forEach(function (r) {
-          drawRoundRect(ctx, 24, ry, 390, 186, 12, '#f8fafc', '#cbd5e1');
-          drawRoundRect(ctx, 424, ry, 595, 186, 12, '#f0fdf4', '#86efac');
-          drawRoundRect(ctx, 1029, ry, 597, 186, 12, '#fff7ed', '#fdba74');
-
-          ctx.textAlign = 'left';
-          ctx.fillStyle = '#0f172a'; ctx.font = 'bold 22px ' + font;
-          wrapCanvasText(ctx, r.title, 44, ry + 58, 350, 30);
-          ctx.fillStyle = '#2563eb'; ctx.font = '600 18px ' + font;
-          ctx.fillText(r.sub, 44, ry + 135);
-
-          ctx.fillStyle = '#064e3b'; ctx.font = '22px ' + font;
-          wrapCanvasText(ctx, r.pos, 448, ry + 52, 545, 34);
-
-          ctx.fillStyle = '#7c2d12'; ctx.font = '22px ' + font;
-          wrapCanvasText(ctx, r.neg, 1053, ry + 48, 548, 33);
-          ry += 200;
-        });
-      }
-
-      var link = document.createElement('a');
-      link.download = orient === 'vertical' ? 'Infographic_Bai4_LMS_Doc_1080x1920.png' : 'Infographic_Bai4_Hinh4.2_SGK_Ngang.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      if (window.showToast) window.showToast('Đã tải ảnh Infographic PNG (' + (orient === 'vertical' ? 'Bản dọc LMS' : 'Bản ngang SGK') + ')!');
-    }
-  </script> <!-- ==================== SCRIPT MODULE 3C: GAME MÔ PHỎNG HỆ THỐNG GỢI Ý AI ==================== --> <script id="script-mod-3c"> var simState = {
-      step: 'turn1', // turn1 -> quiz1 -> turn2 -> quiz2 -> turn3 -> summary
-      time: 0,
-      bubble: 10,
-      data: 15,
-      history: [],
-      quiz1Done: false,
-      quiz2Done: false
-    };
-    window.simFinished = false;
-
-    function updateSimDashboard() {
-      var tVal = document.getElementById('sim-time-val');
-      var bVal = document.getElementById('sim-bubble-val');
-      var dVal = document.getElementById('sim-data-val');
-      var tBar = document.getElementById('sim-time-bar');
-      var bBar = document.getElementById('sim-bubble-bar');
-      var dBar = document.getElementById('sim-data-bar');
-      if (!tVal) return;
-
-      tVal.textContent = simState.time + ' phút';
-      bVal.textContent = simState.bubble + '%';
-      dVal.textContent = simState.data + '%';
-
-      tBar.style.width = Math.min(100, Math.round((simState.time / 210) * 100)) + '%';
-      tBar.style.background = simState.time >= 120 ? '#dc2626' : simState.time >= 60 ? '#ea580c' : '#2563eb';
-
-      bBar.style.width = Math.min(100, simState.bubble) + '%';
-      bBar.style.background = simState.bubble >= 75 ? '#dc2626' : simState.bubble >= 45 ? '#ea580c' : '#10b981';
-
-      dBar.style.width = Math.min(100, simState.data) + '%';
-      dBar.style.background = simState.data >= 80 ? '#dc2626' : simState.data >= 50 ? '#f59e0b' : '#2563eb';
-
-      // Avatar mood
-      var avatar = document.getElementById('sim-avatar-emoji');
-      var status = document.getElementById('sim-minh-status');
-      if (simState.step === 'summary' && simState.bubble <= 45) {
-        avatar.textContent = '';
-        status.textContent = 'Minh kết thúc buổi tối an toàn, biết nghỉ ngơi và giữ góc nhìn đa dạng!';
-      } else if (simState.bubble >= 75 || simState.time >= 120) {
-        avatar.textContent = '';
-        status.textContent = 'Cảnh báo! Minh đang bị cuốn sâu vào “Bong bóng thông tin” và xem màn hình quá lâu!';
-      } else if (simState.bubble >= 45) {
-        avatar.textContent = '';
-        status.textContent = 'Minh đang bị thu hút mạnh bởi các video lặp lại cùng chủ đề mô hình...';
-      } else {
-        avatar.textContent = '';
-        status.textContent = 'Đang xem video trên ứng dụng vào tối Chủ nhật • Góc nhìn còn khá cân bằng';
-      }
-
-      // Circle Visualizer (shrinks as bubble increases)
-      var viewCircle = document.getElementById('viz-view-circle');
-      var diverse = document.getElementById('viz-diverse-topics');
-      var subText = document.getElementById('viz-center-sub');
-      var cap = document.getElementById('viz-caption');
-      var radius = Math.max(40, Math.round(98 - (simState.bubble * 0.56)));
-      viewCircle.setAttribute('r', radius);
-      if (simState.bubble >= 75) {
-        viewCircle.setAttribute('stroke', '#dc2626');
-        viewCircle.setAttribute('fill', 'rgba(220,38,38,0.16)');
-        diverse.style.opacity = '0.14';
-        subText.textContent = 'Bị cô lập!';
-        cap.innerHTML = '<span style="color:#dc2626;"> Vòng tròn góc nhìn đã thu hẹp tối đa!</span> Minh chỉ còn thấy 1 chủ đề duy nhất và bị bao vây bởi quảng cáo bám đuổi.';
-      } else if (simState.bubble >= 45) {
-        viewCircle.setAttribute('stroke', '#ea580c');
-        viewCircle.setAttribute('fill', 'rgba(234,88,12,0.14)');
-        diverse.style.opacity = '0.45';
-        subText.textContent = 'Đang thu hẹp';
-        cap.innerHTML = '<span style="color:#ea580c;"> Góc nhìn đang thu hẹp dần:</span> Các chủ đề Âm nhạc, Toán học, Lịch sử bắt đầu mờ nhạt trên trang chủ của Minh.';
-      } else {
-        viewCircle.setAttribute('stroke', '#2563eb');
-        viewCircle.setAttribute('fill', 'rgba(37,99,235,0.10)');
-        diverse.style.opacity = '1';
-        subText.textContent = 'Đa chiều';
-        cap.innerHTML = '<span style="color:#059669;">✓ Góc nhìn rộng mở:</span> Minh vẫn dễ dàng tiếp cận nhiều lĩnh vực kiến thức đa dạng.';
-      }
-    }
-
-    function renderSimStage() {
-      updateSimDashboard();
-      var body = document.getElementById('sim-stage-body');
-      var badge = document.getElementById('sim-step-badge');
-      if (!body) return;
-
-      if (simState.step === 'turn1') {
-        badge.textContent = 'Lượt 1 / 3 • Khởi tạo sở thích';
-        body.innerHTML =
-          '<span class="tag tag-blue">Lượt 1: Khởi tạo sở thích</span>' +
-          '<h3 style="font-size:18px;font-weight:800;margin:10px 0 6px;color:#0f172a;">Minh vừa xem video thí nghiệm Khoa học và lắp ráp mô hình.</h3>' +
-          '<p style="font-size:14px;color:#475569;">Đóng vai thuật toán gợi ý, em sẽ đề xuất video nào tiếp theo lên trang chủ của Minh?</p>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn1(\'A\')">' +
-          '<div class="sim-choice-head"> Phương án A: Gợi ý video cùng chủ đề “10 mẹo lắp ráp mô hình nâng cao”</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +45 phút xem • Bong bóng thông tin 45% • Thu thập dữ liệu 50%</div>' +
-          '</button>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn1(\'B\')">' +
-          '<div class="sim-choice-head"> Phương án B: Gợi ý video chủ đề khác “Khám phá thế giới âm nhạc cổ điển”</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +15 phút xem • Bong bóng thông tin 20% • Thu thập dữ liệu 30%</div>' +
-          '</button>';
-      } else if (simState.step === 'quiz1') {
-        badge.textContent = 'Câu hỏi neo chặn 1 / 2';
-        body.innerHTML =
-          '<span class="tag tag-orange"> Câu hỏi trắc nghiệm neo chặn 1</span>' +
-          '<h3 style="font-size:17.5px;font-weight:800;margin:10px 0 6px;color:#0f172a;">Vì sao thuật toán gợi ý thường ưu tiên đề xuất video tương tự nội dung em vừa xem?</h3>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(1, \'A\', this)">A. Để giúp tiết kiệm thời gian tìm kiếm và tối đa hóa thời gian người dùng ở lại ứng dụng.</button>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(1, \'B\', this)">B. Vì thuật toán không có khả năng tìm kiếm chủ đề khác.</button>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(1, \'C\', this)">C. Để giảm dung lượng bộ nhớ của điện thoại.</button>' +
-          '<div id="sim-quiz-fb" style="margin-top:12px;"></div>';
-      } else if (simState.step === 'turn2') {
-        badge.textContent = 'Lượt 2 / 3 • Tối ưu giữ chân';
-        body.innerHTML =
-          '<span class="tag tag-blue">Lượt 2: Tối ưu thời gian giữ chân</span>' +
-          '<h3 style="font-size:18px;font-weight:800;margin:10px 0 6px;color:#0f172a;">Minh vừa xem xong video trước. Thuật toán sẽ đề xuất gì tiếp theo?</h3>' +
-          '<p style="font-size:14px;color:#475569;">Hãy chọn 1 trong 2 chiến lược gợi ý và quan sát sự thay đổi của vòng tròn góc nhìn!</p>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn2(\'A\')">' +
-          '<div class="sim-choice-head"> Phương án A: Gợi ý video giật gân “Bí mật gây sốc chưa ai biết về mô hình!”</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +75 phút xem • Bong bóng thông tin 75% • Thu thập dữ liệu 80%</div>' +
-          '</button>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn2(\'B\')">' +
-          '<div class="sim-choice-head"> Phương án B: Gợi ý video giáo dục “Thử thách giải đố Toán học lớp 6”</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +20 phút xem • Bong bóng thông tin 30% • Thu thập dữ liệu 40%</div>' +
-          '</button>';
-      } else if (simState.step === 'quiz2') {
-        badge.textContent = 'Câu hỏi neo chặn 2 / 2';
-        body.innerHTML =
-          '<span class="tag tag-orange"> Câu hỏi trắc nghiệm neo chặn 2</span>' +
-          '<h3 style="font-size:17.5px;font-weight:800;margin:10px 0 6px;color:#0f172a;">Điều gì xảy ra nếu thuật toán chỉ liên tục đề xuất nội dung trùng sở thích hẹp và giật gân?</h3>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(2, \'A\', this)">A. Người dùng trở thành chuyên gia toàn diện mọi lĩnh vực.</button>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(2, \'B\', this)">B. Người dùng rơi vào Bong bóng thông tin, góc nhìn bị thu hẹp và tăng nguy cơ mất kiểm soát dữ liệu cá nhân.</button>' +
-          '<button class="quiz-option" onclick="answerSimQuiz(2, \'C\', this)">C. Thiết bị sẽ tự động tắt nguồn sau 30 phút.</button>' +
-          '<div id="sim-quiz-fb" style="margin-top:12px;"></div>';
-      } else if (simState.step === 'turn3') {
-        badge.textContent = 'Lượt 3 / 3 • Khép kín bong bóng';
-        body.innerHTML =
-          '<span class="tag tag-red">Lượt 3: Khép kín bong bóng</span>' +
-          '<h3 style="font-size:18px;font-weight:800;margin:10px 0 6px;color:#0f172a;">Minh đã xem liên tục 2 giờ buổi tối Chủ nhật. Quyết định cuối cùng của thuật toán?</h3>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn3(\'A\')">' +
-          '<div class="sim-choice-head"> Phương án A: Tự động phát liên hoàn livestream cùng chủ đề và chèn quảng cáo bám đuổi</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +90 phút xem • Bong bóng thông tin 98% • Thu thập dữ liệu 99%</div>' +
-          '</button>' +
-          '<button class="sim-choice-btn" onclick="chooseSimTurn3(\'B\')">' +
-          '<div class="sim-choice-head"> Phương án B: Hiển thị thông báo nhắc Minh nghỉ ngơi để bảo vệ mắt và giữ sức khỏe</div>' +
-          '<div class="sim-choice-meta">Dự kiến tác động: +0 phút • Kết thúc an toàn, bảo vệ sức khỏe người dùng</div>' +
-          '</button>';
-      } else if (simState.step === 'summary') {
-        window.simFinished = true;
-        badge.textContent = ' Tổng kết Mô phỏng';
-        body.innerHTML =
-          '<div class="callout callout-green" style="margin-top:0;">' +
-          '<div class="callout-title"> HOÀN THÀNH HOẠT ĐỘNG 2 – SẴN SÀNG SANG HOẠT ĐỘNG 3</div>' +
-          '<p style="font-size:14px;">Kết quả mô phỏng của bạn Minh: <strong>' + simState.time + ' phút xem</strong> | Bong bóng thông tin: <strong>' + simState.bubble + '%</strong> | Dữ liệu thu thập: <strong>' + simState.data + '%</strong>.</p>' +
-          '</div>' +
-          '<h4 style="font-size:15px;font-weight:800;margin:12px 0 8px;"> Bảng đối chiếu hai mặt của thuật toán gợi ý:</h4>' +
-          '<div class="table-wrap"><table class="styled-table">' +
-          '<thead><tr><th style="background:#d1fae5;color:#065f46;">✓ Mặt tích cực</th><th style="background:#ffedd5;color:#9a3412;"> Mặt hạn chế</th></tr></thead>' +
-          '<tbody><tr>' +
-          '<td>Gợi ý nhanh video, bài giảng phù hợp sở thích; tiết kiệm thời gian tìm kiếm và nâng cao trải nghiệm.</td>' +
-          '<td>Thu thập lượng lớn dữ liệu hành vi (ảnh hưởng quyền riêng tư); tạo “bong bóng thông tin” thu hẹp góc nhìn và dễ xem quá giờ.</td>' +
-          '</tr></tbody>' +
-          '</table></div>' +
-          '<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px;margin-top:12px;">' +
-          '<div style="font-weight:800;font-size:14px;color:#1e3a8a;margin-bottom:6px;"> Nhiệm vụ 4 (Điền từ khóa vào Hộp kiến thức SGK Bài 4):</div>' +
-          '<div style="font-size:13.5px;line-height:2.1;">' +
-          'Tính năng thu thập dữ liệu người dùng giúp <select id="kw1" class="form-select" style="display:inline-block;width:auto;padding:3px 8px;font-size:13px;"><option value="">--chọn--</option><option value="hệ thống gợi ý">hệ thống gợi ý</option><option value="quyền riêng tư">quyền riêng tư</option><option value="bong bóng thông tin">bong bóng thông tin</option></select> đưa ra đề xuất chính xác, nhưng có thể ảnh hưởng đến ' +
-          '<select id="kw2" class="form-select" style="display:inline-block;width:auto;padding:3px 8px;font-size:13px;"><option value="">--chọn--</option><option value="hệ thống gợi ý">hệ thống gợi ý</option><option value="quyền riêng tư">quyền riêng tư</option><option value="bong bóng thông tin">bong bóng thông tin</option></select> và tạo ra “' +
-          '<select id="kw3" class="form-select" style="display:inline-block;width:auto;padding:3px 8px;font-size:13px;"><option value="">--chọn--</option><option value="hệ thống gợi ý">hệ thống gợi ý</option><option value="quyền riêng tư">quyền riêng tư</option><option value="bong bóng thông tin">bong bóng thông tin</option></select>”.' +
-          '</div>' +
-          '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-          '<button class="btn btn-sm btn-primary" onclick="checkSimKeywords()">Kiểm tra Hộp kiến thức</button>' +
-          '<span id="kw-feedback" style="font-size:13px;font-weight:700;"></span>' +
-          '</div>' +
-          '</div>' +
-          '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">' +
-          '<button class="btn btn-green" onclick="finishMod3GoMod4()">Sang Hoạt động 3: Bài tập Kéo – Thả →</button>' +
-          '<button class="btn btn-outline" onclick="resetSimGame()">↻ Thử nhánh lựa chọn khác</button>' +
-          '</div>';
-        if (window.lmsNotifyComplete) window.lmsNotifyComplete('h2');
-      }
-    }
-
-    function chooseSimTurn1(opt) {
-      if (opt === 'A') {
-        simState.time += 45; simState.bubble = 45; simState.data = 50;
-      } else {
-        simState.time += 15; simState.bubble = 20; simState.data = 30;
-      }
-      simState.history.push('Lượt 1: ' + opt);
-      simState.step = 'quiz1';
-      renderSimStage();
-    }
-
-    function chooseSimTurn2(opt) {
-      if (opt === 'A') {
-        simState.time += 75; simState.bubble = 75; simState.data = 80;
-      } else {
-        simState.time += 20; simState.bubble = 30; simState.data = 40;
-      }
-      simState.history.push('Lượt 2: ' + opt);
-      simState.step = 'quiz2';
-      renderSimStage();
-    }
-
-    function chooseSimTurn3(opt) {
-      if (opt === 'A') {
-        simState.time += 90; simState.bubble = 98; simState.data = 99;
-      } else {
-        simState.time += 0;
-      }
-      simState.history.push('Lượt 3: ' + opt);
-      simState.step = 'summary';
-      renderSimStage();
-    }
-
-    function answerSimQuiz(qNum, choice, btnEl) {
-      var fb = document.getElementById('sim-quiz-fb');
-      var isCorrect = (qNum === 1 && choice === 'A') || (qNum === 2 && choice === 'B');
-      if (isCorrect) {
-        btnEl.classList.add('correct');
-        var nextStep = qNum === 1 ? 'turn2' : 'turn3';
-        var msg = qNum === 1
-          ? '✓ Chính xác! Hệ thống gợi ý vừa giúp người dùng tìm nhanh nội dung phù hợp, vừa tối đa hóa thời gian người dùng ở lại ứng dụng (DP-REG, 2023).'
-          : '✓ Chính xác! Việc lặp lại nội dung hẹp và giật gân tạo ra “Bong bóng thông tin”, thu hẹp góc nhìn và tăng nguy cơ mất kiểm soát dữ liệu cá nhân.';
-        fb.innerHTML = '<div class="callout callout-green" style="margin:0;">' + msg +
-          '<div style="margin-top:10px;"><button class="btn btn-sm btn-green" onclick="goSimStep(\'' + nextStep + '\')">Tiếp tục sang Lượt ' + (qNum + 1) + ' →</button></div></div>';
-        btnEl.parentElement.querySelectorAll('.quiz-option').forEach(function (b) { b.disabled = true; });
-      } else {
-        btnEl.classList.add('wrong');
-        fb.innerHTML = '<div class="callout callout-orange" style="margin:0;">✗ Chưa chính xác! Em hãy đọc kĩ lại câu hỏi và chọn lại đáp án đúng để mở khóa lượt tiếp theo nhé.</div>';
-      }
-    }
-
-    function goSimStep(s) {
-      simState.step = s;
-      renderSimStage();
-    }
-
-    function checkSimKeywords() {
-      var k1 = document.getElementById('kw1').value;
-      var k2 = document.getElementById('kw2').value;
-      var k3 = document.getElementById('kw3').value;
-      var fb = document.getElementById('kw-feedback');
-      if (k1 === 'hệ thống gợi ý' && k2 === 'quyền riêng tư' && k3 === 'bong bóng thông tin') {
-        fb.style.color = '#059669';
-        fb.textContent = ' Tuyệt vời! Em hãy ghi 3 từ khóa chuẩn này vào Hộp kiến thức SGK Bài 4 nhé!';
-      } else {
-        fb.style.color = '#dc2626';
-        fb.textContent = ' Có ô chưa đúng, gợi ý thứ tự: hệ thống gợi ý → quyền riêng tư → bong bóng thông tin.';
-      }
-    }
-
-    function finishMod3GoMod4() {
-      if (window.lmsNotifyComplete) window.lmsNotifyComplete('h2');
-      if (window.switchPanel) window.switchPanel('panel-mod4');
-    }
-
-    function resetSimGame() {
-      simState = { step: 'turn1', time: 0, bubble: 10, data: 15, history: [], quiz1Done: false, quiz2Done: false };
-      renderSimStage();
-    }
-
-    document.addEventListener('DOMContentLoaded', renderSimStage);
-  </script> <!-- ==================== SCRIPT MODULE 4: GAME KÉO - THẢ 10 THẺ ==================== --> <script id="script-mod-4"> var dndMasterCards = [
-      { id: 1, text: 'Đề xuất bài giảng, khóa học phù hợp đúng trình độ và nhu cầu học tập của học sinh.', ans: 'pos', fb: 'Giúp tiết kiệm thời gian tìm kiếm và hỗ trợ học tập hiệu quả.' },
-      { id: 2, text: 'Người dùng bị cuốn vào màn hình quá nhiều giờ do video tự động phát nối tiếp liên tục.', ans: 'neg', fb: 'Ảnh hưởng đến sức khỏe, thị lực và quỹ thời gian học tập.' },
-      { id: 3, text: 'Mở khóa điện thoại nhanh chóng bằng nhận diện khuôn mặt mà không cần nhớ mật khẩu dài.', ans: 'pos', fb: 'Mang lại sự thuận tiện, nhanh chóng cho người sử dụng.' },
-      { id: 4, text: 'Tạo ra “bong bóng thông tin”, khiến người dùng chỉ tiếp cận thông tin một chiều, thiếu đa dạng.', ans: 'neg', fb: 'Làm thu hẹp góc nhìn, hạn chế tiếp cận kiến thức mới mẻ.' },
-      { id: 5, text: 'Nền tảng thu thập liên tục lịch sử xem, vị trí và thói quen làm tăng nguy cơ mất quyền riêng tư.', ans: 'neg', fb: 'Người dùng có nguy cơ mất kiểm soát đối với dữ liệu cá nhân.' },
-      { id: 6, text: 'Ứng dụng bản đồ gợi ý tuyến đường thông thoáng dựa trên dữ liệu giao thông thời gian thực.', ans: 'pos', fb: 'Hỗ trợ di chuyển an toàn và tiết kiệm thời gian đi lại.' },
-      { id: 7, text: 'Công cụ tạo sinh văn bản có thể tạo ra thông tin sai lệch hoặc làm giảm tính tự chủ tư duy nếu lạm dụng.', ans: 'neg', fb: 'Cần luôn kiểm chứng thông tin và tự suy nghĩ độc lập.' },
-      { id: 8, text: 'Tự động kiểm tra lỗi chính tả và gợi ý từ ngữ giúp soạn thảo văn bản nhanh, chính xác hơn.', ans: 'pos', fb: 'Nâng cao chất lượng và tốc độ soạn thảo văn bản học tập.' },
-      { id: 9, text: 'Quảng cáo liên tục bám đuổi trên nhiều trang web dựa theo lịch sử tìm kiếm cá nhân.', ans: 'neg', fb: 'Cho thấy hồ sơ hành vi cá nhân đang bị theo dõi chặt chẽ.' },
-      { id: 10, text: 'Hỗ trợ người khuyết tật điều khiển thiết bị dễ dàng hơn nhờ tính năng nhận diện giọng nói.', ans: 'pos', fb: 'Thể hiện giá trị nhân văn của AI trong hỗ trợ cộng đồng.' }
-    ];
-
-    var dndPlacement = {}; // cardId -> 'bank' | 'pos' | 'neg'
-    var dndOrder = [];
-    var dndSelectedId = null;
-    var dndGraded = false;
-    var dndBestScore = 0;
-
-    function initDndOrder(shuffle) {
-      dndOrder = dndMasterCards.map(function (c) { return c.id; });
-      if (shuffle) {
-        for (var i = dndOrder.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = dndOrder[i]; dndOrder[i] = dndOrder[j]; dndOrder[j] = tmp;
-        }
-      }
-      dndOrder.forEach(function (id) { dndPlacement[id] = 'bank'; });
-      dndSelectedId = null;
-      dndGraded = false;
-      var res = document.getElementById('dnd-result-area');
-      if (res) res.style.display = 'none';
-      renderDndBoard();
-    }
-
-    function renderDndBoard() {
-      var listBank = document.getElementById('list-bank');
-      var listPos = document.getElementById('list-pos');
-      var listNeg = document.getElementById('list-neg');
-      if (!listBank) return;
-
-      listBank.innerHTML = '';
-      listPos.innerHTML = '';
-      listNeg.innerHTML = '';
-
-      var counts = { bank: 0, pos: 0, neg: 0 };
-
-      dndOrder.forEach(function (id) {
-        var card = dndMasterCards.find(function (c) { return c.id === id; });
-        var zone = dndPlacement[id] || 'bank';
-        counts[zone]++;
-
-        var el = document.createElement('div');
-        el.className = 'dnd-card';
-        el.draggable = true;
-        el.setAttribute('data-card-id', id);
-        if (dndSelectedId === id) el.classList.add('selected-card');
-
-        var feedbackHtml = '';
-        if (dndGraded && zone !== 'bank') {
-          var isRight = (zone === card.ans);
-          el.classList.add(isRight ? 'card-correct' : 'card-wrong');
-          feedbackHtml = '<div class="card-feedback" style="background:' + (isRight ? '#d1fae5;color:#065f46' : '#fee2e2;color:#991b1b') + ';">' +
-            (isRight ? '✓ Đúng! ' : '✗ Chưa đúng (Đáp án: ' + (card.ans === 'pos' ? 'Mặt tích cực' : 'Mặt hạn chế') + '). ') +
-            card.fb + '</div>';
-        }
-
-        el.innerHTML =
-          '<div><span style="color:#64748b;font-weight:800;margin-right:5px;">Thẻ #' + card.id + ':</span>' + card.text + '</div>' +
-          '<div class="dnd-card-actions" onclick="event.stopPropagation()">' +
-          (zone !== 'pos' ? '<button type="button" class="mini-assign pos" onclick="moveDndCard(' + id + ', \'pos\')">✓ Tích cực</button>' : '') +
-          (zone !== 'neg' ? '<button type="button" class="mini-assign neg" onclick="moveDndCard(' + id + ', \'neg\')"> Hạn chế</button>' : '') +
-          (zone !== 'bank' ? '<button type="button" class="mini-assign" onclick="moveDndCard(' + id + ', \'bank\')"> Trả về kho</button>' : '') +
-          '</div>' + feedbackHtml;
-
-        el.addEventListener('dragstart', function (ev) {
-          ev.dataTransfer.setData('text/plain', String(id));
-          dndSelectedId = id;
-        });
-        el.addEventListener('click', function (ev) {
-          ev.stopPropagation();
-          dndSelectedId = (dndSelectedId === id) ? null : id;
-          renderDndBoard();
-        });
-
-        if (zone === 'bank') listBank.appendChild(el);
-        else if (zone === 'pos') listPos.appendChild(el);
-        else listNeg.appendChild(el);
-      });
-
-      document.getElementById('count-bank').textContent = counts.bank;
-      document.getElementById('count-pos').textContent = counts.pos + ' thẻ';
-      document.getElementById('count-neg').textContent = counts.neg + ' thẻ';
-    }
-
-    function allowDrop(ev) {
-      ev.preventDefault();
-      if (ev.currentTarget && ev.currentTarget.classList.contains('drop-zone')) {
-        ev.currentTarget.classList.add('drag-over');
-      }
-    }
-    function leaveDrop(ev) {
-      if (ev.currentTarget) ev.currentTarget.classList.remove('drag-over');
-    }
-    function dropToZone(ev, zone) {
-      ev.preventDefault();
-      if (ev.currentTarget) ev.currentTarget.classList.remove('drag-over');
-      var id = parseInt(ev.dataTransfer.getData('text/plain'), 10);
-      if (!isNaN(id)) moveDndCard(id, zone);
-    }
-    function placeSelectedInto(zone) {
-      if (dndSelectedId !== null) {
-        moveDndCard(dndSelectedId, zone);
-      }
-    }
-    function moveDndCard(id, zone) {
-      dndPlacement[id] = zone;
-      dndSelectedId = null;
-      dndGraded = false;
-      renderDndBoard();
-    }
-
-    function gradeDndGame() {
-      var unplaced = dndOrder.filter(function (id) { return dndPlacement[id] === 'bank'; }).length;
-      if (unplaced > 0) {
-        alert('Còn ' + unplaced + ' thẻ tình huống chưa được phân loại! Em hãy xếp hết cả 10 thẻ vào 2 cột rồi bấm Kiểm tra kết quả nhé.');
-        return;
-      }
-      dndGraded = true;
-      var score = 0;
-      dndMasterCards.forEach(function (c) {
-        if (dndPlacement[c.id] === c.ans) score++;
-      });
-      if (score > dndBestScore) {
-        dndBestScore = score;
-        var bs = document.getElementById('dnd-best-score');
-        if (bs) bs.textContent = 'Điểm cao nhất: ' + dndBestScore + '/10';
-      }
-      renderDndBoard();
-
-      var area = document.getElementById('dnd-result-area');
-      area.style.display = 'block';
-      if (score >= 8) {
-        area.innerHTML =
-          '<div class="callout callout-green" style="border-width:2px;">' +
-          '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;">' +
-          '<div>' +
-          '<div style="display:inline-block;background:#059669;color:#fff;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:8px;"> ĐẠT CHUẨN – MỞ KHÓA HOẠT ĐỘNG 4</div>' +
-          '<div style="font-size:18px;font-weight:800;color:#065f46;">Chúc mừng em đạt ' + score + '/10 điểm!</div>' +
-          '<p style="font-size:14px;margin-top:4px;">Em hãy chọn ghi <strong>01 ví dụ Mặt tích cực</strong> và <strong>01 ví dụ Mặt hạn chế</strong> tâm đắc nhất vào phần Luyện tập SGK Bài 4, sau đó bước sang Hoạt động 4 nhé!</p>' +
-          '</div>' +
-          '<button class="btn btn-green" onclick="window.switchPanel && switchPanel(\'panel-mod5\')">Bước sang Hoạt động 4: Vận dụng →</button>' +
-          '</div>' +
-          '</div>';
-        if (window.lmsNotifyComplete) window.lmsNotifyComplete('h3');
-      } else {
-        area.innerHTML =
-          '<div class="callout callout-orange" style="border-width:2px;">' +
-          '<div class="callout-title"> Em đạt ' + score + '/10 điểm – Chưa đạt ngưỡng 8/10 để mở khóa Hoạt động 4!</div>' +
-          '<p style="font-size:14px;">Em hãy xem lời giải thích ở các thẻ viền đỏ phía trên, chuyển lại sang đúng cột hoặc bấm <strong>Làm lại</strong> để đạt tối thiểu 8/10 điểm nhé!</p>' +
-          '</div>';
-      }
-      area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function resetDndGame(shuffle) {
-      initDndOrder(shuffle);
-    }
-
-    document.addEventListener('DOMContentLoaded', function () { initDndOrder(true); });
-  </script> <!-- ==================== SCRIPT MODULE 5: HOẠT ĐỘNG 4 VẬN DỤNG & RUBRIC ==================== --> <script id="script-mod-5"> function updateH4PreviewTitle() {
-      var n = (document.getElementById('h4-name').value || '').trim() || 'Họ và tên';
-      var c = document.getElementById('h4-class').value || 'Lớp';
-      var el = document.getElementById('h4-auto-title');
-      if (el) el.textContent = '[' + n + ' – ' + c + ']';
-    }
-
-    function buildH4PlainText() {
-      var n = document.getElementById('h4-name').value.trim();
-      var c = document.getElementById('h4-class').value;
-      var s1 = document.getElementById('h4-sol1').value.trim();
-      var s2 = document.getElementById('h4-sol2').value.trim();
-      var br = document.getElementById('h4-bridge').value.trim();
-      return 'Tiêu đề: [' + n + ' – ' + c + ']\n\n' +
-        '1. Thao tác kĩ thuật 1 & Cơ sở khoa học:\n' + s1 + '\n\n' +
-        '2. Thao tác kĩ thuật 2 & Cơ sở khoa học:\n' + s2 + '\n\n' +
-        '3. Câu hỏi cầu nối chuẩn bị Bài 5 (Đánh giá độ an toàn của AI):\n' + br;
-    }
-
-    function copyH4PostText() {
-      var n = document.getElementById('h4-name').value.trim();
-      var s1 = document.getElementById('h4-sol1').value.trim();
-      if (!n || !s1) { alert('Em hãy nhập đầy đủ nội dung bài viết trước khi sao chép nhé!'); return; }
-      navigator.clipboard.writeText(buildH4PlainText()).then(function () {
-        if (window.showToast) window.showToast('Đã sao chép bài viết chuẩn cú pháp! Em có thể dán lên Diễn đàn LMS.');
-        else alert('Đã sao chép bài viết!');
-      });
-    }
-
-    function submitH4Post(ev) {
-      ev.preventDefault();
-      var n = document.getElementById('h4-name').value.trim();
-      var c = document.getElementById('h4-class').value;
-      var s1 = document.getElementById('h4-sol1').value.trim();
-      var s2 = document.getElementById('h4-sol2').value.trim();
-      var br = document.getElementById('h4-bridge').value.trim();
-      if (!n || !c || !s1 || !s2 || !br) return;
-
-      var list = document.getElementById('h4-published-list');
-      var postHtml =
-        '<div class="forum-post">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
-        '<div class="forum-post-title"> [' + escapeH4(n) + ' – ' + escapeH4(c) + ']</div>' +
-        '<span class="tag tag-green">✓ Đủ 3 phần &amp; đúng cú pháp Rubric</span>' +
-        '</div>' +
-        '<div style="font-size:14px;display:grid;gap:8px;color:#1e293b;">' +
-        '<div><strong>1. Thao tác kĩ thuật 1 &amp; Cơ sở khoa học:</strong> ' + escapeH4(s1) + '</div>' +
-        '<div><strong>2. Thao tác kĩ thuật 2 &amp; Cơ sở khoa học:</strong> ' + escapeH4(s2) + '</div>' +
-        '<div style="background:#f5f3ff;padding:9px 12px;border-radius:8px;border-left:3px solid #7c3aed;"><strong> Câu hỏi cầu nối Bài 5:</strong> ' + escapeH4(br) + '</div>' +
-        '</div>' +
-        '</div>';
-      list.innerHTML = postHtml + list.innerHTML;
-      if (window.lmsNotifyComplete) window.lmsNotifyComplete('h4');
-      if (window.showToast) window.showToast(' Đã hoàn thành Bài 4! Em có thể bấm Sao chép để dán lên Diễn đàn LMS của trường.');
-    }
-
-    function markH4DoneExternal() {
-      if (window.lmsNotifyComplete) window.lmsNotifyComplete('h4');
-      if (window.showToast) window.showToast(' Chúc mừng em đã hoàn thành toàn bộ Bài 4!');
-    }
-
-    function calcRubricTotal() {
-      var c1 = parseFloat(document.getElementById('rub-c1').value) || 0;
-      var c2 = parseFloat(document.getElementById('rub-c2').value) || 0;
-      var c3 = parseFloat(document.getElementById('rub-c3').value) || 0;
-      var sum = Math.min(10, Math.max(0, c1 + c2 + c3));
-      var rank = sum >= 8.5 ? 'Tốt (Xuất sắc)' : sum >= 5.0 ? 'Đạt (Khá / TB)' : 'Cần cố gắng';
-      document.getElementById('rub-total-out').textContent = 'Tổng: ' + sum.toFixed(1) + ' / 10 điểm (' + rank + ')';
-    }
-
-    function escapeH4(str) {
-      return String(str).replace(/[&<>"']/g, function (m) {
-        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
-      });
-    }
-  </script> <!-- ==================== SCRIPT HUB: NAVIGATION, LOCKING & STANDALONE LMS EXPORTER ==================== --> <script id="script-hub"> var hubMode = 'student'; // 'teacher' | 'student'
-    var progressState = { h1: false, h2: false, h3: false, h4: false };
-
-    function showToast(msg) {
-      var el = document.getElementById('toast-el');
-      if (!el) return;
-      el.textContent = msg;
-      el.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3400);
-    }
-
-    function setViewMode(mode) {
-      hubMode = mode;
-      document.body.classList.toggle('student-mode', mode === 'student');
-      document.getElementById('btn-mode-teacher').classList.toggle('active', mode === 'teacher');
-      document.getElementById('btn-mode-student').classList.toggle('active', mode === 'student');
-
-      if (mode === 'student') {
-        var activePanel = document.querySelector('.lms-panel.active');
-        if (activePanel && activePanel.id === 'panel-export') switchPanel('panel-mod1');
-        showToast(' Chế độ Học sinh: Kích hoạt cơ chế mở khóa chốt chặn theo 4 chặng!');
-      } else {
-        showToast(' Chế độ Giáo viên: Mở khóa tất cả module & bật công cụ Xuất LMS.');
-      }
-      refreshLocksAndProgress();
-    }
-
-    function refreshLocksAndProgress() {
-      var doneCount = ['h1', 'h2', 'h3', 'h4'].filter(function (k) { return progressState[k]; }).length;
-      document.getElementById('hub-progress-text').textContent = 'Tiến độ: ' + doneCount + '/4 chặng';
-      document.getElementById('hub-progress-fill').style.width = (doneCount * 25) + '%';
-
-      var t2 = document.querySelector('[data-target="panel-mod2"]');
-      var t3 = document.getElementById('tab-mod3');
-      var t4 = document.getElementById('tab-mod4');
-      var t5 = document.getElementById('tab-mod5');
-
-      t2.classList.toggle('completed', progressState.h1);
-      t3.classList.toggle('completed', progressState.h2);
-      t4.classList.toggle('completed', progressState.h3);
-      t5.classList.toggle('completed', progressState.h4);
-
-      if (false) { t3.classList.toggle('locked', false); } else {
-        t3.classList.remove('locked');
-        t4.classList.remove('locked');
-        t5.classList.remove('locked');
-      }
-    }
-
-    window.lmsNotifyComplete = function (stageKey) {
-      if (!progressState[stageKey]) {
-        progressState[stageKey] = true;
-        refreshLocksAndProgress();
-        var msgs = {
-          h1: ' Đã hoàn thành Hoạt động 1 – Mở khóa Hoạt động 2!',
-          h2: ' Đã hoàn thành Hoạt động 2 – Mở khóa Hoạt động 3!',
-          h3: ' Đạt chuẩn ≥ 8/10 – Đã mở khóa Hoạt động 4!',
-          h4: ' Tuyệt vời! Em đã hoàn thành trọn vẹn Bài 4!'
-        };
-        if (msgs[stageKey]) showToast(msgs[stageKey]);
-      }
-    };
-
-    function switchPanel(panelId) {
-      var tab = document.querySelector('.nav-tab[data-target="' + panelId + '"]');
-      if (tab && tab.classList.contains('locked')) {
-        showToast(' Chặng này đang khóa! Em hãy hoàn thành chặng trước đó để mở khóa nhé.');
-        return;
-      }
-      document.querySelectorAll('.lms-panel').forEach(function (p) { p.classList.remove('active'); });
-      document.querySelectorAll('.nav-tab').forEach(function (t) { t.classList.remove('active'); });
-      var target = document.getElementById(panelId);
-      if (target) target.classList.add('active');
-      if (tab) tab.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function switchSubTab(subId, btnEl) {
-      document.querySelectorAll('.sub-panel').forEach(function (p) { p.classList.remove('active'); });
-      document.querySelectorAll('.sub-tab').forEach(function (b) { b.classList.remove('active'); });
-      var sub = document.getElementById(subId);
-      if (sub) sub.classList.add('active');
-      if (btnEl) btnEl.classList.add('active');
-    }
-
-    /* ===== TEACHER EMBED CONFIGURATORS ===== */
-    function applyGoogleFormH1() {
-      var url = document.getElementById('gf-h1-url').value.trim();
-      if (!url) { showToast('Vui lòng dán đường dẫn Google Form!'); return; }
-      if (url.indexOf('<iframe') !== -1) {
-        var m = url.match(/src=["']([^"']+)["']/i);
-        if (m) url = m[1];
-      }
-      document.getElementById('h1-gform-iframe').src = url;
-      document.getElementById('h1-gform-container').style.display = 'block';
-      document.getElementById('h1-survey-form').style.display = 'none';
-      showToast('✓ Đã nhúng Google Form Khởi động! Có thể xuất Module 2 ngay.');
-    }
-    function resetGoogleFormH1() {
-      document.getElementById('h1-gform-iframe').src = '';
-      document.getElementById('h1-gform-container').style.display = 'none';
-      document.getElementById('h1-survey-form').style.display = 'block';
-      showToast('Đã quay lại dùng Form tương tác tích hợp sẵn.');
-    }
-
-    function applyGoogleFormH4() {
-      var url = document.getElementById('gf-h4-url').value.trim();
-      if (!url) { showToast('Vui lòng dán đường dẫn Google Form dự phòng!'); return; }
-      if (url.indexOf('<iframe') !== -1) {
-        var m = url.match(/src=["']([^"']+)["']/i);
-        if (m) url = m[1];
-      }
-      document.getElementById('h4-gform-iframe').src = url;
-      document.getElementById('h4-gform-container').style.display = 'block';
-      document.getElementById('h4-forum-form').style.display = 'none';
-      showToast('✓ Đã nhúng Google Form Vận dụng dự phòng!');
-    }
-    function resetGoogleFormH4() {
-      document.getElementById('h4-gform-iframe').src = '';
-      document.getElementById('h4-gform-container').style.display = 'none';
-      document.getElementById('h4-forum-form').style.display = 'block';
-      showToast('Đã quay lại khung soạn Diễn đàn sẵn có.');
-    }
-
-    function applyYoutubeUrl() {
-      var raw = document.getElementById('yt-url-input').value.trim();
-      if (!raw) { showToast('Vui lòng dán đường dẫn YouTube!'); return; }
-      var vid = '';
-      var m1 = raw.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-      if (m1) vid = m1[1];
-      var embedUrl = vid ? ('https://www.youtube.com/embed/' + vid) : raw;
-      document.getElementById('yt-embed-iframe').src = embedUrl;
-      document.getElementById('yt-embed-box').style.display = 'block';
-      document.getElementById('builtin-explainer').style.display = 'none';
-      showToast('✓ Đã nhúng Video YouTube! Xuất Module 3A sẽ giữ nguyên video này.');
-    }
-    function resetYoutubeUrl() {
-      document.getElementById('yt-embed-iframe').src = '';
-      document.getElementById('yt-embed-box').style.display = 'none';
-      document.getElementById('builtin-explainer').style.display = 'block';
-      showToast('Đã quay lại Bản hoạt hình tương tác 4 cảnh tích hợp sẵn.');
-    }
-
-    /* ===== STANDALONE LMS MODULE HTML EXPORTER ===== */
-    function buildStandaloneHtml(contentId, pageTitle, scriptIds) {
-      var node = document.getElementById(contentId);
-      if (!node) return '';
-      var clone = node.cloneNode(true);
-      // Remove any teacher-only blocks inside the module when exporting for students on LMS
-      clone.querySelectorAll('.teacher-only').forEach(function (el) { el.remove(); });
-      var sharedCss = document.getElementById('shared-styles').innerHTML;
-
-      var scriptsHtml = '';
-      (scriptIds || []).forEach(function (sid) {
-        var sc = document.getElementById(sid);
-        if (sc) scriptsHtml += '\n<script>\n' + sc.innerHTML + '\n<\/script>';
-      });
-
-      return '<!DOCTYPE html>\n<html lang="vi">\n<head>\n' +
-        '  <meta charset="UTF-8" />\n' +
-        '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n' +
-        '  <title>' + pageTitle + '</title>\n' +
-        '  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />\n' +
-        '  <style>\n' + sharedCss + '\n' +
-        '    body { padding: 18px; max-width: 1120px; margin: 0 auto; }\n' +
-        '    .teacher-only, .module-export-bar { display: none !important; }\n' +
-        '  </style>\n</head>\n<body>\n' +
-        clone.innerHTML + '\n' +
-        '  <div class="toast" id="toast-el"></div>\n' +
-        '  <script>function showToast(m){var e=document.getElementById("toast-el");if(!e)return;e.textContent=m;e.classList.add("show");setTimeout(function(){e.classList.remove("show");},3200);}function switchPanel(){showToast(" Em đã hoàn thành học liệu này! Hãy quay lại trang LMS Bài 4 để mở hoạt động tiếp theo nhé.");}function switchSubTab(){showToast("✓ Em hãy mở học liệu tiếp theo trong Hoạt động 2 trên trang LMS nhé.");}<\/script>' +
-        scriptsHtml + '\n</body>\n</html>';
-    }
-
-    function exportStandaloneModule(contentId, filename, pageTitle, scriptIds) {
-      var html = buildStandaloneHtml(contentId, pageTitle, scriptIds);
-      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      showToast('⬇ Đã tải file độc lập: ' + filename);
-    }
-
-    function copyModuleHtml(contentId, pageTitle, scriptIds) {
-      var html = buildStandaloneHtml(contentId, pageTitle, scriptIds);
-      navigator.clipboard.writeText(html).then(function () {
-        showToast(' Đã sao chép mã HTML độc lập! Dán trực tiếp vào hệ thống LMS.');
-      }).catch(function () {
-        showToast('Không thể sao chép tự động, hãy dùng nút Tải file HTML!');
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', refreshLocksAndProgress);
-  </script>
-</body> </html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bài 4: Mặt tích cực và mặt hạn chế của một số tính năng AI – Học liệu số</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#f4f6fa;color:#1e293b;line-height:1.55}
+  header{background:#1d4ed8;color:#fff;padding:18px 20px}
+  header h1{margin:0;font-size:20px}
+  header p{margin:4px 0 0;font-size:14px;opacity:.85}
+  nav{display:flex;gap:6px;max-width:760px;margin:16px auto 0;padding:0 16px}
+  nav button{flex:1;padding:10px;border:0;border-radius:8px;background:#e2e8f0;font-size:15px;font-weight:600;cursor:pointer;color:#334155}
+  nav button.on{background:#1d4ed8;color:#fff}
+  main{max-width:760px;margin:12px auto 40px;padding:0 16px}
+  .card{background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .card h2{margin:0 0 10px;font-size:17px}
+  ul{margin:0;padding-left:20px}
+  li{margin-bottom:8px}
+  .q{font-weight:600;margin-bottom:10px}
+  .opt{display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border:2px solid #cbd5e1;border-radius:8px;background:#fff;font-size:15px;cursor:pointer;font-family:inherit}
+  .opt:hover{border-color:#60a5fa}
+  .opt.pick{border-color:#1d4ed8;background:#eff6ff}
+  .opt.ok{border-color:#16a34a;background:#dcfce7}
+  .opt.bad{border-color:#dc2626;background:#fee2e2}
+  .opt:disabled{cursor:default;color:#1e293b;opacity:1}
+  .note{margin-top:8px;padding:10px 12px;border-radius:8px;background:#f1f5f9;font-size:14px}
+  .btn{padding:10px 22px;border:0;border-radius:8px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+  .btn.light{background:#e2e8f0;color:#334155}
+  .center{text-align:center}
+  .hide{display:none}
+  .count{font-size:14px;color:#64748b;margin-bottom:6px}
+  .result{font-size:18px;font-weight:700;margin:10px 0}
+  .sync{margin:0 0 12px;padding:10px 12px;border-radius:8px;font-size:14px;background:#eff6ff;color:#1e3a8a;text-align:left}
+  .sync.ok{background:#dcfce7;color:#14532d}
+  .sync.warn{background:#fef3c7;color:#78350f}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bài 4: Mặt tích cực và mặt hạn chế của một số tính năng AI</h1>
+  <p>Tin học 6 – Chuyên đề Trí tuệ nhân tạo</p>
+</header>
+<nav>
+  <button class="on" data-tab="t1">Ghi nhớ</button>
+  <button data-tab="t2">Trắc nghiệm</button>
+  <button data-tab="t3">Trò chơi</button>
+</nav>
+<main>
+  <section id="t1"><div class="card"><h2>Kiến thức cần nhớ</h2><ul id="notes"></ul></div></section>
+
+  <section id="t2" class="hide">
+    <div class="sync hide" id="syncInfo"></div>
+    <div id="quiz"></div>
+    <div class="center">
+      <div id="quizResult" class="result"></div>
+      <div class="sync hide" id="syncStatus"></div>
+      <button class="btn" id="quizSubmit">Nộp bài</button>
+      <button class="btn light hide" id="quizReset">Làm lại</button>
+    </div>
+  </section>
+
+  <section id="t3" class="hide">
+    <div class="card center" id="gStart">
+      <h2 id="gTitle"></h2>
+      <p id="gIntro"></p>
+      <button class="btn" id="gBegin">Bắt đầu</button>
+    </div>
+    <div class="card hide" id="gPlay">
+      <div class="count" id="gCount"></div>
+      <div class="q" id="gQ"></div>
+      <div id="gOpts"></div>
+      <div class="note hide" id="gNote"></div>
+      <div class="center" style="margin-top:12px"><button class="btn hide" id="gNext">Câu tiếp theo</button></div>
+    </div>
+    <div class="card center hide" id="gEnd">
+      <div class="result" id="gScore"></div>
+      <button class="btn" id="gAgain">Chơi lại</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const D = {
+ "notes": [
+  "Hệ thống gợi ý: đề xuất nội dung đúng sở thích, tiết kiệm thời gian. Hạn chế: thu thập nhiều dữ liệu hành vi, dễ tạo “bong bóng thông tin”.",
+  "Nhận diện khuôn mặt, giọng nói: mở khóa nhanh, hỗ trợ người khuyết tật. Hạn chế: có thể nhận diện nhầm, dữ liệu sinh trắc rất nhạy cảm nếu bị lộ.",
+  "AI tạo sinh văn bản, hình ảnh: gợi ý ý tưởng, minh họa nhanh. Hạn chế: có thể sai kiến thức, vi phạm bản quyền, làm giảm tư duy độc lập nếu lạm dụng.",
+  "Mọi tính năng AI đều có hai mặt. Em cần tận dụng lợi ích và biết cách kiểm soát rủi ro."
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "q": "Hệ thống gợi ý video ghi lại lịch sử xem, thời gian xem, lượt thích của em để làm gì?",
+   "o": [
+    "Để dự đoán sở thích và đề xuất nội dung phù hợp.",
+    "Để tắt máy khi em xem quá lâu.",
+    "Để xóa video em không thích.",
+    "Để tăng dung lượng bộ nhớ điện thoại."
+   ],
+   "a": 0,
+   "e": "Dữ liệu hành vi được dùng để dự đoán sở thích và gợi ý nội dung."
+  },
+  {
+   "id": "q2",
+   "q": "“Bong bóng thông tin” là gì?",
+   "o": [
+    "Quảng cáo hiện lên dưới dạng bong bóng.",
+    "Người dùng chỉ nhìn thấy nội dung giống sở thích cũ nên góc nhìn bị thu hẹp.",
+    "Lỗi làm mất dữ liệu trong điện thoại.",
+    "Một loại mạng xã hội mới."
+   ],
+   "a": 1,
+   "e": "Bong bóng thông tin làm em ít tiếp cận ý kiến và kiến thức mới."
+  },
+  {
+   "id": "q3",
+   "q": "Vì sao dữ liệu khuôn mặt và giọng nói cần được bảo vệ đặc biệt?",
+   "o": [
+    "Vì chúng chiếm nhiều dung lượng.",
+    "Vì chúng luôn do AI tạo ra.",
+    "Vì chúng gắn liền với cơ thể, rất khó thay đổi nếu bị lộ.",
+    "Vì ai cũng được phép sử dụng chúng."
+   ],
+   "a": 2,
+   "e": "Mật khẩu có thể đổi, còn khuôn mặt và giọng nói thì không."
+  },
+  {
+   "id": "q4",
+   "q": "Nếu lạm dụng công cụ AI tạo văn bản, em có thể gặp rủi ro nào?",
+   "o": [
+    "Máy tính chạy nhanh hơn.",
+    "Bài làm chắc chắn đúng hoàn toàn.",
+    "Không có rủi ro nào.",
+    "Nhận thông tin sai và giảm khả năng tự suy nghĩ."
+   ],
+   "a": 3,
+   "e": "AI có thể sai, em cần kiểm chứng và tự suy nghĩ độc lập."
+  },
+  {
+   "id": "q5",
+   "q": "Cách dùng tính năng AI đúng đắn nhất là gì?",
+   "o": [
+    "Nhận ra cả hai mặt, tận dụng lợi ích và kiểm soát rủi ro.",
+    "Tin hoàn toàn vào AI.",
+    "Không bao giờ dùng AI.",
+    "Chia sẻ mọi dữ liệu để AI hoạt động tốt hơn."
+   ],
+   "a": 0,
+   "e": "Biết cả mặt tích cực và mặt hạn chế giúp em dùng AI an toàn."
+  }
+ ],
+ "gameTitle": "Mặt tích cực hay mặt hạn chế?",
+ "gameIntro": "Đọc từng tình huống và chọn đây là mặt tích cực hay mặt hạn chế của AI.",
+ "game": [
+  {
+   "q": "Đề xuất bài giảng, khóa học phù hợp đúng trình độ và nhu cầu học tập của học sinh.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 0,
+   "e": "Giúp tiết kiệm thời gian tìm kiếm và hỗ trợ học tập hiệu quả."
+  },
+  {
+   "q": "Người dùng bị cuốn vào màn hình quá nhiều giờ do video tự động phát nối tiếp liên tục.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 1,
+   "e": "Ảnh hưởng đến sức khỏe, thị lực và quỹ thời gian học tập."
+  },
+  {
+   "q": "Mở khóa điện thoại nhanh chóng bằng nhận diện khuôn mặt mà không cần nhớ mật khẩu dài.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 0,
+   "e": "Mang lại sự thuận tiện, nhanh chóng cho người sử dụng."
+  },
+  {
+   "q": "Tạo ra “bong bóng thông tin”, khiến người dùng chỉ tiếp cận thông tin một chiều, thiếu đa dạng.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 1,
+   "e": "Làm thu hẹp góc nhìn, hạn chế tiếp cận kiến thức mới mẻ."
+  },
+  {
+   "q": "Ứng dụng bản đồ gợi ý tuyến đường thông thoáng dựa trên dữ liệu giao thông thời gian thực.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 0,
+   "e": "Hỗ trợ di chuyển an toàn và tiết kiệm thời gian đi lại."
+  },
+  {
+   "q": "Công cụ tạo sinh văn bản có thể tạo ra thông tin sai lệch hoặc làm giảm tính tự chủ tư duy nếu lạm dụng.",
+   "o": [
+    "Mặt tích cực",
+    "Mặt hạn chế"
+   ],
+   "a": 1,
+   "e": "Cần luôn kiểm chứng thông tin và tự suy nghĩ độc lập."
+  }
+ ],
+ "passScore": 8
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// Kết nối với LMS: học liệu chạy trong khung nhúng sẽ gửi bài làm ra trang LMS, máy chủ chấm và lưu điểm
+const inLms = window.parent !== window;
+const PASS = D.passScore || 8;
+function toLms(msg) { if (inLms) window.parent.postMessage(Object.assign({ source: 'hoclieu-6ai' }, msg), '*'); }
+function setBox(id, text, cls) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'sync' + (cls ? ' ' + cls : '');
+}
+function showSaved(s) {
+  if (!s || !s.loggedIn) {
+    setBox('syncInfo', 'Em cần đăng nhập LMS để kết quả được lưu vào sổ điểm.', 'warn');
+    return;
+  }
+  if (!s.attempts) {
+    setBox('syncInfo', 'Kết quả bài trắc nghiệm sẽ được lưu vào sổ điểm LMS. Cần đạt từ ' + PASS + '/10 điểm để hoàn thành bài học.');
+    return;
+  }
+  const done = s.bestScore >= PASS;
+  setBox('syncInfo', 'Đã làm ' + s.attempts + ' lần. Điểm cao nhất: ' + s.bestScore + '/10. ' +
+    (done ? 'Em đã hoàn thành bài học.' : 'Em cần đạt từ ' + PASS + '/10 để hoàn thành.'), done ? 'ok' : 'warn');
+}
+window.addEventListener('message', e => {
+  if (e.source !== window.parent || !e.data || e.data.source !== 'lms-6ai') return;
+  const m = e.data;
+  if (m.type === 'state') showSaved(m);
+  if (m.type === 'quiz-result') {
+    if (m.ok) {
+      setBox('syncStatus', 'Đã lưu vào sổ điểm: ' + m.score + '/10 (lần ' + m.attempt + '). ' +
+        (m.passed ? 'Em đã hoàn thành bài học.' : 'Chưa đạt ' + PASS + '/10, em xem lại giải thích rồi làm lại nhé.'), m.passed ? 'ok' : 'warn');
+      showSaved({ loggedIn: true, attempts: m.attempt, bestScore: m.bestScore });
+    } else {
+      setBox('syncStatus', 'Chưa lưu được kết quả: ' + (m.message || 'lỗi kết nối') + '. Em bấm "Làm lại" và nộp lại khi có mạng.', 'warn');
+    }
+  }
+});
+if (inLms) {
+  toLms({ type: 'ready' });
+} else {
+  setBox('syncInfo', 'Em đang mở học liệu ngoài LMS nên kết quả sẽ không được lưu. Hãy mở bài này trong LMS để được ghi điểm.', 'warn');
+}
+let quizStart = Date.now();
+
+// Tab
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  ['t1','t2','t3'].forEach(t => $(t).classList.toggle('hide', t !== b.dataset.tab));
+});
+
+// Ghi nhớ
+$('notes').innerHTML = D.notes.map(n => '<li>' + esc(n) + '</li>').join('');
+
+// Trắc nghiệm
+const picked = {};
+function drawQuiz() {
+  $('quiz').innerHTML = D.quiz.map((q, i) =>
+    '<div class="card"><div class="q">Câu ' + (i + 1) + '. ' + esc(q.q) + '</div>' +
+    q.o.map((o, j) => '<button class="opt" data-i="' + i + '" data-j="' + j + '">' + 'ABCD'[j] + '. ' + esc(o) + '</button>').join('') +
+    '<div class="note hide" id="qn' + i + '"></div></div>').join('');
+  document.querySelectorAll('#quiz .opt').forEach(b => b.onclick = () => {
+    if (b.disabled) return;
+    const i = +b.dataset.i;
+    picked[i] = +b.dataset.j;
+    document.querySelectorAll('#quiz .opt[data-i="' + i + '"]').forEach(x => x.classList.toggle('pick', x === b));
+  });
+}
+$('quizSubmit').onclick = () => {
+  if (Object.keys(picked).length < D.quiz.length && !confirm('Em chưa trả lời hết các câu. Vẫn nộp bài?')) return;
+  let right = 0;
+  D.quiz.forEach((q, i) => {
+    const btns = document.querySelectorAll('#quiz .opt[data-i="' + i + '"]');
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove('pick');
+      if (j === q.a) b.classList.add('ok');
+      else if (j === picked[i]) b.classList.add('bad');
+    });
+    if (picked[i] === q.a) right++;
+    const n = $('qn' + i);
+    n.textContent = (picked[i] === q.a ? 'Đúng. ' : 'Chưa đúng. ') + q.e;
+    n.classList.remove('hide');
+  });
+  $('quizResult').textContent = 'Em trả lời đúng ' + right + '/' + D.quiz.length + ' câu.';
+  $('quizSubmit').classList.add('hide');
+  $('quizReset').classList.remove('hide');
+  if (inLms) {
+    const answers = {};
+    D.quiz.forEach((q, i) => { if (picked[i] !== undefined) answers[q.id] = picked[i]; });
+    setBox('syncStatus', 'Đang lưu kết quả vào LMS...');
+    toLms({ type: 'quiz-submit', answers, durationSeconds: Math.round((Date.now() - quizStart) / 1000) });
+  }
+};
+$('quizReset').onclick = () => {
+  for (const k in picked) delete picked[k];
+  $('quizResult').textContent = '';
+  $('quizSubmit').classList.remove('hide');
+  $('quizReset').classList.add('hide');
+  $('syncStatus').classList.add('hide');
+  quizStart = Date.now();
+  drawQuiz();
+  window.scrollTo(0, 0);
+};
+drawQuiz();
+
+// Trò chơi
+let gi = 0, gright = 0;
+$('gTitle').textContent = D.gameTitle;
+$('gIntro').textContent = D.gameIntro;
+function show(id) { ['gStart','gPlay','gEnd'].forEach(x => $(x).classList.toggle('hide', x !== id)); }
+function gLoad() {
+  const g = D.game[gi];
+  $('gCount').textContent = 'Câu ' + (gi + 1) + '/' + D.game.length;
+  $('gQ').textContent = g.q;
+  $('gOpts').innerHTML = g.o.map((o, j) => '<button class="opt" data-j="' + j + '">' + esc(o) + '</button>').join('');
+  $('gNote').classList.add('hide');
+  $('gNext').classList.add('hide');
+  $('gNext').textContent = gi === D.game.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo';
+  document.querySelectorAll('#gOpts .opt').forEach(b => b.onclick = () => {
+    const j = +b.dataset.j;
+    document.querySelectorAll('#gOpts .opt').forEach((x, k) => {
+      x.disabled = true;
+      if (k === g.a) x.classList.add('ok');
+      else if (k === j) x.classList.add('bad');
+    });
+    if (j === g.a) gright++;
+    const n = $('gNote');
+    n.textContent = (j === g.a ? 'Đúng. ' : 'Chưa đúng. ') + ((g.f && g.f[j]) || g.e);
+    n.classList.remove('hide');
+    $('gNext').classList.remove('hide');
+  });
+}
+$('gBegin').onclick = () => { gi = 0; gright = 0; show('gPlay'); gLoad(); };
+$('gNext').onclick = () => {
+  gi++;
+  if (gi < D.game.length) gLoad();
+  else {
+    $('gScore').textContent = 'Em trả lời đúng ' + gright + '/' + D.game.length + ' câu.';
+    show('gEnd');
+    toLms({ type: 'game-finish', correct: gright, total: D.game.length });
+  }
+};
+$('gAgain').onclick = () => { show('gStart'); };
+</script>
+</body>
+</html>

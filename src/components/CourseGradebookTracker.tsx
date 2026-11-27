@@ -56,6 +56,11 @@ function formatStudyTime(secs?: number) {
   return rm > 0 ? `${h}g ${rm}p` : `${h} giờ`;
 }
 
+// Bài trắc nghiệm, hoặc học liệu HTML có bài trắc nghiệm bên trong (máy chủ chấm điểm)
+function isQuizLike(x: any): boolean {
+  return !!x && (x.type === 'quiz' || (Array.isArray(x.quizQuestions) && x.quizQuestions.length > 0) || !!x.quizResult);
+}
+
 export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
   course,
   canManage,
@@ -200,7 +205,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
   const quizQuestionInsights = useMemo(() => {
     const out: Array<{ activityTitle: string; index: number; question: string; attempts: number; correct: number; accuracyPercent: number }> = [];
     allActivitiesList.forEach((act: any) => {
-      if (act.type === 'quiz' && Array.isArray(act.questionStats)) {
+      if (isQuizLike(act) && Array.isArray(act.questionStats)) {
         act.questionStats.forEach((qs: any) => {
           if (qs.attempts > 0 && qs.accuracyPercent !== null) {
             out.push({
@@ -281,7 +286,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
     let csv = '\uFEFF';
     csv += 'STT,Họ và tên,Mã HS,Lớp,Email,Tiến độ (%),Hoàn thành,Thời gian học,Điểm TB (GPA),Trạng thái';
     allActivitiesList.forEach((a: any) => {
-      const label = a.type === 'video' ? 'Video' : a.type === 'quiz' ? 'Trắc nghiệm' : a.type === 'assignment' ? 'Bài tập' : 'Tài liệu';
+      const label = a.type === 'video' ? 'Video' : isQuizLike(a) ? 'Trắc nghiệm' : a.type === 'assignment' ? 'Bài tập' : 'Tài liệu';
       csv += `,"[${label}] ${String(a.title || '').replace(/"/g, '""')}"`;
     });
     csv += '\n';
@@ -298,7 +303,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
         else if (ap.type === 'video') {
           const pct = ap.videoProgress?.progressPercent ?? (ap.isCompleted ? 100 : 0);
           csv += `,"Đã xem ${pct}%"`;
-        } else if (ap.type === 'quiz') {
+        } else if (isQuizLike(ap)) {
           csv += `,"${ap.score !== null ? `${ap.score}/10` : 'Chưa làm'}"`;
         } else if (ap.type === 'assignment') {
           csv += `,"${ap.score !== null ? `${ap.score}/10` : ap.submission ? 'Chờ chấm' : 'Chưa nộp'}"`;
@@ -485,7 +490,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        {ap.type === 'quiz' && ap.quizResult ? (
+                        {isQuizLike(ap) && ap.quizResult ? (
                           <button
                             type="button"
                             onClick={() => setQuizReviewModal({
@@ -887,7 +892,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                       >
                         <div className="flex items-center gap-1.5 text-slate-800">
                           {act.type === 'video' && <Play className="w-3.5 h-3.5 text-sky-500 shrink-0" />}
-                          {act.type === 'quiz' && <CheckSquare className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                          {isQuizLike(act) && <CheckSquare className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
                           {act.type === 'assignment' && <Award className="w-3.5 h-3.5 text-indigo-500 shrink-0" />}
                           {act.type === 'document' && <FileText className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
                           <span className="truncate font-bold" title={act.title}>{act.title}</span>
@@ -1054,7 +1059,7 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                             }
 
                             // 2. QUIZ
-                            if (act.type === 'quiz') {
+                            if (isQuizLike(act)) {
                               const qr = actProg.quizResult;
                               const hasTaken = !!qr || actProg.score !== null;
                               const score = actProg.score ?? qr?.score;
@@ -1268,14 +1273,14 @@ export const CourseGradebookTracker: React.FC<CourseGradebookTrackerProps> = ({
                             <span className="font-bold text-slate-900 truncate">{ap.title}</span>
                           </div>
                           <p className="text-[10px] text-slate-500 mt-0.5">
-                            {ap.type === 'video' ? `Video: Đã xem ${pct}%` : ap.type === 'quiz' ? `Trắc nghiệm: ${ap.score !== null ? `${ap.score}/10đ` : 'Chưa làm'}` : ap.type === 'assignment' ? `Bài tập: ${ap.score !== null ? `${ap.score}/10đ` : ap.submission ? 'Đã nộp (Chờ chấm)' : 'Chưa nộp'}` : ap.isCompleted ? 'Đã đọc xong' : 'Chưa hoàn thành'}
+                            {ap.type === 'video' ? `Video: Đã xem ${pct}%` : isQuizLike(ap) ? `Trắc nghiệm: ${ap.score !== null ? `${ap.score}/10đ` : 'Chưa làm'}` : ap.type === 'assignment' ? `Bài tập: ${ap.score !== null ? `${ap.score}/10đ` : ap.submission ? 'Đã nộp (Chờ chấm)' : 'Chưa nộp'}` : ap.isCompleted ? 'Đã đọc xong' : 'Chưa hoàn thành'}
                             {ap.timeSpentSeconds > 0 ? ` • ${formatStudyTime(ap.timeSpentSeconds)}` : ''}
                             {ap.lastAccessedAt ? ` • ${ap.lastAccessedAt}` : ''}
                           </p>
                         </div>
 
                         <div className="shrink-0">
-                          {ap.type === 'quiz' && ap.quizResult && (
+                          {isQuizLike(ap) && ap.quizResult && (
                             <button
                               type="button"
                               onClick={() => setQuizReviewModal({

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài liệu đọc: Giới thiệu tổng quan Bài 2 – Lợi ích và cách sử dụng công cụ AI phù hợp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 16px 40px;
+      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f4f6f9;
+      color: #1e293b;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 18px;
+    }
+    .toolbar-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toolbar-kicker {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #0369a1;
+    }
+    .toolbar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .btn-primary {
+      background: #0374b5;
+      border-color: #0374b5;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #025d91;
+      border-color: #025d91;
+    }
+    .diagram-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .diagram-caption {
+      margin: 10px 4px 0;
+      font-size: 13px;
+      color: #475569;
+      text-align: center;
+      font-style: italic;
+    }
+    #overview-diagram-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+    .doc-sheet {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 36px 44px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+    .doc-header {
+      text-align: center;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .doc-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #d96b43;
+      margin-bottom: 6px;
+    }
+    .doc-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      color: #1b3668;
+      letter-spacing: 0.01em;
+    }
+    .doc-subtitle {
+      margin: 8px 0 0;
+      font-size: 15.5px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .doc-prose p {
+      margin: 0 0 16px;
+      font-size: 15.5px;
+      text-align: justify;
+      text-indent: 28px;
+      color: #1e293b;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 14.5px;
+    }
+    .summary-table th,
+    .summary-table td {
+      border: 1px solid #dbe2ea;
+      padding: 11px 14px;
+      vertical-align: top;
+      text-align: left;
+    }
+    .summary-table th {
+      width: 240px;
+      background: #f8fafc;
+      color: #1b3668;
+      font-weight: 700;
+    }
+    .summary-table ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .summary-table li {
+      margin-bottom: 5px;
+    }
+    .summary-table li:last-child {
+      margin-bottom: 0;
+    }
+    @media (max-width: 720px) {
+      body { padding: 12px 10px 28px; }
+      .doc-sheet { padding: 22px 18px; }
+      .doc-header h1 { font-size: 20px; }
+      .doc-prose p { font-size: 14.5px; text-indent: 18px; }
+      .summary-table th { width: 120px; font-size: 13.5px; }
+    }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .toolbar { display: none !important; }
+      .diagram-card, .doc-sheet { border: none; box-shadow: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <div class="toolbar">
+      <div class="toolbar-meta">
+        <span class="toolbar-kicker">Tài liệu đọc · Chuyên đề Trí tuệ nhân tạo lớp 6 (Chủ đề A và B)</span>
+        <span class="toolbar-title">Giới thiệu tổng quan Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp</span>
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="btn" id="btnDownloadPng">Tải ảnh sơ đồ (PNG)</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">In / Lưu PDF</button>
+      </div>
+    </div>
+
+    <section class="diagram-card" aria-label="Sơ đồ tổng quan bài học">
+      <svg id="overview-diagram-svg" viewBox="0 0 1200 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sơ đồ tổng quan Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp">
+    <defs>
+      <linearGradient id="paperBg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fdfcf8"/>
+        <stop offset="100%" stop-color="#f8f6ee"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Warm editorial paper background -->
+    <rect width="1200" height="660" rx="16" fill="url(#paperBg)" stroke="#e6e2d5" stroke-width="1.5"/>
+
+    <!-- Subtle botanical watermark accents (faithful to Module 9 reference) -->
+    <g opacity="0.22" fill="#9eb47a" stroke="#9eb47a" stroke-width="1.5">
+      <path d="M510 590 C540 460, 620 350, 760 240" fill="none" stroke-width="2.5"/>
+      <ellipse cx="565" cy="495" rx="22" ry="9" transform="rotate(-35 565 495)"/>
+      <ellipse cx="610" cy="445" rx="24" ry="10" transform="rotate(-30 610 445)"/>
+      <ellipse cx="660" cy="375" rx="22" ry="9" transform="rotate(-38 660 375)"/>
+      <ellipse cx="525" cy="525" rx="18" ry="8" transform="rotate(28 525 525)"/>
+      <ellipse cx="592" cy="395" rx="20" ry="8" transform="rotate(25 592 395)"/>
+      <path d="M1080 560 C1050 430, 1020 310, 960 190" fill="none" stroke-width="2.2"/>
+      <ellipse cx="1045" cy="465" rx="20" ry="8" transform="rotate(32 1045 465)"/>
+      <ellipse cx="1012" cy="385" rx="22" ry="9" transform="rotate(25 1012 385)"/>
+      <ellipse cx="980" cy="310" rx="19" ry="8" transform="rotate(-30 980 310)"/>
+      <ellipse cx="1062" cy="360" rx="18" ry="7" transform="rotate(-22 1062 360)"/>
+      <path d="M440 165 C510 100, 610 60, 710 35" fill="none" stroke-width="2"/>
+      <ellipse cx="535" cy="96" rx="18" ry="7" transform="rotate(-20 535 96)"/>
+      <ellipse cx="612" cy="65" rx="19" ry="7" transform="rotate(-15 612 65)"/>
+    </g>
+
+    <!-- Left column: Academic emblem + Lesson Title + Metadata -->
+    <g>
+      <!-- Top orbit & monitor vector emblem (matching Module 9 top-left icon) -->
+      <g transform="translate(196, 86)">
+        <ellipse cx="0" cy="0" rx="52" ry="22" fill="none" stroke="#2563eb" stroke-width="3.2" transform="rotate(-30)"/>
+        <ellipse cx="0" cy="0" rx="52" ry="22" fill="none" stroke="#16a34a" stroke-width="3.2" transform="rotate(30)"/>
+        <ellipse cx="0" cy="0" rx="24" ry="52" fill="none" stroke="#ea580c" stroke-width="3.2"/>
+        <circle cx="-44" cy="-22" r="5" fill="#2563eb"/>
+        <circle cx="44" cy="-22" r="5" fill="#16a34a"/>
+        <circle cx="0" cy="52" r="5" fill="#ea580c"/>
+        <rect x="-18" y="-14" width="36" height="24" rx="4" fill="#1e3a8a"/>
+        <rect x="-14" y="-10" width="28" height="16" rx="2" fill="#e0f2fe"/>
+        <rect x="-6" y="10" width="12" height="5" fill="#475569"/>
+        <rect x="-12" y="15" width="24" height="3" rx="1.5" fill="#334155"/>
+      </g>
+
+      <!-- Lesson Number -->
+      <text x="196" y="206" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="31" font-weight="800" fill="#d96b43">Bài 2</text>
+
+      <!-- Lesson Title -->
+      <text x="190" y="252" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="25.5" font-weight="800" fill="#1b3668" letter-spacing="0.2">LỢI ÍCH VÀ CÁCH</text>
+      <text x="190" y="288" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="25.5" font-weight="800" fill="#1b3668" letter-spacing="0.2">SỬ DỤNG CÔNG CỤ</text>
+      <text x="190" y="324" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="25.5" font-weight="800" fill="#1b3668" letter-spacing="0.2">AI PHÙ HỢP</text>
+
+      <!-- Subtle divider & metadata -->
+      <line x1="96" y1="396" x2="296" y2="396" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="196" y="422" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#334155">Tin học 6 · Chuyên đề AI</text>
+      <text x="196" y="444" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="600" fill="#64748b">YCCĐ 6.A3.2</text>
+
+      <!-- Bottom-left minimalist academic globe + scroll emblem -->
+      <g transform="translate(196, 535)">
+        <circle cx="-22" cy="-4" r="32" fill="#38bdf8" opacity="0.25"/>
+        <circle cx="-22" cy="-4" r="26" fill="#0ea5e9" opacity="0.85"/>
+        <path d="M-36 -14 C-26 -20, -14 -10, -16 2 C-18 12, -32 14, -38 4 Z" fill="#22c55e" opacity="0.9"/>
+        <path d="M-8 -18 C-2 -14, 0 -4, -6 6 C-10 2, -12 -10, -8 -18 Z" fill="#22c55e" opacity="0.9"/>
+        <rect x="0" y="-34" width="44" height="58" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <line x1="9" y1="-19" x2="35" y2="-19" stroke="#b45309" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="9" y1="-8" x2="35" y2="-8" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="3" x2="28" y2="3" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="32" cy="14" r="6" fill="#dc2626"/>
+        <path d="M29 19 L27 28 L32 25 L37 28 L35 19" fill="#dc2626"/>
+      </g>
+
+      <!-- Clean duration pill -->
+      <rect x="86" y="592" width="220" height="32" rx="16" fill="#eef4fb" stroke="#bfdbfe" stroke-width="1.2"/>
+      <text x="196" y="613" text-anchor="middle" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">01 tiết · Trực tuyến LMS</text>
+    </g>
+
+    <!-- Right column: 4 Module-9-style Chevron Sections -->
+    
+      <!-- Row 1 -->
+      <g>
+        <polygon points="378,49 688,49 710,98 688,147 378,147" fill="#fbb03b" />
+        <polygon points="688,49 702,49 726,98 702,147 688,147 710,98" fill="#ee6c3b" />
+        <text x="394" y="91" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#1e293b">1. Khởi động &amp; Ba lợi ích</text>
+        <text x="394" y="114" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#1e293b">của AI trong học tập</text>
+        <line x1="726" y1="98" x2="748" y2="98" stroke="#262b33" stroke-width="3.2" />
+        <line x1="748" y1="50" x2="748" y2="146" stroke="#262b33" stroke-width="3.2" stroke-linecap="round" />
+        
+        <line x1="748" y1="50" x2="786" y2="50" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="50" r="4.2" fill="#262b33"/>
+        <text x="798" y="47" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">Tình huống luyện hội thoại tiếng Anh</text>
+        <text x="798" y="64" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">(Hình 2.1 SGK)</text>
+        <line x1="748" y1="98" x2="786" y2="98" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="98" r="4.2" fill="#262b33"/>
+        <text x="798" y="95" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">Học hỏi kiến thức mới và rèn luyện kĩ</text>
+        <text x="798" y="112" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">năng học tập</text>
+        <line x1="748" y1="146" x2="786" y2="146" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="146" r="4.2" fill="#262b33"/>
+        <text x="798" y="143" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">Mở rộng hiểu biết, không dùng AI làm thay</text>
+        <text x="798" y="160" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#b84a18">bài tập</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g>
+        <polygon points="378,207 688,207 710,256 688,305 378,305" fill="#48dbe8" />
+        <polygon points="688,207 702,207 726,256 702,305 688,305 710,256" fill="#4e5bf2" />
+        <text x="394" y="249" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#0f172a">2. Công thức viết câu lệnh</text>
+        <text x="394" y="272" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#0f172a">(Prompt) 3 thành phần</text>
+        <line x1="726" y1="256" x2="748" y2="256" stroke="#262b33" stroke-width="3.2" />
+        <line x1="748" y1="208" x2="748" y2="304" stroke="#262b33" stroke-width="3.2" stroke-linecap="round" />
+        
+        <line x1="748" y1="208" x2="786" y2="208" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="208" r="4.2" fill="#262b33"/>
+        <text x="798" y="205" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">Video tương tác 06:28 kèm 3 mốc câu hỏi</text>
+        <text x="798" y="222" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">neo chặn</text>
+        <line x1="748" y1="256" x2="786" y2="256" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="256" r="4.2" fill="#262b33"/>
+        <text x="798" y="253" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">Công thức: Bối cảnh + Vai trò + Yêu cầu</text>
+        <text x="798" y="270" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">và định dạng</text>
+        <line x1="748" y1="304" x2="786" y2="304" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="304" r="4.2" fill="#262b33"/>
+        <text x="798" y="301" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">So sánh câu lệnh chung chung với câu lệnh</text>
+        <text x="798" y="318" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1b3668">rõ ngữ cảnh</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g>
+        <polygon points="378,365 688,365 710,414 688,463 378,463" fill="#a6dc3b" />
+        <polygon points="688,365 702,365 726,414 702,463 688,463 710,414" fill="#2e9e4f" />
+        <text x="394" y="407" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#0f172a">3. Cẩm nang “4 KHÔNG”</text>
+        <text x="394" y="430" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#0f172a">bảo vệ dữ liệu cá nhân</text>
+        <line x1="726" y1="414" x2="748" y2="414" stroke="#262b33" stroke-width="3.2" />
+        <line x1="748" y1="366" x2="748" y2="462" stroke="#262b33" stroke-width="3.2" stroke-linecap="round" />
+        
+        <line x1="748" y1="366" x2="786" y2="366" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="366" r="4.2" fill="#262b33"/>
+        <text x="798" y="363" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">Không nhập họ tên đầy đủ, ngày sinh, số</text>
+        <text x="798" y="380" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">điện thoại</text>
+        <line x1="748" y1="414" x2="786" y2="414" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="414" r="4.2" fill="#262b33"/>
+        <text x="798" y="411" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">Không cung cấp địa chỉ nhà, tên trường</text>
+        <text x="798" y="428" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">lớp, ảnh riêng tư</text>
+        <line x1="748" y1="462" x2="786" y2="462" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="462" r="4.2" fill="#262b33"/>
+        <text x="798" y="459" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">Không nhập mật khẩu tài khoản vào ô trò</text>
+        <text x="798" y="476" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#1d6f36">chuyện AI</text>
+      </g>
+
+      <!-- Row 4 -->
+      <g>
+        <polygon points="378,517 688,517 710,566 688,615 378,615" fill="#fbdc46" />
+        <polygon points="688,517 702,517 726,566 702,615 688,615 710,566" fill="#d560f0" />
+        <text x="394" y="559" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#1e293b">4. Thực hành đặt câu lệnh</text>
+        <text x="394" y="582" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="800" fill="#1e293b">&amp; Tóm tắt đối chiếu SGK</text>
+        <line x1="726" y1="566" x2="748" y2="566" stroke="#262b33" stroke-width="3.2" />
+        <line x1="748" y1="535" x2="748" y2="597" stroke="#262b33" stroke-width="3.2" stroke-linecap="round" />
+        
+        <line x1="748" y1="535" x2="786" y2="535" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="535" r="4.2" fill="#262b33"/>
+        <text x="798" y="532" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#7c2d96">Trắc nghiệm chốt chặn 5 câu (đạt ≥ 7/10</text>
+        <text x="798" y="549" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#7c2d96">điểm)</text>
+        <line x1="748" y1="597" x2="786" y2="597" stroke="#262b33" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="786" cy="597" r="4.2" fill="#262b33"/>
+        <text x="798" y="594" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#7c2d96">Thực hành “Hỏi đúng – Trúng đáp án” &amp;</text>
+        <text x="798" y="611" font-family="'Be Vietnam Pro', 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#7c2d96">“Nhà báo nhí”</text>
+      </g>
+  </svg>
+      <p class="diagram-caption">Sơ đồ tổng quan cấu trúc nội dung Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp (Tin học 6 – Chuyên đề AI)</p>
+    </section>
+
+    <article class="doc-sheet">
+      <header class="doc-header">
+        <div class="doc-tag">Chủ đề A: Tư duy lấy con người làm trung tâm · Bài 2 / 8</div>
+        <h1>GIỚI THIỆU TỔNG QUAN VỀ BÀI HỌC</h1>
+        <p class="doc-subtitle">Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp</p>
+      </header>
+
+      <div class="doc-prose">
+        <p>Bài 2 “Lợi ích và cách sử dụng công cụ AI phù hợp” là bài học thứ hai trong tám bài của Chuyên đề Trí tuệ nhân tạo lớp 6 (Chủ đề A: Tư duy lấy con người làm trung tâm), được xây dựng theo định hướng Chương trình Giáo dục phổ thông 2018 và Công văn số 5512/BGDĐT-GDTrH ngày 18/12/2020 của Bộ GD&amp;ĐT. Bài học tập trung thực hiện yêu cầu cần đạt 6.A3.2 trong 01 tiết (45 phút) theo hình thức dạy học trực tuyến trọn vẹn trên hệ thống LMS.</p>
+        <p>Tiếp nối nhận thức nền tảng từ Bài 1 về vai trò công cụ hỗ trợ của AI, Bài 2 có trọng tâm giúp học sinh trình bày được ba lợi ích thiết thực của AI trong học tập (học hỏi kiến thức mới, rèn luyện kĩ năng, mở rộng hiểu biết), nắm vững công thức viết câu lệnh (Prompt) gồm ba thành phần (Bối cảnh + Vai trò + Yêu cầu và định dạng cụ thể) theo khuyến nghị của UNESCO (2023), đồng thời tuân thủ nghiêm Cẩm nang “4 KHÔNG” để bảo vệ dữ liệu cá nhân khi tương tác với AI. Bước thực hành tự tóm tắt bằng lời riêng kết hợp đối chiếu Sách giáo khoa ở cuối bài tạo cầu nối tự nhiên sang Bài 3 về thực chứng thông tin.</p>
+        <p>Nội dung học tập Bài 2 trên hệ thống LMS gồm bốn chặng tuần tự: Khởi động thảo luận trên Diễn đàn gắn với tình huống luyện tiếng Anh của bạn Khoa (Hình 2.1 SGK), Hình thành kiến thức qua Video tương tác có 03 mốc câu hỏi neo chặn bắt buộc cùng tài liệu trọng tâm, Luyện tập qua Trắc nghiệm chốt chặn (đạt từ 7/10 điểm) và thực hành viết câu lệnh “Hỏi đúng – Trúng đáp án”, kết thúc bằng hoạt động Vận dụng “Nhà báo nhí tổng hợp tin tức” kèm đối chiếu SGK (chấm theo Rubric 10 điểm). Tài liệu do Nhóm 2 thiết kế và triển khai trên hệ thống LMS.</p>
+      </div>
+
+      <table class="summary-table" aria-label="Thông tin tóm tắt Bài 2">
+        <tbody>
+          <tr>
+            <th>Chủ đề &amp; Yêu cầu cần đạt</th>
+            <td><strong>Chủ đề A: Tư duy lấy con người làm trung tâm</strong> · YCCĐ <strong>6.A3.2</strong></td>
+          </tr>
+          <tr>
+            <th>Mức độ nhận thức &amp; Thời lượng</th>
+            <td>Hiểu – Vận dụng · 01 tiết – 45 phút (Trực tuyến trên LMS)</td>
+          </tr>
+          <tr>
+            <th>Cấu trúc 4 mạch nội dung chính</th>
+            <td>
+              <ul>
+                <li><strong>1. Khởi động &amp; Ba lợi ích của AI trong học tập:</strong> Tình huống luyện hội thoại tiếng Anh (Hình 2.1 SGK); Học hỏi kiến thức mới và rèn luyện kĩ năng học tập; Mở rộng hiểu biết, không dùng AI làm thay bài tập.</li>
+          <li><strong>2. Công thức viết câu lệnh (Prompt) 3 thành phần:</strong> Video tương tác 06:28 kèm 3 mốc câu hỏi neo chặn; Công thức: Bối cảnh + Vai trò + Yêu cầu và định dạng; So sánh câu lệnh chung chung với câu lệnh rõ ngữ cảnh.</li>
+          <li><strong>3. Cẩm nang “4 KHÔNG” bảo vệ dữ liệu cá nhân:</strong> Không nhập họ tên đầy đủ, ngày sinh, số điện thoại; Không cung cấp địa chỉ nhà, tên trường lớp, ảnh riêng tư; Không nhập mật khẩu tài khoản vào ô trò chuyện AI.</li>
+          <li><strong>4. Thực hành đặt câu lệnh &amp; Tóm tắt đối chiếu SGK:</strong> Trắc nghiệm chốt chặn 5 câu (đạt ≥ 7/10 điểm); Thực hành “Hỏi đúng – Trúng đáp án” &amp; “Nhà báo nhí”.</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Yêu cầu hoàn thành bài học</th>
+            <td>Đọc tổng quan, thảo luận Diễn đàn Khởi động, hoàn thành Video tương tác (3 câu neo chặn), đạt ≥ 7/10 điểm bài Trắc nghiệm và nộp 02 bài tập Thực hành – Vận dụng.</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('btnDownloadPng');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var svgEl = document.getElementById('overview-diagram-svg');
+        if (!svgEl) return;
+        var xml = new XMLSerializer().serializeToString(svgEl);
+        var blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var img = new Image();
+        img.onload = function () {
+          var canvas = document.createElement('canvas');
+          canvas.width = 2400;
+          canvas.height = 1320;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fdfcf8';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          var a = document.createElement('a');
+          a.download = 'SoDoTongQuan_Bai2_AI6.png';
+          a.href = canvas.toDataURL('image/png');
+          a.click();
+        };
+        img.src = url;
+      });
+    })();
+  </script>
+</body>
+</html>

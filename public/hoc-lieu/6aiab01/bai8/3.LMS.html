@@ -1,2625 +1,357 @@
 <!DOCTYPE html>
-<html lang="vi"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Trọn bộ Học liệu số LMS – Bài 8: Con người làm chủ Trí tuệ nhân tạo (Tin học 6)</title> <style> :root {
-      --primary: #0F4C81;
-      --primary-mid: #1D63DC;
-      --primary-light: #EBF4FF;
-      --primary-border: #BFDBFE;
-      --accent: #F97316;
-      --accent-dark: #EA580C;
-      --accent-light: #FFF7ED;
-      --accent-border: #FED7AA;
-      --success: #059669;
-      --success-light: #ECFDF5;
-      --success-border: #A7F3D0;
-      --danger: #DC2626;
-      --danger-light: #FEF2F2;
-      --danger-border: #FECACA;
-      --purple: #6D28D9;
-      --purple-light: #F5F3FF;
-      --bg: #F1F5F9;
-      --surface: #FFFFFF;
-      --text: #0F172A;
-      --text-muted: #475569;
-      --border: #E2E8F0;
-      --radius: 14px;
-      --shadow: 0 4px 18px rgba(15, 76, 129, 0.08);
-      --shadow-lg: 0 12px 32px rgba(15, 76, 129, 0.14);
-      --font: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html,
-    body {
-      height: 100%;
-      font-family: var(--font);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.6;
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font-family: inherit;
-    }
-
-    /* APP SHELL */
-    .app-shell {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 290px;
-      background: linear-gradient(180deg, #0B355C 0%, #0F4C81 60%, #155A96 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 100;
-      box-shadow: 4px 0 24px rgba(11, 53, 92, 0.18);
-      transition: transform .25s ease;
-    }
-
-    .sidebar-header {
-      padding: 20px 18px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    }
-
-    .brand-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(249, 115, 22, 0.22);
-      border: 1px solid rgba(251, 146, 60, 0.55);
-      color: #FED7AA;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .sidebar-header h1 {
-      font-size: 17px;
-      line-height: 1.35;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .sidebar-header p {
-      font-size: 12.5px;
-      color: #CBD5E1;
-      margin-top: 4px;
-    }
-
-    .nav-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-group-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      color: #93C5FD;
-      font-weight: 700;
-      padding: 10px 10px 4px;
-    }
-
-    .nav-btn {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: #E2E8F0;
-      text-align: left;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      transition: all .18s ease;
-      font-size: 13.5px;
-      font-weight: 600;
-    }
-
-    .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.11);
-      color: #fff;
-    }
-
-    .nav-btn.active {
-      background: #fff;
-      color: var(--primary);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .nav-btn .nav-ico {
-      font-size: 17px;
-      line-height: 1.2;
-      flex-shrink: 0;
-    }
-
-    .nav-btn .nav-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .nav-btn .nav-sub {
-      font-size: 11px;
-      font-weight: 500;
-      opacity: 0.78;
-    }
-
-    .nav-btn.active .nav-sub {
-      color: var(--accent-dark);
-      opacity: 1;
-      font-weight: 600;
-    }
-
-    .sidebar-footer {
-      padding: 12px 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      font-size: 11.5px;
-      color: #BFDBFE;
-    }
-
-    /* MOBILE HEADER */
-    .mobile-topbar {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 56px;
-      background: var(--primary);
-      color: #fff;
-      z-index: 120;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .mobile-menu-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: #fff;
-      padding: 7px 12px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* MAIN AREA */
-    .main-content {
-      margin-left: 290px;
-      flex: 1;
-      padding: 24px 28px 60px;
-      max-width: calc(100vw - 290px);
-    }
-
-    .module-section {
-      display: none;
-      animation: fadeIn .22s ease;
-    }
-
-    .module-section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* MODULE HEADER + LMS EXPORT BAR */
-    .module-hero {
-      background: linear-gradient(135deg, #0F4C81 0%, #1D63DC 65%, #2563EB 100%);
-      color: #fff;
-      border-radius: 16px;
-      padding: 22px 26px;
-      margin-bottom: 18px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .module-hero.orange {
-      background: linear-gradient(135deg, #C2410C 0%, #EA580C 55%, #F97316 100%);
-    }
-
-    .module-hero.green {
-      background: linear-gradient(135deg, #065F46 0%, #059669 60%, #10B981 100%);
-    }
-
-    .module-hero.purple {
-      background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 60%, #7C3AED 100%);
-    }
-
-    .module-hero .badge {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 999px;
-      padding: 3px 11px;
-      font-size: 11.5px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .module-hero h2 {
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1.3;
-    }
-
-    .module-hero p {
-      font-size: 13.5px;
-      opacity: 0.92;
-      margin-top: 4px;
-      max-width: 720px;
-    }
-
-    .lms-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 14px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-    }
-
-    .lms-toolbar-label {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-right: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* BUTTONS */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 700;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all .16s ease;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: var(--primary-mid);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .btn-accent {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn-accent:hover {
-      background: var(--accent-dark);
-      transform: translateY(-1px);
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #fff;
-    }
-
-    .btn-success:hover {
-      background: #047857;
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: #fff;
-    }
-
-    .btn-danger:hover {
-      background: #B91C1C;
-    }
-
-    .btn-outline {
-      background: #fff;
-      color: var(--primary);
-      border-color: var(--primary-border);
-    }
-
-    .btn-outline:hover {
-      background: var(--primary-light);
-      border-color: var(--primary-mid);
-    }
-
-    .btn-ghost {
-      background: #F8FAFC;
-      color: var(--text);
-      border-color: var(--border);
-    }
-
-    .btn-ghost:hover {
-      background: #E2E8F0;
-    }
-
-    .btn-sm {
-      padding: 6px 11px;
-      font-size: 12px;
-      border-radius: 7px;
-    }
-
-    /* CARDS & GRIDS */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
-    }
-
-    .card-title {
-      font-size: 16.5px;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .callout {
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin: 12px 0;
-      border-left: 5px solid var(--primary-mid);
-      background: var(--primary-light);
-    }
-
-    .callout.orange {
-      border-left-color: var(--accent);
-      background: var(--accent-light);
-    }
-
-    .callout.green {
-      border-left-color: var(--success);
-      background: var(--success-light);
-    }
-
-    .callout.danger {
-      border-left-color: var(--danger);
-      background: var(--danger-light);
-    }
-
-    /* TABLES */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
-      margin-top: 8px;
-    }
-
-    .data-table th,
-    .data-table td {
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .data-table th {
-      background: var(--primary);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .data-table tr:nth-child(even) td {
-      background: #F8FAFC;
-    }
-
-    /* CHECKLIST BADGES */
-    .status-check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .status-check input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--success);
-      cursor: pointer;
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 700;
-    }
-
-    .pill-blue {
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-
-    .pill-orange {
-      background: var(--accent-light);
-      color: var(--accent-dark);
-    }
-
-    .pill-green {
-      background: var(--success-light);
-      color: var(--success);
-    }
-
-    .pill-red {
-      background: var(--danger-light);
-      color: var(--danger);
-    }
-
-    /* MODULE 1: STUDY GUIDE LMS BOXES */
-    .lms-box {
-      border: 2px solid var(--primary-mid);
-      border-radius: 16px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .lms-box-head {
-      background: linear-gradient(90deg, #0F4C81, #1D63DC);
-      color: #fff;
-      padding: 14px 20px;
-      font-weight: 800;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .lms-box.prereq {
-      border-color: var(--accent);
-    }
-
-    .lms-box.prereq .lms-box-head {
-      background: linear-gradient(90deg, #C2410C, #F97316);
-    }
-
-    .lms-box-body {
-      padding: 20px 22px;
-    }
-
-    .stage-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 14px;
-    }
-
-    .stage-card {
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-top: 4px solid var(--primary-mid);
-      border-radius: 12px;
-      padding: 14px;
-    }
-
-    .stage-card.s2 {
-      border-top-color: var(--accent);
-    }
-
-    .stage-card.s3 {
-      border-top-color: var(--success);
-    }
-
-    .stage-card h4 {
-      font-size: 14px;
-      color: var(--primary);
-      margin-bottom: 6px;
-    }
-
-    .stage-card.s2 h4 {
-      color: var(--accent-dark);
-    }
-
-    .stage-card.s3 h4 {
-      color: var(--success);
-    }
-
-    .stage-card p {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    /* MODULE 2: INTERACTIVE SLIDE DECK */
-    .slide-deck-wrap {
-      background: #0F172A;
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .slide-deck-wrap:fullscreen {
-      padding: 20px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: #0B192C;
-    }
-
-    .slide-stage {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      min-height: 490px;
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .slide-item {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      padding: 24px 30px 18px;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .slide-item.active {
-      display: flex;
-      animation: fadeIn .2s ease;
-    }
-
-    .slide-top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid var(--primary-light);
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-    }
-
-    .slide-tag {
-      background: var(--primary);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 999px;
-      letter-spacing: 0.4px;
-    }
-
-    .slide-tag.orange {
-      background: var(--accent);
-    }
-
-    .slide-tag.green {
-      background: var(--success);
-    }
-
-    .slide-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 10px;
-      line-height: 1.28;
-    }
-
-    .slide-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      font-size: 14.5px;
-    }
-
-    .slide-footer {
-      margin-top: auto;
-      padding-top: 8px;
-      border-top: 1px solid #E2E8F0;
-      display: flex;
-      justify-content: space-between;
-      font-size: 11.5px;
-      color: #64748B;
-      font-weight: 600;
-    }
-
-    .slide-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 12px;
-      color: #fff;
-    }
-
-    .slide-dots {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-    }
-
-    .slide-dot {
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(255, 255, 255, 0.1);
-      color: #CBD5E1;
-      padding: 5px 11px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .15s;
-    }
-
-    .slide-dot:hover {
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
-    }
-
-    .slide-dot.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .slide-cover {
-      background: linear-gradient(135deg, #0B355C 0%, #0F4C81 50%, #1D63DC 100%);
-      color: #fff;
-      justify-content: center;
-    }
-
-    .dialogue-bubble {
-      background: #F8FAFC;
-      border: 1px solid #CBD5E1;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 13.5px;
-      margin-bottom: 6px;
-    }
-
-    .dialogue-bubble strong {
-      color: var(--primary);
-    }
-
-    .dialogue-bubble.khoa {
-      background: #FFF7ED;
-      border-color: #FDBA74;
-    }
-
-    .dialogue-bubble.khoa strong {
-      color: #C2410C;
-    }
-
-    .reveal-box {
-      background: #ECFDF5;
-      border: 1.5px dashed #10B981;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13.5px;
-      display: none;
-      margin-top: 6px;
-    }
-
-    .reveal-box.show {
-      display: block;
-      animation: fadeIn .2s ease;
-    }
-
-    /* TIMER WIDGET */
-    .timer-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: #0F172A;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 18px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .timer-pill.urgent {
-      background: var(--danger);
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.03);
-      }
-    }
-
-    /* MODULE 3: INFOGRAPHIC */
-    .info-preview-stage {
-      background: #E2E8F0;
-      border-radius: 16px;
-      padding: 22px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: auto;
-    }
-
-    .info-svg-box svg {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: var(--shadow-lg);
-      display: block;
-    }
-
-    /* MODULE 4: GAME HTML5 NGÃ RẼ THÔNG MINH */
-    .game-shell {
-      background: linear-gradient(160deg, #EBF4FF 0%, #F8FAFC 55%, #FFF7ED 100%);
-      border: 2px solid var(--primary-border);
-      border-radius: 18px;
-      padding: 22px 24px;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .game-shell:fullscreen {
-      padding: 28px 44px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .game-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--primary-border);
-      margin-bottom: 18px;
-    }
-
-    .game-title {
-      font-size: 23px;
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    .game-stats {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .stat-chip {
-      background: #fff;
-      border: 1.5px solid var(--primary-border);
-      color: var(--primary);
-      padding: 6px 13px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 14px;
-    }
-
-    .game-compare {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .game-panel {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px 22px;
-      border: 2.5px solid var(--primary-mid);
-      box-shadow: var(--shadow);
-    }
-
-    .game-panel.real {
-      border-color: var(--accent);
-    }
-
-    .game-panel-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 10px;
-      color: var(--primary-mid);
-    }
-
-    .game-panel.real .game-panel-head {
-      color: var(--accent-dark);
-    }
-
-    .game-panel-text {
-      font-size: 19px;
-      font-weight: 600;
-      color: #0F172A;
-      line-height: 1.55;
-    }
-
-    .game-actions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .game-choice-btn {
-      border: none;
-      border-radius: 14px;
-      padding: 16px 14px;
-      color: #fff;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
-      transition: all .16s ease;
-    }
-
-    .game-choice-btn:hover:not(:disabled) {
-      transform: translateY(-3px);
-      filter: brightness(1.06);
-    }
-
-    .game-choice-btn:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .game-choice-btn.opt1 {
-      background: linear-gradient(135deg, #059669, #10B981);
-    }
-
-    .game-choice-btn.opt2 {
-      background: linear-gradient(135deg, #1D4ED8, #2563EB);
-    }
-
-    .game-choice-btn.opt3 {
-      background: linear-gradient(135deg, #DC2626, #EA580C);
-    }
-
-    .game-choice-btn.correct-pick {
-      outline: 4px solid #FACC15;
-      transform: scale(1.02);
-      opacity: 1 !important;
-    }
-
-    .kbd-badge {
-      background: rgba(255, 255, 255, 0.22);
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .game-feedback {
-      display: none;
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-top: 12px;
-      border: 2px solid var(--success);
-      background: var(--success-light);
-    }
-
-    .game-feedback.wrong {
-      border-color: var(--danger);
-      background: var(--danger-light);
-    }
-
-    .game-feedback.show {
-      display: block;
-      animation: fadeIn .22s ease;
-    }
-
-    /* MODULE 5: SCENARIO CARDS & MATCHING */
-    .scenario-card {
-      background: #fff;
-      border: 2px solid var(--primary-border);
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--shadow);
-    }
-
-    .scenario-card-head {
-      background: linear-gradient(90deg, #0F4C81, #1D63DC);
-      color: #fff;
-      padding: 12px 16px;
-      font-weight: 800;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .scenario-card:nth-child(2) .scenario-card-head {
-      background: linear-gradient(90deg, #047857, #10B981);
-    }
-
-    .scenario-card:nth-child(3) .scenario-card-head {
-      background: linear-gradient(90deg, #C2410C, #F97316);
-    }
-
-    .scenario-card:nth-child(4) .scenario-card-head {
-      background: linear-gradient(90deg, #6D28D9, #7C3AED);
-    }
-
-    .scenario-card-body {
-      padding: 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 14px;
-    }
-
-    .scenario-ans {
-      display: none;
-      background: #F8FAFC;
-      border: 1.5px dashed var(--primary-mid);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-
-    .scenario-ans.show {
-      display: block;
-    }
-
-    .match-row {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 12px;
-      align-items: center;
-      padding: 10px 12px;
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
-
-    .match-select {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1.5px solid var(--primary-border);
-      font-size: 13.5px;
-      font-weight: 600;
-      background: #fff;
-    }
-
-    /* MODULE 6: LMS QUIZ & CERTIFICATE */
-    .quiz-q-card {
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-bottom: 14px;
-      transition: border-color .2s;
-    }
-
-    .quiz-q-card.correct {
-      border-color: var(--success);
-      background: #F0FDF4;
-    }
-
-    .quiz-q-card.incorrect {
-      border-color: var(--danger);
-      background: #FEF2F2;
-    }
-
-    .quiz-opt {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 13px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      margin-top: 8px;
-      cursor: pointer;
-      background: #fff;
-      transition: all .15s;
-    }
-
-    .quiz-opt:hover {
-      border-color: var(--primary-mid);
-      background: var(--primary-light);
-    }
-
-    .quiz-opt input {
-      margin-top: 4px;
-      accent-color: var(--primary-mid);
-      width: 17px;
-      height: 17px;
-      flex-shrink: 0;
-    }
-
-    .quiz-explain {
-      margin-top: 10px;
-      padding: 10px 14px;
-      border-radius: 9px;
-      font-size: 13.5px;
-      font-weight: 600;
-      display: none;
-    }
-
-    .quiz-explain.show {
-      display: block;
-    }
-
-    .quiz-explain.ok {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-
-    .quiz-explain.no {
-      background: #FEE2E2;
-      color: #991B1B;
-    }
-
-    .cert-box {
-      border: 6px double #0F4C81;
-      border-radius: 18px;
-      padding: 28px 32px;
-      background: radial-gradient(circle at top right, #FFF7ED, #FFFFFF 55%, #EBF4FF 100%);
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-      margin-top: 18px;
-    }
-
-    .cert-box h3 {
-      font-size: 24px;
-      color: #0F4C81;
-      letter-spacing: 1px;
-      margin: 8px 0;
-    }
-
-    .cert-name {
-      font-size: 26px;
-      font-weight: 900;
-      color: #EA580C;
-      margin: 10px 0;
-      border-bottom: 2px solid #FDBA74;
-      display: inline-block;
-      padding: 0 24px 4px;
-    }
-
-    /* MODULE 7: FORM & TABS */
-    .subtabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .subtab-btn {
-      padding: 9px 16px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: #fff;
-      font-weight: 700;
-      font-size: 13.5px;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .subtab-btn.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
-
-    .subtab-pane {
-      display: none;
-    }
-
-    .subtab-pane.active {
-      display: block;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 5px;
-      color: var(--primary);
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px 13px;
-      border: 1.5px solid #CBD5E1;
-      border-radius: 10px;
-      font-size: 14px;
-      background: #fff;
-      transition: border-color .15s;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: var(--primary-mid);
-      box-shadow: 0 0 0 3px rgba(29, 99, 220, 0.14);
-    }
-
-    textarea.form-control {
-      min-height: 82px;
-      resize: vertical;
-    }
-
-    .code-block {
-      background: #0F172A;
-      color: #E2E8F0;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-family: Consolas, 'Courier New', monospace;
-      font-size: 12.5px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 9999;
-      background: #0F172A;
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 13.5px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      opacity: 0;
-      transform: translateY(16px);
-      pointer-events: none;
-      transition: all .22s ease;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1024px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .mobile-topbar {
-        display: flex;
-      }
-
-      .main-content {
-        margin-left: 0;
-        max-width: 100vw;
-        padding: 72px 14px 48px;
-      }
-
-      .grid-2,
-      .grid-3,
-      .grid-4,
-      .stage-grid,
-      .game-compare,
-      .game-actions {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* PRINT STYLES */
-    @media print {
-
-      .sidebar,
-      .mobile-topbar,
-      .lms-toolbar,
-      .module-hero,
-      .no-print {
-        display: none !important;
-      }
-
-      .main-content {
-        margin: 0 !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-      }
-
-      body {
-        background: #fff !important;
-      }
-
-      .card,
-      .lms-box,
-      .scenario-card {
-        box-shadow: none !important;
-        break-inside: avoid;
-      }
-
-      .slide-deck-wrap {
-        background: #fff !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-      }
-
-      .slide-controls {
-        display: none !important;
-      }
-
-      .slide-stage {
-        aspect-ratio: auto !important;
-        box-shadow: none !important;
-        min-height: auto !important;
-      }
-
-      .slide-item {
-        display: flex !important;
-        page-break-after: always;
-        border: 1.5px solid #CBD5E1;
-        margin-bottom: 16px;
-        min-height: 90vh;
-      }
-    }
-  </style> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet"> <style id="lms-clean-student-overrides"> /* Clean academic LMS presentation: hide teacher export/Moodle/Canvas chrome & enforce crisp Vietnamese typography */
-    body, button, input, select, textarea {
-      font-family: 'Be Vietnam Pro', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
-    .mode-switch,
-    .teacher-only,
-    .teacher-bar,
-    .module-export-bar,
-    .export-tab,
-    #btn-teacher-mode,
-    [onclick*="exportStandalone"],
-    [onclick*="downloadStandalone"],
-    [onclick*="copyModuleHtml"],
-    [onclick*="copyLMSGuide"],
-    [onclick*="copyM1Html"],
-    [onclick*="exportQuizGIFT"],
-    [onclick*="exportQuizCSV"],
-    [onclick*="copyMoodleGift"],
-    [onclick*="copyGoogleAppsScript"],
-    [onclick*="copyGoogleFormBlueprint"],
-    [onclick*="openExportModal"],
-    [onclick*="copyRubricHTML"],
-    [onclick*="copySlideEmbedSnippet"],
-    [onclick*="copyInfographicHTML"],
-    [onclick*="copyWorksheetHTML"],
-    [onclick*="copyTextTemplate"],
-    [onclick*="copyModuleText"],
-    [onclick*="switchSubtab('m7-tab-teacher'"] {
-      display: none !important;
-    }
-    .lms-toolbar {
-      display: none !important;
-    }
-  </style>
-</head> <body> <div class="mobile-topbar"> <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu Học liệu</button> <strong>Bài 8: Con người làm chủ AI (LMS)</strong> </div> <div class="app-shell"> <!-- SIDEBAR --> <aside class="sidebar" id="sidebar"> <div class="sidebar-header"> <div class="brand-pill"> Tin học 6 • Chuyên đề AI</div> <h1>BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO</h1> <p>Học liệu số tương tác – Tin học 6</p> </div> <nav class="nav-list"> <div class="nav-group-label">Tổng quan khóa học</div> <button class="nav-btn active" data-target="mod-overview" onclick="switchModule('mod-overview', this)"> <span class="nav-ico">0</span> <span class="nav-meta">Tổng quan Bài 8<span class="nav-sub">Mục tiêu 6.A3.1 & 5 thành
-              phần</span></span> </button> <div class="nav-group-label">Các Module Học liệu số</div> <button class="nav-btn" data-target="mod-1" onclick="switchModule('mod-1', this)"> <span class="nav-ico">1</span> <span class="nav-meta">M1. Study Guide & Kiến thức nền<span class="nav-sub">Đầu trang LMS (TP 1 &
-              2)</span></span> </button> <button class="nav-btn" data-target="mod-2" onclick="switchModule('mod-2', this)"> <span class="nav-ico">2</span> <span class="nav-meta">M2. Bộ 8 Slide trình chiếu<span class="nav-sub">Trực tiếp 45' & Lưu LMS (TP
-              3)</span></span> </button> <button class="nav-btn" data-target="mod-3" onclick="switchModule('mod-3', this)"> <span class="nav-ico">3</span> <span class="nav-meta">M3. Infographic 3 bước<span class="nav-sub">Hình 8.3 SGK & LMS (TP 3)</span></span> </button> <button class="nav-btn" data-target="mod-4" onclick="switchModule('mod-4', this)"> <span class="nav-ico">4</span> <span class="nav-meta">M4. Game "Ngã rẽ thông minh"<span class="nav-sub">HTML5 • Phím 1/2/3 (HĐ
-              3)</span></span> </button> <button class="nav-btn" data-target="mod-5" onclick="switchModule('mod-5', this)"> <span class="nav-ico">5</span> <span class="nav-meta">M5. 4 Thẻ tình huống & Phiếu<span class="nav-sub">Luyện tập SGK + Rubric
-              4.1</span></span> </button> <button class="nav-btn" data-target="mod-6" onclick="switchModule('mod-6', this)"> <span class="nav-ico">6</span> <span class="nav-meta">M6. Quiz chốt chặn LMS (5 câu)<span class="nav-sub">Đạt ≥ 8/10 + Chứng nhận (TP
-              4)</span></span> </button> <button class="nav-btn" data-target="mod-7" onclick="switchModule('mod-7', this)"> <span class="nav-ico">7</span> <span class="nav-meta">M7. Vận dụng 6A & Google Form<span class="nav-sub">Form 7 câu + Rubric 4.2 (TP
-              5)</span></span> </button> </nav> <div class="sidebar-footer"> <strong>Chủ đề A:</strong> Tư duy lấy con người làm trung tâm<br> Chuẩn CV 5512 • U.S. Dept. of Education (2023) • EU AI Act (2024)
-      </div> </aside> <!-- MAIN CONTENT --> <main class="main-content"> <!-- ==================== OVERVIEW ==================== --> <section id="mod-overview" class="module-section active"> <div class="module-hero"> <div> <span class="badge">TRỌN BỘ HỌC LIỆU SỐ TRIỂN KHAI LMS – TIN HỌC 6</span> <h2>Bài 8: Con người làm chủ Trí tuệ nhân tạo</h2> <p>Trọn bộ 7 học liệu tương tác giúp học sinh nắm vững vai trò của con người khi ra quyết định với sự hỗ trợ của AI và thực hành Quy trình 3 bước làm chủ AI.</p> </div> <div style="display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-accent" onclick="switchModule('mod-4')"> Mở nhanh Game HTML5</button> <button class="btn btn-outline" style="background:#fff;" onclick="switchModule('mod-2')"> Trình chiếu 8
-              Slide</button> </div> </div> <div class="grid-3"> <div class="card"> <div class="card-title"> Yêu cầu cần đạt (6.A3.1)</div> <p style="font-size:13.5px;">Nêu được ví dụ về tình huống con người ra quyết định với sự hỗ trợ của AI (y
-              tế, giao thông,...). Thực hành ra quyết định trong tình huống giả định có gợi ý của AI (<strong>nêu lại
-                gợi ý của AI → cân nhắc điều kiện thực tế → đưa ra lựa chọn kèm lí do</strong>).</p> </div> <div class="card"> <div class="card-title"> Hình thức Blended Learning</div> <p style="font-size:13.5px;"><strong>01 tiết trực tiếp tại lớp (45 phút)</strong> kết hợp đồng bộ <strong>5
-                thành phần trên LMS</strong>: Trước giờ (5 phút đọc Study Guide & Kiến thức nền) → Tại lớp (45 phút) →
-              Sau giờ (15 phút làm Quiz ≥ 8/10 & nộp Form Vận dụng lớp 6A).</p> </div> <div class="card"> <div class="card-title"> Cơ sở khoa học & Pháp lí</div> <p style="font-size:13.5px;">• <strong>U.S. Dept. of Education (2023, tr. 17):</strong> AI không có khả năng
-              phán đoán theo ngữ cảnh rộng như con người.<br>• <strong>Điều 14 Khoản 4(d) EU AI Act (2024):</strong> Con
-              người có quyền không sử dụng, bỏ qua hoặc điều chỉnh đầu ra của AI.</p> </div> </div> <div class="card"> <div class="card-title"> Quy cách nộp bài trên LMS & Bảng kiểm triển khai từng Module</div> <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:10px;">Theo dõi tiến độ hoàn thành từng học phần Bài 8 (trạng thái được lưu cục bộ trên trình duyệt của em):</p> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th style="width:48px;">Xong</th> <th style="width:175px;">Vị trí triển khai LMS</th> <th style="width:205px;">Học liệu / Hình thức</th> <th>Ghi chú triển khai & Cách lấy Module</th> <th style="width:140px;">Mở Module</th> </tr> </thead> <tbody> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk1"
-                      onchange="saveChecklist()"></td> <td><strong>Đầu trang Bài 8 LMS</strong><br><span class="pill pill-blue">Thành phần 1 & 2</span></td> <td>Study Guide & Kiến thức nền tổng hợp</td> <td>Copy nguyên văn hoặc mã HTML giao diện đẹp ở Module 1 dán vào Label/Banner đầu trang LMS.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-1')"> Mở M1</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk2"
-                      onchange="saveChecklist()"></td> <td><strong>Trong tiết & Lưu LMS</strong><br><span class="pill pill-blue">Thành phần 3</span></td> <td>Bộ 8 Slide trình chiếu trực tiếp</td> <td>Trình chiếu trực tiếp Fullscreen tại lớp, xuất file HTML độc lập hoặc in PDF tải lên LMS cho HS ôn
-                    tập.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-2')"> Mở M2</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk3"
-                      onchange="saveChecklist()"></td> <td><strong>HĐ 2.2 & Lưu LMS</strong><br><span class="pill pill-orange">Thành phần 3 & Hình 8.3</span> </td> <td>Infographic Quy trình 3 bước</td> <td>Có sẵn Bản ngang (14,5×4,6 cm SGK) và Bản dọc (1080×1920 px LMS). Bấm tải PNG độ phân giải cao.
-                  </td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-3')"> Mở M3</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk4"
-                      onchange="saveChecklist()"></td> <td><strong>Hoạt động 3 – Chặng 1</strong><br><span class="pill pill-orange">Trực tiếp tại lớp</span> </td> <td>Game HTML5 “Ngã rẽ thông minh”</td> <td>5 tình huống chuẩn lớp 6, điều khiển phím 1/2/3 hoặc click chuột, âm thanh vui nhộn. Tải 1 file
-                    HTML độc lập.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-4')"> Mở M4</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk5"
-                      onchange="saveChecklist()"></td> <td><strong>Hoạt động 3 – Chặng 2</strong><br><span class="pill pill-blue">Tại lớp & Lưu LMS</span> </td> <td>Bộ 4 Thẻ tình huống & Phiếu cặp đôi</td> <td>Luyện tập 1 ghép nối tương tác, 4 Scenario Cards (ẩn/hiện đáp án GV), Phiếu cặp đôi in A4 & Rubric
-                    4.1.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-5')"> Mở M5</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk6"
-                      onchange="saveChecklist()"></td> <td><strong>HĐ 4 – Chốt chặn</strong><br><span class="pill pill-green">Thành phần 4 LMS</span></td> <td>LMS Quiz 5 câu tổng kết (≥ 8/10)</td> <td>Làm thử trực tiếp kèm Chứng nhận hoàn thành chuyên đề; xuất file GIFT (Moodle), CSV hoặc HTML
-                    nhúng LMS.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-6')">✓ Mở M6</button></td> </tr> <tr> <td style="text-align:center;"><input type="checkbox" class="lms-chk" data-id="chk7"
-                      onchange="saveChecklist()"></td> <td><strong>HĐ 4 – Nộp bài & Tổng kết</strong><br><span class="pill pill-green">Thành phần 5
-                      LMS</span></td> <td>Google Form 7 câu nhúng LMS</td> <td>Phiếu mẫu tương tác + hướng dẫn tạo Google Form 7 câu, sinh mã <code>&lt;iframe&gt;</code>, QR
-                    Slide 8 & Rubric 4.2.</td> <td><button class="btn btn-outline btn-sm" onclick="switchModule('mod-7')"> Mở M7</button></td> </tr> </tbody> </table> </div> </div> <div class="grid-2"> <div class="card"> <div class="card-title"> Giải thích thuật ngữ chuẩn SGK Bài 8</div> <table class="data-table"> <thead> <tr> <th style="width:36%;">Thuật ngữ</th> <th>Giải thích</th> </tr> </thead> <tbody> <tr> <td><strong>Phán đoán theo ngữ cảnh</strong></td> <td>Khả năng xem xét toàn diện các yếu tố thực tế, đạo đức, an toàn và hoàn cảnh cụ thể của con người
-                    trước khi hành động.</td> </tr> <tr> <td><strong>Làm chủ AI</strong></td> <td>Việc con người chủ động kiểm soát, đánh giá gợi ý của AI, đưa ra quyết định cuối cùng và chịu
-                    trách nhiệm về lựa chọn của mình.</td> </tr> </tbody> </table> </div> <div class="card"> <div class="card-title"> Tiến trình 45 phút dạy học trực tiếp (Chuẩn CV 5512)</div> <ul style="padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:6px;"> <li><strong>HĐ 1 (5 phút):</strong> Khởi động “Lộ trình nào an toàn?” (Tình huống gia đình bạn An – Hình
-                8.1).</li> <li><strong>HĐ 2.1 (6 phút):</strong> Vai trò của AI & con người trong Y tế, Giao thông (Hình 8.2, U.S.
-                Dept. of Ed., EU AI Act).</li> <li><strong>HĐ 2.2 (6 phút):</strong> Tình huống bạn Khoa & Quy trình 3 bước ra quyết định (Hình 8.3).
-              </li> <li><strong>HĐ 3 (18 phút):</strong> Chặng 1 (6') Game HTML5 “Ngã rẽ thông minh” + Chặng 2 (12') Luyện tập
-                SGK & 4 Thẻ tình huống cặp đôi.</li> <li><strong>HĐ 4 (10 phút + LMS):</strong> Vận dụng chuyến tham quan lớp 6A + Giao Quiz chốt chặn ≥ 8/10 &
-                Google Form tổng kết 8 bài.</li> </ul> </div> </div> </section> <!-- ==================== MODULE 1: STUDY GUIDE & PREREQUISITES ==================== --> <section id="mod-1" class="module-section"> <div class="module-hero"> <div> <span class="badge">THÀNH PHẦN 1 & THÀNH PHẦN 2 LMS • ĐẦU TRANG BÀI 8</span> <h2>Module 1: Sổ tay hướng dẫn học tập & Khung kiến thức nền</h2> <p>Dán trực tiếp lên đầu trang Bài 8 trên hệ thống LMS (trên hệ thống LMS) để học sinh chuẩn bị 5 phút trước giờ học trực tiếp.</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Xuất học liệu Module 1 lên LMS:</span> <button class="btn btn-primary btn-sm" onclick="copyM1Html('all')"> Copy HTML nhúng LMS (Cả 2
-            khung)</button> <button class="btn btn-outline btn-sm" onclick="copyM1Html('sg')"> Copy HTML Study Guide</button> <button class="btn btn-outline btn-sm" onclick="copyM1Html('pre')"> Copy HTML Kiến thức nền</button> <button class="btn btn-ghost btn-sm" onclick="copyM1PlainText()"> Copy văn bản thuần</button> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m1')">⬇ Tải tệp HTML độc lập</button> </div> <!-- 1.1 Study Guide --> <div class="lms-box" id="m1-studyguide-preview"> <div class="lms-box-head"> <span> 1.1. HƯỚNG DẪN HỌC TẬP BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Study Guide • TP 1 LMS</span> </div> <div class="lms-box-body"> <div class="callout" style="margin-top:0;"> <strong>Hình thức học tập:</strong> 01 tiết học trực tiếp tại lớp (45 phút) kết hợp đọc kiến thức nền, ôn
-              tập, làm bài kiểm tra chốt chặn cuối khóa và nộp sản phẩm Vận dụng trên hệ thống LMS.
-            </div> <h4 style="margin-top:14px;color:var(--primary);font-size:15px;"> Lộ trình 3 giai đoạn học tập dành cho
-              học sinh:</h4> <div class="stage-grid"> <div class="stage-card"> <h4>1⃣ Trước giờ học tại lớp (5 phút trên LMS)</h4> <p>Đọc phần <strong>Kết nối kiến thức nền tổng hợp</strong> bên dưới và xem trước tình huống
-                  <strong>Khởi động</strong> của gia đình bạn An trong SGK Bài 8.</p> </div> <div class="stage-card s2"> <h4>2⃣ Trong giờ học tại lớp (45 phút trực tiếp)</h4> <p>Phân tích vai trò của AI và con người trong y tế, giao thông; nắm vững <strong>Quy trình 3 bước ra
-                    quyết định cùng AI</strong>; tham gia trò chơi <em>“Ngã rẽ thông minh”</em>, thảo luận cặp đôi xử lí
-                  Thẻ tình huống và thực hành lập kế hoạch chuyến tham quan lớp 6A.</p> </div> <div class="stage-card s3"> <h4>3⃣ Sau giờ học tại lớp (15 phút trên LMS)</h4> <p><strong>(1)</strong> Hoàn thành bài kiểm tra nhanh 5 câu trên LMS (điều kiện bắt buộc đạt <strong>≥
-                    8/10 điểm</strong> để hoàn tất chuyên đề 8 bài);<br><strong>(2)</strong> Nộp bài thực hành 3 bước
-                  chuyến tham quan lớp 6A và Cam kết tổng kết chuyên đề qua Biểu mẫu Google Form nhúng ở cuối trang.</p> </div> </div> <div class="callout green" style="margin-top:16px;margin-bottom:0;"> <strong> SAU BÀI NÀY EM SẼ (Yêu cầu cần đạt 6.A3.1):</strong> <ul style="padding-left:20px;margin-top:4px;font-size:13.5px;"> <li>Nêu được ví dụ về tình huống con người ra quyết định với sự hỗ trợ của AI (ví dụ: trong y tế, giao
-                  thông,...).</li> <li>Thực hành ra quyết định trong một tình huống giả định có gợi ý của AI (nêu lại gợi ý của AI, cân
-                  nhắc và đưa ra lựa chọn của bản thân kèm lí do).</li> </ul> </div> </div> </div> <!-- 1.2 Prerequisites --> <div class="lms-box prereq" id="m1-prereq-preview"> <div class="lms-box-head"> <span> 1.2. KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI HỌC BÀI 8</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Prerequisites • TP 2 LMS</span> </div> <div class="lms-box-body"> <p style="font-weight:700;color:#9A3412;margin-bottom:10px;"> Tổng hợp từ Bài 1 – Bài 7 (Chủ đề A & Chủ đề
-              B):</p> <div class="grid-4" style="margin-bottom:14px;"> <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px;"> <div class="pill pill-blue" style="margin-bottom:6px;">Bài 1 – 2</div> <p style="font-size:13px;">AI là công cụ do con người tạo ra và hỗ trợ học tập.</p> </div> <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px;"> <div class="pill pill-orange" style="margin-bottom:6px;">Bài 3</div> <p style="font-size:13px;">Biết thực chứng thông tin, kiểm tra nguồn tránh ảo giác AI.</p> </div> <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px;"> <div class="pill pill-green" style="margin-bottom:6px;">Bài 4 – 5</div> <p style="font-size:13px;">Nhận diện hai mặt của thuật toán gợi ý và đánh giá độ an toàn, minh bạch.</p> </div> <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:12px;"> <div class="pill" style="background:#EDE9FE;color:#6D28D9;margin-bottom:6px;">Bài 6 – 7</div> <p style="font-size:13px;">Bảo vệ tài sản dữ liệu cá nhân và quyền riêng tư bằng 3 bước tự vệ số.</p> </div> </div> <div class="callout orange"> <strong> Trọng tâm Bài 8:</strong> Vận dụng tổng hợp tất cả hiểu biết trên vào <strong>kĩ năng ra quyết
-                định thông minh khi có gợi ý của AI</strong>.
-            </div> <div class="callout" style="margin-bottom:0;"> <strong> Câu hỏi định hướng trước giờ học:</strong> <em>Khi nhận được một phương án gợi ý từ công cụ AI
-                trong học tập hay đời sống, em cần thực hiện quy trình mấy bước để đưa ra quyết định phù hợp và an toàn
-                nhất?</em> </div> </div> </div> </section> <!-- ==================== MODULE 2: 8 INTERACTIVE SLIDES ==================== --> <section id="mod-2" class="module-section"> <div class="module-hero"> <div> <span class="badge">THÀNH PHẦN 3 LMS • TRÌNH CHIẾU TRỰC TIẾP 45 PHÚT</span> <h2>Module 2: Bộ 8 Slide bài giảng trực tiếp Bài 8</h2> <p>Thiết kế chuẩn kịch bản 8 Slide (kèm hình vẽ minh họa Hình 8.1, 8.2, 8.3, hiệu ứng click đáp án Luyện tập
-              1, đồng hồ đếm ngược 6 phút và mã QR nộp bài). Dùng phím mũi tên ← → để chuyển slide.</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Điều khiển & Xuất Bộ 8 Slide:</span> <button class="btn btn-primary btn-sm" onclick="toggleFullscreen('slide-deck-container')"> Chiếu Toàn màn
-            hình</button> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m2')">⬇ Tải tệp 8 Slide HTML độc
-            lập</button> <button class="btn btn-outline btn-sm" onclick="printModule('mod-2')"> In / Xuất PDF (8 Slide)</button> </div> <div class="slide-deck-wrap" id="slide-deck-container"> <div class="slide-stage"> <!-- SLIDE 1 --> <div class="slide-item slide-cover active" data-slide="1"> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:auto;"> <span class="pill"
-                  style="background:rgba(255,255,255,0.18);color:#fff;font-size:13px;padding:5px 14px;">TIN HỌC 6 • CHỦ
-                  ĐỀ A: TƯ DUY LẤY CON NGƯỜI LÀM TRUNG TÂM</span> <span class="pill" style="background:#F97316;color:#fff;font-size:13px;padding:5px 14px;">BÀI 8 (TỔNG
-                  KẾT CHUYÊN ĐỀ)</span> </div> <div style="margin:22px 0;"> <h2
-                  style="font-size:38px;font-weight:900;line-height:1.18;margin-bottom:14px;text-shadow:0 3px 14px rgba(0,0,0,0.2);"> CON NGƯỜI LÀM CHỦ<br><span style="color:#FDBA74;">TRÍ TUỆ NHÂN TẠO</span></h2> <div
-                  style="background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.26);border-radius:14px;padding:16px 20px;max-width:860px;"> <div style="font-size:13px;font-weight:800;color:#FDE68A;letter-spacing:0.6px;margin-bottom:6px;"> YÊU CẦU CẦN ĐẠT (6.A3.1) – SAU BÀI NÀY EM SẼ:</div> <ul style="padding-left:20px;font-size:16px;line-height:1.65;"> <li>Nêu được ví dụ về tình huống con người ra quyết định với sự hỗ trợ của AI (y tế, giao
-                      thông,...).</li> <li>Thực hành ra quyết định trong một tình huống giả định có gợi ý của AI (<strong>nêu lại gợi ý của
-                        AI → cân nhắc điều kiện thực tế → đưa ra lựa chọn kèm lí do</strong>).</li> </ul> </div> </div> <div style="margin-top:auto;display:flex;justify-content:space-between;font-size:13px;opacity:0.86;"> <span>Thời lượng: 01 tiết (45 phút trực tiếp kết hợp LMS)</span> <span>Slide 1 / 8</span> </div> </div> <!-- SLIDE 2 --> <div class="slide-item" data-slide="2"> <div class="slide-top-bar"> <span class="slide-tag orange">HOẠT ĐỘNG 1 • KHỞI ĐỘNG (5 PHÚT)</span> <span style="font-size:13px;color:#64748B;font-weight:700;">SGK Bài 8 – Hình 8.1</span> </div> <h3 class="slide-title"> Tình huống: “Lộ trình nào an toàn?”</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:center;"> <!-- SVG Hình 8.1 --> <div style="background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:12px;padding:10px;"> <svg viewBox="0 0 520 225" width="100%" xmlns="http://www.w3.org/2000/svg"> <rect width="520" height="225" rx="10" fill="#EFF6FF" /> <!-- River --> <path d="M0,160 Q140,130 270,165 T520,148 L520,225 L0,225 Z" fill="#93C5FD" opacity="0.65" /> <text x="390" y="205" font-size="11" fill="#1E40AF" font-weight="700">Sông (Mực nước dâng)</text> <!-- Highway A --> <path d="M35,115 Q240,28 485,82" stroke="#10B981" stroke-width="14" fill="none"
-                        stroke-linecap="round" /> <path d="M35,115 Q240,28 485,82" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="8 6"
-                        fill="none" /> <rect x="150" y="18" width="188" height="32" rx="8" fill="#059669" /> <text x="244" y="39" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Tuyến A:
-                        Quốc lộ • 50 phút</text> <!-- Dyke road B --> <path d="M35,115 Q245,165 485,82" stroke="#EF4444" stroke-width="8" stroke-dasharray="10 5"
-                        fill="none" /> <rect x="155" y="142" width="215" height="32" rx="8" fill="#DC2626" /> <text x="262" y="162" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Tuyến B:
-                        Đường đê • 35 phút </text> <!-- Rain cloud --> <g transform="translate(345,95)"> <ellipse cx="26" cy="18" rx="22" ry="12" fill="#475569" /> <ellipse cx="42" cy="16" rx="16" ry="11" fill="#334155" /> <line x1="16" y1="32" x2="12" y2="44" stroke="#2563EB" stroke-width="2.5" /> <line x1="28" y1="32" x2="24" y2="44" stroke="#2563EB" stroke-width="2.5" /> <line x1="40" y1="32" x2="36" y2="44" stroke="#2563EB" stroke-width="2.5" /> </g> <!-- Start & End --> <circle cx="35" cy="115" r="11" fill="#0F4C81" /><text x="35" y="119" text-anchor="middle"
-                        fill="#fff" font-size="11" font-weight="800"></text> <circle cx="485" cy="82" r="11" fill="#F97316" /><text x="485" y="86" text-anchor="middle"
-                        fill="#fff" font-size="11" font-weight="800"></text> <text x="260" y="216" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Hình
-                        8.1. Bản đồ AI đề xuất 2 lộ trình sau đêm mưa lớn</text> </svg> </div> <div> <div class="dialogue-bubble"><strong> An:</strong> “Bố ơi, ứng dụng AI đề xuất hai lộ trình:
-                      <b>Tuyến đường A</b> đi qua quốc lộ mất <b>50 phút</b>, còn <b>Tuyến đường B</b> đi tắt qua đường
-                      đê ven sông chỉ mất <b>35 phút</b> ạ!”</div> <div class="dialogue-bubble"><strong> Minh:</strong> “Nếu hệ thống AI tính toán Tuyến B nhanh hơn
-                      15 phút thì nên đi theo Tuyến B ngay thôi!”</div> <div class="dialogue-bubble khoa"><strong> Khoa:</strong> “Khoan đã! <b>Đêm qua trời vừa mưa
-                        lớn</b>, đường đê nhỏ dễ bị trơn trượt và ngập nước. Bố của An cần cân nhắc thêm điều kiện thực
-                      tế trước khi quyết định!”</div> </div> </div> <div class="callout orange" style="margin:4px 0;"> <strong> Câu hỏi vấn đáp:</strong> Theo em, bố của An nên chọn đi tuyến đường nào sau đêm mưa lớn? Vì
-                  sao?
-                  <button class="btn btn-outline btn-sm no-print" style="margin-left:10px;"
-                    onclick="toggleReveal('s2-ans')"> Hiện/Ẩn gợi ý chốt ý</button> <div class="reveal-box" id="s2-ans"><strong>Gợi ý chuẩn:</strong> Nên chọn <b>Tuyến đường A (Quốc lộ –
-                      50 phút)</b> tuy lâu hơn 15 phút nhưng mặt đường rộng, an toàn. Bản đồ AI chỉ tính khoảng cách &
-                    tốc độ trung bình, chưa nắm được đường đê đang trơn trượt, ngập nước sau đêm mưa lớn.</div> </div> </div> <div class="slide-footer"><span>Bài 8: Con người làm chủ Trí tuệ nhân tạo</span><span>Slide 2 / 8</span> </div> </div> <!-- SLIDE 3 --> <div class="slide-item" data-slide="3"> <div class="slide-top-bar"> <span class="slide-tag">HOẠT ĐỘNG 2.1 • HÌNH THÀNH KIẾN THỨC (6 PHÚT)</span> <span style="font-size:13px;color:#64748B;font-weight:700;">Mục 1 SGK – Hình 8.2</span> </div> <h3 class="slide-title"> Vai trò của AI và con người trong Y tế – Giao thông</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"> <!-- SVG Y tế --> <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:10px;"> <svg viewBox="0 0 360 120" width="100%" xmlns="http://www.w3.org/2000/svg"> <defs> <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
-                          orient="auto-start-reverse"> <path d="M 0 1 L 10 5 L 0 9 z" fill="#F97316" /> </marker> </defs> <rect width="360" height="120" rx="8" fill="#0F172A" /> <!-- X-ray chest simplified --> <rect x="16" y="14" width="108" height="92" rx="6" fill="#1E293B" stroke="#38BDF8"
-                        stroke-width="1.5" /> <ellipse cx="52" cy="58" rx="18" ry="30" fill="#334155" stroke="#94A3B8" /> <ellipse cx="88" cy="58" rx="18" ry="30" fill="#334155" stroke="#94A3B8" /> <rect x="76" y="42" width="20" height="20" rx="3" fill="none" stroke="#F97316" stroke-width="2.5"
-                        stroke-dasharray="4 2" /> <text x="70" y="100" text-anchor="middle" fill="#38BDF8" font-size="9" font-weight="700">AI KHOANH
-                        VÙNG</text> <!-- Arrow --> <path d="M134,60 L162,60" stroke="#F97316" stroke-width="3" marker-end="url(#arr)" /> <!-- Doctor panel --> <rect x="170" y="14" width="174" height="92" rx="8" fill="#FFFFFF" /> <text x="182" y="36" fill="#0F4C81" font-size="12" font-weight="800"> BÁC SĨ QUYẾT
-                        ĐỊNH</text> <text x="182" y="56" fill="#334155" font-size="11">• Xem kĩ phim X-quang gốc</text> <text x="182" y="74" fill="#334155" font-size="11">• Thăm khám &amp; hỏi tiền sử</text> <text x="182" y="92" fill="#059669" font-size="11" font-weight="700">→ Chốt phác đồ điều
-                        trị</text> </svg> <div style="font-size:12px;text-align:center;font-weight:700;color:#0F4C81;margin-top:4px;">Hình
-                      8.2a – Trong Y tế</div> </div> <!-- SVG Giao thông --> <div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:12px;padding:10px;"> <svg viewBox="0 0 360 120" width="100%" xmlns="http://www.w3.org/2000/svg"> <rect width="360" height="120" rx="8" fill="#F8FAFC" /> <!-- GPS box --> <rect x="14" y="14" width="110" height="92" rx="8" fill="#1D4ED8" /> <text x="69" y="34" text-anchor="middle" fill="#BFDBFE" font-size="10" font-weight="700">BẢN ĐỒ
-                        AI</text> <path d="M40,86 L69,48 L98,64" stroke="#4ADE80" stroke-width="4" fill="none"
-                        stroke-linecap="round" /> <text x="69" y="98" text-anchor="middle" fill="#fff" font-size="9.5">Gợi ý: Đi thẳng</text> <!-- Road sign --> <polygon points="154,32 180,82 128,82" fill="#FACC15" stroke="#DC2626" stroke-width="3" /> <text x="154" y="74" text-anchor="middle" fill="#0F172A" font-size="22" font-weight="900">!</text> <text x="154" y="98" text-anchor="middle" fill="#DC2626" font-size="8.5" font-weight="800">ĐANG
-                        SỬA ĐƯỜNG</text> <!-- Driver --> <rect x="190" y="14" width="156" height="92" rx="8" fill="#FFFFFF" stroke="#EA580C"
-                        stroke-width="1.5" /> <text x="200" y="36" fill="#C2410C" font-size="12" font-weight="800"> TÀI XẾ QUYẾT ĐỊNH</text> <text x="200" y="56" fill="#334155" font-size="11">• Quan sát biển báo thực</text> <text x="200" y="74" fill="#334155" font-size="11">• Đánh giá mặt đường</text> <text x="200" y="92" fill="#059669" font-size="11" font-weight="700">→ Rẽ tuyến an toàn hơn</text> </svg> <div style="font-size:12px;text-align:center;font-weight:700;color:#C2410C;margin-top:4px;">Hình
-                      8.2b – Trong Giao thông</div> </div> </div> <table class="data-table" style="margin-top:4px;"> <thead> <tr> <th style="width:18%;">Lĩnh vực</th> <th style="width:41%;"> Nhiệm vụ của công cụ AI (Hỗ trợ)</th> <th style="width:41%;"> Nhiệm vụ của con người (Quyết định cuối)</th> </tr> </thead> <tbody> <tr> <td><strong>Y tế</strong></td> <td>Phân tích hàng nghìn ảnh X-quang nhanh, khoanh vùng dấu hiệu bất thường để hỗ trợ sàng lọc.
-                      </td> <td>Xem xét kĩ vùng khoanh, thăm khám trực tiếp, đánh giá sức khỏe tổng thể và quyết định phác đồ
-                        điều trị.</td> </tr> <tr> <td><strong>Giao thông</strong></td> <td>Tính toán dữ liệu bản đồ và mật độ xe để đề xuất tuyến đường nhanh nhất.</td> <td>Quan sát trực tiếp thời tiết, biển báo “Đường đang sửa chữa”, tình trạng mặt đường để chọn
-                        hướng đi an toàn.</td> </tr> <tr> <td><strong>Học tập & Đời sống</strong></td> <td>Gợi ý kế hoạch ôn tập, dự báo thời tiết, thực đơn...</td> <td>Cân nhắc hoàn cảnh cụ thể, sức khỏe, quy định an toàn của bản thân trước khi lựa chọn.</td> </tr> </tbody> </table> </div> <div class="slide-footer"><span>Bài 8: Con người làm chủ Trí tuệ nhân tạo</span><span>Slide 3 / 8</span> </div> </div> <!-- SLIDE 4 --> <div class="slide-item" data-slide="4"> <div class="slide-top-bar"> <span class="slide-tag">HOẠT ĐỘNG 2.1 • CƠ SỞ KHOA HỌC & PHÁP LÍ</span> <span style="font-size:13px;color:#64748B;font-weight:700;">Mục 1 SGK & Em có biết?</span> </div> <h3 class="slide-title"> Vì sao con người luôn giữ quyền quyết định cuối cùng?</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"> <div style="background:#EFF6FF;border:2px solid #2563EB;border-radius:14px;padding:16px;"> <div class="pill pill-blue" style="margin-bottom:8px;">1. Căn cứ Khoa học Giáo dục</div> <h4 style="color:#0F4C81;font-size:16px;margin-bottom:6px;">Bộ Giáo dục Hoa Kỳ (U.S. Dept. of
-                      Education, 2023, tr. 17)</h4> <p style="font-size:14px;">AI <strong>không có khả năng phán đoán theo ngữ cảnh rộng</strong> và
-                      toàn diện như con người; không hiểu đầy đủ các yếu tố <strong>đạo đức, cảm xúc, sự an
-                        toàn</strong> và điều kiện thực tế biến đổi bất ngờ.</p> </div> <div style="background:#FFF7ED;border:2px solid #EA580C;border-radius:14px;padding:16px;"> <div class="pill pill-orange" style="margin-bottom:8px;">2. Căn cứ Pháp lí Quốc tế</div> <h4 style="color:#9A3412;font-size:16px;margin-bottom:6px;">Điều 14 Khoản 4(d) – Đạo luật AI châu Âu
-                      (EU AI Act, 2024)</h4> <p style="font-size:14px;">Con người sử dụng hệ thống AI luôn giữ <strong>quyền quyết định không sử
-                        dụng, bỏ qua, điều chỉnh hoặc đảo ngược</strong> đầu ra của AI trong bất kì tình huống cụ thể
-                      nào để bảo đảm an toàn.</p> </div> </div> <div class="callout green" style="margin:4px 0;"> <strong> EM CÓ BIẾT? (SGK Bài 8):</strong> Trong các hệ thống hiện đại như <strong>hàng
-                    không</strong> hay <strong>y khoa</strong>, dù máy tính tự động tính toán rất chính xác, các
-                  <strong>phi công</strong> và <strong>bác sĩ</strong> vẫn luôn được đào tạo quy trình kiểm tra chéo và
-                  sẵn sàng tiếp quản điều khiển thủ công ngay khi có tình huống bất thường.
-                </div> <div
-                  style="background:#0F4C81;color:#fff;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;text-align:center;"> KIẾN THỨC TRỌNG TÂM: AI chỉ hỗ trợ gợi ý — Con người là chủ thể phán đoán ngữ cảnh, quyết định cuối
-                  cùng và chịu trách nhiệm!
-                </div> </div> <div class="slide-footer"><span>Bài 8: Con người làm chủ Trí tuệ nhân tạo</span><span>Slide 4 / 8</span> </div> </div> <!-- SLIDE 5 --> <div class="slide-item" data-slide="5"> <div class="slide-top-bar"> <span class="slide-tag green">HOẠT ĐỘNG 2.2 • QUY TRÌNH 3 BƯỚC (6 PHÚT)</span> <span style="font-size:13px;color:#64748B;font-weight:700;">Mục 2 SGK – Hình 8.3</span> </div> <h3 class="slide-title"> Tình huống bạn Khoa & Quy trình 3 bước ra quyết định</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"> <div style="background:#EFF6FF;border:1.5px solid #93C5FD;border-radius:12px;padding:12px 14px;"> <strong style="color:#1D4ED8;"> Lịch ôn tập Chủ nhật AI gợi ý cho Khoa:</strong> <p style="margin-top:4px;font-size:13.5px;">“Học liên tục môn Toán từ <b>8h00 – 12h00</b>, chiều học
-                      Tiếng Anh từ <b>13h00 – 17h00</b>.”</p> </div> <div style="background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:12px;padding:12px 14px;"> <strong style="color:#C2410C;"> Điều kiện thực tế của Khoa:</strong> <p style="margin-top:4px;font-size:13.5px;">Sáng Chủ nhật Khoa phải <b>sinh hoạt Đội ở trường đến
-                        9h30</b> và <b>mắt dễ bị mỏi</b> nếu học liên tục quá lâu không nghỉ.</p> </div> </div> <!-- Mini 3-step horizontal diagram (Hình 8.3) --> <div
-                  style="display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr;align-items:center;gap:6px;margin-top:2px;"> <div style="background:#1D63DC;color:#fff;border-radius:12px;padding:12px;text-align:center;"> <div style="font-size:12px;opacity:0.85;font-weight:700;">BƯỚC 1 </div> <div style="font-weight:800;font-size:14px;margin:3px 0;">NÊU LẠI GỢI Ý CỦA AI</div> <div style="font-size:12px;opacity:0.95;">Xác định rõ phương án AI đề xuất</div> </div> <div style="text-align:center;font-size:20px;font-weight:900;color:#F97316;">➜</div> <div style="background:#0F4C81;color:#fff;border-radius:12px;padding:12px;text-align:center;"> <div style="font-size:12px;opacity:0.85;font-weight:700;">BƯỚC 2 </div> <div style="font-weight:800;font-size:14px;margin:3px 0;">CÂN NHẮC THỰC TẾ</div> <div style="font-size:12px;opacity:0.95;">An toàn, sức khỏe, thời gian, bảo mật</div> </div> <div style="text-align:center;font-size:20px;font-weight:900;color:#F97316;">➜</div> <div style="background:#EA580C;color:#fff;border-radius:12px;padding:12px;text-align:center;"> <div style="font-size:12px;opacity:0.85;font-weight:700;">BƯỚC 3 ✓</div> <div style="font-weight:800;font-size:14px;margin:3px 0;">LỰA CHỌN KÈM LÍ DO</div> <div style="font-size:12px;opacity:0.95;">Đồng ý / Điều chỉnh / Từ chối</div> </div> </div> <div> <button class="btn btn-outline btn-sm no-print" onclick="toggleReveal('s5-ans')"> Hiện/Ẩn phương án
-                    điều chỉnh mẫu cho Khoa</button> <div class="reveal-box" id="s5-ans"> <strong>Quyết định ĐIỀU CHỈNH:</strong> Học Toán từ <b>10h00 – 11h30</b> (nghỉ giải lao 10 phút giữa
-                    giờ); chiều học Tiếng Anh từ <b>14h30 – 16h00</b> (nghỉ giải lao 10 phút). <i>Lí do:</i> Vừa hoàn
-                    thành sinh hoạt Đội buổi sáng, vừa bảo vệ mắt và tiếp thu hiệu quả!
-                  </div> </div> </div> <div class="slide-footer"><span>Hình 8.3. Quy trình 3 bước ra quyết định khi có gợi ý của
-                  AI</span><span>Slide 5 / 8</span></div> </div> <!-- SLIDE 6 --> <div class="slide-item" data-slide="6"> <div class="slide-top-bar"> <span class="slide-tag orange">HOẠT ĐỘNG 3 • CHẶNG 1 – TRÒ CHƠI LỚP HỌC (6 PHÚT)</span> <span style="font-size:13px;color:#64748B;font-weight:700;">Game HTML5 • 5 tình huống</span> </div> <h3 class="slide-title"> Trò chơi: “NGÃ RẼ THÔNG MINH – RA QUYẾT ĐỊNH CÙNG AI”</h3> <div class="slide-body" style="justify-content:center;"> <p style="font-size:15.5px;">Cả lớp đọc nhanh <strong>Gợi ý của AI</strong> (trái) và <strong>Điều kiện
-                    thực tế</strong> (phải), sau đó giơ tay biểu quyết trật tự theo quy ước dưới đây để giáo viên bấm
-                  phím kiểm chứng:</p> <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:8px 0;"> <div
-                    style="background:#ECFDF5;border:2.5px solid #10B981;border-radius:16px;padding:18px;text-align:center;"> <div style="font-size:40px;"></div> <div style="font-size:14px;font-weight:800;color:#059669;margin-top:6px;">1 NGÓN TAY (PHÍM 1)</div> <div style="font-size:18px;font-weight:900;color:#065F46;margin-top:4px;">ĐỒNG Ý ÁP DỤNG</div> </div> <div
-                    style="background:#EFF6FF;border:2.5px solid #2563EB;border-radius:16px;padding:18px;text-align:center;"> <div style="font-size:40px;"></div> <div style="font-size:14px;font-weight:800;color:#1D4ED8;margin-top:6px;">2 NGÓN TAY (PHÍM 2)</div> <div style="font-size:18px;font-weight:900;color:#1E3A8A;margin-top:4px;">ĐIỀU CHỈNH PHÙ HỢP</div> </div> <div
-                    style="background:#FEF2F2;border:2.5px solid #EF4444;border-radius:16px;padding:18px;text-align:center;"> <div style="font-size:40px;"></div> <div style="font-size:14px;font-weight:800;color:#DC2626;margin-top:6px;">3 NGÓN TAY (PHÍM 3)</div> <div style="font-size:18px;font-weight:900;color:#991B1B;margin-top:4px;">TỪ CHỐI / BỎ QUA</div> </div> </div> <div style="text-align:center;margin-top:8px;" class="no-print"> <button class="btn btn-accent" style="font-size:16px;padding:12px 26px;"
-                    onclick="launchGameFromSlide()"> MỞ GAME HTML5 “NGÃ RẼ THÔNG MINH” NGAY</button> </div> </div> <div class="slide-footer"><span>Hoạt động 3 – Chặng 1: Biểu quyết trật tự, gọi 1 HS nêu lí do rồi bấm phím
-                  1/2/3</span><span>Slide 6 / 8</span></div> </div> <!-- SLIDE 7 --> <div class="slide-item" data-slide="7"> <div class="slide-top-bar"> <span class="slide-tag">HOẠT ĐỘNG 3 • CHẶNG 2 – THẢO LUẬN CẶP ĐÔI (12 PHÚT)</span> <div class="timer-pill no-print" id="slide7-timer-pill" style="padding:4px 12px;font-size:15px;"> <span> <span id="slide7-timer">06:00</span></span> <button class="btn btn-accent btn-sm" onclick="timerToggle('slide7')"
-                    style="padding:3px 8px;">▶</button> <button class="btn btn-ghost btn-sm" onclick="timerReset('slide7', 360)"
-                    style="padding:3px 8px;">↺</button> </div> </div> <h3 class="slide-title"> Luyện tập 1 SGK & Xử lí 04 Thẻ tình huống (6 phút cặp đôi)</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:14px;"> <div> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"> <strong style="color:#0F4C81;">Nhiệm vụ A: Ghép nối Luyện tập 1 SGK</strong> <button class="btn btn-primary btn-sm no-print" onclick="revealNextMatch()"> Click hiện từng đáp
-                        án</button> </div> <table class="data-table" style="font-size:12.5px;"> <thead> <tr> <th>Cột A (Gợi ý của AI)</th> <th>Cột B (Điều kiện thực tế)</th> <th style="width:68px;">Đáp án</th> </tr> </thead> <tbody> <tr> <td>1) Gợi ý thực đơn bữa tối nhiều món cầu kì.</td> <td>a) Thời tiết, ngập nước, biển báo giao thông.</td> <td style="text-align:center;font-weight:900;color:#059669;" id="s7-m1">?</td> </tr> <tr> <td>2) Gợi ý tuyến đường tắt đi học nhanh nhất.</td> <td>b) Trình độ hiện tại và quỹ thời gian rảnh.</td> <td style="text-align:center;font-weight:900;color:#059669;" id="s7-m2">?</td> </tr> <tr> <td>3) Gợi ý danh sách bài tập Toán nâng cao.</td> <td>c) Khẩu vị gia đình, thời gian nấu, nguyên liệu.</td> <td style="text-align:center;font-weight:900;color:#059669;" id="s7-m3">?</td> </tr> </tbody> </table> </div> <div> <strong style="color:#C2410C;display:block;margin-bottom:6px;">Nhiệm vụ B: 4 Thẻ tình huống cặp đôi
-                      (3 bước)</strong> <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;"> <div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:9px;padding:8px;"> <strong> Thẻ 1 (Thời tiết):</strong> AI báo nắng (10% mưa), không cần áo mưa  Trời mây đen,
-                        gió mạnh.</div> <div style="background:#ECFDF5;border:1px solid #6EE7B7;border-radius:9px;padding:8px;"><strong> Thẻ 2 (Sức khỏe):</strong> AI gợi ý chạy 5 km buổi đầu  Mới tập chạy, đau nhẹ cổ chân.</div> <div style="background:#FFF7ED;border:1px solid #FDBA74;border-radius:9px;padding:8px;"><strong> Thẻ 3 (Học tập):</strong> AI gợi ý học thuộc 20h–1h sáng  Sáng mai dậy 6h đi học.</div> <div style="background:#F5F3FF;border:1px solid #C4B5FD;border-radius:9px;padding:8px;"><strong> Thẻ 4 (An toàn số):</strong> AI gợi ý web vẽ lạ đòi SĐT mẹ  Không rõ nhà phát triển.</div> </div> <div style="margin-top:8px;text-align:right;" class="no-print"> <button class="btn btn-outline btn-sm" onclick="switchModule('mod-5')"> Xem chi tiết Thẻ & Phiếu
-                        cặp đôi</button> </div> </div> </div> </div> <div class="slide-footer"><span>Ghi đủ 3 bước vào Phiếu thực hành cặp đôi trong 6 phút (Rubric 10
-                  điểm)</span><span>Slide 7 / 8</span></div> </div> <!-- SLIDE 8 --> <div class="slide-item" data-slide="8"> <div class="slide-top-bar"> <span class="slide-tag green">HOẠT ĐỘNG 4 • VẬN DỤNG & TỔNG KẾT CHUYÊN ĐỀ (10 PHÚT + LMS)</span> <span style="font-size:13px;color:#64748B;font-weight:700;">Thành phần 4 & 5 LMS</span> </div> <h3 class="slide-title"> Vận dụng chuyến tham quan lớp 6A & Tổng kết 8 bài học AI</h3> <div class="slide-body"> <div style="display:grid;grid-template-columns:1.35fr 0.65fr;gap:14px;align-items:start;"> <div style="display:flex;flex-direction:column;gap:8px;"> <div class="callout orange" style="margin:0;"> <strong>Tình huống SGK Bài 8:</strong> An nhờ AI gợi ý địa điểm tham quan lớp 6A. AI đề xuất:
-                      <em>“Cắm trại qua đêm tại khu rừng cách trường 70 km”</em>. Thực tế: Nhà trường quy định lớp 6
-                      <strong>chỉ tham quan trong ngày</strong> và nhiều bạn <strong>dễ bị say xe</strong> khi đi đường
-                      dài.
-                      <br><strong>Yêu cầu (4 phút cá nhân):</strong> Viết đủ 3 bước ra quyết định vào vở và nộp lên
-                      Google Form LMS.
-                      <button class="btn btn-outline btn-sm no-print" style="margin-left:8px;"
-                        onclick="toggleReveal('s8-ans')"> Đáp án mẫu</button> <div class="reveal-box" id="s8-ans"><strong>B1:</strong> Cắm trại qua đêm rừng cách 70 km.
-                        <strong>B2:</strong> Quy định chỉ đi trong ngày, nhiều bạn say xe, rủi ro rừng đêm.
-                        <strong>B3:</strong> Từ chối & Điều chỉnh chọn điểm tham quan học tập trong ngày gần trường (bảo
-                        tàng, khu di tích, công viên sinh thái) để đúng quy định và an toàn.</div> </div> <div
-                      style="background:#EFF6FF;border:1.5px solid #93C5FD;border-radius:11px;padding:10px 14px;font-size:12.5px;"> <strong style="color:#0F4C81;"> TỔNG KẾT HÀNH TRÌNH 8 BÀI CHUYÊN ĐỀ AI LỚP 6:</strong> <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:4px;"> <span>• <b>Bài 1–2:</b> AI là công cụ hỗ trợ học tập</span> <span>• <b>Bài 3:</b> Kiểm chứng tránh ảo giác AI</span> <span>• <b>Bài 4–5:</b> Thuật toán gợi ý & minh bạch</span> <span>• <b>Bài 6–7:</b> Dữ liệu cá nhân & 3 bước tự vệ số</span> <span style="grid-column:span 2;color:#C2410C;font-weight:800;">• Bài 8: CON NGƯỜI LÀM CHỦ AI –
-                          Phán đoán ngữ cảnh, quyết định cuối cùng & chịu trách nhiệm!</span> </div> </div> </div> <!-- QR Box --> <div
-                    style="background:#fff;border:2px solid #0F4C81;border-radius:14px;padding:12px;text-align:center;"> <div style="font-size:12px;font-weight:800;color:#0F4C81;margin-bottom:6px;"> QUÉT MÃ QR LMS BÀI 8
-                    </div> <div id="slide8-qr-box"
-                      style="width:136px;height:136px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;background:#F8FAFC;border:1px dashed #94A3B8;border-radius:10px;overflow:hidden;"> <svg viewBox="0 0 100 100" width="120" height="120"> <rect width="100" height="100" fill="#fff" /> <rect x="8" y="8" width="26" height="26" fill="none" stroke="#0F4C81" stroke-width="6" /> <rect x="15" y="15" width="12" height="12" fill="#0F4C81" /> <rect x="66" y="8" width="26" height="26" fill="none" stroke="#0F4C81" stroke-width="6" /> <rect x="73" y="15" width="12" height="12" fill="#0F4C81" /> <rect x="8" y="66" width="26" height="26" fill="none" stroke="#0F4C81" stroke-width="6" /> <rect x="15" y="73" width="12" height="12" fill="#0F4C81" /> <rect x="42" y="14" width="8" height="8" fill="#0F4C81" /> <rect x="42" y="30" width="14" height="8" fill="#F97316" /> <rect x="44" y="46" width="16" height="16" fill="#0F4C81" /> <rect x="68" y="46" width="10" height="10" fill="#0F4C81" /> <rect x="82" y="58" width="10" height="18" fill="#0F4C81" /> <rect x="44" y="70" width="12" height="12" fill="#F97316" /> <rect x="64" y="74" width="24" height="12" fill="#0F4C81" /> </svg> </div> <div style="font-size:11.5px;color:#334155;line-height:1.4;"><strong>1. Quiz chốt chặn</strong> (≥
-                      8/10)<br><strong>2. Google Form 6A</strong> & Cam kết<br><span
-                        style="color:#EA580C;font-weight:700;">Hạn nộp: 3 ngày sau tiết học</span></div> <button class="btn btn-outline btn-sm no-print" style="margin-top:6px;width:100%;"
-                      onclick="switchModule('mod-7')"> Gắn link QR thật (M7)</button> </div> </div> </div> <div class="slide-footer"><span>Chúc mừng các em hoàn thành Chuyên đề Trí tuệ nhân tạo lớp
-                  6!</span><span>Slide 8 / 8</span></div> </div> </div> <!-- SLIDE CONTROLS --> <div class="slide-controls"> <button class="btn btn-ghost btn-sm" onclick="changeSlide(-1)">← Slide trước</button> <div class="slide-dots" id="slide-dots"> <button class="slide-dot active" onclick="goSlide(1)">1. Bìa</button> <button class="slide-dot" onclick="goSlide(2)">2. Khởi động</button> <button class="slide-dot" onclick="goSlide(3)">3. Y tế & GT</button> <button class="slide-dot" onclick="goSlide(4)">4. Cơ sở KH</button> <button class="slide-dot" onclick="goSlide(5)">5. Khoa & 3 bước</button> <button class="slide-dot" onclick="goSlide(6)">6. Game</button> <button class="slide-dot" onclick="goSlide(7)">7. Thẻ & LT</button> <button class="slide-dot" onclick="goSlide(8)">8. Vận dụng</button> </div> <button class="btn btn-accent btn-sm" onclick="changeSlide(1)">Slide tiếp →</button> </div> </div> </section> <!-- ==================== MODULE 3: INFOGRAPHIC 3 BƯỚC ==================== --> <section id="mod-3" class="module-section"> <div class="module-hero orange"> <div> <span class="badge">THÀNH PHẦN 3 LMS & HÌNH 8.3 SGK TIN HỌC 6</span> <h2>Module 3: Infographic “Quy trình 3 bước ra quyết định thông minh cùng gợi ý của AI”</h2> <p>Hỗ trợ đầy đủ cả 2 định dạng chuẩn trong kịch bản: <strong>Bản ngang (14,5 cm × 4,6 cm cho Hình 8.3 SGK /
-                Slide)</strong> và <strong>Bản dọc (1080 × 1920 px cho màn hình LMS / điện thoại)</strong>. Bấm tải ngay
-              ảnh PNG sắc nét không cần thiết kế lại!</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Chọn bố cục & Xuất Infographic:</span> <button class="btn btn-primary btn-sm" id="btn-info-h" onclick="switchInfographic('horizontal')"> Bản Ngang
-            (14,5 × 4,6 cm – SGK)</button> <button class="btn btn-outline btn-sm" id="btn-info-v" onclick="switchInfographic('vertical')"> Bản Dọc
-            (1080 × 1920 px – LMS)</button> <button class="btn btn-accent btn-sm" onclick="exportInfographicPNG()"> Tải ảnh PNG chuẩn kích
-            thước</button> <button class="btn btn-ghost btn-sm" onclick="exportInfographicSVG()">⬇ Tải file SVG gốc</button> <button class="btn btn-outline btn-sm" onclick="downloadStandalone('m3')"> Tải tệp HTML nhúng LMS</button> </div> <div class="info-preview-stage"> <!-- HORIZONTAL SVG (14.5 cm x 4.6 cm => 1450 x 460) --> <div class="info-svg-box" id="info-horizontal-wrap" style="width:100%;max-width:1160px;"> <svg id="svg-info-horizontal" viewBox="0 0 1450 460" width="1450" height="460"
-              xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif"> <defs> <linearGradient id="bgH" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#EFF6FF" /> <stop offset="55%" stop-color="#FFFFFF" /> <stop offset="100%" stop-color="#FFF7ED" /> </linearGradient> <linearGradient id="hdrH" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#0F4C81" /> <stop offset="70%" stop-color="#1D63DC" /> <stop offset="100%" stop-color="#F97316" /> </linearGradient> <linearGradient id="ftrH" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#0F4C81" /> <stop offset="100%" stop-color="#EA580C" /> </linearGradient> </defs> <rect width="1450" height="460" rx="18" fill="url(#bgH)" stroke="#93C5FD" stroke-width="3" /> <!-- Header --> <rect x="0" y="0" width="1450" height="68" rx="18" fill="url(#hdrH)" /> <rect x="0" y="45" width="1450" height="23" fill="url(#hdrH)" /> <text x="725" y="43" text-anchor="middle" fill="#FFFFFF" font-size="27" font-weight="900"
-                letter-spacing="0.6">QUY TRÌNH 3 BƯỚC RA QUYẾT ĐỊNH THÔNG MINH CÙNG GỢI Ý CỦA AI</text> <!-- BLOCK 1 --> <g transform="translate(28,88)"> <rect width="420" height="292" rx="16" fill="#FFFFFF" stroke="#1D63DC" stroke-width="3" /> <rect width="420" height="58" rx="16" fill="#1D63DC" /> <rect y="36" width="420" height="22" fill="#1D63DC" /> <!-- Computer speech bubble icon --> <circle cx="42" cy="29" r="20" fill="#FFFFFF" /> <rect x="30" y="19" width="24" height="16" rx="3" fill="#1D63DC" /> <polygon points="36,35 42,35 35,41" fill="#1D63DC" /> <circle cx="37" cy="27" r="2" fill="#FFFFFF" /> <circle cx="42" cy="27" r="2" fill="#FFFFFF" /> <circle cx="47" cy="27" r="2" fill="#FFFFFF" /> <text x="74" y="25" fill="#BFDBFE" font-size="14" font-weight="800">BƯỚC 1</text> <text x="74" y="47" fill="#FFFFFF" font-size="19" font-weight="900">NÊU LẠI GỢI Ý CỦA AI</text> <text x="24" y="96" fill="#0F172A" font-size="18" font-weight="700">Đọc kĩ và xác định chính xác:</text> <text x="24" y="128" fill="#334155" font-size="17">• Phương án, kết quả hoặc lời khuyên</text> <text x="36" y="154" fill="#334155" font-size="17">mà công cụ AI đang đề xuất.</text> <rect x="22" y="182" width="376" height="88" rx="12" fill="#EFF6FF" stroke="#BFDBFE"
-                  stroke-width="1.5" /> <text x="38" y="210" fill="#0F4C81" font-size="15.5" font-weight="800"> Câu hỏi tự kiểm tra Bước
-                  1:</text> <text x="38" y="236" fill="#1E3A8A" font-size="15.5">“Công cụ AI đang gợi ý cho mình</text> <text x="38" y="258" fill="#1E3A8A" font-size="15.5">làm điều gì cụ thể?”</text> </g> <!-- ARROW 1 --> <g transform="translate(454,210)"> <polygon points="0,12 24,12 24,0 44,24 24,48 24,36 0,36" fill="#F97316" /> </g> <!-- BLOCK 2 --> <g transform="translate(504,88)"> <rect width="442" height="292" rx="16" fill="#FFFFFF" stroke="#0F4C81" stroke-width="3" /> <rect width="442" height="58" rx="16" fill="#0F4C81" /> <rect y="36" width="442" height="22" fill="#0F4C81" /> <!-- Scale & magnifying glass icon --> <circle cx="42" cy="29" r="20" fill="#FFFFFF" /> <line x1="30" y1="26" x2="54" y2="26" stroke="#0F4C81" stroke-width="2.5" /> <line x1="42" y1="18" x2="42" y2="39" stroke="#0F4C81" stroke-width="2.5" /> <line x1="35" y1="39" x2="49" y2="39" stroke="#0F4C81" stroke-width="2.5" /> <circle cx="33" cy="32" r="4" fill="#F97316" /> <circle cx="51" cy="32" r="4" fill="#1D63DC" /> <text x="74" y="24" fill="#93C5FD" font-size="13.5" font-weight="800">BƯỚC 2 • PHÁN ĐOÁN THEO NGỮ
-                  CẢNH</text> <text x="74" y="47" fill="#FFFFFF" font-size="19" font-weight="900">CÂN NHẮC ĐIỀU KIỆN THỰC TẾ</text> <text x="20" y="88" fill="#0F172A" font-size="16.5" font-weight="700">Đối chiếu với 4 yếu tố AI không
-                  nắm hết:</text> <rect x="20" y="102" width="195" height="78" rx="10" fill="#EFF6FF" stroke="#93C5FD" /> <text x="32" y="128" fill="#0F4C81" font-size="15.5" font-weight="800">(a) An toàn &amp; Quy định</text> <text x="32" y="152" fill="#334155" font-size="14">Nội quy trường, luật giao</text> <text x="32" y="170" fill="#334155" font-size="14">thông, phòng tránh rủi ro.</text> <rect x="227" y="102" width="195" height="78" rx="10" fill="#ECFDF5" stroke="#6EE7B7" /> <text x="239" y="128" fill="#065F46" font-size="15.5" font-weight="800">(b) Sức khỏe &amp; Thời
-                  gian</text> <text x="239" y="152" fill="#334155" font-size="14">Giấc ngủ, mỏi mắt, thể</text> <text x="239" y="170" fill="#334155" font-size="14">trạng, lịch sinh hoạt.</text> <rect x="20" y="192" width="195" height="82" rx="10" fill="#FFF7ED" stroke="#FDBA74" /> <text x="32" y="218" fill="#9A3412" font-size="15.5" font-weight="800">(c) Môi trường thực tế</text> <text x="32" y="242" fill="#334155" font-size="14">Thời tiết, mưa ngập, biển</text> <text x="32" y="260" fill="#334155" font-size="14">báo, hoàn cảnh xung quanh.</text> <rect x="227" y="192" width="195" height="82" rx="10" fill="#F5F3FF" stroke="#C4B5FD" /> <text x="239" y="218" fill="#5B21B6" font-size="15.5" font-weight="800">(d) Tin cậy &amp; Riêng
-                  tư</text> <text x="239" y="242" fill="#334155" font-size="14">Kiểm chứng nguồn, bảo vệ</text> <text x="239" y="260" fill="#334155" font-size="14">dữ liệu cá nhân, mật khẩu.</text> </g> <!-- ARROW 2 --> <g transform="translate(952,210)"> <polygon points="0,12 24,12 24,0 44,24 24,48 24,36 0,36" fill="#F97316" /> </g> <!-- BLOCK 3 --> <g transform="translate(1002,88)"> <rect width="420" height="292" rx="16" fill="#FFFFFF" stroke="#EA580C" stroke-width="3" /> <rect width="420" height="58" rx="16" fill="#EA580C" /> <rect y="36" width="420" height="22" fill="#EA580C" /> <!-- Human check icon --> <circle cx="42" cy="29" r="20" fill="#FFFFFF" /> <polyline points="32,29 39,36 53,21" fill="none" stroke="#059669" stroke-width="4"
-                  stroke-linecap="round" stroke-linejoin="round" /> <text x="74" y="24" fill="#FED7AA" font-size="13.5" font-weight="800">BƯỚC 3 • ĐIỀU 14 EU AI ACT
-                  (2024)</text> <text x="74" y="47" fill="#FFFFFF" font-size="19" font-weight="900">ĐƯA RA LỰA CHỌN KÈM LÍ DO</text> <rect x="20" y="74" width="380" height="54" rx="10" fill="#ECFDF5" stroke="#10B981" stroke-width="2" /> <text x="34" y="98" fill="#065F46" font-size="16" font-weight="900">✓ ĐỒNG Ý</text> <text x="150" y="98" fill="#065F46" font-size="14.5">Nếu chính xác, phù hợp, an toàn.</text> <text x="34" y="119" fill="#047857" font-size="13.5">Áp dụng trực tiếp sau khi đã kiểm chứng.</text> <rect x="20" y="138" width="380" height="54" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="2" /> <text x="34" y="162" fill="#1E3A8A" font-size="16" font-weight="900"> ĐIỀU CHỈNH</text> <text x="172" y="162" fill="#1E3A8A" font-size="14.5">Nếu cần sửa cho sát thực tế.</text> <text x="34" y="183" fill="#1D4ED8" font-size="13.5">Giữ phần hữu ích, thay đổi phần chưa hợp lí.</text> <rect x="20" y="202" width="380" height="54" rx="10" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" /> <text x="34" y="226" fill="#991B1B" font-size="16" font-weight="900"> TỪ CHỐI / BỎ QUA</text> <text x="220" y="226" fill="#991B1B" font-size="14">Nếu có rủi ro, sai quy định.</text> <text x="34" y="247" fill="#B91C1C" font-size="13.5">Không làm theo để bảo đảm an toàn &amp; bảo
-                  mật.</text> <text x="210" y="279" text-anchor="middle" fill="#C2410C" font-size="14.5" font-weight="800">➜ Luôn giải
-                  thích rõ ràng LÍ DO lựa chọn!</text> </g> <!-- Footer --> <rect x="0" y="398" width="1450" height="62" rx="0" fill="url(#ftrH)" /> <rect x="0" y="440" width="1450" height="20" rx="18" fill="url(#ftrH)" /> <text x="725" y="437" text-anchor="middle" fill="#FFFFFF" font-size="22" font-weight="900"
-                letter-spacing="0.4">“AI GỢI Ý – CON NGƯỜI PHÁN ĐOÁN NGỮ CẢNH, QUYẾT ĐỊNH CUỐI CÙNG VÀ CHỊU TRÁCH
-                NHIỆM!”</text> </svg> </div> <!-- VERTICAL SVG (1080 x 1920 px for LMS & Mobile) --> <div class="info-svg-box" id="info-vertical-wrap" style="display:none;max-width:520px;width:100%;"> <svg id="svg-info-vertical" viewBox="0 0 1080 1920" width="1080" height="1920"
-              xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif"> <defs> <linearGradient id="bgV" x1="0" y1="0" x2="0" y2="1"> <stop offset="0%" stop-color="#EFF6FF" /> <stop offset="50%" stop-color="#FFFFFF" /> <stop offset="100%" stop-color="#FFF7ED" /> </linearGradient> <linearGradient id="hdrV" x1="0" y1="0" x2="1" y2="1"> <stop offset="0%" stop-color="#0B355C" /> <stop offset="65%" stop-color="#1D63DC" /> <stop offset="100%" stop-color="#F97316" /> </linearGradient> </defs> <rect width="1080" height="1920" fill="url(#bgV)" /> <!-- Header --> <rect x="0" y="0" width="1080" height="260" fill="url(#hdrV)" /> <rect x="315" y="34" width="450" height="44" rx="22" fill="rgba(255,255,255,0.2)" /> <text x="540" y="64" text-anchor="middle" fill="#FED7AA" font-size="22" font-weight="800">TIN HỌC 6 •
-                CHUYÊN ĐỀ AI • BÀI 8</text> <text x="540" y="138" text-anchor="middle" fill="#FFFFFF" font-size="46" font-weight="900">QUY TRÌNH 3
-                BƯỚC</text> <text x="540" y="196" text-anchor="middle" fill="#FFFFFF" font-size="38" font-weight="800">RA QUYẾT ĐỊNH
-                THÔNG MINH</text> <text x="540" y="238" text-anchor="middle" fill="#DBEAFE" font-size="28" font-weight="700">CÙNG GỢI Ý CỦA
-                TRÍ TUỆ NHÂN TẠO (AI)</text> <!-- STEP 1 --> <g transform="translate(60,305)"> <rect width="960" height="360" rx="28" fill="#FFFFFF" stroke="#1D63DC" stroke-width="5" /> <rect width="960" height="96" rx="28" fill="#1D63DC" /> <rect y="60" width="960" height="36" fill="#1D63DC" /> <circle cx="72" cy="48" r="32" fill="#FFFFFF" /> <rect x="52" y="32" width="40" height="26" rx="5" fill="#1D63DC" /> <polygon points="62,58 72,58 60,68" fill="#1D63DC" /> <text x="126" y="42" fill="#BFDBFE" font-size="22" font-weight="800">BƯỚC 1</text> <text x="126" y="76" fill="#FFFFFF" font-size="34" font-weight="900">NÊU LẠI GỢI Ý CỦA AI</text> <text x="48" y="156" fill="#0F172A" font-size="30" font-weight="700">Đọc kĩ và xác định chính xác phương
-                  án,</text> <text x="48" y="198" fill="#0F172A" font-size="30" font-weight="700">kết quả hoặc lời khuyên mà công cụ
-                  AI đang đề xuất.</text> <rect x="48" y="232" width="864" height="92" rx="18" fill="#EFF6FF" stroke="#93C5FD" stroke-width="2" /> <text x="76" y="287" fill="#0F4C81" font-size="27" font-weight="800"> Ghi rõ: “AI đang khuyên mình làm
-                  phương án nào?”</text> </g> <!-- Down Arrow 1 --> <polygon points="512,678 568,678 568,708 598,708 540,756 482,708 512,708" fill="#F97316" /> <!-- STEP 2 --> <g transform="translate(60,768)"> <rect width="960" height="450" rx="28" fill="#FFFFFF" stroke="#0F4C81" stroke-width="5" /> <rect width="960" height="96" rx="28" fill="#0F4C81" /> <rect y="60" width="960" height="36" fill="#0F4C81" /> <circle cx="72" cy="48" r="32" fill="#FFFFFF" /> <line x1="52" y1="44" x2="92" y2="44" stroke="#0F4C81" stroke-width="4" /> <line x1="72" y1="30" x2="72" y2="66" stroke="#0F4C81" stroke-width="4" /> <circle cx="57" cy="54" r="6" fill="#F97316" /> <circle cx="87" cy="54" r="6" fill="#1D63DC" /> <text x="126" y="40" fill="#93C5FD" font-size="22" font-weight="800">BƯỚC 2 • PHÁN ĐOÁN THEO NGỮ
-                  CẢNH</text> <text x="126" y="76" fill="#FFFFFF" font-size="34" font-weight="900">CÂN NHẮC ĐIỀU KIỆN THỰC TẾ</text> <text x="48" y="144" fill="#334155" font-size="27" font-weight="700">Đối chiếu gợi ý AI với 4 yếu tố mà
-                  AI không nắm hết:</text> <rect x="44" y="168" width="424" height="116" rx="18" fill="#EFF6FF" stroke="#93C5FD"
-                  stroke-width="2.5" /> <text x="68" y="210" fill="#0F4C81" font-size="26" font-weight="900">(a) An toàn &amp; Quy định</text> <text x="68" y="252" fill="#334155" font-size="22">Quy định nhà trường, rủi ro an toàn.</text> <rect x="492" y="168" width="424" height="116" rx="18" fill="#ECFDF5" stroke="#6EE7B7"
-                  stroke-width="2.5" /> <text x="516" y="210" fill="#065F46" font-size="26" font-weight="900">(b) Sức khỏe &amp; Thời
-                  gian</text> <text x="516" y="252" fill="#334155" font-size="22">Giấc ngủ, mỏi mắt, lịch sinh hoạt.</text> <rect x="44" y="304" width="424" height="116" rx="18" fill="#FFF7ED" stroke="#FDBA74"
-                  stroke-width="2.5" /> <text x="68" y="346" fill="#9A3412" font-size="26" font-weight="900">(c) Môi trường xung quanh</text> <text x="68" y="388" fill="#334155" font-size="22">Mưa gió, ngập lụt, biển báo thực tế.</text> <rect x="492" y="304" width="424" height="116" rx="18" fill="#F5F3FF" stroke="#C4B5FD"
-                  stroke-width="2.5" /> <text x="516" y="346" fill="#5B21B6" font-size="26" font-weight="900">(d) Tin cậy &amp; Riêng tư</text> <text x="516" y="388" fill="#334155" font-size="22">Nguồn kiểm chứng, bảo vệ dữ liệu.</text> </g> <!-- Down Arrow 2 --> <polygon points="512,1230 568,1230 568,1260 598,1260 540,1308 482,1260 512,1260" fill="#F97316" /> <!-- STEP 3 --> <g transform="translate(60,1320)"> <rect width="960" height="420" rx="28" fill="#FFFFFF" stroke="#EA580C" stroke-width="5" /> <rect width="960" height="96" rx="28" fill="#EA580C" /> <rect y="60" width="960" height="36" fill="#EA580C" /> <circle cx="72" cy="48" r="32" fill="#FFFFFF" /> <polyline points="55,48 67,60 90,34" fill="none" stroke="#059669" stroke-width="7"
-                  stroke-linecap="round" stroke-linejoin="round" /> <text x="126" y="40" fill="#FED7AA" font-size="22" font-weight="800">BƯỚC 3 • ĐIỀU 14 EU AI ACT
-                  (2024)</text> <text x="126" y="76" fill="#FFFFFF" font-size="34" font-weight="900">ĐƯA RA LỰA CHỌN KÈM LÍ DO</text> <rect x="44" y="120" width="872" height="76" rx="16" fill="#ECFDF5" stroke="#10B981" stroke-width="3" /> <text x="72" y="168" fill="#065F46" font-size="28" font-weight="900">✓ ĐỒNG Ý:</text> <text x="276" y="168" fill="#065F46" font-size="26">Nếu gợi ý đã kiểm chứng, phù hợp và an toàn.</text> <rect x="44" y="212" width="872" height="76" rx="16" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" /> <text x="72" y="260" fill="#1E3A8A" font-size="28" font-weight="900"> ĐIỀU CHỈNH:</text> <text x="320" y="260" fill="#1E3A8A" font-size="26">Nếu cần chỉnh sửa lại cho sát thực tế.</text> <rect x="44" y="304" width="872" height="76" rx="16" fill="#FEF2F2" stroke="#DC2626" stroke-width="3" /> <text x="72" y="352" fill="#991B1B" font-size="28" font-weight="900"> TỪ CHỐI / BỎ QUA:</text> <text x="414" y="352" fill="#991B1B" font-size="25">Nếu tiềm ẩn rủi ro, vi phạm quy định.</text> </g> <!-- Footer --> <rect x="0" y="1775" width="1080" height="145" fill="#0F4C81" /> <text x="540" y="1836" text-anchor="middle" fill="#FDBA74" font-size="30" font-weight="900">“AI GỢI Ý –
-                CON NGƯỜI PHÁN ĐOÁN NGỮ CẢNH,</text> <text x="540" y="1884" text-anchor="middle" fill="#FFFFFF" font-size="31" font-weight="900">QUYẾT ĐỊNH
-                CUỐI CÙNG VÀ CHỊU TRÁCH NHIỆM!”</text> </svg> </div> </div> </section> <!-- ==================== MODULE 4: GAME HTML5 NGÃ RẼ THÔNG MINH ==================== --> <section id="mod-4" class="module-section"> <div class="module-hero green"> <div> <span class="badge">HOẠT ĐỘNG 3 – CHẶNG 1 (6 PHÚT) • GAME HTML5 TƯƠNG TÁC</span> <h2>Module 4: Game “NGÃ RẼ THÔNG MINH – RA QUYẾT ĐỊNH CÙNG AI”</h2> <p>Xây dựng đúng 100% kịch bản Prompt Phần 4: 5 tình huống chuẩn học thuật lớp 6, hiển thị 2 khung song
-              song, hỗ trợ phím tắt <strong>1 / 2 / 3</strong> (sau khi cả lớp biểu quyết ngón tay), âm thanh tương tác
-              và giải thích chi tiết theo Quy trình 3 bước.</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Trình chiếu & Xuất tệp Game HTML5 độc lập:</span> <button class="btn btn-primary btn-sm" onclick="toggleFullscreen('game-classroom-shell')"> Chiếu Toàn màn
-            hình (Máy chiếu)</button> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m4')">⬇ Tải tệp Game độc lập
-            (.html)</button> <button class="btn btn-ghost btn-sm" id="game-sound-btn" onclick="toggleGameSound()"> Âm thanh: BẬT</button> <button class="btn btn-outline btn-sm" onclick="resetGame()">↻ Chơi lại từ Câu 1</button> </div> <div class="game-shell" id="game-classroom-shell"> <div class="game-header"> <div> <div style="font-size:12px;font-weight:800;color:var(--accent-dark);letter-spacing:0.6px;">TIN HỌC 6 •
-                CHUYÊN ĐỀ AI • BÀI 8</div> <div class="game-title"> NGÃ RẼ THÔNG MINH – RA QUYẾT ĐỊNH CÙNG AI</div> </div> <div class="game-stats"> <span class="stat-chip" id="game-progress-chip">Câu 1 / 5</span> <span class="stat-chip" style="border-color:#A7F3D0;color:#059669;" id="game-score-chip">Điểm: 0 /
-                50</span> <button class="btn btn-ghost btn-sm" onclick="toggleGameSound()" id="game-sound-inner"> Bật</button> <button class="btn btn-primary btn-sm" onclick="toggleFullscreen('game-classroom-shell')"></button> </div> </div> <!-- PLAY VIEW --> <div id="game-play-view"> <div
-              style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"> <span class="pill pill-blue" style="font-size:13.5px;padding:5px 14px;" id="game-q-badge">Tình huống 1 •
-                Học tập tiếng Anh</span> <span style="font-size:13px;color:var(--text-muted);font-weight:700;"> Cả lớp giơ 1 / 2 / 3 ngón tay →
-                GV nhấn phím <b>1</b>, <b>2</b>, <b>3</b> hoặc click nút</span> </div> <div class="game-compare"> <div class="game-panel"> <div class="game-panel-head"> GỢI Ý CỦA AI</div> <div class="game-panel-text" id="game-ai-text">...</div> </div> <div class="game-panel real"> <div class="game-panel-head"> ĐIỀU KIỆN THỰC TẾ</div> <div class="game-panel-text" id="game-real-text">...</div> </div> </div> <div class="game-actions"> <button class="game-choice-btn opt1" id="gbtn-1" onclick="answerGame(1)"> <span class="kbd-badge">PHÍM 1 •  1 NGÓN TAY</span> <span>✓ ĐỒNG Ý ÁP DỤNG</span> </button> <button class="game-choice-btn opt2" id="gbtn-2" onclick="answerGame(2)"> <span class="kbd-badge">PHÍM 2 •  2 NGÓN TAY</span> <span> ĐIỀU CHỈNH CHO PHÙ HỢP</span> </button> <button class="game-choice-btn opt3" id="gbtn-3" onclick="answerGame(3)"> <span class="kbd-badge">PHÍM 3 •  3 NGÓN TAY</span> <span> TỪ CHỐI / BỎ QUA</span> </button> </div> <div class="game-feedback" id="game-feedback"> <div
-                style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px;"> <strong style="font-size:18px;" id="game-fb-title"></strong> <button class="btn btn-primary" id="game-next-btn" onclick="nextGameQuestion()">Câu tiếp theo →
-                  (Enter)</button> </div> <div id="game-fb-steps" style="font-size:15px;line-height:1.6;"></div> </div> </div> <!-- SUMMARY VIEW --> <div id="game-summary-view" style="display:none;text-align:center;padding:24px 12px;"> <div style="font-size:56px;margin-bottom:8px;" id="game-trophy"></div> <h3 style="font-size:28px;color:var(--primary);font-weight:900;" id="game-final-title">TỔNG KẾT TRÒ CHƠI
-            </h3> <p style="font-size:19px;margin:10px 0 18px;font-weight:700;" id="game-final-score"></p> <div id="game-review-list"
-              style="text-align:left;max-width:860px;margin:0 auto 20px;display:flex;flex-direction:column;gap:8px;"> </div> <button class="btn btn-accent" style="font-size:16px;padding:12px 26px;" onclick="resetGame()">↻ Chơi lại
-              trò chơi</button> </div> </div> </section> <!-- ==================== MODULE 5: 4 THẺ TÌNH HUỐNG, LUYỆN TẬP & PHIẾU CẶP ĐÔI ==================== --> <section id="mod-5" class="module-section"> <div class="module-hero"> <div> <span class="badge">HOẠT ĐỘNG 3 – CHẶNG 2 (12 PHÚT) & THÀNH PHẦN 3 LMS</span> <h2>Module 5: Luyện tập SGK, Bộ 04 Thẻ tình huống & Phiếu thực hành cặp đôi</h2> <p>Bao gồm bài tập Ghép nối Luyện tập 1 SGK tương tác, Bộ 04 Scenario Cards (có nút ẩn/hiện đáp án 3 bước
-              dành cho GV), Phiếu thực hành cặp đôi có thể điền trực tiếp hoặc in giấy A4, đồng hồ 6 phút và Rubric 4.1.
-            </p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Công cụ lớp học & Xuất Module 5:</span> <button class="btn btn-primary btn-sm" onclick="toggleAllScenarioAnswers()"> Hiện/Ẩn toàn bộ đáp án
-            GV</button> <button class="btn btn-outline btn-sm" onclick="printModule('mod-5')"> In 4 Thẻ & Phiếu cặp đôi
-            (A4)</button> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m5')">⬇ Tải tệp HTML độc lập</button> <div class="timer-pill" id="m5-timer-pill" style="padding:4px 12px;font-size:14px;margin-left:auto;"> <span> Thảo luận: <span id="m5-timer">06:00</span></span> <button class="btn btn-accent btn-sm" onclick="timerToggle('m5')" style="padding:3px 8px;">▶</button> <button class="btn btn-ghost btn-sm" onclick="timerReset('m5', 360)" style="padding:3px 8px;">↺</button> </div> </div> <!-- Luyện tập 1 & 2 SGK tương tác --> <div class="card"> <div class="card-title"> Nhiệm vụ A: Luyện tập 1 & 2 (SGK Bài 8) – Ghép nối tương tác</div> <p style="font-size:13.5px;margin-bottom:10px;"><strong>Bài 1:</strong> Em hãy ghép mỗi gợi ý của công cụ AI ở
-            cột A với điều kiện thực tế mà con người cần cân nhắc ở cột B:</p> <div class="match-row"> <div><strong>1)</strong> AI gợi ý thực đơn bữa tối nhiều món cầu kì.</div> <select class="match-select" id="match-1"> <option value="">-- Chọn điều kiện thực tế (Cột B) --</option> <option value="a">a) Tình trạng thời tiết, ngập nước và biển báo giao thông.</option> <option value="b">b) Trình độ hiện tại và quỹ thời gian rảnh của bản thân.</option> <option value="c">c) Khẩu vị gia đình, thời gian nấu và nguyên liệu sẵn có.</option> </select> </div> <div class="match-row"> <div><strong>2)</strong> AI gợi ý tuyến đường tắt đi học nhanh nhất.</div> <select class="match-select" id="match-2"> <option value="">-- Chọn điều kiện thực tế (Cột B) --</option> <option value="a">a) Tình trạng thời tiết, ngập nước và biển báo giao thông.</option> <option value="b">b) Trình độ hiện tại và quỹ thời gian rảnh của bản thân.</option> <option value="c">c) Khẩu vị gia đình, thời gian nấu và nguyên liệu sẵn có.</option> </select> </div> <div class="match-row"> <div><strong>3)</strong> AI gợi ý danh sách bài tập Toán nâng cao.</div> <select class="match-select" id="match-3"> <option value="">-- Chọn điều kiện thực tế (Cột B) --</option> <option value="a">a) Tình trạng thời tiết, ngập nước và biển báo giao thông.</option> <option value="b">b) Trình độ hiện tại và quỹ thời gian rảnh của bản thân.</option> <option value="c">c) Khẩu vị gia đình, thời gian nấu và nguyên liệu sẵn có.</option> </select> </div> <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;" class="no-print"> <button class="btn btn-primary btn-sm" onclick="checkMatching()">✓ Kiểm tra ghép nối</button> <button class="btn btn-ghost btn-sm" onclick="showMatchingAnswer()"> Xem đáp án chuẩn (1-c, 2-a,
-              3-b)</button> <span id="match-result" style="font-weight:800;font-size:14px;"></span> </div> <div class="callout" style="margin-top:12px;margin-bottom:0;"> <strong>Bài 2 (SGK):</strong> Kể tên 02 tình huống trong đời sống hằng ngày mà con người sử dụng gợi ý của
-            AI để hỗ trợ ra quyết định. <em>(Ví dụ: Ứng dụng dự báo thời tiết gợi ý trang phục; ứng dụng thương mại điện
-              tử gợi ý sản phẩm; ứng dụng sức khỏe gợi ý chế độ tập luyện...)</em> </div> </div> <!-- 4 Scenario Cards --> <div class="card"> <div class="card-title"> Nhiệm vụ B: Bộ 04 Thẻ tình huống (Scenario Cards – Thực hành cặp đôi 6 phút)</div> <div class="grid-2"> <!-- Thẻ 1 --> <div class="scenario-card"> <div class="scenario-card-head"> <span> THẺ 1 – THỜI TIẾT</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Dãy bàn 1</span> </div> <div class="scenario-card-body"> <p>Ứng dụng dự báo thời tiết AI trên điện thoại hiển thị: <em>“Hôm nay trời nắng đẹp, khả năng mưa 10%,
-                    không cần mang áo mưa”</em>. Tuy nhiên, trước giờ đi học em nhìn ra ngoài thấy <strong>bầu trời kéo
-                    đầy mây đen và gió thổi mạnh</strong>.</p> <button class="btn btn-outline btn-sm no-print" style="align-self:flex-start;"
-                  onclick="toggleReveal('sc-ans-1')"> Đáp án định hướng 3 bước (GV)</button> <div class="scenario-ans" id="sc-ans-1"> <strong>• Bước 1:</strong> AI dự báo trời nắng, không cần áo mưa.<br> <strong>• Bước 2:</strong> Thực tế ngoài trời nhiều mây đen, gió lớn báo hiệu sắp mưa.<br> <strong>• Bước 3:</strong> <b>Điều chỉnh / Từ chối</b> gợi ý AI → Vẫn mang theo áo mưa để chủ động bảo
-                  vệ sức khỏe và sách vở.
-                </div> </div> </div> <!-- Thẻ 2 --> <div class="scenario-card"> <div class="scenario-card-head"> <span> THẺ 2 – SỨC KHỎE</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Dãy bàn 2</span> </div> <div class="scenario-card-body"> <p>Minh nhờ ứng dụng AI lập kế hoạch rèn luyện thể thao. AI gợi ý: <em>“Chạy bộ liên tục 5 km ngay trong
-                    buổi đầu tiên”</em>. Thực tế, <strong>Minh mới bắt đầu tập chạy và hôm qua bị đau nhẹ ở cổ
-                    chân</strong>.</p> <button class="btn btn-outline btn-sm no-print" style="align-self:flex-start;"
-                  onclick="toggleReveal('sc-ans-2')"> Đáp án định hướng 3 bước (GV)</button> <div class="scenario-ans" id="sc-ans-2"> <strong>• Bước 1:</strong> AI gợi ý chạy liên tục 5 km buổi đầu.<br> <strong>• Bước 2:</strong> Minh mới tập chạy và đang đau nhẹ cổ chân.<br> <strong>• Bước 3:</strong> <b>Điều chỉnh / Từ chối</b> → Nghỉ ngơi cho khỏi hẳn cổ chân, sau đó bắt
-                  đầu bằng đi bộ nhanh hoặc chạy nhẹ 500m–1km để tránh chấn thương.
-                </div> </div> </div> <!-- Thẻ 3 --> <div class="scenario-card"> <div class="scenario-card-head"> <span> THẺ 3 – HỌC TẬP</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Dãy bàn 3</span> </div> <div class="scenario-card-body"> <p>Trước kì kiểm tra, một công cụ AI gợi ý kế hoạch ôn bài cho An: <em>“Học thuộc lòng liên tục từ 20
-                    giờ tối đến 1 giờ sáng để đạt điểm cao”</em>. Thực tế, <strong>sáng hôm sau An phải dậy lúc 6 giờ để
-                    đến trường</strong>.</p> <button class="btn btn-outline btn-sm no-print" style="align-self:flex-start;"
-                  onclick="toggleReveal('sc-ans-3')"> Đáp án định hướng 3 bước (GV)</button> <div class="scenario-ans" id="sc-ans-3"> <strong>• Bước 1:</strong> AI gợi ý học liên tục đến 1 giờ sáng.<br> <strong>• Bước 2:</strong> Sáng mai An phải dậy sớm 6h; thức quá khuya gây thiếu ngủ, giảm trí
-                  nhớ.<br> <strong>• Bước 3:</strong> <b>Điều chỉnh</b> → Chỉ ôn trọng tâm từ 20h đến 21h30 rồi đi ngủ sớm để giữ
-                  sức khỏe và sự tỉnh táo khi làm bài.
-                </div> </div> </div> <!-- Thẻ 4 --> <div class="scenario-card"> <div class="scenario-card-head"> <span> THẺ 4 – AN TOÀN SỐ</span> <span class="pill" style="background:rgba(255,255,255,0.22);color:#fff;">Dãy bàn 4</span> </div> <div class="scenario-card-body"> <p>Để vẽ hình minh họa cho bài thuyết trình, một chatbot AI gợi ý Khoa <strong>truy cập một trang web
-                    tạo ảnh miễn phí không rõ nhà phát triển và yêu cầu nhập số điện thoại của mẹ</strong> để nhận ảnh.
-                </p> <button class="btn btn-outline btn-sm no-print" style="align-self:flex-start;"
-                  onclick="toggleReveal('sc-ans-4')"> Đáp án định hướng 3 bước (GV)</button> <div class="scenario-ans" id="sc-ans-4"> <strong>• Bước 1:</strong> AI gợi ý dùng trang web tạo ảnh lạ đòi số điện thoại phụ huynh.<br> <strong>• Bước 2:</strong> Trang web thiếu minh bạch, vi phạm bảo vệ dữ liệu cá nhân.<br> <strong>• Bước 3:</strong> <b>Từ chối</b> gợi ý AI → Không truy cập, chọn công cụ vẽ an toàn hoặc tự
-                  vẽ tay để bảo vệ dữ liệu cá nhân gia đình.
-                </div> </div> </div> </div> </div> <!-- Phiếu thực hành cặp đôi --> <div class="card" style="border:2px solid var(--primary);"> <div class="card-title"> PHIẾU THỰC HÀNH CẶP ĐÔI: QUYẾT ĐỊNH CỦA CHÚNG EM (Điền trong 6 phút)</div> <div class="grid-3"> <div class="form-group"> <label>Họ tên 2 bạn cùng bàn:</label> <input type="text" class="form-control" id="pw-names" placeholder="VD: Nguyễn Minh An & Trần Gia Khoa"> </div> <div class="form-group"> <label>Lớp:</label> <input type="text" class="form-control" id="pw-class" placeholder="VD: 6A1"> </div> <div class="form-group"> <label>Mã thẻ tình huống:</label> <select class="form-control" id="pw-card"> <option value="Thẻ 1 (Thời tiết)">Thẻ 1 (Thời tiết)</option> <option value="Thẻ 2 (Sức khỏe)">Thẻ 2 (Sức khỏe)</option> <option value="Thẻ 3 (Học tập)">Thẻ 3 (Học tập)</option> <option value="Thẻ 4 (An toàn số)">Thẻ 4 (An toàn số)</option> </select> </div> </div> <div class="form-group"> <label>Bước 1 – Nêu lại gợi ý của công cụ AI:</label> <textarea class="form-control" id="pw-b1" placeholder="Ghi ngắn gọn phương án AI đang gợi ý..."></textarea> </div> <div class="form-group"> <label>Bước 2 – Các điều kiện thực tế cần cân nhắc:</label> <textarea class="form-control" id="pw-b2"
-              placeholder="Liệt kê các yếu tố an toàn, sức khỏe, thời gian, bảo mật..."></textarea> </div> <div class="form-group"> <label>Bước 3 – Lựa chọn của nhóm:</label> <div style="display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 10px;"> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--success);"><input
-                  type="radio" name="pw-choice" value="Đồng ý"> ✓ [ Đồng ý ]</label> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--primary-mid);"><input
-                  type="radio" name="pw-choice" value="Điều chỉnh" checked> [ Điều chỉnh ]</label> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--danger);"><input
-                  type="radio" name="pw-choice" value="Từ chối"> [ Từ chối ]</label> </div> <label>Phương án cụ thể và lí do lựa chọn:</label> <textarea class="form-control" id="pw-b3"
-              placeholder="Nêu rõ phương án của nhóm em và giải thích lí do..."></textarea> </div> <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="copyPairWorksheet()"> Sao chép nội dung Phiếu</button> <button class="btn btn-outline btn-sm" onclick="printModule('mod-5')"> In phiếu</button> </div> </div> <!-- Rubric 4.1 --> <div class="card"> <div class="card-title"> Bảng Rubric 4.1 – Đánh giá Hoạt động 3: Xử lí Thẻ tình huống cặp đôi (Thang 10
-            điểm)</div> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th style="width:20%;">Tiêu chí đánh giá</th> <th style="width:26%;">Mức Tốt (Giỏi)</th> <th style="width:26%;">Mức Đạt (Khá / TB)</th> <th style="width:20%;">Mức Cần cố gắng</th> <th style="width:8%;">Điểm</th> </tr> </thead> <tbody> <tr> <td><strong>1. Thực hiện đúng Quy trình 3 bước</strong></td> <td><strong>(4 điểm)</strong> Trình bày đủ và đúng thứ tự 3 bước: Nêu lại gợi ý AI → Cân nhắc điều
-                    kiện thực tế → Đưa ra lựa chọn cụ thể.</td> <td><strong>(2.5 điểm)</strong> Trình bày được 2 trong số 3 bước (thường bỏ qua bước nêu lại gợi ý AI
-                    hoặc nêu sơ lược thực tế).</td> <td><strong>(1 điểm)</strong> Chỉ nêu lựa chọn cảm tính mà không áp dụng quy trình 3 bước.</td> <td style="text-align:center;font-weight:800;">4 đ</td> </tr> <tr> <td><strong>2. Tính hợp lí, an toàn & lí do</strong></td> <td><strong>(4 điểm)</strong> Xác định chính xác yếu tố ngữ cảnh (sức khỏe, an toàn, thời gian, bảo
-                    mật) và đưa phương án thuyết phục.</td> <td><strong>(2.5 điểm)</strong> Lựa chọn đúng hướng an toàn nhưng giải thích lí do còn ngắn gọn, chưa
-                    gắn chặt dữ kiện.</td> <td><strong>(1 điểm)</strong> Chấp nhận mù quáng gợi ý chưa an toàn của AI hoặc lí do thiếu thuyết
-                    phục.</td> <td style="text-align:center;font-weight:800;">4 đ</td> </tr> <tr> <td><strong>3. Hoàn thành bài tập SGK & Hợp tác</strong></td> <td><strong>(2 điểm)</strong> Ghép đúng Luyện tập 1 SGK, trình bày phiếu rõ ràng; hai bạn thảo luận
-                    trật tự, đúng giờ.</td> <td><strong>(1 điểm)</strong> Hoàn thành phiếu nhưng còn sai 1 ý ở Luyện tập 1 hoặc trình bày chưa
-                    gọn.</td> <td><strong>(0 điểm)</strong> Không hoàn thành phiếu thực hành cặp đôi.</td> <td style="text-align:center;font-weight:800;">2 đ</td> </tr> </tbody> </table> </div> </div> </section> <!-- ==================== MODULE 6: LMS QUIZ CHỐT CHẶN (5 CÂU) ==================== --> <section id="mod-6" class="module-section"> <div class="module-hero purple"> <div> <span class="badge">THÀNH PHẦN 4 LMS • ĐIỀU KIỆN BẮT BUỘC ≥ 8/10 ĐIỂM</span> <h2>Module 6: Ngân hàng 5 câu Quiz chốt chặn tổng kết Chuyên đề AI lớp 6</h2> <p>Học sinh làm bài trực tiếp, nhận chấm điểm & giải thích tự động ngay sau khi nộp. Đạt từ <strong>8/10
-                điểm (đúng ≥ 4/5 câu)</strong> để hệ thống cấp Giấy chứng nhận hoàn thành Chuyên đề Trí tuệ nhân tạo lớp
-              6 (8 bài). Hệ thống chấm điểm tự động và hiển thị giải thích ngay sau khi nộp bài.</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Xuất Ngân hàng Quiz lên LMS:</span> <button class="btn btn-primary btn-sm" onclick="exportQuizGIFT()"> Tải định dạng Moodle GIFT (.txt)</button> <button class="btn btn-outline btn-sm" onclick="exportQuizCSV()"> Tải bảng CSV
-            (Excel/Quizizz/Azota)</button> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m6')">⬇ Tải trang Quiz HTML độc
-            lập</button> <button class="btn btn-ghost btn-sm" onclick="resetQuiz()">↻ Làm lại bài Quiz</button> </div> <div class="card"> <div
-            style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);"> <div style="flex:1;min-width:220px;"> <label style="display:block;font-weight:700;font-size:13.5px;color:var(--primary);margin-bottom:4px;">Họ
-                và tên học sinh (để ghi trên Giấy chứng nhận):</label> <input type="text" class="form-control" id="quiz-student-name" placeholder="Nhập họ tên của em..."> </div> <div style="width:160px;"> <label
-                style="display:block;font-weight:700;font-size:13.5px;color:var(--primary);margin-bottom:4px;">Lớp:</label> <input type="text" class="form-control" id="quiz-student-class" placeholder="VD: 6A1"> </div> <div> <span class="pill pill-orange" style="padding:7px 14px;font-size:13px;">Passing Grade: ≥ 8/10 điểm • Cho
-                phép làm lại</span> </div> </div> <div id="quiz-questions-container"></div> <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px;"> <button class="btn btn-primary" style="font-size:15px;padding:11px 24px;" onclick="submitQuiz()">✓ Nộp bài &
-              Chấm điểm ngay</button> <button class="btn btn-ghost" onclick="resetQuiz()">↻ Làm lại</button> </div> <div id="quiz-result-banner" style="display:none;margin-top:18px;"></div> <!-- CERTIFICATE (UNLOCKED WHEN >= 8/10) --> <div id="quiz-cert-wrap" style="display:none;"> <div class="cert-box" id="cert-printable"> <div style="font-size:13px;font-weight:800;color:#1D63DC;letter-spacing:1.5px;">CHƯƠNG TRÌNH TIN HỌC 6 •
-                CHUYÊN ĐỀ TRÍ TUỆ NHÂN TẠO (8 BÀI)</div> <h3> GIẤY CHỨNG NHẬN HOÀN THÀNH CHUYÊN ĐỀ</h3> <p style="font-size:14.5px;color:#475569;">Chứng nhận học sinh:</p> <div class="cert-name" id="cert-name-display">Học sinh lớp 6</div> <p style="font-size:15px;color:#0F172A;max-width:680px;margin:10px auto;">Đã hoàn thành xuất sắc
-                <strong>Bài 8: Con người làm chủ Trí tuệ nhân tạo</strong> và vượt qua Bài kiểm tra chốt chặn cuối khóa
-                với số điểm <strong style="color:#059669;" id="cert-score-display">10/10</strong>.</p> <p style="font-size:13.5px;color:#64748B;font-style:italic;margin-top:6px;">“Sử dụng AI có mục đích rõ
-                ràng, kiểm chứng thông tin, bảo vệ dữ liệu cá nhân và luôn làm chủ quyết định cuối cùng!”</p> <div style="margin-top:14px;font-size:12.5px;color:#0F4C81;font-weight:700;" id="cert-date-display"></div> </div> <div style="text-align:center;margin-top:12px;" class="no-print"> <button class="btn btn-success btn-sm" onclick="printModule('mod-6')"> In Giấy chứng nhận</button> </div> </div> </div> </section> <!-- ==================== MODULE 7: FORM VẬN DỤNG 6A & GOOGLE FORM ==================== --> <section id="mod-7" class="module-section"> <div class="module-hero"> <div> <span class="badge">THÀNH PHẦN 5 LMS • HOẠT ĐỘNG 4 – NỘP BÀI VẬN DỤNG & TỔNG KẾT 8 BÀI</span> <h2>Module 7: Phiếu Vận dụng lớp 6A & Bộ thiết lập Google Form nhúng LMS</h2> <p>Thu sản phẩm thực hành 3 bước tình huống <strong>chuyến tham quan lớp 6A</strong> và <strong>Cam kết cá
-                nhân tổng kết 8 bài học</strong>. Gồm 2 thẻ: <em>(1) Phiếu nộp bài tương tác mẫu</em> và <em>(2) Hướng
-                dẫn tạo Google Form + Sinh mã &lt;iframe&gt; & QR cho Slide 8 + Rubric 4.2</em>.</p> </div> </div> <div class="lms-toolbar"> <span class="lms-toolbar-label"> Xuất Module 7 lên LMS:</span> <button class="btn btn-accent btn-sm" onclick="downloadStandalone('m7')">⬇ Tải Phiếu Vận dụng HTML độc
-            lập</button> <button class="btn btn-outline btn-sm" onclick="copyGoogleFormBlueprint()"> Copy trọn bộ 7 câu hỏi tạo
-            Google Form</button> </div> <div class="subtabs teacher-only"> <button class="subtab-btn active" onclick="switchSubtab('m7-tab-student', this)"> Dành cho Học sinh: Phiếu
-            Vận dụng 7 câu (Tương tác)</button> <button class="subtab-btn" onclick="switchSubtab('m7-tab-teacher', this)"> Dành cho Giáo viên: Tạo Google
-            Form, Mã &lt;iframe&gt;, QR & Rubric 4.2</button> </div> <!-- TAB A: STUDENT INTERACTIVE FORM --> <div id="m7-tab-student" class="subtab-pane active"> <div class="card" style="border-top:5px solid var(--primary-mid);"> <div class="card-title">[TIN HỌC 6 – AI] NỘP BÀI VẬN DỤNG BÀI 8 &amp; TỔNG KẾT CHUYÊN ĐỀ</div> <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:14px;">Học sinh hoàn thành phiếu này tại
-              nhà trong vòng <strong>3 ngày</strong> sau tiết học trực tiếp Bài 8 để nộp sản phẩm Vận dụng và tổng kết
-              Chuyên đề Trí tuệ nhân tạo lớp 6.</p> <form id="vandung-form" onsubmit="submitVanDungForm(event)"> <div
-                style="background:#EFF6FF;padding:10px 14px;border-radius:10px;font-weight:800;color:var(--primary);margin-bottom:12px;"> PHẦN A – THÔNG TIN HỌC SINH</div> <div class="grid-2"> <div class="form-group"> <label>Câu 1 (Bắt buộc): Họ và tên học sinh *</label> <input type="text" class="form-control" id="vd-name" required placeholder="Nhập đầy đủ họ và tên..."> </div> <div class="form-group"> <label>Câu 2 (Bắt buộc): Lớp *</label> <select class="form-control" id="vd-class" required> <option value="">-- Chọn lớp --</option> <option value="6A1">6A1</option> <option value="6A2">6A2</option> <option value="6A3">6A3</option> <option value="6A4">6A4</option> <option value="6A5">6A5</option> </select> </div> </div> <div
-                style="background:#FFF7ED;padding:10px 14px;border-radius:10px;font-weight:800;color:#C2410C;margin:12px 0;"> PHẦN B – SẢN PHẨM VẬN DỤNG BÀI 8 (TÌNH HUỐNG CHUYẾN THAM QUAN LỚP 6A – CHẤM RUBRIC 10 ĐIỂM)</div> <div class="callout orange" style="margin-top:0;"> <strong>Tình huống:</strong> Lớp 6A dự định tổ chức chuyến tham quan học tập. An nhờ công cụ AI gợi ý và
-                AI đề xuất: <em>“Tổ chức cắm trại qua đêm tại khu rừng cách trường 70 km”</em>. Thực tế, <strong>nhà
-                  trường quy định học sinh lớp 6 chỉ tham quan trong ngày</strong> và <strong>nhiều bạn trong lớp dễ bị
-                  say xe khi đi đường dài</strong>.
-              </div> <div class="form-group"> <label>Câu 3 (Bắt buộc): Bước 1 – Em hãy nêu lại gợi ý của công cụ AI trong tình huống trên. *</label> <input type="text" class="form-control" id="vd-b1" required
-                  placeholder="VD: Công cụ AI đề xuất tổ chức cắm trại qua đêm tại..."> </div> <div class="form-group"> <label>Câu 4 (Bắt buộc): Bước 2 – Em hãy liệt kê đầy đủ các điều kiện thực tế của lớp 6A cần cân nhắc.
-                  *</label> <textarea class="form-control" id="vd-b2" required
-                  placeholder="Nêu rõ quy định của nhà trường, sức khỏe của các bạn (say xe), yếu tố an toàn..."></textarea> </div> <div class="form-group"> <label>Câu 5 (Bắt buộc): Bước 3 – Em lựa chọn Đồng ý, Điều chỉnh hay Từ chối gợi ý của AI? Hãy nêu rõ
-                  phương án cụ thể em đề xuất cho lớp 6A kèm theo lí do thuyết phục. *</label> <div style="display:flex;gap:16px;flex-wrap:wrap;margin:4px 0 8px;"> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio"
-                      name="vd-choice" value="Đồng ý"> Đồng ý</label> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio"
-                      name="vd-choice" value="Điều chỉnh"> Điều chỉnh</label> <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio"
-                      name="vd-choice" value="Từ chối và đề xuất phương án thay thế" checked> Từ chối và đề xuất phương
-                    án thay thế</label> </div> <textarea class="form-control" id="vd-b3" required
-                  placeholder="Nêu rõ lựa chọn, địa điểm tham quan trong ngày cụ thể gần trường và giải thích lí do..."></textarea> </div> <div class="form-group"> <label>Câu 6 (Tùy chọn – chỉ dùng nếu HS có tài khoản Gmail): Ảnh chụp trang vở/SGK Bài 8 ghi bài thực
-                  hành (.png/.jpg, tối đa 5MB)</label> <input type="file" class="form-control" id="vd-file" accept=".png,.jpg,.jpeg"> </div> <div
-                style="background:#ECFDF5;padding:10px 14px;border-radius:10px;font-weight:800;color:#065F46;margin:12px 0;"> PHẦN C – PHẢN TƯ &amp; CAM KẾT TỔNG KẾT CHUYÊN ĐỀ 8 BÀI (CHỦ ĐỀ A &amp; CHỦ ĐỀ B)</div> <div class="form-group"> <label>Câu 7 (Bắt buộc): Sau khi hoàn thành cả 8 bài học chuyên đề Trí tuệ nhân tạo lớp 6, em hãy viết
-                  01 cam kết cá nhân (2–3 câu) về cách em sẽ sử dụng và làm chủ các công cụ AI an toàn, trung thực và có
-                  trách nhiệm trong học tập sắp tới. *</label> <textarea class="form-control" id="vd-commit" required placeholder="Em cam kết sẽ..."></textarea> </div> <div style="display:flex;gap:10px;flex-wrap:wrap;"> <button type="submit" class="btn btn-primary"> Gửi bài Vận dụng &amp; Cam kết</button> </div> </form> <div class="reveal-box" id="vd-sample-ans" style="margin-top:14px;"> <strong>Đáp án chuẩn (Rubric 10 điểm):</strong><br> • <b>Bước 1:</b> Tổ chức cắm trại qua đêm tại khu rừng cách trường 70 km.<br> • <b>Bước 2:</b> Quy định nhà trường chỉ cho phép học sinh lớp 6 tham quan trong ngày (không qua đêm);
-              quãng đường 70 km quá xa khiến nhiều bạn bị say xe, mệt mỏi; cắm trại trong rừng tiềm ẩn rủi ro an
-              toàn.<br> • <b>Bước 3:</b> Từ chối gợi ý cắm trại qua đêm của AI và điều chỉnh chọn địa điểm tham quan học tập trong
-              ngày gần trường (bảo tàng, khu di tích lịch sử, công viên sinh thái trong thành phố) để đúng quy định, bảo
-              đảm sức khỏe và an toàn cho cả lớp 6A.
-            </div> <div id="vd-submit-result" style="display:none;margin-top:16px;"></div> </div> </div> <!-- TAB B: TEACHER GOOGLE FORM BUILDER + IFRAME + QR + RUBRIC 4.2 --> <div id="m7-tab-teacher" class="subtab-pane teacher-only" style="display:none !important;"> <div class="card"> <div class="card-title"> Trình tạo mã nhúng &lt;iframe&gt; LMS &amp; Mã QR cho Slide 8</div> <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:10px;">Sau khi thầy/cô tạo xong Google Form
-              theo 7 câu bên dưới, hãy dán đường dẫn Google Form (hoặc trang Bài 8 LMS) vào đây để tự động tạo mã nhúng
-              <code>&lt;iframe&gt;</code> và cập nhật <strong>Mã QR thật</strong> trên cả trang này lẫn <strong>Slide
-                8</strong>:</p> <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;"> <input type="url" class="form-control" id="gform-url-input" style="flex:1;min-width:260px;"
-                placeholder="VD: https://docs.google.com/forms/d/e/1FAIpQL.../viewform"> <button class="btn btn-primary" onclick="generateEmbedAndQR()"> Tạo mã &lt;iframe&gt; &amp; Mã
-                QR</button> </div> <div class="grid-2"> <div> <label style="font-weight:700;font-size:13px;color:var(--primary);display:block;margin-bottom:6px;">Mã
-                  nhúng &lt;iframe&gt; dán vào cuối trang Bài 8 LMS:</label> <div class="code-block" id="gform-iframe-code">&lt;iframe
-                  src="" width="100%"
-                  height="920" frameborder="0" marginheight="0" marginwidth="0"&gt;Đang tải…&lt;/iframe&gt;</div> <button class="btn btn-outline btn-sm" style="margin-top:8px;"
-                  onclick="copyTextById('gform-iframe-code')"> Copy mã &lt;iframe&gt;</button> </div> <div
-                style="text-align:center;background:#F8FAFC;border:1.5px solid var(--border);border-radius:12px;padding:14px;"> <div style="font-weight:800;font-size:13px;color:var(--primary);margin-bottom:8px;"> Mã QR (Tự đồng bộ
-                  sang Slide 8)</div> <div id="m7-qr-preview"
-                  style="width:160px;height:160px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #CBD5E1;border-radius:10px;overflow:hidden;"> <span style="font-size:12px;color:#64748B;padding:12px;">Dán link Form rồi bấm <b>Tạo mã QR</b></span> </div> <div id="m7-qr-note" style="font-size:11.5px;color:#64748B;margin-top:6px;">Khi có Internet, hệ thống
-                  sinh ảnh QR quét được ngay bằng điện thoại.</div> </div> </div> <div class="callout green" style="margin-top:14px;margin-bottom:0;"> <strong> Lưu ý cấu hình kỹ thuật Google Form (Phần 7):</strong><br> 1. Thẻ <strong>Câu trả lời (Responses)</strong> → chọn <strong>Liên kết với Trang tính (Google
-                Sheets)</strong> để gom bài tập trung và chấm điểm theo Bảng Rubric 4.2.<br> 2. Nếu học sinh lớp 6 chưa có tài khoản Gmail đồng bộ, <strong>bỏ Câu 6 (Tải tệp lên)</strong> để các em
-              nộp bài trực tiếp không cần đăng nhập Google.<br> 3. Vào <strong>Cài đặt → Bản trình bày → Thông báo xác nhận</strong> dán câu: <em>“Chúc mừng em đã nộp bài
-                Vận dụng Bài 8 thành công! Hãy nhớ hoàn thành bài Quiz chốt chặn 5 câu trên LMS (đạt ≥ 8/10 điểm) để
-                hoàn tất trọn vẹn Chuyên đề Trí tuệ nhân tạo lớp 6 nhé!”</em> </div> </div> <div class="card"> <div class="card-title"> Cấu trúc 7 câu hỏi chuẩn để tạo Google Form (Bấm Copy nhanh từng câu)</div> <table class="data-table"> <thead> <tr> <th style="width:12%;">Mục</th> <th style="width:20%;">Loại câu hỏi</th> <th>Nội dung chuẩn copy vào Google Form</th> <th style="width:86px;">Copy</th> </tr> </thead> <tbody id="gform-blueprint-tbody"></tbody> </table> </div> <div class="card"> <div class="card-title"> Bảng Rubric 4.2 – Đánh giá Hoạt động 4: Sản phẩm nộp trên Google Form (Thang 10
-              điểm)</div> <div style="overflow-x:auto;"> <table class="data-table"> <thead> <tr> <th style="width:20%;">Tiêu chí đánh giá</th> <th style="width:27%;">Mức Tốt (Giỏi)</th> <th style="width:25%;">Mức Đạt (Khá / TB)</th> <th style="width:20%;">Mức Cần cố gắng</th> <th style="width:8%;">Điểm</th> </tr> </thead> <tbody> <tr> <td><strong>1. Cấu trúc đủ 3 bước tình huống lớp 6A</strong></td> <td><strong>(4 điểm)</strong> Trình bày rõ ràng cả 3 bước: Nêu lại gợi ý AI (cắm trại qua đêm rừng
-                      70 km); Cân nhắc đủ 2 điều kiện thực tế (quy định đi trong ngày, dễ say xe); Đưa ra lựa chọn cụ
-                      thể.</td> <td><strong>(2.5 điểm)</strong> Nêu đủ lựa chọn nhưng chỉ chỉ ra được 1 điều kiện thực tế hoặc thiếu
-                      bước nêu lại gợi ý AI.</td> <td><strong>(1 điểm)</strong> Thiếu từ 2 bước trở lên hoặc trả lời lạc đề.</td> <td style="text-align:center;font-weight:800;">4 đ</td> </tr> <tr> <td><strong>2. Tính thuyết phục của phương án &amp; Lí do</strong></td> <td><strong>(4 điểm)</strong> Từ chối phương án qua đêm, đề xuất điểm tham quan trong ngày gần
-                      trường hợp lí và lập luận rõ ràng về an toàn, sức khỏe, quy định.</td> <td><strong>(2.5 điểm)</strong> Quyết định hợp lí nhưng phương án thay thế hoặc lí do còn chung
-                      chung.</td> <td><strong>(1 điểm)</strong> Đồng ý theo gợi ý chưa phù hợp của AI hoặc không có lí do thuyết phục.
-                    </td> <td style="text-align:center;font-weight:800;">4 đ</td> </tr> <tr> <td><strong>3. Cam kết tổng kết 8 bài &amp; Nộp đúng hạn</strong></td> <td><strong>(2 điểm)</strong> Viết cam kết sử dụng AI an toàn, trách nhiệm sâu sắc; không sai chính
-                      tả; nộp đúng hạn trên LMS.</td> <td><strong>(1 điểm)</strong> Nộp đúng hạn nhưng cam kết còn sơ sài hoặc mắc vài lỗi chính tả.</td> <td><strong>(0 điểm)</strong> Nộp quá hạn hoặc bỏ trống phần cam kết tổng kết.</td> <td style="text-align:center;font-weight:800;">2 đ</td> </tr> </tbody> </table> </div> </div> </div> </section> </main> </div> <div class="toast" id="toast">✓ Đã sao chép!</div> <script> /* =========================================================
-       DATA REPOSITORY (CHUẨN XÁC 100% TỪ 3 TỆP TRONG THƯ MỤC BAI8)
-       ========================================================= */
-    const GAME_QUESTIONS = [
-      {
-        id: 1,
-        topic: "Tình huống 1 • Ôn tập tiếng Anh",
-        ai: "Đề xuất 5 từ vựng tiếng Anh về chủ đề Gia đình kèm phiên âm chuẩn để ôn tập trong 15 phút.",
-        real: "Em đã đối chiếu từ điển thấy hoàn toàn chính xác và có đúng 15 phút rảnh.",
-        answer: 1,
-        answerLabel: "ĐỒNG Ý ÁP DỤNG (Phím 1)",
-        step1: "AI đề xuất 5 từ vựng tiếng Anh chủ đề Gia đình kèm phiên âm để ôn trong 15 phút.",
-        step2: "Em đã kiểm chứng lại bằng từ điển thấy chính xác hoàn toàn và đúng với quỹ 15 phút rảnh.",
-        step3: "Gợi ý đã được kiểm chứng chính xác, an toàn và phù hợp quỹ thời gian → Đồng ý áp dụng!"
-      },
-      {
-        id: 2,
-        topic: "Tình huống 2 • Giao thông & Thời tiết",
-        ai: "Đi theo tuyến đường tắt qua đường đê ven sông giúp rút ngắn 15 phút.",
-        real: "Đêm qua trời mưa rất lớn, đường đê nhỏ đang bị ngập nước và trơn trượt.",
-        answer: 3,
-        answerLabel: "TỪ CHỐI / BỎ QUA (Phím 3)",
-        step1: "Bản đồ AI gợi ý đi đường tắt qua đường đê ven sông để tiết kiệm 15 phút.",
-        step2: "Thực tế sau đêm mưa lớn, đường đê nhỏ đang bị ngập nước và trơn trượt nguy hiểm.",
-        step3: "Điều kiện thực tế tiềm ẩn nguy hiểm giao thông; cần từ chối đường tắt và chọn đường chính (quốc lộ) an toàn."
-      },
-      {
-        id: 3,
-        topic: "Tình huống 3 • Lịch ôn tập môn Toán",
-        ai: "Lập thời gian biểu ôn tập môn Toán liên tục 4 giờ không nghỉ từ 8h đến 12h.",
-        real: "Em cần ôn môn Toán hôm nay nhưng mắt dễ mỏi nếu học liên tục quá 45 phút.",
-        answer: 2,
-        answerLabel: "ĐIỀU CHỈNH CHO PHÙ HỢP (Phím 2)",
-        step1: "AI lập lịch ôn môn Toán liên tục 4 giờ không nghỉ (8h – 12h).",
-        step2: "Em cần ôn Toán nhưng sức khỏe đôi mắt dễ mỏi nếu học quá 45 phút liên tục.",
-        step3: "Giữ mục tiêu ôn Toán nhưng điều chỉnh chia thành từng phiên 45 phút xen kẽ 10 phút nghỉ giải lao để bảo vệ mắt."
-      },
-      {
-        id: 4,
-        topic: "Tình huống 4 • Y tế – Phân tích X-quang",
-        ai: "Bác sĩ nhận ảnh X-quang được AI khoanh vùng một điểm mờ bất thường.",
-        real: "Bác sĩ cần xem lại phim gốc, hỏi tiền sử bệnh và thăm khám trực tiếp trước khi kê đơn.",
-        answer: 2,
-        answerLabel: "ĐIỀU CHỈNH / KẾT HỢP KIỂM TRA (Phím 2)",
-        step1: "Hệ thống AI khoanh vùng một điểm mờ bất thường trên ảnh chụp X-quang.",
-        step2: "Kết quả y khoa cần đối chiếu phim gốc, tiền sử bệnh và tình trạng thăm khám lâm sàng trực tiếp.",
-        step3: "AI chỉ hỗ trợ sàng lọc; bác sĩ phải kết hợp kiểm tra tổng hợp bối cảnh lâm sàng để quyết định phác đồ điều trị."
-      },
-      {
-        id: 5,
-        topic: "Tình huống 5 • Bảo vệ dữ liệu cá nhân",
-        ai: "Một ứng dụng AI giải trí đề xuất đăng nhập bằng mật khẩu mạng xã hội và chia sẻ địa chỉ nhà để nhận điểm thưởng.",
-        real: "Đây là dữ liệu cá nhân mật và ứng dụng không rõ nguồn gốc.",
-        answer: 3,
-        answerLabel: "TỪ CHỐI / BỎ QUA (Phím 3)",
-        step1: "Ứng dụng AI giải trí yêu cầu mật khẩu mạng xã hội và địa chỉ nhà để đổi điểm thưởng.",
-        step2: "Đây là dữ liệu cá nhân nhạy cảm và ứng dụng không minh bạch, không rõ nguồn gốc.",
-        step3: "Vi phạm nguyên tắc bảo vệ dữ liệu cá nhân và tính an toàn, minh bạch → Từ chối ngay lập tức!"
-      }
-    ];
-
-    const QUIZ_DATA = [
-      {
-        id: 1,
-        q: "Câu 1 (2 điểm): Trong tình huống bác sĩ sử dụng hệ thống AI phân tích ảnh chụp X-quang phổi, vai trò của hệ thống AI và vai trò của bác sĩ được phân định đúng như thế nào?",
-        options: [
-          { key: "A", text: "Hệ thống AI tự động kê đơn thuốc, bác sĩ không cần kiểm tra lại." },
-          { key: "B", text: "Hệ thống AI hỗ trợ phân tích hình ảnh và gợi ý vùng nghi vấn; bác sĩ thăm khám tổng thể và đưa ra quyết định phương án điều trị cuối cùng." },
-          { key: "C", text: "Bác sĩ không được phép điều chỉnh gợi ý của hệ thống AI." },
-          { key: "D", text: "Hệ thống AI chịu hoàn toàn trách nhiệm y khoa thay cho bác sĩ." }
-        ],
-        correct: "B",
-        feedback: "Chính xác! AI chỉ hỗ trợ sàng lọc và gợi ý; bác sĩ là người phán đoán ngữ cảnh lâm sàng và quyết định cuối cùng."
-      },
-      {
-        id: 2,
-        q: "Câu 2 (2 điểm): Vì sao theo Bộ Giáo dục Hoa Kỳ (2023), con người luôn phải giữ vai trò quyết định cuối cùng thay vì phó mặc cho AI?",
-        options: [
-          { key: "A", text: "Vì máy tính không thể tính toán các phép cộng trừ đơn giản." },
-          { key: "B", text: "Vì AI không có khả năng phán đoán theo ngữ cảnh rộng về thực tế biến đổi, đạo đức, cảm xúc và sự an toàn như con người." },
-          { key: "C", text: "Vì AI chỉ hoạt động được vào ban ngày." },
-          { key: "D", text: "Vì AI không thể đưa ra bất kì gợi ý nào." }
-        ],
-        correct: "B",
-        feedback: "Rất tốt! Phán đoán theo ngữ cảnh là năng lực đặc trưng của con người mà máy móc không thể thay thế."
-      },
-      {
-        id: 3,
-        q: "Câu 3 (2 điểm): Thứ tự đúng của Quy trình 3 bước ra quyết định khi có gợi ý của AI là gì?",
-        options: [
-          { key: "A", text: "Làm theo ngay gợi ý của AI → Kiểm tra sau → Hỏi bạn bè." },
-          { key: "B", text: "Từ chối mọi công cụ AI → Không tìm hiểu → Tự đoán." },
-          { key: "C", text: "Bước 1: Nêu lại gợi ý của AI → Bước 2: Cân nhắc điều kiện thực tế → Bước 3: Đưa ra lựa chọn của bản thân kèm lí do." },
-          { key: "D", text: "Bước 1: Cân nhắc thực tế → Bước 2: Bỏ qua gợi ý của AI → Bước 3: Không cần lí do." }
-        ],
-        correct: "C",
-        feedback: "Chính xác! Thực hiện đủ 3 bước giúp em luôn làm chủ công nghệ một cách khoa học."
-      },
-      {
-        id: 4,
-        q: "Câu 4 (2 điểm): Theo tinh thần Điều 14 Đạo luật AI của Liên minh châu Âu (EU AI Act, 2024), khi nhận thấy gợi ý của hệ thống AI không phù hợp hoặc tiềm ẩn rủi ro trong tình huống cụ thể, con người có quyền gì?",
-        options: [
-          { key: "A", text: "Bắt buộc phải thực hiện theo đúng gợi ý của AI." },
-          { key: "B", text: "Có quyền quyết định không sử dụng, bỏ qua, điều chỉnh hoặc đảo ngược đầu ra của hệ thống AI để bảo đảm an toàn." },
-          { key: "C", text: "Chỉ được phép bỏ qua nếu phần mềm bị tắt nguồn." },
-          { key: "D", text: "Phải chờ hệ thống AI tự sửa lỗi mới được quyết định." }
-        ],
-        correct: "B",
-        feedback: "Chính xác! Con người luôn nắm quyền giám sát và quyền từ chối hoặc điều chỉnh đầu ra của AI."
-      },
-      {
-        id: 5,
-        q: "Câu 5 (2 điểm): Sau khi hoàn thành cả 8 bài học chuyên đề Trí tuệ nhân tạo lớp 6, nguyên tắc cốt lõi nào thể hiện đúng nhất tinh thần “Con người làm chủ Trí tuệ nhân tạo”?",
-        options: [
-          { key: "A", text: "Tin tưởng tuyệt đối mọi câu trả lời của AI và để AI làm thay bài tập." },
-          { key: "B", text: "Sử dụng AI có mục đích rõ ràng, luôn kiểm chứng thông tin, bảo vệ dữ liệu cá nhân – quyền riêng tư và tự chịu trách nhiệm với quyết định cuối cùng của mình." },
-          { key: "C", text: "Chia sẻ toàn bộ thông tin cá nhân lên các ứng dụng AI miễn phí để nhận gợi ý nhanh hơn." },
-          { key: "D", text: "Không bao giờ sử dụng bất kì ứng dụng công nghệ nào trong học tập." }
-        ],
-        correct: "B",
-        feedback: "Xuất sắc! Chúc mừng em đã nắm vững toàn bộ kiến thức và năng lực cốt lõi của Chuyên đề Trí tuệ nhân tạo lớp 6."
-      }
-    ];
-
-    const GFORM_BLUEPRINT = [
-      { sec: "Tiêu đề Form", type: "Tiêu đề & Mô tả", text: "[TIN HỌC 6 – AI] NỘP BÀI VẬN DỤNG BÀI 8 & TỔNG KẾT CHUYÊN ĐỀ\nMô tả: Học sinh hoàn thành phiếu này tại nhà trong vòng 3 ngày sau tiết học trực tiếp Bài 8 để nộp sản phẩm Vận dụng và tổng kết Chuyên đề Trí tuệ nhân tạo lớp 6." },
-      { sec: "Câu 1 (Phần A)", type: "Trả lời ngắn – Bắt buộc", text: "Họ và tên học sinh." },
-      { sec: "Câu 2 (Phần A)", type: "Menu thả xuống – Bắt buộc", text: "Lớp (6A1, 6A2, 6A3...)." },
-      { sec: "Mô tả Phần B", type: "Tiêu đề mục", text: "PHẦN B – SẢN PHẨM VẬN DỤNG BÀI 8 (CHUYẾN THAM QUAN LỚP 6A – RUBRIC 10 ĐIỂM)\nLớp 6A dự định tổ chức chuyến tham quan học tập. An nhờ công cụ AI gợi ý và AI đề xuất: “Tổ chức cắm trại qua đêm tại khu rừng cách trường 70 km”. Thực tế, nhà trường quy định học sinh lớp 6 chỉ tham quan trong ngày và nhiều bạn trong lớp dễ bị say xe khi đi đường dài." },
-      { sec: "Câu 3 (Phần B)", type: "Trả lời ngắn – Bắt buộc", text: "Bước 1 – Em hãy nêu lại gợi ý của công cụ AI trong tình huống trên." },
-      { sec: "Câu 4 (Phần B)", type: "Đoạn văn ngắn – Bắt buộc", text: "Bước 2 – Em hãy liệt kê đầy đủ các điều kiện thực tế của lớp 6A cần cân nhắc." },
-      { sec: "Câu 5 (Phần B)", type: "Đoạn văn – Bắt buộc", text: "Bước 3 – Em lựa chọn Đồng ý, Điều chỉnh hay Từ chối gợi ý của AI? Hãy nêu rõ phương án cụ thể em đề xuất cho lớp 6A kèm theo lí do thuyết phục." },
-      { sec: "Câu 6 (Phần B)", type: "Tải tệp lên – Tùy chọn", text: "Chụp ảnh trang vở/SGK Bài 8 ghi bài thực hành của em (định dạng .png/.jpg, tối đa 5MB). [Lưu ý: Bỏ câu này nếu HS chưa có Gmail đồng bộ]" },
-      { sec: "Câu 7 (Phần C)", type: "Đoạn văn ngắn – Bắt buộc", text: "Sau khi hoàn thành cả 8 bài học chuyên đề Trí tuệ nhân tạo lớp 6, em hãy viết 01 cam kết cá nhân (2–3 câu) về cách em sẽ sử dụng và làm chủ các công cụ AI an toàn, trung thực và có trách nhiệm trong học tập sắp tới." },
-      { sec: "Xác nhận gửi", type: "Thông báo sau khi gửi", text: "Chúc mừng em đã nộp bài Vận dụng Bài 8 thành công! Hãy nhớ hoàn thành bài Quiz chốt chặn 5 câu trên LMS (đạt ≥ 8/10 điểm) để hoàn tất trọn vẹn Chuyên đề Trí tuệ nhân tạo lớp 6 nhé!" }
-    ];
-
-    /* =========================================================
-       UTILITIES: NAVIGATION, TOAST, CLIPBOARD, FULLSCREEN, PRINT
-       ========================================================= */
-    let activeModuleId = "mod-overview";
-
-    function switchModule(id, btnEl) {
-      activeModuleId = id;
-      document.querySelectorAll(".module-section").forEach(s => s.classList.remove("active"));
-      const target = document.getElementById(id);
-      if (target) target.classList.add("active");
-
-      document.querySelectorAll(".nav-btn").forEach(b => {
-        b.classList.toggle("active", b.getAttribute("data-target") === id);
-      });
-      document.getElementById("sidebar").classList.remove("open");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("open");
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
-    }
-
-    function copyText(text, msg = "✓ Đã sao chép vào bộ nhớ tạm!") {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => showToast(msg)).catch(() => fallbackCopy(text, msg));
-      } else {
-        fallbackCopy(text, msg);
-      }
-    }
-
-    function fallbackCopy(text, msg) {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      showToast(msg);
-    }
-
-    function copyTextById(id) {
-      const el = document.getElementById(id);
-      if (el) copyText(el.textContent, "✓ Đã sao chép đoạn mã!");
-    }
-
-    function toggleReveal(id) {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle("show");
-    }
-
-    function toggleFullscreen(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (!document.fullscreenElement) {
-        if (el.requestFullscreen) el.requestFullscreen();
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-      }
-    }
-
-    function printModule(modId) {
-      if (activeModuleId !== modId) switchModule(modId);
-      setTimeout(() => window.print(), 180);
-    }
-
-    function downloadFile(filename, content, mime = "text/html;charset=utf-8") {
-      const blob = new Blob([content], { type: mime });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      showToast("⬇ Đã tải tệp: " + filename);
-    }
-
-    /* =========================================================
-       CHECKLIST PERSISTENCE (OVERVIEW)
-       ========================================================= */
-    function saveChecklist() {
-      const state = {};
-      document.querySelectorAll(".lms-chk").forEach(c => { state[c.dataset.id] = c.checked; });
-      try { localStorage.setItem("bai8_lms_checklist", JSON.stringify(state)); } catch (e) { }
-    }
-    function loadChecklist() {
-      try {
-        const raw = localStorage.getItem("bai8_lms_checklist");
-        if (!raw) return;
-        const state = JSON.parse(raw);
-        document.querySelectorAll(".lms-chk").forEach(c => {
-          if (state[c.dataset.id]) c.checked = true;
-        });
-      } catch (e) { }
-    }
-
-    /* =========================================================
-       MODULE 1: STUDY GUIDE & PREREQUISITES LMS HTML EXPORTER
-       ========================================================= */
-    function getM1LmsSnippet(part) {
-      const sgHtml = `<div style="border:2px solid #1D63DC;border-radius:14px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;margin-bottom:18px;background:#fff;"> <div style="background:linear-gradient(90deg,#0F4C81,#1D63DC);color:#fff;padding:14px 20px;font-weight:800;font-size:16px;"> HƯỚNG DẪN HỌC TẬP BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO</div> <div style="padding:18px 20px;color:#0F172A;line-height:1.65;font-size:14.5px;"> <p style="background:#EFF6FF;border-left:4px solid #1D63DC;padding:10px 14px;border-radius:8px;margin:0 0 12px;"><strong>Hình thức học tập:</strong> 01 tiết học trực tiếp tại lớp (45 phút) kết hợp đọc kiến thức nền, ôn tập, làm bài kiểm tra chốt chặn cuối khóa và nộp sản phẩm Vận dụng trên hệ thống LMS.</p> <p style="font-weight:700;color:#0F4C81;margin:0 0 8px;">Lộ trình 3 giai đoạn học tập dành cho học sinh:</p> <ul style="margin:0;padding-left:20px;"> <li style="margin-bottom:6px;"><strong>Trước giờ học tại lớp (5 phút trên LMS):</strong> Đọc phần Kết nối kiến thức nền tổng hợp bên dưới và xem trước tình huống Khởi động của gia đình bạn An trong SGK Bài 8.</li> <li style="margin-bottom:6px;"><strong>Trong giờ học tại lớp (45 phút trực tiếp):</strong> Phân tích vai trò của AI và con người trong y tế, giao thông; nắm vững Quy trình 3 bước ra quyết định cùng AI; tham gia trò chơi “Ngã rẽ thông minh”, thảo luận cặp đôi xử lí Thẻ tình huống và thực hành lập kế hoạch chuyến tham quan lớp 6A.</li> <li><strong>Sau giờ học tại lớp (15 phút trên LMS):</strong> (1) Hoàn thành bài kiểm tra nhanh 5 câu trên LMS (điều kiện bắt buộc đạt ≥ 8/10 điểm để hoàn tất chuyên đề 8 bài); (2) Nộp bài thực hành 3 bước chuyến tham quan lớp 6A và Cam kết tổng kết chuyên đề qua Biểu mẫu Google Form nhúng ở cuối trang.</li> </ul> </div>
-</div>`;
-
-      const preHtml = `<div style="border:2px solid #F97316;border-radius:14px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;margin-bottom:18px;background:#fff;"> <div style="background:linear-gradient(90deg,#C2410C,#F97316);color:#fff;padding:14px 20px;font-weight:800;font-size:16px;"> KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI HỌC BÀI 8</div> <div style="padding:18px 20px;color:#0F172A;line-height:1.65;font-size:14.5px;"> <ul style="margin:0;padding-left:20px;"> <li style="margin-bottom:8px;"><strong>Tổng hợp từ Bài 1 – Bài 7 (Chủ đề A &amp; Chủ đề B):</strong> Em đã biết AI là công cụ do con người tạo ra và hỗ trợ học tập (Bài 1, 2); biết thực chứng thông tin tránh ảo giác AI (Bài 3); nhận diện hai mặt của thuật toán gợi ý và đánh giá độ an toàn, minh bạch (Bài 4, 5); bảo vệ tài sản dữ liệu cá nhân và quyền riêng tư bằng 3 bước tự vệ số (Bài 6, 7).</li> <li style="margin-bottom:8px;"><strong>Trọng tâm Bài 8:</strong> Vận dụng tổng hợp tất cả hiểu biết trên vào kĩ năng ra quyết định thông minh khi có gợi ý của AI.</li> <li><strong>Câu hỏi định hướng:</strong> <em>Khi nhận được một phương án gợi ý từ công cụ AI trong học tập hay đời sống, em cần thực hiện quy trình mấy bước để đưa ra quyết định phù hợp và an toàn nhất?</em></li> </ul> </div>
-</div>`;
-
-      if (part === "sg") return sgHtml;
-      if (part === "pre") return preHtml;
-      return sgHtml + "\n" + preHtml;
-    }
-
-    function copyM1Html(part) {
-      copyText(getM1LmsSnippet(part), "✓ Đã sao chép mã HTML (Inline-CSS) sẵn sàng dán vào LMS!");
-    }
-
-    function copyM1PlainText() {
-      const txt = `HƯỚNG DẪN HỌC TẬP BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO
-Hình thức học tập: 01 tiết học trực tiếp tại lớp (45 phút) kết hợp đọc kiến thức nền, ôn tập, làm bài kiểm tra chốt chặn cuối khóa và nộp sản phẩm Vận dụng trên hệ thống LMS.
-Lộ trình 3 giai đoạn học tập dành cho học sinh:
-• Trước giờ học tại lớp (5 phút trên LMS): Đọc phần Kết nối kiến thức nền tổng hợp bên dưới và xem trước tình huống Khởi động của gia đình bạn An trong SGK Bài 8.
-• Trong giờ học tại lớp (45 phút trực tiếp): Phân tích vai trò của AI và con người trong y tế, giao thông; nắm vững Quy trình 3 bước ra quyết định cùng AI; tham gia trò chơi “Ngã rẽ thông minh”, thảo luận cặp đôi xử lí Thẻ tình huống và thực hành lập kế hoạch chuyến tham quan lớp 6A.
-• Sau giờ học tại lớp (15 phút trên LMS): (1) Hoàn thành bài kiểm tra nhanh 5 câu trên LMS (điều kiện bắt buộc đạt ≥ 8/10 điểm để hoàn tất chuyên đề 8 bài); (2) Nộp bài thực hành 3 bước chuyến tham quan lớp 6A và Cam kết tổng kết chuyên đề qua Biểu mẫu Google Form nhúng ở cuối trang.
-
----
-KIẾN THỨC NỀN CẦN NHỚ TRƯỚC KHI HỌC BÀI 8
-• Tổng hợp từ Bài 1 – Bài 7 (Chủ đề A & Chủ đề B): Em đã biết AI là công cụ do con người tạo ra và hỗ trợ học tập (Bài 1, 2); biết thực chứng thông tin tránh ảo giác AI (Bài 3); nhận diện hai mặt của thuật toán gợi ý và đánh giá độ an toàn, minh bạch (Bài 4, 5); bảo vệ tài sản dữ liệu cá nhân và quyền riêng tư bằng 3 bước tự vệ số (Bài 6, 7).
-• Trọng tâm Bài 8: Vận dụng tổng hợp tất cả hiểu biết trên vào kĩ năng ra quyết định thông minh khi có gợi ý của AI.
-• Câu hỏi định hướng: Khi nhận được một phương án gợi ý từ công cụ AI trong học tập hay đời sống, em cần thực hiện quy trình mấy bước để đưa ra quyết định phù hợp và an toàn nhất?`;
-      copyText(txt, "✓ Đã sao chép nguyên văn Study Guide & Kiến thức nền!");
-    }
-
-    /* =========================================================
-       MODULE 2: SLIDE DECK + CLICK-REVEAL + COUNTDOWN TIMERS
-       ========================================================= */
-    let currentSlide = 1;
-    const totalSlides = 8;
-    let slide7MatchStep = 0;
-
-    function goSlide(n) {
-      currentSlide = Math.max(1, Math.min(totalSlides, n));
-      document.querySelectorAll(".slide-item").forEach(el => {
-        el.classList.toggle("active", Number(el.dataset.slide) === currentSlide);
-      });
-      document.querySelectorAll("#slide-dots .slide-dot").forEach((d, idx) => {
-        d.classList.toggle("active", idx + 1 === currentSlide);
-      });
-    }
-
-    function changeSlide(delta) {
-      goSlide(currentSlide + delta);
-    }
-
-    function revealNextMatch() {
-      slide7MatchStep = (slide7MatchStep % 4) + 1;
-      const answers = ["1 – c", "2 – a", "3 – b"];
-      if (slide7MatchStep <= 3) {
-        document.getElementById("s7-m" + slide7MatchStep).textContent = answers[slide7MatchStep - 1];
-        playTone(660, 0.12);
-      } else {
-        document.getElementById("s7-m1").textContent = "?";
-        document.getElementById("s7-m2").textContent = "?";
-        document.getElementById("s7-m3").textContent = "?";
-        slide7MatchStep = 0;
-      }
-    }
-
-    function launchGameFromSlide() {
-      if (document.fullscreenElement) document.exitFullscreen();
-      switchModule("mod-4");
-      setTimeout(() => toggleFullscreen("game-classroom-shell"), 260);
-    }
-
-    /* Timers (Slide 7 & Module 5) */
-    const timers = {
-      slide7: { left: 360, running: false, interval: null },
-      m5: { left: 360, running: false, interval: null }
-    };
-
-    function renderTimer(key) {
-      const s = timers[key].left;
-      const mm = String(Math.floor(s / 60)).padStart(2, "0");
-      const ss = String(s % 60).padStart(2, "0");
-      const disp = document.getElementById(key + "-timer");
-      const pill = document.getElementById(key + "-timer-pill");
-      if (disp) disp.textContent = mm + ":" + ss;
-      if (pill) pill.classList.toggle("urgent", s <= 30 && s > 0);
-    }
-
-    function timerToggle(key) {
-      const t = timers[key];
-      if (t.running) {
-        clearInterval(t.interval);
-        t.running = false;
-      } else {
-        if (t.left <= 0) t.left = 360;
-        t.running = true;
-        t.interval = setInterval(() => {
-          t.left--;
-          renderTimer(key);
-          if (t.left <= 0) {
-            clearInterval(t.interval);
-            t.running = false;
-            playTone(880, 0.25);
-            setTimeout(() => playTone(880, 0.35), 280);
-            showToast(" Đã hết 6 phút thảo luận cặp đôi!");
-          }
-        }, 1000);
-      }
-    }
-
-    function timerReset(key, secs) {
-      const t = timers[key];
-      clearInterval(t.interval);
-      t.running = false;
-      t.left = secs;
-      renderTimer(key);
-    }
-
-    /* =========================================================
-       MODULE 3: INFOGRAPHIC SWITCHER + HIGH-RES PNG/SVG EXPORT
-       ========================================================= */
-    let activeInfoMode = "horizontal";
-
-    function switchInfographic(mode) {
-      activeInfoMode = mode;
-      document.getElementById("info-horizontal-wrap").style.display = mode === "horizontal" ? "block" : "none";
-      document.getElementById("info-vertical-wrap").style.display = mode === "vertical" ? "block" : "none";
-      document.getElementById("btn-info-h").className = mode === "horizontal" ? "btn btn-primary btn-sm" : "btn btn-outline btn-sm";
-      document.getElementById("btn-info-v").className = mode === "vertical" ? "btn btn-primary btn-sm" : "btn btn-outline btn-sm";
-    }
-
-    function exportInfographicSVG() {
-      const svgEl = document.getElementById(activeInfoMode === "horizontal" ? "svg-info-horizontal" : "svg-info-vertical");
-      const serializer = new XMLSerializer();
-      const source = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(svgEl);
-      const fname = activeInfoMode === "horizontal" ? "Infographic_Bai8_Ngang_Hinh8.3.svg" : "Infographic_Bai8_Doc_1080x1920_LMS.svg";
-      downloadFile(fname, source, "image/svg+xml;charset=utf-8");
-    }
-
-    function exportInfographicPNG() {
-      const svgEl = document.getElementById(activeInfoMode === "horizontal" ? "svg-info-horizontal" : "svg-info-vertical");
-      const w = activeInfoMode === "horizontal" ? 2175 : 1080;
-      const h = activeInfoMode === "horizontal" ? 690 : 1920;
-      const serializer = new XMLSerializer();
-      const svgStr = serializer.serializeToString(svgEl);
-      const svgBlob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0, w, h);
-        URL.revokeObjectURL(url);
-        const pngUrl = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = pngUrl;
-        a.download = activeInfoMode === "horizontal" ? "Infographic_Bai8_Hinh8.3_SGK_Ngang.png" : "Infographic_Bai8_LMS_Doc_1080x1920.png";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast(" Đã xuất ảnh PNG độ phân giải cao (" + w + "×" + h + " px)!");
-      };
-      img.src = url;
-    }
-
-    /* =========================================================
-       MODULE 4: GAME HTML5 NGÃ RẼ THÔNG MINH (WEB AUDIO + KBD)
-       ========================================================= */
-    let gameIndex = 0;
-    let gameScore = 0;
-    let gameLocked = false;
-    let gameSoundOn = true;
-    let gameHistory = [];
-    let audioCtx = null;
-
-    function playTone(freq, dur = 0.16, type = "sine") {
-      if (!gameSoundOn) return;
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.16, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + dur);
-      } catch (e) { }
-    }
-
-    function playSuccessSfx() {
-      playTone(523.25, 0.12, "triangle");
-      setTimeout(() => playTone(659.25, 0.12, "triangle"), 110);
-      setTimeout(() => playTone(783.99, 0.22, "triangle"), 220);
-    }
-
-    function playWrongSfx() {
-      playTone(260, 0.18, "sawtooth");
-      setTimeout(() => playTone(195, 0.25, "sawtooth"), 160);
-    }
-
-    function toggleGameSound() {
-      gameSoundOn = !gameSoundOn;
-      document.getElementById("game-sound-btn").textContent = gameSoundOn ? " Âm thanh: BẬT" : " Âm thanh: TẮT";
-      document.getElementById("game-sound-inner").textContent = gameSoundOn ? " Bật" : " Tắt";
-    }
-
-    function renderGameQuestion() {
-      const q = GAME_QUESTIONS[gameIndex];
-      gameLocked = false;
-      document.getElementById("game-play-view").style.display = "block";
-      document.getElementById("game-summary-view").style.display = "none";
-      document.getElementById("game-progress-chip").textContent = `Câu ${gameIndex + 1} / ${GAME_QUESTIONS.length}`;
-      document.getElementById("game-score-chip").textContent = `Điểm: ${gameScore} / 50`;
-      document.getElementById("game-q-badge").textContent = q.topic;
-      document.getElementById("game-ai-text").textContent = q.ai;
-      document.getElementById("game-real-text").textContent = q.real;
-
-      [1, 2, 3].forEach(k => {
-        const b = document.getElementById("gbtn-" + k);
-        b.disabled = false;
-        b.classList.remove("correct-pick");
-      });
-      const fb = document.getElementById("game-feedback");
-      fb.classList.remove("show", "wrong");
-    }
-
-    function answerGame(choice) {
-      if (gameLocked) return;
-      gameLocked = true;
-      const q = GAME_QUESTIONS[gameIndex];
-      const isCorrect = choice === q.answer;
-      if (isCorrect) {
-        gameScore += 10;
-        playSuccessSfx();
-      } else {
-        playWrongSfx();
-      }
-      gameHistory.push({ q, choice, isCorrect });
-      document.getElementById("game-score-chip").textContent = `Điểm: ${gameScore} / 50`;
-
-      [1, 2, 3].forEach(k => {
-        const b = document.getElementById("gbtn-" + k);
-        b.disabled = true;
-        if (k === q.answer) b.classList.add("correct-pick");
-      });
-
-      const fb = document.getElementById("game-feedback");
-      fb.classList.toggle("wrong", !isCorrect);
-      fb.classList.add("show");
-      document.getElementById("game-fb-title").innerHTML = isCorrect
-        ? ` CHÍNH XÁC! Đáp án: ${q.answerLabel}`
-        : ` CHƯA CHÍNH XÁC! Đáp án đúng là: ${q.answerLabel}`;
-      document.getElementById("game-fb-steps").innerHTML = `
-    <div><strong>• Bước 1 (Nêu lại gợi ý AI):</strong> ${q.step1}</div> <div><strong>• Bước 2 (Cân nhắc thực tế):</strong> ${q.step2}</div> <div><strong>• Bước 3 (Lựa chọn &amp; Lí do):</strong> ${q.step3}</div> `;
-      document.getElementById("game-next-btn").textContent =
-        gameIndex === GAME_QUESTIONS.length - 1 ? " Xem tổng kết điểm số (Enter)" : "Câu tiếp theo → (Enter)";
-    }
-
-    function nextGameQuestion() {
-      if (!gameLocked) return;
-      if (gameIndex < GAME_QUESTIONS.length - 1) {
-        gameIndex++;
-        renderGameQuestion();
-      } else {
-        showGameSummary();
-      }
-    }
-
-    function showGameSummary() {
-      document.getElementById("game-play-view").style.display = "none";
-      document.getElementById("game-summary-view").style.display = "block";
-      playSuccessSfx();
-      const rank = gameScore === 50 ? "XUẤT SẮC – NHÀ LÀM CHỦ AI THÔNG THÁI!" :
-        gameScore >= 40 ? "RẤT TỐT – PHÁN ĐOÁN NGỮ CẢNH SẮC BÉN!" :
-          "CỐ GẮNG THÊM – HÃY NHỚ QUY TRÌNH 3 BƯỚC NHÉ!";
-      document.getElementById("game-final-title").textContent = rank;
-      document.getElementById("game-final-score").innerHTML = `Tổng điểm của lớp: <span style="color:#059669;font-size:28px;">${gameScore} / 50 điểm</span> (${gameScore / 10}/5 tình huống chính xác)`;
-
-      const list = document.getElementById("game-review-list");
-      list.innerHTML = gameHistory.map(item => `
-    <div style="background:#fff;border-left:5px solid ${item.isCorrect ? '#10B981' : '#EF4444'};border-radius:10px;padding:10px 14px;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.05);"> <strong>${item.isCorrect ? '✓' : '✗'} ${item.q.topic}:</strong> Đáp án chuẩn: <span style="color:#0F4C81;font-weight:800;">${item.q.answerLabel}</span> — ${item.q.step3}
-    </div> `).join("");
-    }
-
-    function resetGame() {
-      gameIndex = 0;
-      gameScore = 0;
-      gameHistory = [];
-      renderGameQuestion();
-    }
-
-    /* Global keyboard shortcuts for Slides (M2) and Game (M4) */
-    document.addEventListener("keydown", function (e) {
-      const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-
-      if (activeModuleId === "mod-2") {
-        if (e.key === "ArrowRight") changeSlide(1);
-        else if (e.key === "ArrowLeft") changeSlide(-1);
-      } else if (activeModuleId === "mod-4") {
-        if (e.key === "1") answerGame(1);
-        else if (e.key === "2") answerGame(2);
-        else if (e.key === "3") answerGame(3);
-        else if ((e.key === "Enter" || e.key === " ") && gameLocked) {
-          e.preventDefault();
-          nextGameQuestion();
-        }
-      }
-    });
-
-    /* =========================================================
-       MODULE 5: MATCHING, SCENARIO CARDS & PAIR WORKSHEET
-       ========================================================= */
-    function checkMatching() {
-      const m1 = document.getElementById("match-1").value;
-      const m2 = document.getElementById("match-2").value;
-      const m3 = document.getElementById("match-3").value;
-      let right = 0;
-      if (m1 === "c") right++;
-      if (m2 === "a") right++;
-      if (m3 === "b") right++;
-      const res = document.getElementById("match-result");
-      if (right === 3) {
-        res.style.color = "#059669";
-        res.textContent = " Chính xác cả 3/3 cặp (1–c, 2–a, 3–b)!";
-        playSuccessSfx();
-      } else {
-        res.style.color = "#DC2626";
-        res.textContent = ` Đúng ${right}/3 cặp. Em hãy kiểm tra lại nhé!`;
-        playWrongSfx();
-      }
-    }
-
-    function showMatchingAnswer() {
-      document.getElementById("match-1").value = "c";
-      document.getElementById("match-2").value = "a";
-      document.getElementById("match-3").value = "b";
-      checkMatching();
-    }
-
-    let allScenarioShown = false;
-    function toggleAllScenarioAnswers() {
-      allScenarioShown = !allScenarioShown;
-      [1, 2, 3, 4].forEach(i => {
-        const el = document.getElementById("sc-ans-" + i);
-        if (el) el.classList.toggle("show", allScenarioShown);
-      });
-    }
-
-    function copyPairWorksheet() {
-      const names = document.getElementById("pw-names").value || "(Chưa điền)";
-      const cls = document.getElementById("pw-class").value || "(Chưa điền)";
-      const card = document.getElementById("pw-card").value;
-      const b1 = document.getElementById("pw-b1").value || "(Chưa điền)";
-      const b2 = document.getElementById("pw-b2").value || "(Chưa điền)";
-      const choice = (document.querySelector('input[name="pw-choice"]:checked') || {}).value || "";
-      const b3 = document.getElementById("pw-b3").value || "(Chưa điền)";
-      const txt = `PHIẾU THỰC HÀNH CẶP ĐÔI – BÀI 8: CON NGƯỜI LÀM CHỦ AI
-Họ tên 2 bạn: ${names} | Lớp: ${cls} | ${card}
-- Bước 1 (Gợi ý AI): ${b1}
-- Bước 2 (Điều kiện thực tế): ${b2}
-- Bước 3 (Lựa chọn: ${choice}): ${b3}`;
-      copyText(txt, "✓ Đã sao chép nội dung Phiếu thực hành cặp đôi!");
-    }
-
-    /* =========================================================
-       MODULE 6: LMS QUIZ (5 QUESTIONS + CERTIFICATE + GIFT/CSV)
-       ========================================================= */
-    function renderQuiz() {
-      const box = document.getElementById("quiz-questions-container");
-      box.innerHTML = QUIZ_DATA.map(q => `
-    <div class="quiz-q-card" id="qq-card-${q.id}"> <div style="font-weight:800;font-size:15px;color:#0F172A;margin-bottom:6px;">${q.q}</div> ${q.options.map(opt => `
-        <label class="quiz-opt"> <input type="radio" name="quiz-q-${q.id}" value="${opt.key}"> <span><strong>${opt.key}.</strong> ${opt.text}</span> </label> `).join("")}
-      <div class="quiz-explain" id="qq-exp-${q.id}"></div> </div> `).join("");
-    }
-
-    function submitQuiz() {
-      let score = 0;
-      let answered = 0;
-      QUIZ_DATA.forEach(q => {
-        const picked = document.querySelector(`input[name="quiz-q-${q.id}"]:checked`);
-        const card = document.getElementById("qq-card-" + q.id);
-        const exp = document.getElementById("qq-exp-" + q.id);
-        card.classList.remove("correct", "incorrect");
-        exp.classList.remove("show", "ok", "no");
-
-        if (picked) {
-          answered++;
-          if (picked.value === q.correct) {
-            score += 2;
-            card.classList.add("correct");
-            exp.classList.add("show", "ok");
-            exp.innerHTML = `✓ Đúng (+2 điểm) – ${q.feedback}`;
-          } else {
-            card.classList.add("incorrect");
-            exp.classList.add("show", "no");
-            exp.innerHTML = `✗ Chưa đúng (Đáp án đúng: ${q.correct}) – ${q.feedback}`;
-          }
-        } else {
-          card.classList.add("incorrect");
-          exp.classList.add("show", "no");
-          exp.innerHTML = ` Em chưa chọn đáp án (Đáp án đúng: ${q.correct}) – ${q.feedback}`;
-        }
-      });
-
-      const banner = document.getElementById("quiz-result-banner");
-      const certWrap = document.getElementById("quiz-cert-wrap");
-      banner.style.display = "block";
-      if (score >= 8) {
-        playSuccessSfx();
-        banner.innerHTML = `<div class="callout green" style="font-size:15px;"> <strong>CHÚC MỪNG! Em đạt ${score}/10 điểm (${score / 2}/5 câu đúng)</strong> — Đạt điều kiện chốt chặn (≥ 8/10 điểm) để hoàn tất Chuyên đề Trí tuệ nhân tạo lớp 6!</div>`;
-        certWrap.style.display = "block";
-        const sname = document.getElementById("quiz-student-name").value.trim() || "Học sinh lớp 6";
-        const sclass = document.getElementById("quiz-student-class").value.trim();
-        document.getElementById("cert-name-display").textContent = sclass ? `${sname} – Lớp ${sclass}` : sname;
-        document.getElementById("cert-score-display").textContent = `${score}/10 điểm`;
-        document.getElementById("cert-date-display").textContent = "Ngày cấp: " + new Date().toLocaleDateString("vi-VN");
-      } else {
-        playWrongSfx();
-        banner.innerHTML = `<div class="callout danger" style="font-size:15px;"> <strong>Em đạt ${score}/10 điểm (${score / 2}/5 câu đúng)</strong> — Chưa đạt điều kiện chốt chặn (yêu cầu ≥ 8/10 điểm). Hãy đọc kĩ phần giải thích từng câu và bấm <strong>Làm lại</strong> nhé!</div>`;
-        certWrap.style.display = "none";
-      }
-    }
-
-    function resetQuiz() {
-      renderQuiz();
-      document.getElementById("quiz-result-banner").style.display = "none";
-      document.getElementById("quiz-cert-wrap").style.display = "none";
-    }
-
-    function exportQuizGIFT() {
-      const esc = s => s.replace(/([~=#{}:])/g, "\\$1");
-      const gift = "// Ngân hàng 5 câu Quiz Chốt chặn Bài 8 - Tin học 6 (Moodle GIFT Format)\n" +
-        "// Cấu hình LMS: Tổng 10 điểm (2 điểm/câu), Passing Grade >= 8/10\n\n" +
-        QUIZ_DATA.map(q => {
-          const opts = q.options.map(o => {
-            const prefix = o.key === q.correct ? "=" : "~";
-            const fb = o.key === q.correct ? ` # ${esc(q.feedback)}` : ` # Hãy xem lại kiến thức Bài 8 nhé!`;
-            return `  ${prefix}${esc(o.text)}${fb}`;
-          }).join("\n");
-          return `::Bai8_Cau${q.id}:: ${esc(q.q)} {\n${opts}\n}`;
-        }).join("\n\n");
-      downloadFile("Quiz_Bai8_TinHoc6_Moodle_GIFT.txt", gift, "text/plain;charset=utf-8");
-    }
-
-    function exportQuizCSV() {
-      const qcsv = s => '"' + String(s).replace(/"/g, '""') + '"';
-      const rows = [
-        ["STT", "Câu hỏi", "Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D", "Đáp án đúng", "Điểm", "Phản hồi giải thích tự động"]
-      ];
-      QUIZ_DATA.forEach(q => {
-        rows.push([q.id, q.q, q.options[0].text, q.options[1].text, q.options[2].text, q.options[3].text, q.correct, 2, q.feedback]);
-      });
-      const csv = "\uFEFF" + rows.map(r => r.map(qcsv).join(",")).join("\n");
-      downloadFile("Quiz_Bai8_TinHoc6_ChotChan.csv", csv, "text/csv;charset=utf-8");
-    }
-
-    /* =========================================================
-       MODULE 7: FORM VẬN DỤNG + GOOGLE FORM HELPER + QR
-       ========================================================= */
-    function switchSubtab(paneId, btn) {
-      document.querySelectorAll("#mod-7 .subtab-pane").forEach(p => p.classList.remove("active"));
-      document.getElementById(paneId).classList.add("active");
-      document.querySelectorAll("#mod-7 .subtab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-    }
-
-    function renderGFormBlueprint() {
-      const tbody = document.getElementById("gform-blueprint-tbody");
-      tbody.innerHTML = GFORM_BLUEPRINT.map((item, idx) => `
-    <tr> <td><strong>${item.sec}</strong></td> <td><span class="pill pill-blue">${item.type}</span></td> <td style="white-space:pre-line;">${item.text}</td> <td><button class="btn btn-outline btn-sm" onclick="copyText(GFORM_BLUEPRINT[${idx}].text, '✓ Đã copy ${item.sec}!')"> Copy</button></td> </tr> `).join("");
-    }
-
-    function copyGoogleFormBlueprint() {
-      const full = GFORM_BLUEPRINT.map(x => `[${x.sec} | ${x.type}]\n${x.text}`).join("\n\n");
-      copyText(full, "✓ Đã sao chép trọn bộ cấu trúc 7 câu Google Form!");
-    }
-
-    function submitVanDungForm(e) {
-      e.preventDefault();
-      const name = document.getElementById("vd-name").value.trim();
-      const cls = document.getElementById("vd-class").value;
-      const b1 = document.getElementById("vd-b1").value.trim();
-      const b2 = document.getElementById("vd-b2").value.trim();
-      const choice = (document.querySelector('input[name="vd-choice"]:checked') || {}).value || "";
-      const b3 = document.getElementById("vd-b3").value.trim();
-      const commit = document.getElementById("vd-commit").value.trim();
-
-      const summaryText = `BÀI NỘP VẬN DỤNG BÀI 8 & TỔNG KẾT CHUYÊN ĐỀ AI LỚP 6
-Họ tên: ${name} | Lớp: ${cls}
-- Bước 1 (Gợi ý của AI): ${b1}
-- Bước 2 (Điều kiện thực tế lớp 6A): ${b2}
-- Bước 3 (Lựa chọn: ${choice}): ${b3}
-- Cam kết cá nhân (8 bài học AI): ${commit}`;
-
-      window.__lastVanDungSubmission = summaryText;
-      const res = document.getElementById("vd-submit-result");
-      res.style.display = "block";
-      res.innerHTML = `
-    <div class="callout green"> <strong> Chúc mừng em đã nộp bài Vận dụng Bài 8 thành công!</strong><br> Hãy nhớ hoàn thành bài <strong>Quiz chốt chặn 5 câu trên LMS (đạt ≥ 8/10 điểm)</strong> để hoàn tất trọn vẹn Chuyên đề Trí tuệ nhân tạo lớp 6 nhé!
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" onclick="copyText(window.__lastVanDungSubmission, '✓ Đã sao chép bài nộp!')"> Sao chép bài nộp</button> <button class="btn btn-outline btn-sm" onclick="downloadFile('BaiNop_VanDung_Bai8_' + '${cls}' + '.txt', window.__lastVanDungSubmission, 'text/plain;charset=utf-8')">⬇ Tải bản lưu (.txt)</button> <button class="btn btn-accent btn-sm" onclick="switchModule('mod-6')">✓ Chuyển sang làm Quiz chốt chặn</button> </div> </div> `;
-      playSuccessSfx();
-    }
-
-    function generateEmbedAndQR() {
-      const raw = document.getElementById("gform-url-input").value.trim();
-      if (!raw) {
-        showToast(" Vui lòng dán đường dẫn Google Form trước!");
-        return;
-      }
-      const embedSrc = raw.includes("embedded=true") ? raw : (raw + (raw.includes("?") ? "&embedded=true" : "?embedded=true"));
-      const iframeCode = `<iframe src="${embedSrc}" width="100%" height="920" frameborder="0" marginheight="0" marginwidth="0">Đang tải…</iframe>`;
-      document.getElementById("gform-iframe-code").textContent = iframeCode;
-
-      const qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=" + encodeURIComponent(raw);
-      const imgTag = `<img src="${qrApiUrl}" alt="QR Code LMS Bài 8" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.innerHTML='<div style=\\'padding:10px;font-size:11px;color:#DC2626;\\'>Không có Internet để tải ảnh QR.<br>Link: ${raw.slice(0, 28)}...</div>'">`;
-
-      document.getElementById("m7-qr-preview").innerHTML = imgTag;
-      document.getElementById("slide8-qr-box").innerHTML = imgTag;
-      showToast("✓ Đã tạo mã <iframe> và cập nhật Mã QR ở cả M7 & Slide 8!");
-    }
-
-    /* =========================================================
-       STANDALONE SINGLE-MODULE HTML DOWNLOADER (UPLOAD LÊN LMS)
-       ========================================================= */
-    function buildStandaloneDoc(title, bodyHtml, extraScript = "") {
-      const css = document.querySelector("style").textContent;
-      return `<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bài 8: Con người làm chủ trí tuệ nhân tạo – Học liệu số</title>
 <style>
-${css}
-body { background: #F1F5F9; padding: 20px; }
-.standalone-wrap { max-width: 1120px; margin: 0 auto; }
-.module-section { display: block !important; }
-.no-standalone { display: none !important; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#f4f6fa;color:#1e293b;line-height:1.55}
+  header{background:#1d4ed8;color:#fff;padding:18px 20px}
+  header h1{margin:0;font-size:20px}
+  header p{margin:4px 0 0;font-size:14px;opacity:.85}
+  nav{display:flex;gap:6px;max-width:760px;margin:16px auto 0;padding:0 16px}
+  nav button{flex:1;padding:10px;border:0;border-radius:8px;background:#e2e8f0;font-size:15px;font-weight:600;cursor:pointer;color:#334155}
+  nav button.on{background:#1d4ed8;color:#fff}
+  main{max-width:760px;margin:12px auto 40px;padding:0 16px}
+  .card{background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .card h2{margin:0 0 10px;font-size:17px}
+  ul{margin:0;padding-left:20px}
+  li{margin-bottom:8px}
+  .q{font-weight:600;margin-bottom:10px}
+  .opt{display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border:2px solid #cbd5e1;border-radius:8px;background:#fff;font-size:15px;cursor:pointer;font-family:inherit}
+  .opt:hover{border-color:#60a5fa}
+  .opt.pick{border-color:#1d4ed8;background:#eff6ff}
+  .opt.ok{border-color:#16a34a;background:#dcfce7}
+  .opt.bad{border-color:#dc2626;background:#fee2e2}
+  .opt:disabled{cursor:default;color:#1e293b;opacity:1}
+  .note{margin-top:8px;padding:10px 12px;border-radius:8px;background:#f1f5f9;font-size:14px}
+  .btn{padding:10px 22px;border:0;border-radius:8px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+  .btn.light{background:#e2e8f0;color:#334155}
+  .center{text-align:center}
+  .hide{display:none}
+  .count{font-size:14px;color:#64748b;margin-bottom:6px}
+  .result{font-size:18px;font-weight:700;margin:10px 0}
+  .sync{margin:0 0 12px;padding:10px 12px;border-radius:8px;font-size:14px;background:#eff6ff;color:#1e3a8a;text-align:left}
+  .sync.ok{background:#dcfce7;color:#14532d}
+  .sync.warn{background:#fef3c7;color:#78350f}
 </style>
 </head>
 <body>
-<div class="standalone-wrap">
-${bodyHtml}
-</div>
-<div class="toast" id="toast"></div>
+<header>
+  <h1>Bài 8: Con người làm chủ trí tuệ nhân tạo</h1>
+  <p>Tin học 6 – Chuyên đề Trí tuệ nhân tạo</p>
+</header>
+<nav>
+  <button class="on" data-tab="t1">Ghi nhớ</button>
+  <button data-tab="t2">Trắc nghiệm</button>
+  <button data-tab="t3">Trò chơi</button>
+</nav>
+<main>
+  <section id="t1"><div class="card"><h2>Kiến thức cần nhớ</h2><ul id="notes"></ul></div></section>
+
+  <section id="t2" class="hide">
+    <div class="sync hide" id="syncInfo"></div>
+    <div id="quiz"></div>
+    <div class="center">
+      <div id="quizResult" class="result"></div>
+      <div class="sync hide" id="syncStatus"></div>
+      <button class="btn" id="quizSubmit">Nộp bài</button>
+      <button class="btn light hide" id="quizReset">Làm lại</button>
+    </div>
+  </section>
+
+  <section id="t3" class="hide">
+    <div class="card center" id="gStart">
+      <h2 id="gTitle"></h2>
+      <p id="gIntro"></p>
+      <button class="btn" id="gBegin">Bắt đầu</button>
+    </div>
+    <div class="card hide" id="gPlay">
+      <div class="count" id="gCount"></div>
+      <div class="q" id="gQ"></div>
+      <div id="gOpts"></div>
+      <div class="note hide" id="gNote"></div>
+      <div class="center" style="margin-top:12px"><button class="btn hide" id="gNext">Câu tiếp theo</button></div>
+    </div>
+    <div class="card center hide" id="gEnd">
+      <div class="result" id="gScore"></div>
+      <button class="btn" id="gAgain">Chơi lại</button>
+    </div>
+  </section>
+</main>
+
 <script>
-function showToast(m){const t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove('show'),2500);}
-function toggleReveal(id){const e=document.getElementById(id);if(e)e.classList.toggle('show');}
-function toggleFullscreen(id){const e=document.getElementById(id);if(!e)return;if(!document.fullscreenElement){if(e.requestFullscreen)e.requestFullscreen();}else{if(document.exitFullscreen)document.exitFullscreen();}}
-function copyText(text,msg){if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast(msg||'Đã sao chép!'));}}
-function downloadFile(fn,c,m){const b=new Blob([c],{type:m||'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();}
-${extraScript}
-<\/script>
-</body>
-</html>`;
-    }
+const D = {
+ "notes": [
+  "Quy trình 3 bước khi AI đưa ra gợi ý: (1) Nêu lại gợi ý của AI; (2) Cân nhắc điều kiện thực tế; (3) Đưa ra lựa chọn của bản thân kèm lí do.",
+  "Có ba cách xử lí gợi ý của AI: đồng ý áp dụng, điều chỉnh cho phù hợp hoặc từ chối.",
+  "Con người có quyền không dùng, bỏ qua, điều chỉnh hoặc đảo ngược kết quả của AI để bảo đảm an toàn.",
+  "Dùng AI có mục đích rõ ràng, luôn kiểm chứng thông tin, bảo vệ dữ liệu cá nhân và tự chịu trách nhiệm với quyết định cuối cùng."
+ ],
+ "quiz": [
+  {
+   "id": "q1",
+   "q": "Trong tình huống bác sĩ sử dụng hệ thống AI phân tích ảnh chụp X-quang phổi, vai trò của hệ thống AI và vai trò của bác sĩ được phân định đúng như thế nào?",
+   "o": [
+    "Hệ thống AI hỗ trợ phân tích hình ảnh và gợi ý vùng nghi vấn; bác sĩ thăm khám tổng thể và đưa ra quyết định phương án điều trị cuối cùng.",
+    "Hệ thống AI tự động kê đơn thuốc, bác sĩ không cần kiểm tra lại.",
+    "Bác sĩ không được phép điều chỉnh gợi ý của hệ thống AI.",
+    "Hệ thống AI chịu hoàn toàn trách nhiệm y khoa thay cho bác sĩ."
+   ],
+   "a": 0,
+   "e": "AI chỉ hỗ trợ sàng lọc và gợi ý; bác sĩ là người phán đoán ngữ cảnh lâm sàng và quyết định cuối cùng."
+  },
+  {
+   "id": "q2",
+   "q": "Vì sao theo Bộ Giáo dục Hoa Kỳ (2023), con người luôn phải giữ vai trò quyết định cuối cùng thay vì phó mặc cho AI?",
+   "o": [
+    "Vì máy tính không thể tính toán các phép cộng trừ đơn giản.",
+    "Vì AI không có khả năng phán đoán theo ngữ cảnh rộng về thực tế biến đổi, đạo đức, cảm xúc và sự an toàn như con người.",
+    "Vì AI chỉ hoạt động được vào ban ngày.",
+    "Vì AI không thể đưa ra bất kì gợi ý nào."
+   ],
+   "a": 1,
+   "e": "Phán đoán theo ngữ cảnh là năng lực đặc trưng của con người mà máy móc không thể thay thế."
+  },
+  {
+   "id": "q3",
+   "q": "Thứ tự đúng của Quy trình 3 bước ra quyết định khi có gợi ý của AI là gì?",
+   "o": [
+    "Làm theo ngay gợi ý của AI → Kiểm tra sau → Hỏi bạn bè.",
+    "Từ chối mọi công cụ AI → Không tìm hiểu → Tự đoán.",
+    "Bước 1: Nêu lại gợi ý của AI → Bước 2: Cân nhắc điều kiện thực tế → Bước 3: Đưa ra lựa chọn của bản thân kèm lí do.",
+    "Bước 1: Cân nhắc thực tế → Bước 2: Bỏ qua gợi ý của AI → Bước 3: Không cần lí do."
+   ],
+   "a": 2,
+   "e": "Thực hiện đủ 3 bước giúp em luôn làm chủ công nghệ một cách khoa học."
+  },
+  {
+   "id": "q4",
+   "q": "Theo tinh thần Điều 14 Đạo luật AI của Liên minh châu Âu (năm 2024), khi nhận thấy gợi ý của hệ thống AI không phù hợp hoặc tiềm ẩn rủi ro trong tình huống cụ thể, con người có quyền gì?",
+   "o": [
+    "Bắt buộc phải thực hiện theo đúng gợi ý của AI.",
+    "Chỉ được phép bỏ qua nếu phần mềm bị tắt nguồn.",
+    "Phải chờ hệ thống AI tự sửa lỗi mới được quyết định.",
+    "Có quyền quyết định không sử dụng, bỏ qua, điều chỉnh hoặc đảo ngược đầu ra của hệ thống AI để bảo đảm an toàn."
+   ],
+   "a": 3,
+   "e": "Con người luôn nắm quyền giám sát và quyền từ chối hoặc điều chỉnh đầu ra của AI."
+  },
+  {
+   "id": "q5",
+   "q": "Sau khi hoàn thành cả 8 bài học chuyên đề Trí tuệ nhân tạo lớp 6, nguyên tắc cốt lõi nào thể hiện đúng nhất tinh thần “Con người làm chủ Trí tuệ nhân tạo”?",
+   "o": [
+    "Sử dụng AI có mục đích rõ ràng, luôn kiểm chứng thông tin, bảo vệ dữ liệu cá nhân – quyền riêng tư và tự chịu trách nhiệm với quyết định cuối cùng của mình.",
+    "Tin tưởng tuyệt đối mọi câu trả lời của AI và để AI làm thay bài tập.",
+    "Chia sẻ toàn bộ thông tin cá nhân lên các ứng dụng AI miễn phí để nhận gợi ý nhanh hơn.",
+    "Không bao giờ sử dụng bất kì ứng dụng công nghệ nào trong học tập."
+   ],
+   "a": 0,
+   "e": "Làm chủ AI là dùng AI có mục đích, luôn kiểm chứng thông tin, bảo vệ dữ liệu cá nhân và tự chịu trách nhiệm với quyết định của mình."
+  }
+ ],
+ "gameTitle": "Em quyết định thế nào?",
+ "gameIntro": "AI đưa ra gợi ý. Em cân nhắc thực tế rồi chọn: áp dụng, điều chỉnh hoặc từ chối.",
+ "game": [
+  {
+   "q": "AI gợi ý: Đề xuất 5 từ vựng tiếng Anh về chủ đề Gia đình kèm phiên âm chuẩn để ôn tập trong 15 phút. Thực tế: Em đã đối chiếu từ điển thấy hoàn toàn chính xác và có đúng 15 phút rảnh.",
+   "o": [
+    "Đồng ý áp dụng",
+    "Điều chỉnh cho phù hợp",
+    "Từ chối, bỏ qua"
+   ],
+   "a": 0,
+   "e": "Gợi ý đã được kiểm chứng chính xác, an toàn và phù hợp quỹ thời gian → Đồng ý áp dụng!"
+  },
+  {
+   "q": "AI gợi ý: Đi theo tuyến đường tắt qua đường đê ven sông giúp rút ngắn 15 phút. Thực tế: Đêm qua trời mưa rất lớn, đường đê nhỏ đang bị ngập nước và trơn trượt.",
+   "o": [
+    "Đồng ý áp dụng",
+    "Điều chỉnh cho phù hợp",
+    "Từ chối, bỏ qua"
+   ],
+   "a": 2,
+   "e": "Điều kiện thực tế tiềm ẩn nguy hiểm giao thông; cần từ chối đường tắt và chọn đường chính (quốc lộ) an toàn."
+  },
+  {
+   "q": "AI gợi ý: Lập thời gian biểu ôn tập môn Toán liên tục 4 giờ không nghỉ từ 8h đến 12h. Thực tế: Em cần ôn môn Toán hôm nay nhưng mắt dễ mỏi nếu học liên tục quá 45 phút.",
+   "o": [
+    "Đồng ý áp dụng",
+    "Điều chỉnh cho phù hợp",
+    "Từ chối, bỏ qua"
+   ],
+   "a": 1,
+   "e": "Giữ mục tiêu ôn Toán nhưng điều chỉnh chia thành từng phiên 45 phút xen kẽ 10 phút nghỉ giải lao để bảo vệ mắt."
+  },
+  {
+   "q": "AI gợi ý: Bác sĩ nhận ảnh X-quang được AI khoanh vùng một điểm mờ bất thường. Thực tế: Bác sĩ cần xem lại phim gốc, hỏi tiền sử bệnh và thăm khám trực tiếp trước khi kê đơn.",
+   "o": [
+    "Đồng ý áp dụng",
+    "Điều chỉnh cho phù hợp",
+    "Từ chối, bỏ qua"
+   ],
+   "a": 1,
+   "e": "AI chỉ hỗ trợ sàng lọc; bác sĩ phải kết hợp kiểm tra tổng hợp bối cảnh lâm sàng để quyết định phác đồ điều trị."
+  },
+  {
+   "q": "AI gợi ý: Một ứng dụng AI giải trí đề xuất đăng nhập bằng mật khẩu mạng xã hội và chia sẻ địa chỉ nhà để nhận điểm thưởng. Thực tế: Đây là dữ liệu cá nhân mật và ứng dụng không rõ nguồn gốc.",
+   "o": [
+    "Đồng ý áp dụng",
+    "Điều chỉnh cho phù hợp",
+    "Từ chối, bỏ qua"
+   ],
+   "a": 2,
+   "e": "Vi phạm nguyên tắc bảo vệ dữ liệu cá nhân và tính an toàn, minh bạch → Từ chối ngay lập tức!"
+  }
+ ],
+ "passScore": 8
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-    function downloadStandalone(modKey) {
-      if (modKey === "m1") {
-        const html = buildStandaloneDoc(
-          "Bài 8 LMS – Study Guide & Kiến thức nền",
-          getM1LmsSnippet("all")
-        );
-        downloadFile("Bai8_M1_StudyGuide_KienThucNen_LMS.html", html);
-      } else if (modKey === "m2") {
-        const deck = document.getElementById("slide-deck-container").outerHTML;
-        const js = `
-      let currentSlide=1,totalSlides=8,slide7MatchStep=0;
-      function goSlide(n){currentSlide=Math.max(1,Math.min(totalSlides,n));document.querySelectorAll('.slide-item').forEach(el=>el.classList.toggle('active',Number(el.dataset.slide)===currentSlide));document.querySelectorAll('#slide-dots .slide-dot').forEach((d,i)=>d.classList.toggle('active',i+1===currentSlide));}
-      function changeSlide(d){goSlide(currentSlide+d);}
-      function revealNextMatch(){slide7MatchStep=(slide7MatchStep%4)+1;const a=['1 – c','2 – a','3 – b'];if(slide7MatchStep<=3){document.getElementById('s7-m'+slide7MatchStep).textContent=a[slide7MatchStep-1];}else{['s7-m1','s7-m2','s7-m3'].forEach(i=>document.getElementById(i).textContent='?');slide7MatchStep=0;}}
-      function launchGameFromSlide(){showToast('Mở tệp Game HTML5 độc lập (Bai8_M4_Game_NgaReThongMinh.html)!');}
-      function switchModule(){showToast('Chức năng này có trong bản Trọn bộ Học liệu số!');}
-      const timers={slide7:{left:360,running:false,interval:null}};
-      function renderTimer(k){const s=timers[k].left;document.getElementById(k+'-timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
-      function timerToggle(k){const t=timers[k];if(t.running){clearInterval(t.interval);t.running=false;}else{t.running=true;t.interval=setInterval(()=>{t.left--;renderTimer(k);if(t.left<=0){clearInterval(t.interval);t.running=false;showToast('Hết 6 phút!');}},1000);}}
-      function timerReset(k,s){clearInterval(timers[k].interval);timers[k].running=false;timers[k].left=s;renderTimer(k);}
-      document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')changeSlide(1);if(e.key==='ArrowLeft')changeSlide(-1);});
-    `;
-        const html = buildStandaloneDoc("Bài 8 Tin học 6 – Bộ 8 Slide trình chiếu", `<div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><strong style="color:#0F4C81;"> BỘ 8 SLIDE BÀI 8: CON NGƯỜI LÀM CHỦ AI</strong><button class="btn btn-primary btn-sm" onclick="toggleFullscreen('slide-deck-container')"> Toàn màn hình</button></div>` + deck, js);
-        downloadFile("Bai8_M2_Bo8Slide_TrinhChieu.html", html);
-      } else if (modKey === "m3") {
-        const stage = document.querySelector("#mod-3 .info-preview-stage").outerHTML;
-        const js = `
-      let activeInfoMode='horizontal';
-      function switchInfographic(m){activeInfoMode=m;document.getElementById('info-horizontal-wrap').style.display=m==='horizontal'?'block':'none';document.getElementById('info-vertical-wrap').style.display=m==='vertical'?'block':'none';}
-      function exportInfographicPNG(){const svgEl=document.getElementById(activeInfoMode==='horizontal'?'svg-info-horizontal':'svg-info-vertical');const w=activeInfoMode==='horizontal'?2175:1080,h=activeInfoMode==='horizontal'?690:1920;const u=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svgEl)],{type:'image/svg+xml;charset=utf-8'}));const i=new Image();i.onload=function(){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='Infographic_Bai8_'+activeInfoMode+'.png';a.click();};i.src=u;}
-    `;
-        const bar = `<div class="lms-toolbar"><span class="lms-toolbar-label"> Infographic Quy trình 3 bước (Bài 8):</span><button class="btn btn-primary btn-sm" onclick="switchInfographic('horizontal')"> Bản Ngang (SGK)</button><button class="btn btn-outline btn-sm" onclick="switchInfographic('vertical')"> Bản Dọc (LMS)</button><button class="btn btn-accent btn-sm" onclick="exportInfographicPNG()"> Tải ảnh PNG</button></div>`;
-        const html = buildStandaloneDoc("Bài 8 – Infographic Quy trình 3 bước ra quyết định cùng AI", bar + stage, js);
-        downloadFile("Bai8_M3_Infographic_3Buoc_LMS.html", html);
-      } else if (modKey === "m4") {
-        const shell = document.getElementById("game-classroom-shell").outerHTML;
-        const js = `
-      const GAME_QUESTIONS = ${JSON.stringify(GAME_QUESTIONS)};
-      let gameIndex=0,gameScore=0,gameLocked=false,gameSoundOn=true,gameHistory=[],audioCtx=null;
-      ${playTone.toString()}
-      ${playSuccessSfx.toString()}
-      ${playWrongSfx.toString()}
-      function toggleGameSound(){gameSoundOn=!gameSoundOn;const b=document.getElementById('game-sound-inner');if(b)b.textContent=gameSoundOn?' Bật':' Tắt';}
-      ${renderGameQuestion.toString()}
-      ${answerGame.toString()}
-      ${nextGameQuestion.toString()}
-      ${showGameSummary.toString()}
-      ${resetGame.toString()}
-      document.addEventListener('keydown',e=>{if(e.key==='1')answerGame(1);else if(e.key==='2')answerGame(2);else if(e.key==='3')answerGame(3);else if((e.key==='Enter'||e.key===' ')&&gameLocked){e.preventDefault();nextGameQuestion();}});
-      resetGame();
-    `;
-        const html = buildStandaloneDoc("NGÃ RẼ THÔNG MINH – RA QUYẾT ĐỊNH CÙNG AI (Tin học 6 – Bài 8)", shell, js);
-        downloadFile("Bai8_M4_Game_NgaReThongMinh.html", html);
-      } else if (modKey === "m5") {
-        const sec = document.getElementById("mod-5").innerHTML;
-        const js = `
-      let gameSoundOn=true,audioCtx=null,allScenarioShown=false;
-      ${playTone.toString()}${playSuccessSfx.toString()}${playWrongSfx.toString()}
-      ${checkMatching.toString()}${showMatchingAnswer.toString()}${toggleAllScenarioAnswers.toString()}${copyPairWorksheet.toString()}
-      function printModule(){window.print();}
-      function downloadStandalone(){showToast('Đây là tệp độc lập của Module 5!');}
-      const timers={m5:{left:360,running:false,interval:null}};
-      ${renderTimer.toString()}${timerToggle.toString()}${timerReset.toString()}
-    `;
-        const html = buildStandaloneDoc("Bài 8 – 4 Thẻ tình huống, Luyện tập SGK & Phiếu cặp đôi", sec, js);
-        downloadFile("Bai8_M5_TheTinhHuong_PhieuCapDoi.html", html);
-      } else if (modKey === "m6") {
-        const sec = document.getElementById("mod-6").innerHTML;
-        const js = `
-      const QUIZ_DATA = ${JSON.stringify(QUIZ_DATA)};
-      let gameSoundOn=true,audioCtx=null;
-      ${playTone.toString()}${playSuccessSfx.toString()}${playWrongSfx.toString()}
-      ${renderQuiz.toString()}${submitQuiz.toString()}${resetQuiz.toString()}${exportQuizGIFT.toString()}${exportQuizCSV.toString()}
-      function printModule(){window.print();}
-      function downloadStandalone(){showToast('Đây là tệp Quiz độc lập!');}
-      renderQuiz();
-    `;
-        const html = buildStandaloneDoc("Bài 8 LMS – Quiz chốt chặn 5 câu (Đạt ≥ 8/10)", sec, js);
-        downloadFile("Bai8_M6_Quiz_ChotChan_LMS.html", html);
-      } else if (modKey === "m7") {
-        const pane = document.getElementById("m7-tab-student").innerHTML;
-        const js = `
-      let gameSoundOn=true,audioCtx=null;
-      ${playTone.toString()}${playSuccessSfx.toString()}
-      ${submitVanDungForm.toString()}
-      function switchModule(){showToast('Quay về trang LMS để mở Bài Quiz chốt chặn nhé!');}
-    `;
-        const html = buildStandaloneDoc("Bài 8 LMS – Nộp bài Vận dụng lớp 6A & Tổng kết Chuyên đề", pane, js);
-        downloadFile("Bai8_M7_PhieuVanDung_Lop6A.html", html);
-      }
+// Kết nối với LMS: học liệu chạy trong khung nhúng sẽ gửi bài làm ra trang LMS, máy chủ chấm và lưu điểm
+const inLms = window.parent !== window;
+const PASS = D.passScore || 8;
+function toLms(msg) { if (inLms) window.parent.postMessage(Object.assign({ source: 'hoclieu-6ai' }, msg), '*'); }
+function setBox(id, text, cls) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'sync' + (cls ? ' ' + cls : '');
+}
+function showSaved(s) {
+  if (!s || !s.loggedIn) {
+    setBox('syncInfo', 'Em cần đăng nhập LMS để kết quả được lưu vào sổ điểm.', 'warn');
+    return;
+  }
+  if (!s.attempts) {
+    setBox('syncInfo', 'Kết quả bài trắc nghiệm sẽ được lưu vào sổ điểm LMS. Cần đạt từ ' + PASS + '/10 điểm để hoàn thành bài học.');
+    return;
+  }
+  const done = s.bestScore >= PASS;
+  setBox('syncInfo', 'Đã làm ' + s.attempts + ' lần. Điểm cao nhất: ' + s.bestScore + '/10. ' +
+    (done ? 'Em đã hoàn thành bài học.' : 'Em cần đạt từ ' + PASS + '/10 để hoàn thành.'), done ? 'ok' : 'warn');
+}
+window.addEventListener('message', e => {
+  if (e.source !== window.parent || !e.data || e.data.source !== 'lms-6ai') return;
+  const m = e.data;
+  if (m.type === 'state') showSaved(m);
+  if (m.type === 'quiz-result') {
+    if (m.ok) {
+      setBox('syncStatus', 'Đã lưu vào sổ điểm: ' + m.score + '/10 (lần ' + m.attempt + '). ' +
+        (m.passed ? 'Em đã hoàn thành bài học.' : 'Chưa đạt ' + PASS + '/10, em xem lại giải thích rồi làm lại nhé.'), m.passed ? 'ok' : 'warn');
+      showSaved({ loggedIn: true, attempts: m.attempt, bestScore: m.bestScore });
+    } else {
+      setBox('syncStatus', 'Chưa lưu được kết quả: ' + (m.message || 'lỗi kết nối') + '. Em bấm "Làm lại" và nộp lại khi có mạng.', 'warn');
     }
+  }
+});
+if (inLms) {
+  toLms({ type: 'ready' });
+} else {
+  setBox('syncInfo', 'Em đang mở học liệu ngoài LMS nên kết quả sẽ không được lưu. Hãy mở bài này trong LMS để được ghi điểm.', 'warn');
+}
+let quizStart = Date.now();
 
-    /* =========================================================
-       INIT ON LOAD
-       ========================================================= */
-    document.addEventListener("DOMContentLoaded", function () {
-      loadChecklist();
-      renderGameQuestion();
-      renderQuiz();
-      renderGFormBlueprint();
+// Tab
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  ['t1','t2','t3'].forEach(t => $(t).classList.toggle('hide', t !== b.dataset.tab));
+});
+
+// Ghi nhớ
+$('notes').innerHTML = D.notes.map(n => '<li>' + esc(n) + '</li>').join('');
+
+// Trắc nghiệm
+const picked = {};
+function drawQuiz() {
+  $('quiz').innerHTML = D.quiz.map((q, i) =>
+    '<div class="card"><div class="q">Câu ' + (i + 1) + '. ' + esc(q.q) + '</div>' +
+    q.o.map((o, j) => '<button class="opt" data-i="' + i + '" data-j="' + j + '">' + 'ABCD'[j] + '. ' + esc(o) + '</button>').join('') +
+    '<div class="note hide" id="qn' + i + '"></div></div>').join('');
+  document.querySelectorAll('#quiz .opt').forEach(b => b.onclick = () => {
+    if (b.disabled) return;
+    const i = +b.dataset.i;
+    picked[i] = +b.dataset.j;
+    document.querySelectorAll('#quiz .opt[data-i="' + i + '"]').forEach(x => x.classList.toggle('pick', x === b));
+  });
+}
+$('quizSubmit').onclick = () => {
+  if (Object.keys(picked).length < D.quiz.length && !confirm('Em chưa trả lời hết các câu. Vẫn nộp bài?')) return;
+  let right = 0;
+  D.quiz.forEach((q, i) => {
+    const btns = document.querySelectorAll('#quiz .opt[data-i="' + i + '"]');
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove('pick');
+      if (j === q.a) b.classList.add('ok');
+      else if (j === picked[i]) b.classList.add('bad');
     });
-  </script>
-</body> </html>
+    if (picked[i] === q.a) right++;
+    const n = $('qn' + i);
+    n.textContent = (picked[i] === q.a ? 'Đúng. ' : 'Chưa đúng. ') + q.e;
+    n.classList.remove('hide');
+  });
+  $('quizResult').textContent = 'Em trả lời đúng ' + right + '/' + D.quiz.length + ' câu.';
+  $('quizSubmit').classList.add('hide');
+  $('quizReset').classList.remove('hide');
+  if (inLms) {
+    const answers = {};
+    D.quiz.forEach((q, i) => { if (picked[i] !== undefined) answers[q.id] = picked[i]; });
+    setBox('syncStatus', 'Đang lưu kết quả vào LMS...');
+    toLms({ type: 'quiz-submit', answers, durationSeconds: Math.round((Date.now() - quizStart) / 1000) });
+  }
+};
+$('quizReset').onclick = () => {
+  for (const k in picked) delete picked[k];
+  $('quizResult').textContent = '';
+  $('quizSubmit').classList.remove('hide');
+  $('quizReset').classList.add('hide');
+  $('syncStatus').classList.add('hide');
+  quizStart = Date.now();
+  drawQuiz();
+  window.scrollTo(0, 0);
+};
+drawQuiz();
+
+// Trò chơi
+let gi = 0, gright = 0;
+$('gTitle').textContent = D.gameTitle;
+$('gIntro').textContent = D.gameIntro;
+function show(id) { ['gStart','gPlay','gEnd'].forEach(x => $(x).classList.toggle('hide', x !== id)); }
+function gLoad() {
+  const g = D.game[gi];
+  $('gCount').textContent = 'Câu ' + (gi + 1) + '/' + D.game.length;
+  $('gQ').textContent = g.q;
+  $('gOpts').innerHTML = g.o.map((o, j) => '<button class="opt" data-j="' + j + '">' + esc(o) + '</button>').join('');
+  $('gNote').classList.add('hide');
+  $('gNext').classList.add('hide');
+  $('gNext').textContent = gi === D.game.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo';
+  document.querySelectorAll('#gOpts .opt').forEach(b => b.onclick = () => {
+    const j = +b.dataset.j;
+    document.querySelectorAll('#gOpts .opt').forEach((x, k) => {
+      x.disabled = true;
+      if (k === g.a) x.classList.add('ok');
+      else if (k === j) x.classList.add('bad');
+    });
+    if (j === g.a) gright++;
+    const n = $('gNote');
+    n.textContent = (j === g.a ? 'Đúng. ' : 'Chưa đúng. ') + ((g.f && g.f[j]) || g.e);
+    n.classList.remove('hide');
+    $('gNext').classList.remove('hide');
+  });
+}
+$('gBegin').onclick = () => { gi = 0; gright = 0; show('gPlay'); gLoad(); };
+$('gNext').onclick = () => {
+  gi++;
+  if (gi < D.game.length) gLoad();
+  else {
+    $('gScore').textContent = 'Em trả lời đúng ' + gright + '/' + D.game.length + ' câu.';
+    show('gEnd');
+    toLms({ type: 'game-finish', correct: gright, total: D.game.length });
+  }
+};
+$('gAgain').onclick = () => { show('gStart'); };
+</script>
+</body>
+</html>
