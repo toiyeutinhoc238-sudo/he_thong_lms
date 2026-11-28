@@ -240,6 +240,8 @@ const certSchema = new mongoose.Schema({
   studentId: String,
   studentName: String,
   studentCode: String,
+  studentClass: String,
+  studentSchool: String,
   issueDate: String,
   scoreAverage: Number,
   gradeClassification: String,
@@ -2654,7 +2656,34 @@ async function maybeIssueCertificate(course, user) {
     ? await CertModel.findOne({ courseId: course.id, studentId: user.id }).lean()
     : (readDb().certificates || []).find(c => c.courseId === course.id && c.studentId === user.id);
 
-  if (existingCert) return existingCert;
+  const studentClass = user.className || user.classOrPosition || '';
+  const studentSchool = user.school || '';
+
+  if (existingCert) {
+    const syncedPatch = {
+      studentName: user.name || existingCert.studentName || 'Học viên',
+      studentClass: studentClass || existingCert.studentClass || '',
+      studentSchool: studentSchool || existingCert.studentSchool || ''
+    };
+    if (
+      syncedPatch.studentName !== existingCert.studentName ||
+      syncedPatch.studentClass !== (existingCert.studentClass || '') ||
+      syncedPatch.studentSchool !== (existingCert.studentSchool || '')
+    ) {
+      if (isMongoConnected) {
+        await CertModel.updateOne({ id: existingCert.id }, { $set: syncedPatch });
+      } else {
+        const db = readDb();
+        const found = (db.certificates || []).find(c => c.id === existingCert.id);
+        if (found) {
+          Object.assign(found, syncedPatch);
+          writeDb(db);
+        }
+      }
+      return { ...existingCert, ...syncedPatch };
+    }
+    return existingCert;
+  }
 
   const certNumber = `LMS2-${course.code || 'CERT'}-${new Date().getFullYear()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
   const cert = {
@@ -2665,12 +2694,14 @@ async function maybeIssueCertificate(course, user) {
     studentId: user.id,
     studentName: user.name || 'Học viên',
     studentCode: user.code || (user.email ? user.email.split('@')[0].toUpperCase() : 'HV'),
+    studentClass,
+    studentSchool,
     issueDate: new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
     scoreAverage: avg,
     gradeClassification,
     qrVerificationUrl: `/api/certificates/verify/${certNumber}`,
     signatureName: course.instructor?.name || 'Phan Phi Phú',
-    signatureTitle: 'Giáo viên phụ trách • LMS Nhóm 2'
+    signatureTitle: 'Giáo viên phụ trách'
   };
 
   if (isMongoConnected) {
@@ -4077,7 +4108,37 @@ app.get('/api/files/download/:filename', async (req, res) => {
   return res.status(404).json({ message: 'Tệp không tồn tại hoặc đã bị xóa.' });
 });
 
-// 10. Certificates
+// 10. Certificates (tự động đồng bộ Họ tên, Lớp, Trường mới nhất từ hồ sơ học sinh)
+async function enrichCertificatesWithUsers(certs) {
+  if (!Array.isArray(certs) || certs.length === 0) return [];
+  const ids = [...new Set(certs.map(c => c.studentId).filter(Boolean))];
+  let userMap = new Map();
+  if (ids.length > 0) {
+    if (isMongoConnected) {
+      try {
+        const users = await UserModel.find({ id: { $in: ids } }).lean();
+        users.forEach(u => userMap.set(u.id, u));
+      } catch {}
+    } else {
+      const db = readDb();
+      (db.users || []).forEach(u => {
+        if (ids.includes(u.id)) userMap.set(u.id, u);
+      });
+    }
+  }
+  return certs.map(c => {
+    const u = userMap.get(c.studentId);
+    if (!u) return c;
+    return {
+      ...c,
+      studentName: u.name || c.studentName || 'Học viên',
+      studentClass: u.className || u.classOrPosition || c.studentClass || '',
+      studentSchool: u.school || c.studentSchool || '',
+      studentCode: u.code || c.studentCode || ''
+    };
+  });
+}
+
 app.get('/api/certificates', async (req, res) => {
   let certs = [];
   if (isMongoConnected) {
@@ -4092,7 +4153,8 @@ app.get('/api/certificates', async (req, res) => {
   if (req.user && !isStaff(req.user)) {
     certs = certs.filter(c => c.studentId === req.user.id);
   }
-  res.json(certs || []);
+  const enriched = await enrichCertificatesWithUsers(certs || []);
+  res.json(enriched);
 });
 
 app.get('/api/certificates/verify/:certNumber', async (req, res) => {
@@ -4101,7 +4163,8 @@ app.get('/api/certificates/verify/:certNumber', async (req, res) => {
     ? await CertModel.findOne({ certificateNumber: certNumber }).lean()
     : (readDb().certificates || []).find(c => c.certificateNumber === certNumber);
   if (!cert) return res.status(404).json({ message: 'Không tìm thấy chứng chỉ hợp lệ với mã này.' });
-  res.json(cert);
+  const [enriched] = await enrichCertificatesWithUsers([cert]);
+  res.json(enriched || cert);
 });
 
 // 10.5 System Settings

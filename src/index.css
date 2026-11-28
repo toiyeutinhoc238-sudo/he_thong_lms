@@ -44,19 +44,32 @@
 
 /* Print styles for Certificate */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   body * {
     visibility: hidden;
   }
   #certificate-print-area, #certificate-print-area * {
     visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   #certificate-print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
-    padding: 0;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 }
 

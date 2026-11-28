@@ -1,9 +1,37 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Award, QrCode, Calendar, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Award, ArrowRight, ShieldCheck, Eye } from 'lucide-react';
 
 export const CertificatesView: React.FC = () => {
-  const { certificates, setActiveCertificate, courses, navigateToCourse } = useApp();
+  const { certificates, setActiveCertificate, courses, currentUser, activeRole } = useApp();
+
+  const canManage = Boolean(
+    currentUser?.role === 'admin' ||
+    currentUser?.role === 'lecturer' ||
+    activeRole === 'admin' ||
+    activeRole === 'lecturer'
+  );
+
+  const handlePreviewTemplate = () => {
+    const sampleCourse = courses[0];
+    setActiveCertificate({
+      id: 'cert-preview',
+      certificateNumber: `LMS2-${sampleCourse?.code || '6AIAB01'}-${new Date().getFullYear()}-MAU`,
+      courseId: sampleCourse?.id || '6AIAB01',
+      courseName: sampleCourse?.name || 'Chuyên đề trí tuệ nhân tạo lớp 6: Chủ đề A và B',
+      studentId: currentUser?.id || 'preview',
+      studentName: currentUser?.name || 'Học viên mẫu',
+      studentCode: currentUser?.code || 'HV001',
+      studentClass: currentUser?.className || currentUser?.classOrPosition || 'Lớp 6A1',
+      studentSchool: currentUser?.school || '',
+      issueDate: new Date().toLocaleDateString('vi-VN'),
+      scoreAverage: 9.5,
+      gradeClassification: 'Xuất sắc',
+      qrVerificationUrl: '',
+      signatureName: sampleCourse?.instructor?.name || 'Phan Phi Phú',
+      signatureTitle: 'Giáo viên phụ trách'
+    });
+  };
 
   return (
     <div className="flex-1 min-w-0 w-full p-6 max-w-7xl mx-auto space-y-6">
@@ -22,9 +50,21 @@ export const CertificatesView: React.FC = () => {
           </p>
         </div>
 
-        <div className="px-5 py-3 rounded-2xl bg-amber-50 border border-amber-200/60 text-center shrink-0">
-          <div className="text-2xl font-black text-amber-600">{certificates.length}</div>
-          <div className="text-xs font-bold text-amber-800">Chứng chỉ đã đạt</div>
+        <div className="flex items-center gap-3 shrink-0">
+          {canManage && (
+            <button
+              type="button"
+              onClick={handlePreviewTemplate}
+              className="px-4 py-2.5 rounded-2xl bg-[#39394B] hover:bg-[#2d2d3c] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+            >
+              <Eye className="w-4 h-4 text-[#D5B263]" />
+              <span>Xem mẫu chứng chỉ</span>
+            </button>
+          )}
+          <div className="px-5 py-3 rounded-2xl bg-amber-50 border border-amber-200/60 text-center">
+            <div className="text-2xl font-black text-amber-600">{certificates.length}</div>
+            <div className="text-xs font-bold text-amber-800">Chứng chỉ đã đạt</div>
+          </div>
         </div>
       </div>
 
@@ -51,9 +91,14 @@ export const CertificatesView: React.FC = () => {
                 </h3>
 
                 <div className="space-y-1 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-slate-400">Học viên:</span>
                     <strong className="text-slate-800">{cert.studentName}</strong>
+                    {cert.studentClass && (
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[11px]">
+                        {/^(lớp|lop|khối|khoi)/i.test(cert.studentClass) ? cert.studentClass : `Lớp ${cert.studentClass}`}
+                      </span>
+                    )}
                     <span className="font-mono text-slate-500">({cert.studentCode})</span>
                   </div>
                   <div className="flex items-center gap-2">

@@ -269,6 +269,8 @@ export interface Certificate {
   studentId: string;
   studentName: string;
   studentCode: string;
+  studentClass?: string;
+  studentSchool?: string;
   issueDate: string;
   scoreAverage: number;
   gradeClassification: 'Xuất sắc' | 'Giỏi' | 'Khá' | 'Đạt';
