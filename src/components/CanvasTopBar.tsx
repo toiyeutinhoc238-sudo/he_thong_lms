@@ -24,8 +24,7 @@ export const CanvasTopBar: React.FC<CanvasTopBarProps> = ({
     people: 'Thành viên',
     discussions: 'Thảo luận',
     files: 'Các tập tin',
-    syllabus: 'Lịch trình khóa học',
-    resources3d: 'Kho học liệu 3D & AI Lab'
+    syllabus: 'Lịch trình khóa học'
   };
   const resolvedTabLabel = tabLabels[activeCourseTab] || 'Nội dung học tập';
   const isModuleScopedTab = activeCourseTab === 'home' || activeCourseTab === 'modules';

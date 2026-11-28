@@ -7,8 +7,7 @@ export type CourseNavTab =
   | 'people'
   | 'files'
   | 'syllabus'
-  | 'modules'
-  | 'resources3d';
+  | 'modules';
 
 interface CanvasCourseNavProps {
   activeTab: CourseNavTab;
@@ -31,7 +30,6 @@ export const CanvasCourseNav: React.FC<CanvasCourseNavProps> = ({
     { id: 'discussions', label: 'Thảo luận' },
     { id: 'files', label: 'Các tập tin' },
     { id: 'syllabus', label: 'Lịch trình khóa học' },
-    { id: 'resources3d', label: 'Kho học liệu số & Mô phỏng 3D' },
   ];
 
   return (

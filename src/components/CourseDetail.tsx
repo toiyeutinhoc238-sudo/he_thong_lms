@@ -4,7 +4,6 @@ import { CanvasCourseNav, CourseNavTab } from './CanvasCourseNav';
 import { CanvasModulesView } from './CanvasModulesView';
 import { CanvasRightSidebar } from './CanvasRightSidebar';
 import { CourseGradebookTracker } from './CourseGradebookTracker';
-import { AIVirtualLab } from './AIVirtualLab';
 import { defaultGrade6Course } from '../data/mockData';
 import { API_BASE_URL, resolveBackendUrl } from '../services/api';
 import { 
@@ -193,8 +192,7 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
               { id: 'people', label: 'Thành viên' },
               { id: 'discussions', label: 'Thảo luận' },
               { id: 'files', label: 'Tập tin' },
-              { id: 'syllabus', label: 'Lịch trình' },
-              { id: 'resources3d', label: 'AI Lab' }
+              { id: 'syllabus', label: 'Lịch trình' }
             ] as { id: CourseNavTab; label: string }[]).map(item => (
               <button
                 key={item.id}
@@ -400,13 +398,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
                   className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold transition-colors"
                 >
                   Thư mục Học liệu ({(activeCourse.files || []).length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('resources3d')}
-                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold transition-colors"
-                >
-                  Phòng Lab AI & HTML5
                 </button>
               </div>
             </div>
@@ -1421,9 +1412,6 @@ export const CourseDetail: React.FC<CourseDetailProps> = ({ isCourseNavOpen = tr
             </div>
           );
         })()}
-
-        {/* Tab 7: Kho học liệu số & Phòng thí nghiệm Tương tác AI */}
-        {activeTab === 'resources3d' && <AIVirtualLab />}
       </div>
 
       {/* 3. Right Action Sidebar (Xem luồng khóa học, Xem lịch, Cần làm) — ẩn khi đang nhúng iframe embed=1 */}
