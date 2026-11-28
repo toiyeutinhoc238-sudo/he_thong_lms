@@ -163,12 +163,12 @@ export const bai8Module = {
   officialFiles: [
     {
       id: 'file-ai6-b8-sgk',
-      name: '0.SGK_Bai8_ConNguoiLamChuAI.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai8/0.SGK.docx',
-      size: '21 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai8_ConNguoiLamChuAI.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai8/0.SGK.pdf',
+      size: '616 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 8: CON NGƯỜI LÀM CHỦ TRÍ TUỆ NHÂN TẠO',
       moduleId: 'module-lesson-8',
       description: 'Sách giáo khoa Bài 8: Con người làm chủ Trí tuệ nhân tạo (Quy trình 3 bước ra quyết định & Điều 14 EU AI Act 2024).',

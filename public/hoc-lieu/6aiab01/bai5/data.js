@@ -163,12 +163,12 @@ export const bai5Module = {
   officialFiles: [
     {
       id: 'file-ai6-b5-sgk',
-      name: '0.SGK_Bai5_DanhGiaDoAnToanAI.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai5/0.SGK.docx',
-      size: '18 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai5_DanhGiaDoAnToanAI.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai5/0.SGK.pdf',
+      size: '581 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 5: ĐÁNH GIÁ ĐỘ AN TOÀN CỦA TRÍ TUỆ NHÂN TẠO',
       moduleId: 'module-lesson-5',
       description: 'Sách giáo khoa Bài 5: Đánh giá độ an toàn của Trí tuệ nhân tạo (Tin học 6 – Chuyên đề AI).',

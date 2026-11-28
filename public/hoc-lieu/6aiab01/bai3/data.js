@@ -163,12 +163,12 @@ export const bai3Module = {
   officialFiles: [
     {
       id: 'file-ai6-b3-sgk',
-      name: '0.SGK_Bai3_ThucChungThongTin_LamChuAI.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai3/0.SGK.docx',
-      size: '19 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai3_ThucChungThongTin_LamChuAI.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai3/0.SGK.pdf',
+      size: '534 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 3: THỰC CHỨNG THÔNG TIN - LÀM CHỦ AI',
       moduleId: 'module-lesson-3',
       description: 'Sách giáo khoa Bài 3: Thực chứng thông tin – Làm chủ AI (Tin học 6 – Chuyên đề AI).',

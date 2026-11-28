@@ -230,12 +230,12 @@ export const bai2Module = {
   officialFiles: [
     {
       id: 'file-ai6-b2-sgk',
-      name: '0.SGK_Bai2_LoiIch_CachSuDungAI.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai2/0.SGK.docx',
-      size: '65 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai2_LoiIch_CachSuDungAI.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai2/0.SGK.pdf',
+      size: '654 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 2: LỢI ÍCH VÀ CÁCH SỬ DỤNG CÔNG CỤ AI PHÙ HỢP',
       moduleId: 'module-lesson-2',
       description: 'Giáo trình / Sách giáo khoa Bài 2: Lợi ích và cách sử dụng công cụ AI phù hợp (Tin học 6 – Chuyên đề AI).',

@@ -217,12 +217,12 @@ export const bai4Module = {
   officialFiles: [
     {
       id: 'file-ai6-b4-sgk',
-      name: '0.SGK_Bai4_MatTichCuc_TieuCuc_TinhNangAI.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai4/0.SGK.docx',
-      size: '18 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai4_MatTichCuc_TieuCuc_TinhNangAI.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai4/0.SGK.pdf',
+      size: '515 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 4: KHÁM PHÁ MẶT TÍCH CỰC VÀ TIÊU CỰC CỦA MỘT SỐ TÍNH NĂNG AI',
       moduleId: 'module-lesson-4',
       description: 'Sách giáo khoa Bài 4: Khám phá mặt tích cực và tiêu cực của một số tính năng AI.',

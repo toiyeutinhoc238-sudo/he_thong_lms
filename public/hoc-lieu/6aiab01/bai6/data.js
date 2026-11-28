@@ -218,12 +218,12 @@ export const bai6Module = {
   officialFiles: [
     {
       id: 'file-ai6-b6-sgk',
-      name: '0.SGK_Bai6_DuLieuCaNhanLaTaiSan.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai6/0.SGK.docx',
-      size: '18 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai6_DuLieuCaNhanLaTaiSan.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai6/0.SGK.pdf',
+      size: '518 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 6: DỮ LIỆU CÁ NHÂN LÀ TÀI SẢN CỦA MỖI CON NGƯỜI',
       moduleId: 'module-lesson-6',
       description: 'Sách giáo khoa Bài 6: Dữ liệu cá nhân là tài sản của mỗi con người (Nghị định 13/2023/NĐ-CP).',

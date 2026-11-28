@@ -163,12 +163,12 @@ export const bai7Module = {
   officialFiles: [
     {
       id: 'file-ai6-b7-sgk',
-      name: '0.SGK_Bai7_QuyenRiengTu_KyNangTuVeSo.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai7/0.SGK.docx',
-      size: '19 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai7_QuyenRiengTu_KyNangTuVeSo.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai7/0.SGK.pdf',
+      size: '605 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 7: QUYỀN RIÊNG TƯ VÀ KỸ NĂNG TỰ VỆ SỐ',
       moduleId: 'module-lesson-7',
       description: 'Sách giáo khoa Bài 7: Quyền riêng tư và kỹ năng tự vệ số (Deepfake, Doxing, 3 bước tự vệ số & Tổng đài 111).',

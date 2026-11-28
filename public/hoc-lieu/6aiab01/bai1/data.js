@@ -163,12 +163,12 @@ export const bai1Module = {
   officialFiles: [
     {
       id: 'file-ai6-b1-sgk',
-      name: '0.SGK_Bai1_NguonGocAI_QuyenQuyetDinh.docx',
-      filename: '0.SGK.docx',
-      url: '/hoc-lieu/6aiab01/bai1/0.SGK.docx',
-      size: '70 KB',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      fileType: 'word',
+      name: '0.SGK_Bai1_NguonGocAI_QuyenQuyetDinh.pdf',
+      filename: '0.SGK.pdf',
+      url: '/hoc-lieu/6aiab01/bai1/0.SGK.pdf',
+      size: '636 KB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
       folder: 'BÀI 1: NGUỒN GỐC CỦA AI VÀ QUYỀN QUYẾT ĐỊNH',
       moduleId: 'module-lesson-1',
       description: 'Giáo trình / Sách giáo khoa Bài 1: Nguồn gốc của AI và quyền quyết định (Tin học 6 – Chuyên đề AI).',
