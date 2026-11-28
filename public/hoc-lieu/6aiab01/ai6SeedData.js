@@ -32,6 +32,30 @@ export function buildAi6Bai12SeedData() {
   ];
 
   const officialFiles = [
+    {
+      id: 'file-ai6-shared-sach-pdf',
+      name: 'Sách chuyên đề AI lớp 6 (Bản PDF).pdf',
+      filename: 'SachLop6_MoiNhat_2422.pdf',
+      url: '/hoc-lieu/6aiab01/SachLop6_MoiNhat_2422.pdf',
+      size: '3.2 MB',
+      mimetype: 'application/pdf',
+      fileType: 'pdf',
+      folder: 'Tài liệu dùng chung',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '28/11/2026'
+    },
+    {
+      id: 'file-ai6-shared-sach-docx',
+      name: 'Sách chuyên đề AI lớp 6 (Bản Word).docx',
+      filename: 'SachLop6_MoiNhat_2422.docx',
+      url: '/hoc-lieu/6aiab01/SachLop6_MoiNhat_2422.docx',
+      size: '17.4 MB',
+      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileType: 'doc',
+      folder: 'Tài liệu dùng chung',
+      uploadedBy: { id: 'admin', name: 'Phan Phi Phú', email: 'phanphiphu04@gmail.com' },
+      uploadedAt: '28/11/2026'
+    },
     ...OFFICIAL_AI_GRADE6_LESSONS.map((lessonTitle, idx) => ({
       id: `file-ai6-b${idx + 1}-tongquan`,
       name: `0.GioiThieuTongQuan_Bai${idx + 1}.html`,
